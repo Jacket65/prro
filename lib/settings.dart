@@ -10,11 +10,27 @@ List<String> rowsText = [
   'trikrapki',
   'iconDown'
 ];
+List<String> ttrows = [
+  'Назва',
+  'Адреса',
+  'ID ритейлера',
+  'Ідентифікатор',
+  'Статус у ДПС',
+  'Дії',
+  ''
+];
+
 List<DataColumn> novaTThead([List<String>? extraText]) {
   List<DataColumn> list = [];
   for (String i in extraText!) {
     list.add(
-      DataColumn(label: Flexible(child: FittedBox(child: Text(i)))),
+      DataColumn(
+          label: Expanded(
+              child: Text(
+        i,
+        softWrap: true,
+      ))),
+      // DataColumn(label: Flexible(child: FittedBox(child: Text(i)))),
     );
   }
   return list;
@@ -35,13 +51,3 @@ List<String> largestCities = [
 String currentContent = 'Торгові точки та ПРРО';
 
 int selecteIndex = 1;
-
-List<String> ttrows = [
-  'Назва',
-  'Адреса',
-  'ID ритейлера',
-  'Ідентифікатор',
-  'Статус у ДПС',
-  'Дії',
-  ''
-];

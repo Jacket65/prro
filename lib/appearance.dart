@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prro/main.dart';
 import 'package:prro/settings.dart';
+import 'package:prro/teller.dart';
 
 class MainScreenState extends State<MainScreen> {
   Padding topButton({required int selecteIndexW, required String lable}) {
@@ -102,6 +103,7 @@ class MainScreenState extends State<MainScreen> {
               ),
               switch (currentContent) {
                 'Торгові точки та ПРРО' => torgovaTochaka(context),
+                'Касири' => teller(context),
                 _ => Text('В процесі'),
               },
               SizedBox(

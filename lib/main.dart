@@ -295,22 +295,29 @@ List<Item> _items = [
   Item(name: 'Charlie', age: 35, details: 'Charlie likes hiking and coding.'),
 ];
 
-Row torgovaTochaka(BuildContext context) {
-  return Row(
-    children: [
-      Flexible(
-        child: DataTable(
-            horizontalMargin: 0,
-            dataRowMinHeight: 0,
-            dataRowMaxHeight: double.infinity,
-            showCheckboxColumn: false,
-            headingRowColor: WidgetStatePropertyAll(Colors.black12),
-            decoration: BoxDecoration(
-                border: Border.all(color: Colors.black26),
-                borderRadius: BorderRadius.circular(5)),
-            columns: novaTThead(ttrows),
-            rows: rowsName),
-      ),
-    ],
+Widget torgovaTochaka(BuildContext context) {
+  return SafeArea(
+    child: Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: DataTable(
+                  columnSpacing: 100,
+                  horizontalMargin: 0,
+                  dataRowMinHeight: 0,
+                  dataRowMaxHeight: double.infinity,
+                  showCheckboxColumn: false,
+                  headingRowColor: WidgetStatePropertyAll(Colors.black12),
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black26),
+                      borderRadius: BorderRadius.circular(5)),
+                  columns: novaTThead(ttrows),
+                  rows: rowsName),
+            ),
+          ],
+        ),
+      ],
+    ),
   );
 }
