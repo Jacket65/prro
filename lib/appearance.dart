@@ -81,21 +81,22 @@ class MainScreenState extends State<MainScreen> {
                       topButton(lable: 'Помилки', selecteIndexW: 6),
                     ],
                   ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5)),
-                        backgroundColor: Colors.blueAccent),
-                    onPressed: () {
-                      showDialogFunc('Зазначте код ДПІ');
-                      fillRows(extraText: rowsText);
-                      setState(() {});
-                    },
-                    child: Text(
-                      'Нова торгова точка',
-                      style: TextStyle(color: Colors.white),
+                  if (currentContent == 'Торгові точки та ПРРО')
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5)),
+                          backgroundColor: Colors.blueAccent),
+                      onPressed: () {
+                        showDialogFunc('Зазначте код ДПІ');
+                        fillRows(extraText: rowsText);
+                        setState(() {});
+                      },
+                      child: Text(
+                        'Нова торгова точка',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
-                  ),
                 ],
               ),
               SizedBox(
