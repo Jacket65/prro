@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:prro/settings.dart';
 
 Column teller(BuildContext context) {
   return Column(
@@ -18,10 +21,32 @@ Column teller(BuildContext context) {
             ),
           ),
           Container(
-            decoration: BoxDecoration(border: Border.all()),
+            // decoration: BoxDecoration(border: Border.all()),
             child: Row(
               children: [
-                Container(width: 200, child: TextField(decoration: null)),
+                SizedBox(
+                  width: 300,
+                  child: TextField(
+                    cursorWidth: 1,
+                    cursorColor: Colors.grey,
+                    decoration: InputDecoration(
+                      hintText: 'Пошук касира ПІБ',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      isDense: true,
+                      contentPadding: EdgeInsets.all(10),
+                      fillColor: Colors.white,
+                      focusColor: Colors.white,
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.white, width: 2.0),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                  ),
+                ),
                 IconButton(onPressed: () {}, icon: Icon(Icons.search)),
               ],
             ),
@@ -32,9 +57,8 @@ Column teller(BuildContext context) {
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: Container(
           decoration: BoxDecoration(
-              color: Colors.black12,
-              border: Border.all(),
-              borderRadius: BorderRadius.circular(5)),
+            color: const Color.fromARGB(31, 168, 168, 168),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -42,10 +66,14 @@ Column teller(BuildContext context) {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 0.0),
                   child: Container(
-                    width: 300,
-                    child: Text(
-                      'Інформація по касирам',
-                      style: TextStyle(fontSize: 25),
+                    // width: 300,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        'Інформація по касирам',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
                 ),
@@ -58,6 +86,38 @@ Column teller(BuildContext context) {
           ),
         ),
       ),
+      Row(
+        children: [
+          Expanded(
+              child: DataTable(
+                  showCheckboxColumn: false,
+                  columns: tellerTop,
+                  rows: tellerList)),
+        ],
+      )
     ],
+  );
+}
+
+List<DataColumn> tellerTop =
+    novaTThead(['ПІБ', 'Тип', 'Статус в ДПС', 'Стан активності']);
+
+List<DataRow> tellerList = [
+  fillTellerRows(extraText: ['1', '2', '3', '4'])
+];
+DataRow fillTellerRows({required List<String>? extraText}) {
+  List<DataCell> a = [];
+  for (String i in extraText!) {
+    a.add(DataCell(Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10),
+      child: Text(
+        textAlign: TextAlign.center,
+        i,
+      ),
+    )));
+  }
+  return DataRow(
+    cells: a,
+    onSelectChanged: (value) {},
   );
 }

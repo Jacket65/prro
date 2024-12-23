@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        useMaterial3: true,
+        // useMaterial3: true,
         primarySwatch: Colors.blue,
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
@@ -173,19 +173,28 @@ void fillRows({required List<String>? extraText}) {
   List<DataCell> a = [];
   for (String i in extraText!) {
     if (i != 'trikrapki' && i != 'iconDown') {
-      a.add(DataCell(Text(
-        i,
+      a.add(DataCell(Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10),
+        child: Text(
+          i,
+        ),
       )));
     } else if (i == extraText[extraText.length - 2]) {
-      a.add(DataCell(IconButton(
-        padding: EdgeInsets.zero,
-        onPressed: () {},
-        icon: Icon(Icons.more_vert),
+      a.add(DataCell(Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10),
+        child: IconButton(
+          padding: EdgeInsets.zero,
+          onPressed: () {},
+          icon: Icon(Icons.more_vert),
+        ),
       )));
     } else if (i == extraText[extraText.length - 1]) {
-      a.add(DataCell(IconButton(
-        onPressed: () {},
-        icon: Icon(Icons.keyboard_arrow_down),
+      a.add(DataCell(Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10),
+        child: IconButton(
+          onPressed: () {},
+          icon: Icon(Icons.keyboard_arrow_down),
+        ),
       )));
     }
   }
@@ -303,12 +312,13 @@ Widget torgovaTochaka(BuildContext context) {
           children: [
             Expanded(
               child: DataTable(
-                  columnSpacing: 100,
+                  columnSpacing: 70,
                   horizontalMargin: 0,
                   dataRowMinHeight: 0,
                   dataRowMaxHeight: double.infinity,
                   showCheckboxColumn: false,
-                  headingRowColor: WidgetStatePropertyAll(Colors.black12),
+                  headingRowColor: WidgetStatePropertyAll(
+                      const Color.fromARGB(31, 168, 168, 168)),
                   decoration: BoxDecoration(
                       border: Border.all(color: Colors.black26),
                       borderRadius: BorderRadius.circular(5)),

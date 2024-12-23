@@ -26,9 +26,12 @@ List<DataColumn> novaTThead([List<String>? extraText]) {
     list.add(
       DataColumn(
           label: Expanded(
-              child: Text(
-        i,
-        softWrap: true,
+              child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          i,
+          softWrap: true,
+        ),
       ))),
       // DataColumn(label: Flexible(child: FittedBox(child: Text(i)))),
     );
