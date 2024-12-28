@@ -20,7 +20,8 @@ List<String> ttrows = [
   ''
 ];
 
-List<DataColumn> novaTThead([List<String>? extraText]) {
+List<DataColumn> novaTThead(
+    {bool showStatus = false, List<String>? extraText}) {
   List<DataColumn> list = [];
   for (String i in extraText!) {
     list.add(
@@ -36,6 +37,20 @@ List<DataColumn> novaTThead([List<String>? extraText]) {
       // DataColumn(label: Flexible(child: FittedBox(child: Text(i)))),
     );
   }
+  if (showStatus)
+    list.add(
+      DataColumn(
+          label: Expanded(
+              child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          'Стан активності',
+          textAlign: TextAlign.center,
+          softWrap: true,
+        ),
+      ))),
+      // DataColumn(label: Flexible(child: FittedBox(child: Text(i)))),
+    );
   return list;
 }
 

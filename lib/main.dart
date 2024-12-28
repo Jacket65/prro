@@ -322,7 +322,7 @@ Widget torgovaTochaka(BuildContext context) {
                   decoration: BoxDecoration(
                       border: Border.all(color: Colors.black26),
                       borderRadius: BorderRadius.circular(5)),
-                  columns: novaTThead(ttrows),
+                  columns: novaTThead(extraText: ttrows),
                   rows: rowsName),
             ),
           ],

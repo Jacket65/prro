@@ -3,53 +3,6 @@ import 'package:prro/main.dart';
 import 'package:prro/settings.dart';
 import 'package:prro/teller.dart';
 
-class porba extends StatefulWidget {
-  const porba({super.key});
-
-  @override
-  State<StatefulWidget> createState() => SomeWidgetState();
-}
-
-class SomeWidgetState extends State<porba> {
-  @override
-  Widget build(BuildContext context) {
-    return Text('1');
-  }
-}
-
-int counter = 1;
-
-class MyWidget extends StatelessWidget {
-  const MyWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        Color color123 = counter % 2 == 0 ? Colors.black : Colors.red;
-        counter += 1;
-        showDialog(
-          context: context,
-          builder: (context) {
-            return Dialog(
-              child: Column(
-                children: [
-                  Text('$counter'),
-                  Container(
-                      decoration: BoxDecoration(
-                    border: Border.all(color: color123),
-                  ))
-                ],
-              ),
-            );
-          },
-        );
-      },
-      child: const Text('2'),
-    );
-  }
-}
-
 class MainScreenState extends State<MainScreen> {
   Padding topButton({required int selecteIndexW, required String lable}) {
     final Increment _increment = Increment();
@@ -58,8 +11,6 @@ class MainScreenState extends State<MainScreen> {
       child: Container(
         child: Column(
           children: [
-            MyWidget(),
-            porba(),
             Container(
               padding: EdgeInsets.only(bottom: 5),
               decoration: BoxDecoration(
@@ -153,7 +104,7 @@ class MainScreenState extends State<MainScreen> {
               ),
               switch (currentContent) {
                 'Торгові точки та ПРРО' => torgovaTochaka(context),
-                'Касири' => teller(context),
+                'Касири' => Teller(),
                 _ => Text('В процесі'),
               },
               SizedBox(
