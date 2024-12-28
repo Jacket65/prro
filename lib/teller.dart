@@ -22,17 +22,7 @@ class _TellerState extends State<Teller> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5)),
-                    backgroundColor: Colors.blueAccent),
-                onPressed: () {},
-                child: Text(
-                  'Реєстрація касира',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
+              NewWidget(),
               Container(
                 // decoration: BoxDecoration(border: Border.all()),
                 child: Row(
@@ -103,19 +93,31 @@ class _TellerState extends State<Teller> {
                     Row(
                       children: [
                         Visibility(
-                            visible: longOptions,
+                            visible: rowTapSettings,
                             child: Row(
                               children: [
-                                Icon(Icons.drive_file_rename_outline_rounded),
+                                Icon(
+                                  Icons.drive_file_rename_outline_rounded,
+                                  color: Colors.grey,
+                                ),
                                 TextButton(
-                                  child: Text('Редагувати'),
+                                  child: Text(
+                                    'Редагувати',
+                                    style: TextStyle(color: Colors.blue),
+                                  ),
                                   onPressed: () {
                                     editTeller(context);
                                   },
                                 ),
-                                Icon(Icons.delete_forever_rounded),
+                                Icon(
+                                  Icons.delete_forever_rounded,
+                                  color: Colors.grey,
+                                ),
                                 TextButton(
-                                  child: Text('Видалити'),
+                                  child: Text(
+                                    'Видалити',
+                                    style: TextStyle(color: Colors.blue),
+                                  ),
                                   onPressed: () {},
                                 ),
                               ],
@@ -137,10 +139,19 @@ class _TellerState extends State<Teller> {
           Row(
             children: [
               Expanded(
-                  child: DataTable(
-                      showCheckboxColumn: false,
-                      columns: tellerTop,
-                      rows: [fillTellerRows(extraText: abc)])),
+                child: DataTable(
+                    // border: TableBorder(
+                    //   horizontalInside: BorderSide(color: Colors.yellow[200]!),
+                    //   bottom: BorderSide(color: Colors.yellow[200]!),
+                    //   left: BorderSide(color: Colors.yellow[200]!),
+                    //   right: BorderSide(color: Colors.yellow[200]!),
+                    // ),
+                    dividerThickness: 0,
+                    horizontalMargin: 0,
+                    showCheckboxColumn: false,
+                    columns: tellerTop,
+                    rows: [fillTellerRows(extraText: tellerText)]),
+              ),
             ],
           ),
           Padding(
@@ -208,12 +219,15 @@ class _TellerState extends State<Teller> {
     }
     a.add(
       DataCell(
-        Align(
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.circle,
-            color: Colors.green,
-            size: 15,
+        Container(
+          // decoration: BoxDecoration(border: Border.all()),
+          child: Align(
+            alignment: Alignment.center,
+            child: Icon(
+              Icons.circle,
+              color: isActiveTeller ? Colors.green : Colors.red,
+              size: 15,
+            ),
           ),
         ),
       ),
@@ -224,7 +238,7 @@ class _TellerState extends State<Teller> {
       onSelectChanged: (value) {
         counter++;
         color333 = (counter % 2 == 0 ? Colors.orange[100] : Colors.white)!;
-        longOptions = !longOptions;
+        rowTapSettings = !rowTapSettings;
         setState(() {});
       },
     );
@@ -234,73 +248,68 @@ class _TellerState extends State<Teller> {
     showDialog(
       context: context,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Padding(
-              padding: const EdgeInsets.only(top: 50.0),
-              child: AlertDialog(
-                shape: BeveledRectangleBorder(),
-                alignment: Alignment.topCenter,
-                title: Text('Редагування касира'),
-                content: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.5,
-                  child: Column(
+        return Padding(
+          padding: const EdgeInsets.only(top: 50.0),
+          child: AlertDialog(
+            shape: BeveledRectangleBorder(),
+            alignment: Alignment.topCenter,
+            title: Text('Редагування касира'),
+            content: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.5,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Row(
+                    children: [
+                      Icon(Icons.info),
+                      SizedBox(width: 10),
+                      Text('ПІБ'),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  Divider(),
+                  SizedBox(height: 20),
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      // First Row of Text
-                      Row(
-                        children: [
-                          Icon(Icons.info),
-                          SizedBox(width: 10),
-                          Text('ПІБ'),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      // Second Row of Text
-                      Divider(),
-                      SizedBox(height: 20),
-                      // Switcher
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Стан Активності:'),
-                          Switch(
-                            // This bool value toggles the switch.
+                    children: [
+                      Text('Стан Активності:'),
+                      StatefulBuilder(
+                        builder: (context, setState) {
+                          return Switch(
                             value: isActiveTeller,
                             activeColor: Colors.blueAccent,
                             onChanged: (bool value) {
-                              // This is called when the user toggles the switch.
                               isActiveTeller = value;
+
                               setState(() {});
                             },
-                          ),
-                        ],
+                          );
+                        },
                       ),
                     ],
                   ),
-                ),
-                actionsAlignment: MainAxisAlignment.start,
-                actions: <Widget>[
-                  // Cancel Button
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('Зберегти'),
-                  ),
-                  // Ok Button
-                  TextButton(
-                    onPressed: () {
-                      // Handle Ok action
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('Скасувати'),
-                  ),
                 ],
               ),
-            );
-          },
+            ),
+            actionsAlignment: MainAxisAlignment.start,
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  setState(() {});
+                },
+                child: Text('Зберегти'),
+              ),
+              TextButton(
+                onPressed: () {
+                  isActiveTeller = rowTapSettings;
+                  Navigator.of(context).pop();
+                },
+                child: Text('Скасувати'),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -317,6 +326,109 @@ List<DataColumn> tellerTop =
 
 int counter = 1;
 Color color333 = Colors.white;
-List<String> abc = ['1', '999', '3'];
-bool longOptions = false;
-bool isActiveTeller = true;
+List<String> tellerText = ['1', '999', '3'];
+bool rowTapSettings = false;
+bool isActiveTeller = false;
+
+class NewWidget extends StatelessWidget {
+  const NewWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          backgroundColor: Colors.blueAccent),
+      onPressed: () {
+        editT(context);
+      },
+      child: Text(
+        'Реєстрація касира',
+        style: TextStyle(color: Colors.white),
+      ),
+    );
+  }
+
+  editT(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 50.0),
+          child: AlertDialog(
+            shape: BeveledRectangleBorder(),
+            alignment: Alignment.topCenter,
+            title: Text('Редагування касира'),
+            content: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.5,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Divider(),
+                  SizedBox(height: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        decoration:
+                            InputDecoration(border: OutlineInputBorder()),
+                      ),
+                      SizedBox(height: 20),
+                      TextField(
+                        decoration:
+                            InputDecoration(border: OutlineInputBorder()),
+                      ),
+                      SizedBox(height: 20),
+                      DropdownMenu(
+                        initialSelection: 10,
+                        expandedInsets: EdgeInsets.zero,
+                        focusNode: FocusNode(canRequestFocus: false),
+                        trailingIcon: Icon(
+                          Icons.arrow_drop_down,
+                        ),
+                        dropdownMenuEntries: [
+                          DropdownMenuEntry(value: 5, label: '5'),
+                          DropdownMenuEntry(value: 10, label: '10'),
+                          DropdownMenuEntry(value: 15, label: '15'),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      TextField(
+                        decoration:
+                            InputDecoration(border: OutlineInputBorder()),
+                      ),
+                      SizedBox(height: 20),
+                      TextField(
+                        decoration:
+                            InputDecoration(border: OutlineInputBorder()),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            actionsAlignment: MainAxisAlignment.start,
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Зберегти'),
+              ),
+              TextButton(
+                onPressed: () {
+                  isActiveTeller = rowTapSettings;
+                  Navigator.of(context).pop();
+                },
+                child: Text('Скасувати'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
