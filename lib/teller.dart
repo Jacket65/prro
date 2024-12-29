@@ -297,6 +297,7 @@ class _TellerState extends State<Teller> {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
+
                   setState(() {});
                 },
                 child: Text('Зберегти'),
@@ -352,6 +353,8 @@ class NewWidget extends StatelessWidget {
   }
 
   editT(BuildContext context) {
+    String PIB = '';
+    int? tellerType = 1;
     showDialog(
       context: context,
       builder: (context) {
@@ -360,67 +363,137 @@ class NewWidget extends StatelessWidget {
           child: AlertDialog(
             shape: BeveledRectangleBorder(),
             alignment: Alignment.topCenter,
-            title: Text('Редагування касира'),
-            content: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.5,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Divider(),
-                  SizedBox(height: 20),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextField(
-                        decoration:
-                            InputDecoration(border: OutlineInputBorder()),
-                      ),
+            title: Text('Реєстрація касира'),
+            content: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 12.0),
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Divider(),
                       SizedBox(height: 20),
-                      TextField(
-                        decoration:
-                            InputDecoration(border: OutlineInputBorder()),
-                      ),
-                      SizedBox(height: 20),
-                      DropdownMenu(
-                        initialSelection: 10,
-                        expandedInsets: EdgeInsets.zero,
-                        focusNode: FocusNode(canRequestFocus: false),
-                        trailingIcon: Icon(
-                          Icons.arrow_drop_down,
-                        ),
-                        dropdownMenuEntries: [
-                          DropdownMenuEntry(value: 5, label: '5'),
-                          DropdownMenuEntry(value: 10, label: '10'),
-                          DropdownMenuEntry(value: 15, label: '15'),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('ІПН касира'),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  cursorWidth: 1,
+                                  cursorColor: Colors.grey,
+                                  decoration: InputDecoration(
+                                    hintText: 'Вкажіть ІПН касира',
+                                    hintStyle: TextStyle(color: Colors.grey),
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.all(10),
+                                    fillColor: Colors.white,
+                                    focusColor: Colors.white,
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderSide: const BorderSide(
+                                          color: Colors.white, width: 2.0),
+                                      borderRadius: BorderRadius.circular(5.0),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                  onPressed: () {}, icon: Icon(Icons.search)),
+                            ],
+                          ),
+                          SizedBox(height: 20),
+                          Text('ПІБ'),
+                          TextField(
+                            onChanged: (value) {
+                              PIB = value;
+                            },
+                            decoration:
+                                InputDecoration(border: OutlineInputBorder()),
+                          ),
+                          SizedBox(height: 20),
+                          Text('Код ДПІ'),
+                          Row(
+                            children: [
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.15,
+                                child: TextField(
+                                  decoration: InputDecoration(
+                                      border: OutlineInputBorder()),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              ElevatedButton(
+                                  onPressed: () {}, child: Text('Перевірити')),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              ElevatedButton(
+                                  onPressed: () {},
+                                  child: Text('Знайти у довіднику'))
+                            ],
+                          ),
+                          SizedBox(height: 20),
+                          Text('Тип касира'),
+                          DropdownMenu(
+                            onSelected: (value) {
+                              tellerType = value;
+                            },
+                            initialSelection: 10,
+                            expandedInsets: EdgeInsets.zero,
+                            focusNode: FocusNode(canRequestFocus: false),
+                            trailingIcon: Icon(
+                              Icons.arrow_drop_down,
+                            ),
+                            dropdownMenuEntries: [
+                              DropdownMenuEntry(
+                                  value: 1, label: 'Старший касир'),
+                              DropdownMenuEntry(value: 2, label: 'Касир'),
+                            ],
+                          ),
+                          SizedBox(height: 20),
+                          Text('Вкажіть пароль від SmartID'),
+                          TextField(
+                            decoration:
+                                InputDecoration(border: OutlineInputBorder()),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [],
+                          ),
+                          SizedBox(height: 40),
                         ],
                       ),
-                      SizedBox(height: 20),
-                      TextField(
-                        decoration:
-                            InputDecoration(border: OutlineInputBorder()),
-                      ),
-                      SizedBox(height: 20),
-                      TextField(
-                        decoration:
-                            InputDecoration(border: OutlineInputBorder()),
+                      Text(
+                        'Подання форми про надання інформації про кваліфікований сертифікат відкритого ключа до ДПС',
+                        style: TextStyle(
+                          color: Colors.red,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
             actionsAlignment: MainAxisAlignment.start,
             actions: <Widget>[
               TextButton(
                 onPressed: () {
+                  // fillTellerRows(extraText: []);
                   Navigator.of(context).pop();
                 },
-                child: Text('Зберегти'),
+                child: Text('Надіслати запит'),
               ),
               TextButton(
                 onPressed: () {
-                  isActiveTeller = rowTapSettings;
                   Navigator.of(context).pop();
                 },
                 child: Text('Скасувати'),
