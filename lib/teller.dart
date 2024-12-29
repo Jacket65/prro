@@ -12,6 +12,11 @@ class Teller extends StatefulWidget {
   State<Teller> createState() => _TellerState();
 }
 
+List<DataRow> listOfTllers = [];
+List<List<String>> tellerGroup = [];
+List<String> tellerText = ['1', '999', '344', 'inActive'];
+List<String> tellerTextN = ['1', '999', '3', 'Active'];
+
 class _TellerState extends State<Teller> {
   Padding teller(BuildContext context) {
     return Padding(
@@ -22,7 +27,19 @@ class _TellerState extends State<Teller> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              NewWidget(),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5)),
+                    backgroundColor: Colors.blueAccent),
+                onPressed: () {
+                  editT(context);
+                },
+                child: Text(
+                  'Реєстрація касира',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
               Container(
                 // decoration: BoxDecoration(border: Border.all()),
                 child: Row(
@@ -140,17 +157,19 @@ class _TellerState extends State<Teller> {
             children: [
               Expanded(
                 child: DataTable(
-                    // border: TableBorder(
-                    //   horizontalInside: BorderSide(color: Colors.yellow[200]!),
-                    //   bottom: BorderSide(color: Colors.yellow[200]!),
-                    //   left: BorderSide(color: Colors.yellow[200]!),
-                    //   right: BorderSide(color: Colors.yellow[200]!),
-                    // ),
-                    dividerThickness: 0,
-                    horizontalMargin: 0,
-                    showCheckboxColumn: false,
-                    columns: tellerTop,
-                    rows: [fillTellerRows(extraText: tellerText)]),
+                  // border: TableBorder(
+                  //   horizontalInside: BorderSide(color: Colors.yellow[200]!),
+                  //   bottom: BorderSide(color: Colors.yellow[200]!),
+                  //   left: BorderSide(color: Colors.yellow[200]!),
+                  //   right: BorderSide(color: Colors.yellow[200]!),
+                  // ),
+                  dividerThickness: 0,
+                  horizontalMargin: 0,
+                  showCheckboxColumn: false,
+                  columns: tellerTop,
+                  rows: newMethod1(),
+                  // rows: listOfTllers,
+                ),
               ),
             ],
           ),
@@ -206,42 +225,77 @@ class _TellerState extends State<Teller> {
     );
   }
 
+  List<DataRow> newMethod1() {
+    return List.generate(listOfTllers.length, (index) {
+      return DataRow(
+        color: WidgetStatePropertyAll(
+            _selectedRowIndex == index ? Colors.orange[100] : Colors.white),
+        cells: cells(tellerGroup[index]),
+        onSelectChanged: (bool? selected) {
+          _selectedRowIndex = _selectedRowIndex == index ? -1 : index;
+
+          rowTapSettings = _selectedRowIndex == index ? true : false;
+
+          setState(() {});
+        },
+      );
+    });
+  }
+
+  Color color333 = Colors.white;
+
+  int counter = 1;
   DataRow fillTellerRows({required List<String>? extraText}) {
-    List<DataCell> a = [];
-    for (String i in extraText!) {
-      a.add(DataCell(Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10),
-        child: Text(
-          textAlign: TextAlign.center,
-          i,
-        ),
-      )));
-    }
-    a.add(
-      DataCell(
-        Container(
-          // decoration: BoxDecoration(border: Border.all()),
-          child: Align(
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.circle,
-              color: isActiveTeller ? Colors.green : Colors.red,
-              size: 15,
-            ),
-          ),
-        ),
-      ),
-    );
+    List<DataCell> a = cells(extraText);
+
     return DataRow(
       color: WidgetStatePropertyAll(color333),
       cells: a,
       onSelectChanged: (value) {
-        counter++;
-        color333 = (counter % 2 == 0 ? Colors.orange[100] : Colors.white)!;
-        rowTapSettings = !rowTapSettings;
+        newMethod(extraText!);
         setState(() {});
       },
     );
+  }
+
+  List<DataCell> cells(List<String>? extraText) {
+    List<DataCell> a = [];
+    for (String i in extraText!) {
+      if (i != extraText[extraText.length - 1]) {
+        a.add(DataCell(Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10),
+          child: Text(
+            textAlign: TextAlign.center,
+            i,
+          ),
+        )));
+      } else {
+        a.add(
+          DataCell(
+            Container(
+              // decoration: BoxDecoration(border: Border.all()),
+              child: Align(
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.circle,
+                  color: i == 'Active' ? Colors.green : Colors.red,
+                  size: 15,
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+    }
+    return a;
+  }
+
+  int _selectedRowIndex = -1;
+  void newMethod(List<String> extraText) {
+    counter++;
+    rowTapSettings = !rowTapSettings;
+    color333 = (counter % 2 == 0 ? Colors.orange[100] : Colors.white)!;
+    // listOfTllers[id] = fillTellerRows(extraText: extraText);
   }
 
   editTeller(BuildContext context) {
@@ -296,8 +350,18 @@ class _TellerState extends State<Teller> {
             actions: <Widget>[
               TextButton(
                 onPressed: () {
+                  // isActiveTeller == true
+                  //     ? listOfTllers.insert(_selectedRowIndex,
+                  //         fillTellerRows(extraText: tellerText))
+                  // :
+                  // listOfTllers.insert(_selectedRowIndex,
+                  //     fillTellerRows(extraText: tellerTextN));
+                  // listOfTllers.add(fillTellerRows(extraText: tellerTextN));
+                  tellerGroup[_selectedRowIndex] =
+                      isActiveTeller ? tellerTextN : tellerText;
+                  // listOfTllers.insert(
+                  //     _selectedRowIndex, fillTellerRows(extraText: tellerText));
                   Navigator.of(context).pop();
-
                   setState(() {});
                 },
                 child: Text('Зберегти'),
@@ -313,42 +377,6 @@ class _TellerState extends State<Teller> {
           ),
         );
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return teller(context);
-  }
-}
-
-List<DataColumn> tellerTop =
-    novaTThead(showStatus: true, extraText: ['ПІБ', 'Тип', 'Статус в ДПС']);
-
-int counter = 1;
-Color color333 = Colors.white;
-List<String> tellerText = ['1', '999', '3'];
-bool rowTapSettings = false;
-bool isActiveTeller = false;
-
-class NewWidget extends StatelessWidget {
-  const NewWidget({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-          backgroundColor: Colors.blueAccent),
-      onPressed: () {
-        editT(context);
-      },
-      child: Text(
-        'Реєстрація касира',
-        style: TextStyle(color: Colors.white),
-      ),
     );
   }
 
@@ -487,8 +515,10 @@ class NewWidget extends StatelessWidget {
             actions: <Widget>[
               TextButton(
                 onPressed: () {
-                  // fillTellerRows(extraText: []);
+                  listOfTllers.add(fillTellerRows(extraText: tellerText));
+                  tellerGroup.add(tellerText);
                   Navigator.of(context).pop();
+                  setState(() {});
                 },
                 child: Text('Надіслати запит'),
               ),
@@ -504,4 +534,15 @@ class NewWidget extends StatelessWidget {
       },
     );
   }
+
+  bool rowTapSettings = false;
+  bool isActiveTeller = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return teller(context);
+  }
 }
+
+List<DataColumn> tellerTop =
+    novaTThead(showStatus: true, extraText: ['ПІБ', 'Тип', 'Статус в ДПС']);
