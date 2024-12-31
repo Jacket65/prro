@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:prro/main.dart';
 import 'package:prro/settings.dart';
 
 var currentValue = 1;
@@ -14,8 +15,18 @@ class Teller extends StatefulWidget {
 
 List<DataRow> listOfTllers = [];
 List<List<String>> tellerGroup = [];
-List<String> tellerText = ['1', '999', '344', 'inActive'];
-List<String> tellerTextN = ['1', '999', '3', 'Active'];
+List<String> tellerText = [
+  'Зеленський Володимир Олександрович',
+  '1',
+  'Зареєстрований',
+  'Inactive'
+];
+List<String> tellerTextN = [
+  'Зеленський Володимир Олександрович',
+  '1',
+  'Зареєстрований',
+  'Active'
+];
 
 class _TellerState extends State<Teller> {
   Padding teller(BuildContext context) {
@@ -299,6 +310,9 @@ class _TellerState extends State<Teller> {
   }
 
   editTeller(BuildContext context) {
+    isActiveTeller =
+        tellerGroup[_selectedRowIndex].last == 'Active' ? true : false;
+
     showDialog(
       context: context,
       builder: (context) {
@@ -350,17 +364,11 @@ class _TellerState extends State<Teller> {
             actions: <Widget>[
               TextButton(
                 onPressed: () {
-                  // isActiveTeller == true
-                  //     ? listOfTllers.insert(_selectedRowIndex,
-                  //         fillTellerRows(extraText: tellerText))
-                  // :
-                  // listOfTllers.insert(_selectedRowIndex,
-                  //     fillTellerRows(extraText: tellerTextN));
-                  // listOfTllers.add(fillTellerRows(extraText: tellerTextN));
-                  tellerGroup[_selectedRowIndex] =
-                      isActiveTeller ? tellerTextN : tellerText;
-                  // listOfTllers.insert(
-                  //     _selectedRowIndex, fillTellerRows(extraText: tellerText));
+                  var row = tellerGroup[_selectedRowIndex];
+                  tellerGroup[_selectedRowIndex] = isActiveTeller
+                      ? row.sublist(0, row.length - 1) + ['Active']
+                      : row.sublist(0, row.length - 1) + ['inact'];
+
                   Navigator.of(context).pop();
                   setState(() {});
                 },
@@ -380,9 +388,10 @@ class _TellerState extends State<Teller> {
     );
   }
 
+  String PIB = '';
+  int? tellerType = 1;
+  var tleer = {1: "Старший касир", 2: "Касир"};
   editT(BuildContext context) {
-    String PIB = '';
-    int? tellerType = 1;
     showDialog(
       context: context,
       builder: (context) {
@@ -464,7 +473,9 @@ class _TellerState extends State<Teller> {
                                 width: 20,
                               ),
                               ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    findInDictionary(context);
+                                  },
                                   child: Text('Знайти у довіднику'))
                             ],
                           ),
@@ -515,8 +526,14 @@ class _TellerState extends State<Teller> {
             actions: <Widget>[
               TextButton(
                 onPressed: () {
-                  listOfTllers.add(fillTellerRows(extraText: tellerText));
-                  tellerGroup.add(tellerText);
+                  listOfTllers.add(fillTellerRows(extraText: [
+                    PIB,
+                    tellerType.toString(),
+                    'Зареєстрований',
+                    'Inactive'
+                  ]));
+                  tellerGroup.add(
+                      [PIB, tleer[tellerType]!, 'Зареєстрований', 'Inactive']);
                   Navigator.of(context).pop();
                   setState(() {});
                 },
@@ -536,13 +553,14 @@ class _TellerState extends State<Teller> {
   }
 
   bool rowTapSettings = false;
-  bool isActiveTeller = false;
 
   @override
   Widget build(BuildContext context) {
     return teller(context);
   }
 }
+
+bool isActiveTeller = false;
 
 List<DataColumn> tellerTop =
     novaTThead(showStatus: true, extraText: ['ПІБ', 'Тип', 'Статус в ДПС']);
