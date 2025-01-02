@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prro/category_pick.dart';
 
 class Items extends StatefulWidget {
   Items({super.key});
@@ -44,6 +45,8 @@ class _ItemsState extends State<Items> {
                 width: 20,
               ),
               IconButton(
+                constraints: BoxConstraints(),
+                padding: EdgeInsets.all(4),
                 icon: Icon(
                   Icons.create_new_folder_rounded,
                   color: Colors.grey,
@@ -53,12 +56,16 @@ class _ItemsState extends State<Items> {
                       borderRadius: BorderRadius.circular(4))),
                   backgroundColor: WidgetStatePropertyAll(Colors.blueGrey[50]),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  addCategory(context);
+                },
               ),
               SizedBox(
                 width: 20,
               ),
               IconButton(
+                  constraints: BoxConstraints(),
+                  padding: EdgeInsets.all(4),
                   style: ButtonStyle(
                     shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4))),
@@ -231,13 +238,21 @@ class CustomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Colors.blueGrey[50],
       elevation: 2.0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) => CategoryPick(title: cardTit),
+            ),
+          );
+        },
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(
