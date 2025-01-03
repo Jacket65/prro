@@ -51,6 +51,26 @@ class MainScreenState extends State<MainScreen> {
     );
   }
 
+// user['name']
+  @override
+  void initState() {
+    for (int i = 0; i < userLenght; i++) {
+      listOfTllers.add(TellerState.fillTellerRows(extraText: [
+        initUser[i]["name"],
+        initUser[i]["name"],
+        initUser[i]["name"],
+        initUser[i]["status2"],
+      ]));
+      tellerGroup.add([
+        initUser[i]["name"],
+        initUser[i]["name"],
+        initUser[i]["name"],
+        initUser[i]["status2"],
+      ]);
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     // return MainScreenWidget();
@@ -64,63 +84,57 @@ class MainScreenState extends State<MainScreen> {
       ),
       body: SafeArea(
         child: Container(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Column(
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            topButton(
-                                lable: 'Торгові точки та ПРРО',
-                                selecteIndexW: 1),
-                            topButton(lable: 'Касири', selecteIndexW: 2),
-                            topButton(lable: 'Товари', selecteIndexW: 3),
-                            topButton(lable: 'Журнал', selecteIndexW: 4),
-                            topButton(lable: 'Звіти', selecteIndexW: 5),
-                            topButton(lable: 'Помилки', selecteIndexW: 6),
-                          ],
-                        ),
-                        if (currentContent == 'Торгові точки та ПРРО')
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5)),
-                                backgroundColor: Colors.blueAccent),
-                            onPressed: () {
-                              showDialogFunc('Зазначте код ДПІ');
-                              fillRows(extraText: rowsText);
-                              setState(() {});
-                            },
-                            child: Text(
-                              'Нова торгова точка',
-                              style: TextStyle(color: Colors.white),
-                            ),
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          topButton(
+                              lable: 'Торгові точки та ПРРО', selecteIndexW: 1),
+                          topButton(lable: 'Касири', selecteIndexW: 2),
+                          topButton(lable: 'Товари', selecteIndexW: 3),
+                          topButton(lable: 'Журнал', selecteIndexW: 4),
+                          topButton(lable: 'Звіти', selecteIndexW: 5),
+                          topButton(lable: 'Помилки', selecteIndexW: 6),
+                        ],
+                      ),
+                      if (currentContent == 'Торгові точки та ПРРО')
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5)),
+                              backgroundColor: Colors.blueAccent),
+                          onPressed: () {
+                            showDialogFunc('Зазначте код ДПІ');
+                            fillRows(extraText: rowsText);
+                            setState(() {});
+                          },
+                          child: Text(
+                            'Нова торгова точка',
+                            style: TextStyle(color: Colors.white),
                           ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                  ],
-                ),
-                switch (currentContent) {
-                  'Торгові точки та ПРРО' => torgovaTochaka(context),
-                  'Касири' => Teller(),
-                  'Товари' => Items(),
-                  _ => Text('В процесі'),
-                },
-                SizedBox(
-                  height: 20,
-                ),
-              ],
-            ),
+                        ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                ],
+              ),
+              switch (currentContent) {
+                'Торгові точки та ПРРО' => torgovaTochaka(context),
+                'Касири' => Teller(),
+                'Товари' => Items(),
+                _ => Text('В процесі'),
+              },
+            ],
           ),
         ),
       ),

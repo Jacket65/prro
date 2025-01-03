@@ -1,5 +1,6 @@
+import 'dart:convert';
 import 'dart:ui';
-
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:prro/main.dart';
 import 'package:prro/settings.dart';
@@ -10,7 +11,7 @@ class Teller extends StatefulWidget {
   const Teller({super.key});
 
   @override
-  State<Teller> createState() => _TellerState();
+  State<Teller> createState() => TellerState();
 }
 
 List<DataRow> listOfTllers = [];
@@ -28,214 +29,7 @@ List<String> tellerTextN = [
   'Active'
 ];
 
-class _TellerState extends State<Teller> {
-  Padding teller(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5)),
-                    backgroundColor: Colors.blueAccent),
-                onPressed: () {
-                  editT(context);
-                },
-                child: Text(
-                  'Реєстрація касира',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              Container(
-                // decoration: BoxDecoration(border: Border.all()),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 300,
-                      child: TextField(
-                        cursorWidth: 1,
-                        cursorColor: Colors.grey,
-                        decoration: InputDecoration(
-                          hintText: 'Пошук касира ПІБ',
-                          hintStyle: TextStyle(color: Colors.grey),
-                          isDense: true,
-                          contentPadding: EdgeInsets.all(10),
-                          fillColor: Colors.white,
-                          focusColor: Colors.white,
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                color: Colors.white, width: 2.0),
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                    IconButton(onPressed: () {}, icon: Icon(Icons.search)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(31, 168, 168, 168),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 0.0),
-                          child: Container(
-                            // width: 300,
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Text(
-                                'Інформація по касирам',
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.info_outline,
-                          color: Colors.grey,
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Visibility(
-                            visible: rowTapSettings,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.drive_file_rename_outline_rounded,
-                                  color: Colors.grey,
-                                ),
-                                TextButton(
-                                  child: Text(
-                                    'Редагувати',
-                                    style: TextStyle(color: Colors.blue),
-                                  ),
-                                  onPressed: () {
-                                    editTeller(context);
-                                  },
-                                ),
-                                Icon(
-                                  Icons.delete_forever_rounded,
-                                  color: Colors.grey,
-                                ),
-                                TextButton(
-                                  child: Text(
-                                    'Видалити',
-                                    style: TextStyle(color: Colors.blue),
-                                  ),
-                                  onPressed: () {},
-                                ),
-                              ],
-                            )),
-                        IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.replay_outlined,
-                          ),
-                          color: Colors.blue,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: DataTable(
-                  // border: TableBorder(
-                  //   horizontalInside: BorderSide(color: Colors.yellow[200]!),
-                  //   bottom: BorderSide(color: Colors.yellow[200]!),
-                  //   left: BorderSide(color: Colors.yellow[200]!),
-                  //   right: BorderSide(color: Colors.yellow[200]!),
-                  // ),
-                  dividerThickness: 0,
-                  horizontalMargin: 0,
-                  showCheckboxColumn: false,
-                  columns: tellerTop,
-                  rows: newMethod1(),
-                  // rows: listOfTllers,
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text('Записів на сторінці'),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  width: 130,
-                  child: DropdownMenu(
-                    initialSelection: 10,
-                    expandedInsets: EdgeInsets.zero,
-                    focusNode: FocusNode(canRequestFocus: false),
-                    trailingIcon: Icon(
-                      Icons.arrow_drop_down,
-                    ),
-                    dropdownMenuEntries: [
-                      DropdownMenuEntry(value: 5, label: '5'),
-                      DropdownMenuEntry(value: 10, label: '10'),
-                      DropdownMenuEntry(value: 15, label: '15'),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Text('1 із 1'),
-                ),
-                IconButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    onPressed: null,
-                    icon: Icon(Icons.skip_previous_outlined)),
-                IconButton(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  onPressed: null,
-                  icon: Icon(Icons.navigate_before),
-                ),
-                IconButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    onPressed: null,
-                    icon: Icon(Icons.navigate_next)),
-                IconButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    onPressed: null,
-                    icon: Icon(Icons.skip_next_outlined)),
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
+class TellerState extends State<Teller> {
   List<DataRow> newMethod1() {
     return List.generate(listOfTllers.length, (index) {
       return DataRow(
@@ -253,10 +47,10 @@ class _TellerState extends State<Teller> {
     });
   }
 
-  Color color333 = Colors.white;
+  static Color color333 = Colors.white;
 
-  int counter = 1;
-  DataRow fillTellerRows({required List<String>? extraText}) {
+  static int counter = 1;
+  static DataRow fillTellerRows({required List<String>? extraText}) {
     List<DataCell> a = cells(extraText);
 
     return DataRow(
@@ -264,21 +58,20 @@ class _TellerState extends State<Teller> {
       cells: a,
       onSelectChanged: (value) {
         newMethod(extraText!);
-        setState(() {});
+        // setState(() {});
       },
     );
   }
 
-  List<DataCell> cells(List<String>? extraText) {
+  static List<DataCell> cells(List<String>? extraText) {
     List<DataCell> a = [];
+
     for (String i in extraText!) {
       if (i != extraText[extraText.length - 1]) {
-        a.add(DataCell(Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10),
-          child: Text(
-            textAlign: TextAlign.center,
-            i,
-          ),
+        a.add(DataCell(Text(
+          // style: TextStyle(fontSize: 20),
+          textAlign: TextAlign.right,
+          i,
         )));
       } else {
         a.add(
@@ -302,8 +95,9 @@ class _TellerState extends State<Teller> {
   }
 
   int _selectedRowIndex = -1;
-  void newMethod(List<String> extraText) {
+  static void newMethod(List<String> extraText) {
     counter++;
+
     rowTapSettings = !rowTapSettings;
     color333 = (counter % 2 == 0 ? Colors.orange[100] : Colors.white)!;
     // listOfTllers[id] = fillTellerRows(extraText: extraText);
@@ -526,6 +320,7 @@ class _TellerState extends State<Teller> {
             actions: <Widget>[
               TextButton(
                 onPressed: () {
+                  sendJsonData();
                   listOfTllers.add(fillTellerRows(extraText: [
                     PIB,
                     tellerType.toString(),
@@ -552,15 +347,305 @@ class _TellerState extends State<Teller> {
     );
   }
 
-  bool rowTapSettings = false;
+  Future<void> sendJsonData() async {
+    // final url = Uri.parse('http://localhost:8080/admin/sellers');
+    final response =
+        await http.get(Uri.parse('http://localhost:8080/admin/sellers'));
+
+    if (response.statusCode == 200) {
+      print(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load data');
+    }
+
+    // final data = {
+    //   'phone_number': '+38052',
+    //   'first_name': 'mama',
+    //   'second_name': "sasa",
+    //   'password': "12345",
+    // };
+
+    // final body = json.encode(data);
+
+    // try {
+    //   // Send a POST request with JSON data
+    //   final response = await http.post(
+    //     url,
+    //     headers: {
+    //       'Content-Type': 'application/json', // Set header for JSON content
+    //     },
+    //     body: body, // The JSON body
+    //   );
+
+    //   // Check if the request was successful
+    //   if (response.statusCode == 200) {
+    //     print('Data sent successfully');
+    //     print('Response body: ${response.body}');
+    //   } else {
+    //     print('Failed to send data: ${response.statusCode}');
+    //   }
+    // } catch (e) {
+    //   print('Error: $e');
+    // }
+  }
+
+  static bool rowTapSettings = false;
 
   @override
   Widget build(BuildContext context) {
-    return teller(context);
+    return Expanded(
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5)),
+                    backgroundColor: Colors.blueAccent),
+                onPressed: () {
+                  editT(context);
+                },
+                child: Text(
+                  'Реєстрація касира',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              Container(
+                // decoration: BoxDecoration(border: Border.all()),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 300,
+                      child: TextField(
+                        cursorWidth: 1,
+                        cursorColor: Colors.grey,
+                        decoration: InputDecoration(
+                          hintText: 'Пошук касира ПІБ',
+                          hintStyle: TextStyle(color: Colors.grey),
+                          isDense: true,
+                          contentPadding: EdgeInsets.all(10),
+                          fillColor: Colors.white,
+                          focusColor: Colors.white,
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Colors.white, width: 2.0),
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                        ),
+                      ),
+                    ),
+                    IconButton(onPressed: () {}, icon: Icon(Icons.search)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(31, 168, 168, 168),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                        child: Container(
+                          // width: 300,
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text(
+                              'Інформація по касирам',
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.info_outline,
+                        color: Colors.grey,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Visibility(
+                          visible: TellerState.rowTapSettings,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.drive_file_rename_outline_rounded,
+                                color: Colors.grey,
+                              ),
+                              TextButton(
+                                child: Text(
+                                  'Редагувати',
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                                onPressed: () {
+                                  editTeller(context);
+                                },
+                              ),
+                              Icon(
+                                Icons.delete_forever_rounded,
+                                color: Colors.grey,
+                              ),
+                              TextButton(
+                                child: Text(
+                                  'Видалити',
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                                onPressed: () {},
+                              ),
+                            ],
+                          )),
+                      IconButton(
+                        onPressed: () {},
+                        icon: Icon(
+                          Icons.replay_outlined,
+                        ),
+                        color: Colors.blue,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: DataTable(
+                      // border: TableBorder(
+                      //   horizontalInside: BorderSide(color: Colors.yellow[200]!),
+                      //   bottom: BorderSide(color: Colors.yellow[200]!),
+                      //   left: BorderSide(color: Colors.yellow[200]!),
+                      //   right: BorderSide(color: Colors.yellow[200]!),
+                      // ),
+                      dividerThickness: 0,
+                      horizontalMargin: 0,
+                      showCheckboxColumn: false,
+                      columns: tellerTop,
+                      rows: newMethod1(),
+                      // rows: listOfTllers,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text('Записів на сторінці'),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  width: 130,
+                  child: DropdownMenu(
+                    initialSelection: 10,
+                    expandedInsets: EdgeInsets.zero,
+                    focusNode: FocusNode(canRequestFocus: false),
+                    trailingIcon: Icon(
+                      Icons.arrow_drop_down,
+                    ),
+                    dropdownMenuEntries: [
+                      DropdownMenuEntry(value: 5, label: '5'),
+                      DropdownMenuEntry(value: 10, label: '10'),
+                      DropdownMenuEntry(value: 15, label: '15'),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Text('1 із 1'),
+                ),
+                IconButton(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    onPressed: null,
+                    icon: Icon(Icons.skip_previous_outlined)),
+                IconButton(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  onPressed: null,
+                  icon: Icon(Icons.navigate_before),
+                ),
+                IconButton(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    onPressed: null,
+                    icon: Icon(Icons.navigate_next)),
+                IconButton(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    onPressed: null,
+                    icon: Icon(Icons.skip_next_outlined)),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
   }
 }
 
 bool isActiveTeller = false;
 
+final user = jsonDecode('''
+{
+  "items": [
+    {
+      "name": "foo1",
+      "surname": "lox1",
+      "status": "lox1",
+      "status2": "Inactive"
+    },
+    {
+      "name": "foo2",
+      "surname": "lox2",
+      "status": "lox2",
+      "status2": "Inactive"
+    },
+    {
+      "name": "foo2",
+      "surname": "lox2",
+      "status": "lox2",
+      "status2": "Inactive"
+    },
+    {
+      "name": "foo2",
+      "surname": "lox2",
+      "status": "lox2",
+      "status2": "Inactive"
+    },
+    {
+      "name": "foo2",
+      "surname": "lox2",
+      "status": "lox2",
+      "status2": "Inactive"
+    },
+    {
+      "name": "foo3",
+      "surname": "lox3",
+      "status": "lox3",
+      "status2": "Inactive"
+    }
+  ]
+}
+''');
+
+final initUser = user["items"];
+final userLenght = initUser.length;
 List<DataColumn> tellerTop =
     novaTThead(showStatus: true, extraText: ['ПІБ', 'Тип', 'Статус в ДПС']);

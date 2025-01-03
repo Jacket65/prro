@@ -305,29 +305,36 @@ List<Item> _items = [
 ];
 
 Widget torgovaTochaka(BuildContext context) {
-  return SafeArea(
-    child: Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: DataTable(
-                  columnSpacing: 70,
-                  horizontalMargin: 0,
-                  dataRowMinHeight: 0,
-                  dataRowMaxHeight: double.infinity,
-                  showCheckboxColumn: false,
-                  headingRowColor: WidgetStatePropertyAll(
-                      const Color.fromARGB(31, 168, 168, 168)),
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black26),
-                      borderRadius: BorderRadius.circular(5)),
-                  columns: novaTThead(extraText: ttrows),
-                  rows: rowsName),
+  return Expanded(
+    child: SafeArea(
+      child: Column(
+        children: [
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: DataTable(
+                        columnSpacing: 70,
+                        horizontalMargin: 0,
+                        dataRowMinHeight: 0,
+                        dataRowMaxHeight: double.infinity,
+                        showCheckboxColumn: false,
+                        headingRowColor: WidgetStatePropertyAll(
+                            const Color.fromARGB(31, 168, 168, 168)),
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black26),
+                            borderRadius: BorderRadius.circular(5)),
+                        columns: novaTThead(extraText: ttrows),
+                        rows: rowsName),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     ),
   );
 }
