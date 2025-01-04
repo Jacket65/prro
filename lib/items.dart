@@ -21,7 +21,15 @@ class _ItemsState extends State<Items> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5)),
                     backgroundColor: Colors.blueAccent),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) =>
+                          CategoryPick(),
+                    ),
+                  );
+                },
                 child: Text(
                   'Новий товар',
                   style: TextStyle(color: Colors.white),
@@ -245,14 +253,7 @@ class CustomCard extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => CategoryPick(title: cardTit),
-            ),
-          );
-        },
+        onTap: () {},
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(
