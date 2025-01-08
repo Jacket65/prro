@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prro/category_pick.dart';
+import 'package:prro/inside_category.dart';
 
 class Items extends StatefulWidget {
   Items({super.key});
@@ -25,8 +26,7 @@ class _ItemsState extends State<Items> {
                   Navigator.push(
                     context,
                     MaterialPageRoute<void>(
-                      builder: (BuildContext context) =>
-                          CategoryPick(),
+                      builder: (BuildContext context) => CategoryPick(),
                     ),
                   );
                 },
@@ -253,7 +253,15 @@ class CustomCard extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            DialogRoute(
+              context: context,
+              builder: (context) => InsideCategory(),
+            ),
+          );
+        },
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(

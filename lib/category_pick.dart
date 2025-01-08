@@ -8,7 +8,9 @@ class CategoryPick extends StatefulWidget {
 }
 
 class _CategoryPickState extends State<CategoryPick> {
-  bool checked = false;
+  bool checkedBox = false;
+  bool checkedPrice = false;
+  bool checkedMass = false;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,7 @@ class _CategoryPickState extends State<CategoryPick> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Тип касира'),
+            Text('Категорія'),
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.5,
               child: DropdownMenu(
@@ -45,100 +47,123 @@ class _CategoryPickState extends State<CategoryPick> {
             SizedBox(
               height: 20,
             ),
-            Text('Тип касира'),
-            Checkbox(
-              value: checked,
-              onChanged: (value) {
-                checked = value!;
-                setState(() {});
-              },
+            Text('Податкова ставка'),
+            Row(
+              children: [
+                Checkbox(
+                  value: checkedBox,
+                  onChanged: (value) {
+                    checkedBox = value!;
+                    setState(() {});
+                  },
+                ),
+                Text('A - БЕЗ ПДВ 0%')
+              ],
             ),
             Row(
               children: [
                 Flexible(
-                  child: SizedBox(
-                    width: 400,
-                    child: TextField(
-                      cursorWidth: 1,
-                      cursorColor: Colors.grey,
-                      decoration: InputDecoration(
-                        hintText: 'Пошук по категоріям',
-                        hintStyle: TextStyle(color: Colors.grey),
-                        isDense: true,
-                        contentPadding: EdgeInsets.all(10),
-                        fillColor: Colors.white,
-                        focusColor: Colors.white,
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide:
-                              const BorderSide(color: Colors.white, width: 2.0),
-                          borderRadius: BorderRadius.circular(5.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Назва'),
+                      SizedBox(
+                        width: 400,
+                        child: TextField(
+                          cursorWidth: 1,
+                          cursorColor: Colors.grey,
+                          decoration: InputDecoration(
+                            hintText: 'Введіть назву товару чи послуги',
+                            hintStyle: TextStyle(color: Colors.grey),
+                            isDense: true,
+                            contentPadding: EdgeInsets.all(10),
+                            fillColor: Colors.white,
+                            focusColor: Colors.white,
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  color: Colors.white, width: 2.0),
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
                 SizedBox(
                   width: 20,
                 ),
                 Flexible(
-                  child: SizedBox(
-                    // width: 200,
-                    // height: 40,
-                    child: DropdownMenu(
-                      inputDecorationTheme: InputDecorationTheme(
-                        isDense: true,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16),
-                        constraints:
-                            BoxConstraints.tight(const Size.fromHeight(36)),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Одиниці виміру'),
+                      SizedBox(
+                        // width: 200,
+                        // height: 40,
+                        child: DropdownMenu(
+                          inputDecorationTheme: InputDecorationTheme(
+                            isDense: true,
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 16),
+                            constraints:
+                                BoxConstraints.tight(const Size.fromHeight(36)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          hintText: "Вибрати категорію",
+                          onSelected: (value) {},
+                          initialSelection: 10,
+                          // expandedInsets: EdgeInsets.zero,
+                          focusNode: FocusNode(canRequestFocus: false),
+                          trailingIcon: Icon(
+                            Icons.arrow_drop_down,
+                          ),
+                          dropdownMenuEntries: [
+                            DropdownMenuEntry(value: 1, label: 'Старший касир'),
+                            DropdownMenuEntry(value: 2, label: 'Касир'),
+                          ],
                         ),
                       ),
-                      hintText: "Вибрати категорію",
-                      onSelected: (value) {},
-                      initialSelection: 10,
-                      // expandedInsets: EdgeInsets.zero,
-                      focusNode: FocusNode(canRequestFocus: false),
-                      trailingIcon: Icon(
-                        Icons.arrow_drop_down,
-                      ),
-                      dropdownMenuEntries: [
-                        DropdownMenuEntry(value: 1, label: 'Старший касир'),
-                        DropdownMenuEntry(value: 2, label: 'Касир'),
-                      ],
-                    ),
+                    ],
                   ),
                 ),
                 SizedBox(
                   width: 20,
                 ),
                 Flexible(
-                  child: SizedBox(
-                    width: 200,
-                    child: TextField(
-                      cursorWidth: 1,
-                      cursorColor: Colors.grey,
-                      decoration: InputDecoration(
-                        hintText: 'Пошук по категоріям',
-                        hintStyle: TextStyle(color: Colors.grey),
-                        isDense: true,
-                        contentPadding: EdgeInsets.all(10),
-                        fillColor: Colors.white,
-                        focusColor: Colors.white,
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide:
-                              const BorderSide(color: Colors.white, width: 2.0),
-                          borderRadius: BorderRadius.circular(5.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Ціна'),
+                      SizedBox(
+                        width: 200,
+                        child: TextField(
+                          cursorWidth: 1,
+                          cursorColor: Colors.grey,
+                          decoration: InputDecoration(
+                            hintText: 'Ціна(грн)',
+                            hintStyle: TextStyle(color: Colors.grey),
+                            isDense: true,
+                            contentPadding: EdgeInsets.all(10),
+                            fillColor: Colors.white,
+                            focusColor: Colors.white,
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  color: Colors.white, width: 2.0),
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ],
@@ -146,8 +171,11 @@ class _CategoryPickState extends State<CategoryPick> {
             Row(
               children: [
                 Switch(
-                  value: false,
-                  onChanged: (value) {},
+                  value: checkedPrice,
+                  onChanged: (value) {
+                    checkedPrice = value;
+                    setState(() {});
+                  },
                 ),
                 Text('Зміна ціни')
               ],
@@ -155,114 +183,123 @@ class _CategoryPickState extends State<CategoryPick> {
             Row(
               children: [
                 Switch(
-                  value: false,
-                  onChanged: (value) {},
+                  value: checkedMass,
+                  onChanged: (value) {
+                    checkedMass = value;
+                    setState(() {});
+                  },
                 ),
                 Text('Зміна ваги')
               ],
             ),
             Row(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Kod'),
-                    SizedBox(
-                      width: 400,
-                      child: TextField(
-                        cursorWidth: 1,
-                        cursorColor: Colors.grey,
-                        decoration: InputDecoration(
-                          hintText: 'Пошук по категоріям',
-                          hintStyle: TextStyle(color: Colors.grey),
-                          isDense: true,
-                          contentPadding: EdgeInsets.all(10),
-                          fillColor: Colors.white,
-                          focusColor: Colors.white,
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                color: Colors.white, width: 2.0),
-                            borderRadius: BorderRadius.circular(5.0),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Код УКТЗЕД'),
+                      SizedBox(
+                        width: 400,
+                        child: TextField(
+                          cursorWidth: 1,
+                          cursorColor: Colors.grey,
+                          decoration: InputDecoration(
+                            hintText: 'Необовязково',
+                            hintStyle: TextStyle(color: Colors.grey),
+                            isDense: true,
+                            contentPadding: EdgeInsets.all(10),
+                            fillColor: Colors.white,
+                            focusColor: Colors.white,
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  color: Colors.white, width: 2.0),
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 SizedBox(
                   width: 20,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Kod'),
-                    SizedBox(
-                      width: 400,
-                      child: TextField(
-                        cursorWidth: 1,
-                        cursorColor: Colors.grey,
-                        decoration: InputDecoration(
-                          hintText: 'Пошук по категоріям',
-                          hintStyle: TextStyle(color: Colors.grey),
-                          isDense: true,
-                          contentPadding: EdgeInsets.all(10),
-                          fillColor: Colors.white,
-                          focusColor: Colors.white,
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                color: Colors.white, width: 2.0),
-                            borderRadius: BorderRadius.circular(5.0),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Артикул'),
+                      SizedBox(
+                        width: 400,
+                        child: TextField(
+                          cursorWidth: 1,
+                          cursorColor: Colors.grey,
+                          decoration: InputDecoration(
+                            hintText: 'Необовязково',
+                            hintStyle: TextStyle(color: Colors.grey),
+                            isDense: true,
+                            contentPadding: EdgeInsets.all(10),
+                            fillColor: Colors.white,
+                            focusColor: Colors.white,
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  color: Colors.white, width: 2.0),
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 SizedBox(
                   width: 20,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Kod'),
-                    SizedBox(
-                      width: 400,
-                      child: TextField(
-                        cursorWidth: 1,
-                        cursorColor: Colors.grey,
-                        decoration: InputDecoration(
-                          hintText: 'Пошук по категоріям',
-                          hintStyle: TextStyle(color: Colors.grey),
-                          isDense: true,
-                          contentPadding: EdgeInsets.all(10),
-                          fillColor: Colors.white,
-                          focusColor: Colors.white,
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                color: Colors.white, width: 2.0),
-                            borderRadius: BorderRadius.circular(5.0),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Штрихкод'),
+                      SizedBox(
+                        width: 400,
+                        child: TextField(
+                          cursorWidth: 1,
+                          cursorColor: Colors.grey,
+                          decoration: InputDecoration(
+                            hintText: 'Необовязково',
+                            hintStyle: TextStyle(color: Colors.grey),
+                            isDense: true,
+                            contentPadding: EdgeInsets.all(10),
+                            fillColor: Colors.white,
+                            focusColor: Colors.white,
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  color: Colors.white, width: 2.0),
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
             SizedBox(
               height: 20,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+            Wrap(
+              // mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 TextButton(
                   style: ButtonStyle(
@@ -276,6 +313,9 @@ class _CategoryPickState extends State<CategoryPick> {
                     'Створити',
                     style: TextStyle(color: Colors.white),
                   ),
+                ),
+                SizedBox(
+                  width: 20,
                 ),
                 TextButton(
                   onPressed: () {

@@ -12,6 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
+        colorScheme: ColorScheme.light(),
         // useMaterial3: true,
         primarySwatch: Colors.blue,
         textButtonTheme: TextButtonThemeData(
@@ -199,6 +200,7 @@ void fillRows({required List<String>? extraText}) {
     }
   }
   rowsName.add(DataRow(
+    // color: WidgetStatePropertyAll(Colors.white),
     cells: a,
     onSelectChanged: (value) {},
   ));
@@ -321,11 +323,13 @@ Widget torgovaTochaka(BuildContext context) {
                         dataRowMinHeight: 0,
                         dataRowMaxHeight: double.infinity,
                         showCheckboxColumn: false,
-                        headingRowColor: WidgetStatePropertyAll(
-                            const Color.fromARGB(31, 168, 168, 168)),
                         decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black26),
-                            borderRadius: BorderRadius.circular(5)),
+                          color: Colors.white,
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        // headingRowColor: WidgetStatePropertyAll(
+                        //     const Color.fromARGB(31, 168, 168, 168)),
                         columns: novaTThead(extraText: ttrows),
                         rows: rowsName),
                   ),
