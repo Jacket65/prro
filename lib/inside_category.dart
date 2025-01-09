@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:prro/items.dart';
 
 class InsideCategory extends StatefulWidget {
-  const InsideCategory({super.key});
-
+  InsideCategory(this.cardInx, this.cardTil, {super.key});
+  int cardInx;
+  String cardTil;
   @override
   State<InsideCategory> createState() => _InsideCategoryState();
 }
@@ -12,7 +14,7 @@ class _InsideCategoryState extends State<InsideCategory> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('123'),
+        title: Text('${widget.cardTil}'),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24),
@@ -103,46 +105,52 @@ class _InsideCategoryState extends State<InsideCategory> {
             SizedBox(
               height: 20,
             ),
-            Flexible(
-              child: Container(
-                decoration: BoxDecoration(
-                    border: Border.all(width: 1),
-                    borderRadius: BorderRadius.circular(5)),
-                width: double.maxFinite,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15)),
-                      showCheckboxColumn: true,
-                      showBottomBorder: false,
-                      columns: List.generate(
-                        itemsBar.length,
-                        (index) =>
-                            DataColumn(label: Text('${itemsBar[index]}')),
-                      ),
-                      rows: List<DataRow>.generate(
-                        lenght,
-                        (int index) => DataRow(
-                          cells: List.generate(
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(width: 1),
+                        borderRadius: BorderRadius.circular(5)),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: DataTable(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15)),
+                          showCheckboxColumn: true,
+                          showBottomBorder: false,
+                          columns: List.generate(
                             itemsBar.length,
-                            (index) => DataCell(
-                                Text('Cell-------------------------$index')),
+                            (index) =>
+                                DataColumn(label: Text('${itemsBar[index]}')),
                           ),
-                          selected: selected[index],
-                          onSelectChanged: (bool? value) {
-                            setState(() {
-                              selected[index] = value!;
-                            });
-                          },
+                          rows: categoryItems[widget.cardInx].isEmpty
+                              ? []
+                              : List<DataRow>.generate(
+                                  categoryItems[widget.cardInx].length,
+                                  (int rowIndex) => DataRow(
+                                    cells: List.generate(
+                                      6,
+                                      // categoryItems[widget.cardInx][index].length,
+                                      (celIndex) => DataCell(Text(
+                                          '${categoryItems[widget.cardInx][rowIndex][celIndex]}')),
+                                    ),
+                                    selected: selected[rowIndex],
+                                    onSelectChanged: (bool? value) {
+                                      setState(() {
+                                        selected[rowIndex] = value!;
+                                      });
+                                    },
+                                  ),
+                                ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           ],
         ),

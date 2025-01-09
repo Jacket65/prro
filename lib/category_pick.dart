@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prro/items.dart';
 
 class CategoryPick extends StatefulWidget {
   CategoryPick();
@@ -31,17 +32,22 @@ class _CategoryPickState extends State<CategoryPick> {
               width: MediaQuery.of(context).size.width * 0.5,
               child: DropdownMenu(
                 hintText: "Вибрати категорію",
-                onSelected: (value) {},
-                initialSelection: 10,
+                onSelected: (value) {
+                  indxCategory = value!;
+                },
+                initialSelection: 0,
                 expandedInsets: EdgeInsets.zero,
                 focusNode: FocusNode(canRequestFocus: false),
                 trailingIcon: Icon(
                   Icons.arrow_drop_down,
                 ),
-                dropdownMenuEntries: [
-                  DropdownMenuEntry(value: 1, label: 'Старший касир'),
-                  DropdownMenuEntry(value: 2, label: 'Касир'),
-                ],
+                dropdownMenuEntries: List.generate(
+                  cardTitles.length,
+                  (index) {
+                    return DropdownMenuEntry(
+                        value: index, label: cardTitles[index]);
+                  },
+                ),
               ),
             ),
             SizedBox(
@@ -70,6 +76,9 @@ class _CategoryPickState extends State<CategoryPick> {
                       SizedBox(
                         width: 400,
                         child: TextField(
+                          onChanged: (value) {
+                            itemName = value;
+                          },
                           cursorWidth: 1,
                           cursorColor: Colors.grey,
                           decoration: InputDecoration(
@@ -307,7 +316,11 @@ class _CategoryPickState extends State<CategoryPick> {
                           borderRadius: BorderRadius.circular(5))),
                       backgroundColor: WidgetStatePropertyAll(Colors.blue)),
                   onPressed: () {
+                    categoryItems[indxCategory]
+                        .add(['${itemName}', 'грн', 'kod', '', '', '']);
+
                     Navigator.of(context).pop();
+                    setState(() {});
                   },
                   child: Text(
                     'Створити',
@@ -331,3 +344,6 @@ class _CategoryPickState extends State<CategoryPick> {
     );
   }
 }
+
+int indxCategory = 0;
+String itemName = '';

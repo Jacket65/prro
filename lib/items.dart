@@ -134,7 +134,9 @@ class _ItemsState extends State<Items> {
                 ),
                 itemCount: cardTitles.length,
                 itemBuilder: (context, index) {
+                  // categoryItems.add([[]]);
                   return CustomCard(
+                    cardInx: index,
                     cardTit: cardTitles[index],
                   );
                 },
@@ -230,6 +232,36 @@ class _ItemsState extends State<Items> {
   var items = ['1', '2', '3', '4', '5'];
 }
 
+List<List<List<String>>> categoryItems = [
+  [
+    ['', '', '', '', '', ''],
+    ['', '', '', '', '', ''],
+  ],
+  [
+    ['', '', '', '', '', ''],
+    ['', '', '', '', '', ''],
+  ],
+  [
+    ['', '', '', '', '', ''],
+    ['', '', '', '', '', ''],
+  ],
+  [
+    ['', '', '', '', '', ''],
+    ['', '', '', '', '', ''],
+  ],
+  [
+    ['', '', '', '', '', ''],
+    ['', '', '', '', '', ''],
+  ],
+  [
+    ['', '', '', '', '', ''],
+    ['', '', '', '', '', ''],
+  ],
+  [
+    ['', '', '', '', '', ''],
+    ['', '', '', '', '', ''],
+  ],
+];
 final List<String> cardTitles = [
   'Холодні напої',
   'Солодощі',
@@ -237,12 +269,13 @@ final List<String> cardTitles = [
   'Додатки',
   'Кава вагова',
   'Кавоварка',
-  'Кавоварка',
+  'Кавоварка2',
 ];
 
 class CustomCard extends StatelessWidget {
-  CustomCard({required this.cardTit});
+  CustomCard({required this.cardTit, required this.cardInx});
   final String cardTit;
+  final int cardInx;
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -258,7 +291,10 @@ class CustomCard extends StatelessWidget {
             context,
             DialogRoute(
               context: context,
-              builder: (context) => InsideCategory(),
+              builder: (context) => InsideCategory(
+                cardInx,
+                cardTit,
+              ),
             ),
           );
         },
