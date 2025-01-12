@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prro/category_pick.dart';
 import 'package:prro/items.dart';
 
 class InsideCategory extends StatefulWidget {
@@ -9,6 +10,11 @@ class InsideCategory extends StatefulWidget {
   State<InsideCategory> createState() => _InsideCategoryState();
 }
 
+List<bool> selected = List<bool>.generate(lenght, (int index) => false);
+int lenght = 5;
+
+double paddingWidth = 25;
+
 class _InsideCategoryState extends State<InsideCategory> {
   @override
   Widget build(BuildContext context) {
@@ -17,7 +23,9 @@ class _InsideCategoryState extends State<InsideCategory> {
         title: Text('${widget.cardTil}'),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24),
+        // padding: EdgeInsets.zero,
+        padding:
+            EdgeInsets.symmetric(vertical: 8.0, horizontal: paddingWidth - 1),
         child: Column(
           // crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
@@ -73,7 +81,14 @@ class _InsideCategoryState extends State<InsideCategory> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5)),
                       backgroundColor: Colors.blueAccent),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) => CategoryPick(),
+                      ),
+                    );
+                  },
                   child: Text(
                     'Новий товар',
                     style: TextStyle(color: Colors.white),
@@ -105,46 +120,115 @@ class _InsideCategoryState extends State<InsideCategory> {
             SizedBox(
               height: 20,
             ),
-            SingleChildScrollView(
-              child: Container(
-                decoration: BoxDecoration(
-                    border: Border.all(width: 1),
-                    borderRadius: BorderRadius.circular(5)),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: DataTable(
-                    dataRowMaxHeight: double.infinity,
-                    decoration:
-                        BoxDecoration(borderRadius: BorderRadius.circular(15)),
-                    showCheckboxColumn: true,
-                    showBottomBorder: false,
-                    columns: List.generate(
-                      itemsBar.length,
-                      (index) => DataColumn(label: Text('${itemsBar[index]}')),
-                    ),
-                    rows: categoryItems[widget.cardInx].isEmpty
-                        ? []
-                        : List<DataRow>.generate(
-                            categoryItems[widget.cardInx].length,
-                            (int rowIndex) => DataRow(
-                              cells: List.generate(
-                                6,
-                                // categoryItems[widget.cardInx][index].length,
-                                (celIndex) => DataCell(Text(
-                                    '${categoryItems[widget.cardInx][rowIndex][celIndex]}')),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: Border.all(width: 1),
+                      borderRadius: BorderRadius.circular(5)),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minWidth: MediaQuery.of(context).size.width -
+                            ((paddingWidth * 2)),
+                      ),
+                      child: DataTable(
+                        // dataRowColor: WidgetStatePropertyAll(Colors.amber),
+                        headingRowColor:
+                            WidgetStatePropertyAll(Colors.blueGrey[100]),
+                        dataRowMaxHeight: double.infinity,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15)),
+                        showCheckboxColumn: true,
+                        showBottomBorder: false,
+                        columns: List.generate(
+                          itemsBar.length,
+                          (index) =>
+                              DataColumn(label: Text('${itemsBar[index]}')),
+                        ),
+                        rows: categoryItems[widget.cardInx].isEmpty
+                            ? []
+                            : List<DataRow>.generate(
+                                categoryItems[widget.cardInx].length,
+                                (int rowIndex) => DataRow(
+                                  // color: WidgetStatePropertyAll(Colors.green),
+                                  cells: List.generate(
+                                    6,
+                                    // categoryItems[widget.cardInx][index].length,
+                                    (celIndex) => DataCell(Text(
+                                        '${categoryItems[widget.cardInx][rowIndex][celIndex]}')),
+                                  ),
+                                  selected: selected[rowIndex],
+                                  onSelectChanged: (bool? value) {
+                                    setState(() {
+                                      selected[rowIndex] = value!;
+                                    });
+                                  },
+                                ),
                               ),
-                              selected: selected[rowIndex],
-                              onSelectChanged: (bool? value) {
-                                setState(() {
-                                  selected[rowIndex] = value!;
-                                });
-                              },
-                            ),
-                          ),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Text('Показати по:'),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        width: 130,
+                        child: DropdownMenu(
+                          initialSelection: 10,
+                          expandedInsets: EdgeInsets.zero,
+                          focusNode: FocusNode(canRequestFocus: false),
+                          trailingIcon: Icon(
+                            Icons.arrow_drop_down,
+                          ),
+                          dropdownMenuEntries: [
+                            DropdownMenuEntry(value: 5, label: '5'),
+                            DropdownMenuEntry(value: 10, label: '10'),
+                            DropdownMenuEntry(value: 15, label: '15'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        child: Text('1 із 1'),
+                      ),
+                      IconButton(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          onPressed: null,
+                          icon: Icon(Icons.skip_previous_outlined)),
+                      IconButton(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        onPressed: null,
+                        icon: Icon(Icons.navigate_before),
+                      ),
+                      IconButton(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          onPressed: null,
+                          icon: Icon(Icons.navigate_next)),
+                      IconButton(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          onPressed: null,
+                          icon: Icon(Icons.skip_next_outlined)),
+                    ],
+                  ),
+                ],
+              ),
+            )
           ],
         ),
       ),
@@ -152,9 +236,7 @@ class _InsideCategoryState extends State<InsideCategory> {
   }
 }
 
-int lenght = 5;
 int number = itemsBar.length;
-List<bool> selected = List<bool>.generate(lenght, (int index) => false);
 List<String> itemsBar = [
   'Товар',
   'Одиниці',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prro/inside_category.dart';
 import 'package:prro/items.dart';
 
 class CategoryPick extends StatefulWidget {
@@ -316,6 +317,7 @@ class _CategoryPickState extends State<CategoryPick> {
                           borderRadius: BorderRadius.circular(5))),
                       backgroundColor: WidgetStatePropertyAll(Colors.blue)),
                   onPressed: () {
+                    selected.add(false);
                     categoryItems[indxCategory]
                         .add(['${itemName}', 'грн', 'kod', '', '', '']);
 
