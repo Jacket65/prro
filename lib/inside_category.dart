@@ -20,7 +20,7 @@ class _InsideCategoryState extends State<InsideCategory> {
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24),
         child: Column(
           // crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.max,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
@@ -105,52 +105,45 @@ class _InsideCategoryState extends State<InsideCategory> {
             SizedBox(
               height: 20,
             ),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                        border: Border.all(width: 1),
-                        borderRadius: BorderRadius.circular(5)),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: DataTable(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15)),
-                          showCheckboxColumn: true,
-                          showBottomBorder: false,
-                          columns: List.generate(
-                            itemsBar.length,
-                            (index) =>
-                                DataColumn(label: Text('${itemsBar[index]}')),
-                          ),
-                          rows: categoryItems[widget.cardInx].isEmpty
-                              ? []
-                              : List<DataRow>.generate(
-                                  categoryItems[widget.cardInx].length,
-                                  (int rowIndex) => DataRow(
-                                    cells: List.generate(
-                                      6,
-                                      // categoryItems[widget.cardInx][index].length,
-                                      (celIndex) => DataCell(Text(
-                                          '${categoryItems[widget.cardInx][rowIndex][celIndex]}')),
-                                    ),
-                                    selected: selected[rowIndex],
-                                    onSelectChanged: (bool? value) {
-                                      setState(() {
-                                        selected[rowIndex] = value!;
-                                      });
-                                    },
-                                  ),
-                                ),
-                        ),
-                      ),
+            SingleChildScrollView(
+              child: Container(
+                decoration: BoxDecoration(
+                    border: Border.all(width: 1),
+                    borderRadius: BorderRadius.circular(5)),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    dataRowMaxHeight: double.infinity,
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(15)),
+                    showCheckboxColumn: true,
+                    showBottomBorder: false,
+                    columns: List.generate(
+                      itemsBar.length,
+                      (index) => DataColumn(label: Text('${itemsBar[index]}')),
                     ),
+                    rows: categoryItems[widget.cardInx].isEmpty
+                        ? []
+                        : List<DataRow>.generate(
+                            categoryItems[widget.cardInx].length,
+                            (int rowIndex) => DataRow(
+                              cells: List.generate(
+                                6,
+                                // categoryItems[widget.cardInx][index].length,
+                                (celIndex) => DataCell(Text(
+                                    '${categoryItems[widget.cardInx][rowIndex][celIndex]}')),
+                              ),
+                              selected: selected[rowIndex],
+                              onSelectChanged: (bool? value) {
+                                setState(() {
+                                  selected[rowIndex] = value!;
+                                });
+                              },
+                            ),
+                          ),
                   ),
                 ),
-              ],
+              ),
             ),
           ],
         ),
