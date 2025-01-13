@@ -3,7 +3,7 @@ import 'package:prro/main_screen/main_screen_widgets/fill_rows.dart';
 
 import 'package:prro/items.dart';
 import 'package:prro/main.dart';
-import 'package:prro/main_screen/trade_place.dart';
+import 'package:prro/main_screen/torgovi_tochki.dart';
 import 'package:prro/settings.dart';
 import 'package:prro/main_screen/main_screen_widgets/show_dialog_func1.dart';
 import 'package:prro/tellers_screen/fill_teller_rows.dart';

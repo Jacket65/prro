@@ -20,7 +20,7 @@ class ttochki extends StatelessWidget {
                     child: SingleChildScrollView(
                       child: DataTable(
                           columnSpacing: 70,
-                          horizontalMargin: 0,
+                          // horizontalMargin: 0,
                           dataRowMinHeight: 0,
                           dataRowMaxHeight: double.infinity,
                           showCheckboxColumn: false,

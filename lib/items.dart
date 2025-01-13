@@ -76,8 +76,9 @@ class _ItemsState extends State<Items> {
                 width: 32,
                 height: 32,
                 child: PopupMenuButton(
+                  tooltip: "Додатково",
                   iconColor: Colors.grey,
-                  padding: EdgeInsets.zero,
+                  // padding: EdgeInsets.zero,
                   style: ButtonStyle(
                       backgroundColor:
                           WidgetStatePropertyAll(Colors.blueGrey[50]),
@@ -87,10 +88,15 @@ class _ItemsState extends State<Items> {
                   // (
                   // borderRadius: BorderRadius.circular(2)))),
                   offset: Offset(0, 42),
-                  menuPadding: EdgeInsets.all(0),
+                  menuPadding: EdgeInsets.all(4),
 
                   itemBuilder: (context) {
-                    return [PopupMenuItem(height: 0, child: Text('123'))];
+                    return [
+                      PopupMenuItem(child: Text('Історія імпорту')),
+                      PopupMenuItem(child: Text('Експорт товарів')),
+                      PopupMenuItem(child: Text('Видалити всі категорії')),
+                      PopupMenuItem(child: Text('Переглянути інструкцію')),
+                    ];
                   },
                 ),
               )
