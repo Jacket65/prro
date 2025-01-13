@@ -56,11 +56,15 @@ class MainScreenState extends State<MainScreen> {
     currentContent = newContent;
   }
 
+  void changeState() {
+    setState(() {});
+  }
+
   void showDialogFunc(String title) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return ShowDialogFunc1(title, context);
+        return ShowDialogFunc1(title, context, changeState);
       },
     );
   }
@@ -124,7 +128,6 @@ class MainScreenState extends State<MainScreen> {
                               backgroundColor: Colors.blueAccent),
                           onPressed: () {
                             showDialogFunc('Зазначте код ДПІ');
-                            fillRows(extraText: rowsText);
                             setState(() {});
                           },
                           child: Text(

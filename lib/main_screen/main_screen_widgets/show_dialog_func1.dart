@@ -1,8 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:prro/main_screen/main_screen_widgets/fill_rows.dart';
 import 'package:prro/main_screen/main_screen_widgets/find_in_dictionary.dart';
+import 'package:prro/settings.dart';
 
-AlertDialog ShowDialogFunc1(String title, BuildContext context) {
+AlertDialog ShowDialogFunc1(
+    String title, BuildContext context, void Function() changeState) {
   return AlertDialog(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
     backgroundColor: Colors.white,
@@ -95,6 +98,8 @@ AlertDialog ShowDialogFunc1(String title, BuildContext context) {
                     borderRadius: BorderRadius.circular(5))),
                 backgroundColor: WidgetStatePropertyAll(Colors.blue)),
             onPressed: () {
+              fillRows(extraText: rowsText);
+              changeState();
               Navigator.of(context).pop();
             },
             child: Text(
