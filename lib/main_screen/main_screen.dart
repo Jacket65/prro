@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:prro/main_screen/main_screen_widgets/fill_rows.dart';
+
 import 'package:prro/items.dart';
 import 'package:prro/main.dart';
+import 'package:prro/main_screen/trade_place.dart';
 import 'package:prro/settings.dart';
-import 'package:prro/teller.dart';
+import 'package:prro/main_screen/main_screen_widgets/show_dialog_func1.dart';
+import 'package:prro/tellers_screen/fill_teller_rows.dart';
+import 'package:prro/tellers_screen/teller.dart';
+
+class MainScreen extends StatefulWidget {
+  @override
+  MainScreenState createState() => MainScreenState();
+}
 
 class MainScreenState extends State<MainScreen> {
-  Padding topButton({required int selecteIndexW, required String lable}) {
-    final Increment _increment = Increment();
+  Padding topBarButtons({required int selecteIndexW, required String lable}) {
+    // final Increment _increment = Increment();
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: 8.0),
       child: Container(
         child: Column(
           children: [
@@ -30,7 +40,7 @@ class MainScreenState extends State<MainScreen> {
                 child: Text(
                   lable,
                   style: TextStyle(
-                      color: selecteIndex == selecteIndex
+                      color: selecteIndex == selecteIndexW
                           ? Colors.black
                           : Colors.grey),
                 ),
@@ -42,6 +52,10 @@ class MainScreenState extends State<MainScreen> {
     );
   }
 
+  void changeContent(String newContent) {
+    currentContent = newContent;
+  }
+
   void showDialogFunc(String title) {
     showDialog(
       context: context,
@@ -51,11 +65,10 @@ class MainScreenState extends State<MainScreen> {
     );
   }
 
-// user['name']
   @override
   void initState() {
     for (int i = 0; i < userLenght; i++) {
-      listOfTllers.add(TellerState.fillTellerRows(extraText: [
+      listOfTllers.add(fillTellerRows(extraText: [
         initUser[i]["name"],
         initUser[i]["name"],
         initUser[i]["name"],
@@ -73,8 +86,6 @@ class MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // return MainScreenWidget();
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
@@ -96,13 +107,13 @@ class MainScreenState extends State<MainScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          topButton(
+                          topBarButtons(
                               lable: 'Торгові точки та ПРРО', selecteIndexW: 1),
-                          topButton(lable: 'Касири', selecteIndexW: 2),
-                          topButton(lable: 'Товари', selecteIndexW: 3),
-                          topButton(lable: 'Журнал', selecteIndexW: 4),
-                          topButton(lable: 'Звіти', selecteIndexW: 5),
-                          topButton(lable: 'Помилки', selecteIndexW: 6),
+                          topBarButtons(lable: 'Касири', selecteIndexW: 2),
+                          topBarButtons(lable: 'Товари', selecteIndexW: 3),
+                          topBarButtons(lable: 'Журнал', selecteIndexW: 4),
+                          topBarButtons(lable: 'Звіти', selecteIndexW: 5),
+                          topBarButtons(lable: 'Помилки', selecteIndexW: 6),
                         ],
                       ),
                       if (currentContent == 'Торгові точки та ПРРО')
@@ -129,7 +140,7 @@ class MainScreenState extends State<MainScreen> {
                 ],
               ),
               switch (currentContent) {
-                'Торгові точки та ПРРО' => torgovaTochaka(context),
+                'Торгові точки та ПРРО' => ttochki(),
                 'Касири' => Teller(),
                 'Товари' => Items(),
                 _ => Text('В процесі'),

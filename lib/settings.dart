@@ -66,3 +66,22 @@ List<String> largestCities = [
 String currentContent = 'Торгові точки та ПРРО';
 
 int selecteIndex = 1;
+List<DataRow> listOfTllers = [];
+List<List<String>> tellerGroup = [];
+List<String> tellerText = [
+  'Зеленський Володимир Олександрович',
+  '1',
+  'Зареєстрований',
+  'Inactive'
+];
+List<String> tellerTextN = [
+  'Зеленський Володимир Олександрович',
+  '1',
+  'Зареєстрований',
+  'Active'
+];
+var currentValue = 1;
+
+Color color333 = Colors.white;
+bool counter = false;
+bool rowTapSettings = false;

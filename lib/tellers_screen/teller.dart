@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:prro/main_screen/main_screen_widgets/find_in_dictionary.dart';
 import 'package:prro/main.dart';
 import 'package:prro/settings.dart';
-
-var currentValue = 1;
+import 'package:prro/tellers_screen/cells.dart';
+import 'package:prro/tellers_screen/fill_teller_rows.dart';
 
 class Teller extends StatefulWidget {
   const Teller({super.key});
@@ -14,23 +15,16 @@ class Teller extends StatefulWidget {
   State<Teller> createState() => TellerState();
 }
 
-List<DataRow> listOfTllers = [];
-List<List<String>> tellerGroup = [];
-List<String> tellerText = [
-  'Зеленський Володимир Олександрович',
-  '1',
-  'Зареєстрований',
-  'Inactive'
-];
-List<String> tellerTextN = [
-  'Зеленський Володимир Олександрович',
-  '1',
-  'Зареєстрований',
-  'Active'
-];
+void select_teller(List<String> extraText) {
+  counter = !counter;
+
+  rowTapSettings = !rowTapSettings;
+  color333 = (counter ? Colors.orange[100] : Colors.white)!;
+  // listOfTllers[id] = fillTellerRows(extraText: extraText);
+}
 
 class TellerState extends State<Teller> {
-  List<DataRow> newMethod1() {
+  List<DataRow> createTellerRows() {
     return List.generate(listOfTllers.length, (index) {
       return DataRow(
         color: WidgetStatePropertyAll(
@@ -47,61 +41,7 @@ class TellerState extends State<Teller> {
     });
   }
 
-  static Color color333 = Colors.white;
-
-  static int counter = 1;
-  static DataRow fillTellerRows({required List<String>? extraText}) {
-    List<DataCell> a = cells(extraText);
-
-    return DataRow(
-      color: WidgetStatePropertyAll(color333),
-      cells: a,
-      onSelectChanged: (value) {
-        newMethod(extraText!);
-        // setState(() {});
-      },
-    );
-  }
-
-  static List<DataCell> cells(List<String>? extraText) {
-    List<DataCell> a = [];
-
-    for (String i in extraText!) {
-      if (i != extraText[extraText.length - 1]) {
-        a.add(DataCell(Text(
-          // style: TextStyle(fontSize: 20),
-          textAlign: TextAlign.right,
-          i,
-        )));
-      } else {
-        a.add(
-          DataCell(
-            Container(
-              // decoration: BoxDecoration(border: Border.all()),
-              child: Align(
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.circle,
-                  color: i == 'Active' ? Colors.green : Colors.red,
-                  size: 15,
-                ),
-              ),
-            ),
-          ),
-        );
-      }
-    }
-    return a;
-  }
-
   int _selectedRowIndex = -1;
-  static void newMethod(List<String> extraText) {
-    counter++;
-
-    rowTapSettings = !rowTapSettings;
-    color333 = (counter % 2 == 0 ? Colors.orange[100] : Colors.white)!;
-    // listOfTllers[id] = fillTellerRows(extraText: extraText);
-  }
 
   editTeller(BuildContext context) {
     isActiveTeller =
@@ -389,8 +329,6 @@ class TellerState extends State<Teller> {
     // }
   }
 
-  static bool rowTapSettings = false;
-
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -481,7 +419,7 @@ class TellerState extends State<Teller> {
                   Row(
                     children: [
                       Visibility(
-                          visible: TellerState.rowTapSettings,
+                          visible: rowTapSettings,
                           child: Row(
                             children: [
                               Icon(
@@ -540,7 +478,7 @@ class TellerState extends State<Teller> {
                       horizontalMargin: 0,
                       showCheckboxColumn: false,
                       columns: tellerTop,
-                      rows: newMethod1(),
+                      rows: createTellerRows(),
                       // rows: listOfTllers,
                     ),
                   ),

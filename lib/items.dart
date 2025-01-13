@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prro/category_pick.dart';
+import 'package:prro/custom_card.dart';
 import 'package:prro/inside_category.dart';
 
 class Items extends StatefulWidget {
@@ -71,20 +72,28 @@ class _ItemsState extends State<Items> {
               SizedBox(
                 width: 20,
               ),
-              IconButton(
-                  constraints: BoxConstraints(),
-                  padding: EdgeInsets.all(4),
+              SizedBox(
+                width: 32,
+                height: 32,
+                child: PopupMenuButton(
+                  iconColor: Colors.grey,
+                  padding: EdgeInsets.zero,
                   style: ButtonStyle(
-                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4))),
-                    backgroundColor:
-                        WidgetStatePropertyAll(Colors.blueGrey[50]),
-                  ),
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.more_vert_outlined,
-                    color: Colors.grey,
-                  )),
+                      backgroundColor:
+                          WidgetStatePropertyAll(Colors.blueGrey[50]),
+                      padding: WidgetStatePropertyAll(EdgeInsets.zero),
+                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4)))),
+                  // (
+                  // borderRadius: BorderRadius.circular(2)))),
+                  offset: Offset(0, 42),
+                  menuPadding: EdgeInsets.all(0),
+
+                  itemBuilder: (context) {
+                    return [PopupMenuItem(height: 0, child: Text('123'))];
+                  },
+                ),
+              )
             ],
           ),
           SizedBox(
@@ -271,69 +280,3 @@ final List<String> cardTitles = [
   'Кавоварка',
   'Кавоварка2',
 ];
-
-class CustomCard extends StatelessWidget {
-  CustomCard({required this.cardTit, required this.cardInx});
-  final String cardTit;
-  final int cardInx;
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Colors.blueGrey[50],
-      elevation: 2.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: () {
-          Navigator.push(
-            context,
-            DialogRoute(
-              context: context,
-              builder: (context) => InsideCategory(
-                cardInx,
-                cardTit,
-              ),
-            ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.folder,
-                    color: Colors.grey.shade700,
-                    size: 40.0,
-                  ),
-                  const SizedBox(width: 12.0),
-                  Text(
-                    cardTit,
-                    style: const TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Icon(
-                    Icons.more_vert,
-                    color: Colors.grey.shade700,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
