@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:prro/inside_category.dart';
-import 'package:prro/items.dart';
+import 'package:prro/items_screen/inside_category_screen.dart';
+import 'package:prro/items_screen/items_screen.dart';
 
 class CategoryPick extends StatefulWidget {
   CategoryPick();

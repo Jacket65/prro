@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prro/inside_category.dart';
+import 'package:prro/items_screen/inside_category_screen.dart';
 
 class CustomCard extends StatelessWidget {
   CustomCard({required this.cardTit, required this.cardInx});

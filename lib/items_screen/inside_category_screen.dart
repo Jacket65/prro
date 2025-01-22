@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:prro/category_pick.dart';
-import 'package:prro/items.dart';
+import 'package:prro/items_screen/category_pick_screen.dart';
+import 'package:prro/items_screen/items_screen.dart';
 
 class InsideCategory extends StatefulWidget {
   InsideCategory(this.cardInx, this.cardTil, {super.key});
