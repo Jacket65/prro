@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:prro/category_pick.dart';
-import 'package:prro/custom_card.dart';
-import 'package:prro/inside_category.dart';
+import 'package:prro/items_screen/category_pick_screen.dart';
+import 'package:prro/items_screen/custom_card.dart';
+import 'package:prro/items_screen/inside_category_screen.dart';
 
 class Items extends StatefulWidget {
   Items({super.key});

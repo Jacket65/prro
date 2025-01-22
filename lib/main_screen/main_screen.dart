@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prro/main_screen/main_screen_widgets/fill_rows.dart';
 
-import 'package:prro/items.dart';
+import 'package:prro/items_screen/items_screen.dart';
 import 'package:prro/main.dart';
 import 'package:prro/main_screen/torgovi_tochki.dart';
 import 'package:prro/settings.dart';
