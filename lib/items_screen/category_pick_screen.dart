@@ -115,7 +115,11 @@ class _CategoryPickState extends State<CategoryPick> {
                         // width: 200,
                         // height: 40,
                         child: DropdownMenu(
+                          width: 140,
                           inputDecorationTheme: InputDecorationTheme(
+                            hintStyle: TextStyle(
+                                color: Colors.grey,
+                                fontWeight: FontWeight.w600),
                             isDense: true,
                             contentPadding:
                                 const EdgeInsets.symmetric(horizontal: 16),
@@ -125,7 +129,8 @@ class _CategoryPickState extends State<CategoryPick> {
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
-                          hintText: "Вибрати категорію",
+                          hintText: "Вибрати",
+
                           onSelected: (value) {},
                           initialSelection: 10,
                           // expandedInsets: EdgeInsets.zero,
@@ -134,8 +139,12 @@ class _CategoryPickState extends State<CategoryPick> {
                             Icons.arrow_drop_down,
                           ),
                           dropdownMenuEntries: [
-                            DropdownMenuEntry(value: 1, label: 'Старший касир'),
-                            DropdownMenuEntry(value: 2, label: 'Касир'),
+                            DropdownMenuEntry(value: 1, label: 'шт'),
+                            DropdownMenuEntry(value: 2, label: 'кг'),
+                            DropdownMenuEntry(value: 3, label: 'пач'),
+                            DropdownMenuEntry(value: 4, label: 'пар'),
+                            DropdownMenuEntry(value: 5, label: 'пляш'),
+                            DropdownMenuEntry(value: 6, label: 'порц'),
                           ],
                         ),
                       ),
