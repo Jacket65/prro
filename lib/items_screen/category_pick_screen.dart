@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prro/items_screen/inside_category_screen.dart';
 import 'package:prro/items_screen/items_screen.dart';
+import 'package:prro/settings.dart';
 
 class CategoryPick extends StatefulWidget {
   CategoryPick();
@@ -30,13 +31,13 @@ class _CategoryPickState extends State<CategoryPick> {
           children: [
             Text('Категорія'),
             SizedBox(
-              width: MediaQuery.of(context).size.width * 0.5,
+              width: 500,
               child: DropdownMenu(
                 hintText: "Вибрати категорію",
                 onSelected: (value) {
                   indxCategory = value!;
                 },
-                initialSelection: 0,
+                initialSelection: last_category,
                 expandedInsets: EdgeInsets.zero,
                 focusNode: FocusNode(canRequestFocus: false),
                 trailingIcon: Icon(

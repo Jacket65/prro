@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prro/items_screen/inside_category_screen.dart';
+import 'package:prro/settings.dart';
 
 class CustomCard extends StatelessWidget {
   CustomCard({required this.cardTit, required this.cardInx});
@@ -16,6 +17,7 @@ class CustomCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () {
+          last_category = cardInx;
           Navigator.push(
             context,
             DialogRoute(

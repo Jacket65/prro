@@ -134,41 +134,44 @@ class _InsideCategoryState extends State<InsideCategory> {
                         minWidth: MediaQuery.of(context).size.width -
                             ((paddingWidth * 2)),
                       ),
-                      child: DataTable(
-                        // dataRowColor: WidgetStatePropertyAll(Colors.amber),
-                        headingRowColor:
-                            WidgetStatePropertyAll(Colors.blueGrey[100]),
-                        dataRowMaxHeight: double.infinity,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15)),
-                        showCheckboxColumn: true,
-                        showBottomBorder: false,
-                        columns: List.generate(
-                          itemsBar.length,
-                          (index) =>
-                              DataColumn(label: Text('${itemsBar[index]}')),
-                        ),
-                        rows: categoryItems[widget.cardInx].isEmpty
-                            ? []
-                            : List<DataRow>.generate(
-                                categoryItems[widget.cardInx].length,
-                                (int rowIndex) => DataRow(
-                                  // color: WidgetStatePropertyAll(Colors.green),
-                                  cells: List.generate(
-                                    6,
-                                    // categoryItems[widget.cardInx][index].length,
-                                    (celIndex) => DataCell(Text(
-                                        '${categoryItems[widget.cardInx][rowIndex][celIndex]}')),
+                      child: Builder(builder: (context) {
+                        return DataTable(
+                          // dataRowColor: WidgetStatePropertyAll(Colors.amber),
+                          headingRowColor:
+                              WidgetStatePropertyAll(Colors.blueGrey[100]),
+                          dataRowMaxHeight: double.infinity,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15)),
+                          showCheckboxColumn: true,
+                          showBottomBorder: false,
+                          columns: List.generate(
+                            itemsBar.length,
+                            (index) =>
+                                DataColumn(label: Text('${itemsBar[index]}')),
+                          ),
+                          rows: widget.cardInx > categoryItems[0].length
+                              //  categoryItems[widget.cardInx].isEmpty
+                              ? []
+                              : List<DataRow>.generate(
+                                  categoryItems[widget.cardInx].length,
+                                  (int rowIndex) => DataRow(
+                                    // color: WidgetStatePropertyAll(Colors.green),
+                                    cells: List.generate(
+                                      6,
+                                      // categoryItems[widget.cardInx][index].length,
+                                      (celIndex) => DataCell(Text(
+                                          '${categoryItems[widget.cardInx][rowIndex][celIndex]}')),
+                                    ),
+                                    selected: selected[rowIndex],
+                                    onSelectChanged: (bool? value) {
+                                      setState(() {
+                                        selected[rowIndex] = value!;
+                                      });
+                                    },
                                   ),
-                                  selected: selected[rowIndex],
-                                  onSelectChanged: (bool? value) {
-                                    setState(() {
-                                      selected[rowIndex] = value!;
-                                    });
-                                  },
                                 ),
-                              ),
-                      ),
+                        );
+                      }),
                     ),
                   ),
                 ),

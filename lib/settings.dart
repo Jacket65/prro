@@ -85,3 +85,5 @@ var currentValue = 1;
 Color color333 = Colors.white;
 bool counter = false;
 bool rowTapSettings = false;
+
+int last_category = 0;
