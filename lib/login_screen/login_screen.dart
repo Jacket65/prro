@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
@@ -118,7 +118,8 @@ Future<String?> authenticateUser(String phone, String password) async {
       'phone_number': phone,
       'password': password,
     });
-    print(response.statusCode);
+    // print(jwtToken);
+    // print(response.statusCode);
     if (response.statusCode == 200) {
       jwtToken = response.headers['authorization']![0].split(' ')[1];
       return jwtToken;
@@ -167,14 +168,20 @@ String filename = '';
 Future<String?> checkExport() async {
   final dio = Dio();
   // print(jwtToken);
+  print('go export');
+
   try {
     dio.options.headers['authorization'] = 'Bearer $jwtToken';
-    final response = await dio
-        .get('http://localhost:8080/admin/retail_outlet/1/products/export');
+    final response = await http.get(
+        headers: {'authorization': 'Bearer $jwtToken'},
+        Uri.parse(
+            'http://localhost:8080/admin/retail_outlet/1/products/export'));
     print(response.statusCode);
     if (response.statusCode == 200) {
-      filename = response.headers['content-disposition']![0].split('"')[1];
-      downloadFile(filename, response.data);
+      filename = response.headers['content-disposition']!.split('"')[1];
+      print(filename);
+      // print(response.bodyBytes);
+      downloadFile(filename, response.bodyBytes);
     }
   } catch (e) {
     print('Error: $e');
@@ -195,11 +202,11 @@ Future<String?> checkExport() async {
 //   print('Файл завантажено: $filePath');
 // }
 
-Future<void> downloadFile(String filename, List<int> response) async {
+Future<void> downloadFile(String filename, Uint8List response) async {
   Directory directory = await getApplicationDocumentsDirectory();
-  String path = directory.path;
-  File file = File('$path/$path');
+  // String path = directory.path;
+  File file = File('${filename}');
   await file.writeAsBytes(response);
 
-  print('Файл завантажено: $path');
+  print('Файл завантажено в папку проекту: ${filename}');
 }

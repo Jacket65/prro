@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prro/login_screen/login_screen.dart';
 import 'package:prro/main_screen/main_screen_widgets/fill_rows.dart';
 
 import 'package:prro/items_screen/items_screen.dart';
@@ -96,6 +97,26 @@ class MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Text('Програмний ПРРО "Каса"'),
+        actions: [
+          TextButton(
+            style: ButtonStyle(
+                shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5))),
+                backgroundColor: WidgetStatePropertyAll(Colors.blueAccent)),
+            onPressed: () {
+              Navigator.pushReplacement(
+                  context,
+                  DialogRoute(
+                    context: context,
+                    builder: (context) => LoginScreen(),
+                  ));
+            },
+            child: Text(
+              'Зберегти',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Container(
