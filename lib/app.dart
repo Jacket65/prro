@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:prro/main_screen/main_screen.dart';
-
-void main() {
-  runApp(const MyApp());
-}
+import 'package:prro/features/auth/auth.dart';
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        colorScheme: const ColorScheme.light(),
+        colorScheme: ColorScheme.light(),
         // useMaterial3: true,
         primarySwatch: Colors.blue,
         textButtonTheme: TextButtonThemeData(
@@ -22,7 +16,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: MainScreen(),
+      home: LoginScreen(),
     );
   }
 }
