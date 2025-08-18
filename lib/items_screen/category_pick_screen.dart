@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:prro/items_screen/inside_category_screen.dart';
 import 'package:prro/items_screen/items_screen.dart';
-import 'package:prro/settings.dart';
+import 'package:prro/core/constants/settings.dart';
 
 class CategoryPick extends StatefulWidget {
-  CategoryPick();
+  const CategoryPick({super.key});
 
   @override
   State<CategoryPick> createState() => _CategoryPickState();
@@ -19,10 +19,7 @@ class _CategoryPickState extends State<CategoryPick> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text('Новий товар'),
-      ),
+      appBar: AppBar(backgroundColor: Colors.white, title: Text('Новий товар')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -37,24 +34,19 @@ class _CategoryPickState extends State<CategoryPick> {
                 onSelected: (value) {
                   indxCategory = value!;
                 },
-                initialSelection: last_category,
+                initialSelection: lastCategory,
                 expandedInsets: EdgeInsets.zero,
                 focusNode: FocusNode(canRequestFocus: false),
-                trailingIcon: Icon(
-                  Icons.arrow_drop_down,
-                ),
-                dropdownMenuEntries: List.generate(
-                  cardTitles.length,
-                  (index) {
-                    return DropdownMenuEntry(
-                        value: index, label: cardTitles[index]);
-                  },
-                ),
+                trailingIcon: Icon(Icons.arrow_drop_down),
+                dropdownMenuEntries: List.generate(cardTitles.length, (index) {
+                  return DropdownMenuEntry(
+                    value: index,
+                    label: cardTitles[index],
+                  );
+                }),
               ),
             ),
-            SizedBox(
-              height: 20,
-            ),
+            SizedBox(height: 20),
             Text('Податкова ставка'),
             Row(
               children: [
@@ -65,7 +57,7 @@ class _CategoryPickState extends State<CategoryPick> {
                     setState(() {});
                   },
                 ),
-                Text('A - БЕЗ ПДВ 0%')
+                Text('A - БЕЗ ПДВ 0%'),
               ],
             ),
             Row(
@@ -95,7 +87,9 @@ class _CategoryPickState extends State<CategoryPick> {
                             ),
                             border: OutlineInputBorder(
                               borderSide: const BorderSide(
-                                  color: Colors.white, width: 2.0),
+                                color: Colors.white,
+                                width: 2.0,
+                              ),
                               borderRadius: BorderRadius.circular(5.0),
                             ),
                           ),
@@ -104,9 +98,7 @@ class _CategoryPickState extends State<CategoryPick> {
                     ],
                   ),
                 ),
-                SizedBox(
-                  width: 20,
-                ),
+                SizedBox(width: 20),
                 Flexible(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,13 +111,16 @@ class _CategoryPickState extends State<CategoryPick> {
                           width: 140,
                           inputDecorationTheme: InputDecorationTheme(
                             hintStyle: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.w600),
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w600,
+                            ),
                             isDense: true,
-                            contentPadding:
-                                const EdgeInsets.symmetric(horizontal: 16),
-                            constraints:
-                                BoxConstraints.tight(const Size.fromHeight(36)),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                            ),
+                            constraints: BoxConstraints.tight(
+                              const Size.fromHeight(36),
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(4),
                             ),
@@ -136,9 +131,7 @@ class _CategoryPickState extends State<CategoryPick> {
                           initialSelection: 10,
                           // expandedInsets: EdgeInsets.zero,
                           focusNode: FocusNode(canRequestFocus: false),
-                          trailingIcon: Icon(
-                            Icons.arrow_drop_down,
-                          ),
+                          trailingIcon: Icon(Icons.arrow_drop_down),
                           dropdownMenuEntries: [
                             DropdownMenuEntry(value: 1, label: 'шт'),
                             DropdownMenuEntry(value: 2, label: 'кг'),
@@ -152,9 +145,7 @@ class _CategoryPickState extends State<CategoryPick> {
                     ],
                   ),
                 ),
-                SizedBox(
-                  width: 20,
-                ),
+                SizedBox(width: 20),
                 Flexible(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,7 +168,9 @@ class _CategoryPickState extends State<CategoryPick> {
                             ),
                             border: OutlineInputBorder(
                               borderSide: const BorderSide(
-                                  color: Colors.white, width: 2.0),
+                                color: Colors.white,
+                                width: 2.0,
+                              ),
                               borderRadius: BorderRadius.circular(5.0),
                             ),
                           ),
@@ -197,7 +190,7 @@ class _CategoryPickState extends State<CategoryPick> {
                     setState(() {});
                   },
                 ),
-                Text('Зміна ціни')
+                Text('Зміна ціни'),
               ],
             ),
             Row(
@@ -209,7 +202,7 @@ class _CategoryPickState extends State<CategoryPick> {
                     setState(() {});
                   },
                 ),
-                Text('Зміна ваги')
+                Text('Зміна ваги'),
               ],
             ),
             Row(
@@ -236,7 +229,9 @@ class _CategoryPickState extends State<CategoryPick> {
                             ),
                             border: OutlineInputBorder(
                               borderSide: const BorderSide(
-                                  color: Colors.white, width: 2.0),
+                                color: Colors.white,
+                                width: 2.0,
+                              ),
                               borderRadius: BorderRadius.circular(5.0),
                             ),
                           ),
@@ -245,9 +240,7 @@ class _CategoryPickState extends State<CategoryPick> {
                     ],
                   ),
                 ),
-                SizedBox(
-                  width: 20,
-                ),
+                SizedBox(width: 20),
                 Flexible(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,7 +263,9 @@ class _CategoryPickState extends State<CategoryPick> {
                             ),
                             border: OutlineInputBorder(
                               borderSide: const BorderSide(
-                                  color: Colors.white, width: 2.0),
+                                color: Colors.white,
+                                width: 2.0,
+                              ),
                               borderRadius: BorderRadius.circular(5.0),
                             ),
                           ),
@@ -279,9 +274,7 @@ class _CategoryPickState extends State<CategoryPick> {
                     ],
                   ),
                 ),
-                SizedBox(
-                  width: 20,
-                ),
+                SizedBox(width: 20),
                 Flexible(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,7 +297,9 @@ class _CategoryPickState extends State<CategoryPick> {
                             ),
                             border: OutlineInputBorder(
                               borderSide: const BorderSide(
-                                  color: Colors.white, width: 2.0),
+                                color: Colors.white,
+                                width: 2.0,
+                              ),
                               borderRadius: BorderRadius.circular(5.0),
                             ),
                           ),
@@ -315,21 +310,29 @@ class _CategoryPickState extends State<CategoryPick> {
                 ),
               ],
             ),
-            SizedBox(
-              height: 20,
-            ),
+            SizedBox(height: 20),
             Wrap(
               // mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 TextButton(
                   style: ButtonStyle(
-                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5))),
-                      backgroundColor: WidgetStatePropertyAll(Colors.blue)),
+                    shape: WidgetStatePropertyAll(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    backgroundColor: WidgetStatePropertyAll(Colors.blue),
+                  ),
                   onPressed: () {
                     selected.add(false);
-                    categoryItems[indxCategory]
-                        .add(['${itemName}', 'грн', 'kod', '', '', '']);
+                    categoryItems[indxCategory].add([
+                      itemName,
+                      'грн',
+                      'kod',
+                      '',
+                      '',
+                      '',
+                    ]);
 
                     Navigator.of(context).pop();
                     setState(() {});
@@ -339,9 +342,7 @@ class _CategoryPickState extends State<CategoryPick> {
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
-                SizedBox(
-                  width: 20,
-                ),
+                SizedBox(width: 20),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();

@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:ui';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:prro/main_screen/main_screen_widgets/find_in_dictionary.dart';
-import 'package:prro/main.dart';
-import 'package:prro/settings.dart';
+import 'package:prro/core/constants/settings.dart';
 import 'package:prro/tellers_screen/cells.dart';
 import 'package:prro/tellers_screen/fill_teller_rows.dart';
 

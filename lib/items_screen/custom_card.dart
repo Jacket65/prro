@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:prro/items_screen/inside_category_screen.dart';
-import 'package:prro/settings.dart';
+import 'package:prro/core/constants/settings.dart';
 
 class CustomCard extends StatelessWidget {
-  CustomCard({required this.cardTit, required this.cardInx});
+  const CustomCard({super.key, required this.cardTit, required this.cardInx});
   final String cardTit;
   final int cardInx;
   @override
@@ -17,7 +17,7 @@ class CustomCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () {
-          last_category = cardInx;
+          lastCategory = cardInx;
           Navigator.push(
             context,
             DialogRoute(

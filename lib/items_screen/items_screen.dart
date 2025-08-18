@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:prro/items_screen/category_pick_screen.dart';
 import 'package:prro/items_screen/custom_card.dart';
-import 'package:prro/items_screen/inside_category_screen.dart';
-import 'package:prro/settings.dart';
 
 class Items extends StatefulWidget {
-  Items({super.key});
+  const Items({super.key});
 
   @override
   State<Items> createState() => _ItemsState();

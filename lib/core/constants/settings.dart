@@ -34,7 +34,7 @@ List<DataColumn> novaTThead(
       // DataColumn(label: Flexible(child: FittedBox(child: Text(i)))),
     );
   }
-  if (showStatus)
+  if (showStatus) {
     list.add(
       DataColumn(
           label: Expanded(
@@ -48,6 +48,7 @@ List<DataColumn> novaTThead(
       ))),
       // DataColumn(label: Flexible(child: FittedBox(child: Text(i)))),
     );
+  }
   return list;
 }
 
@@ -86,4 +87,4 @@ Color color333 = Colors.white;
 bool counter = false;
 bool rowTapSettings = false;
 
-int last_category = 0;
+int lastCategory = 0;

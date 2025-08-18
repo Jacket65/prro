@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prro/settings.dart';
+import 'package:prro/core/constants/settings.dart';
 
 class ttochki extends StatelessWidget {
   const ttochki({

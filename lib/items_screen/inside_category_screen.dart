@@ -4,8 +4,8 @@ import 'package:prro/items_screen/items_screen.dart';
 
 class InsideCategory extends StatefulWidget {
   InsideCategory(this.cardInx, this.cardTil, {super.key});
-  int cardInx;
-  String cardTil;
+  final int cardInx;
+  final String cardTil;
   @override
   State<InsideCategory> createState() => _InsideCategoryState();
 }

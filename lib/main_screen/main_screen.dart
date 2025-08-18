@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:prro/login_screen/login_screen.dart';
-import 'package:prro/main_screen/main_screen_widgets/fill_rows.dart';
 
 import 'package:prro/items_screen/items_screen.dart';
-import 'package:prro/main.dart';
 import 'package:prro/main_screen/torgovi_tochki.dart';
-import 'package:prro/settings.dart';
+import 'package:prro/core/constants/settings.dart';
 import 'package:prro/main_screen/main_screen_widgets/show_dialog_func1.dart';
 import 'package:prro/tellers_screen/fill_teller_rows.dart';
 import 'package:prro/tellers_screen/teller.dart';
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
   MainScreenState createState() => MainScreenState();
 }

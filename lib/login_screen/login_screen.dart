@@ -4,13 +4,12 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:prro/main_screen/main_screen.dart';
 
 class LoginScreen extends StatelessWidget {
-  LoginScreen({super.key});
-  String phone_numb = '+380123456789';
-  String password = '123456';
+  const LoginScreen({super.key});
+  final String phoneNumb = '+380123456789';
+  final String password = '123456';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,7 +22,7 @@ class LoginScreen extends StatelessWidget {
             SizedBox(
               width: 300,
               child: TextField(
-                onChanged: (value) => phone_numb,
+                onChanged: (value) => phoneNumb,
                 cursorWidth: 1,
                 cursorColor: Colors.grey,
                 decoration: InputDecoration(
@@ -95,7 +94,7 @@ class LoginScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(5)),
                     backgroundColor: Colors.blueAccent),
                 onPressed: () {
-                  authenticateUser(phone_numb, password);
+                  authenticateUser(phoneNumb, password);
                   // checkMeasureunits();
                   // checkRetail_outlets();
                   checkExport();
@@ -203,7 +202,7 @@ Future<String?> checkExport() async {
 // }
 
 Future<void> downloadFile(String filename, Uint8List response) async {
-  Directory directory = await getApplicationDocumentsDirectory();
+  //  Directory directory = await getApplicationDocumentsDirectory();
   // String path = directory.path;
   File file = File('${filename}');
   await file.writeAsBytes(response);

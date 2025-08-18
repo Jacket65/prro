@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:prro/main_screen/main_screen_widgets/fill_rows.dart';
 import 'package:prro/main_screen/main_screen_widgets/find_in_dictionary.dart';
-import 'package:prro/settings.dart';
+import 'package:prro/core/constants/settings.dart';
 
 AlertDialog ShowDialogFunc1(
     String title, BuildContext context, void Function() changeState) {

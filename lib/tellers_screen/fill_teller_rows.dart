@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prro/settings.dart';
+import 'package:prro/core/constants/settings.dart';
 import 'package:prro/tellers_screen/cells.dart';
 import 'package:prro/tellers_screen/teller.dart';
 
