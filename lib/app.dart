@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/features/auth/auth.dart';
 
 import 'package:prro/core/theme/theme.dart';
+import 'package:prro/features/auth/bloc/login_bloc.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Prro beta",
-      theme: lightTheme,
-      debugShowCheckedModeBanner: false,
-      home: LoginScreen(),
+    return MultiBlocProvider(
+      providers: [BlocProvider(create: (_) => LoginBloc())],
+      child: MaterialApp(
+        title: "Prro beta",
+        theme: lightTheme,
+        debugShowCheckedModeBanner: false,
+        home: LoginScreen(),
+      ),
     );
   }
 }
