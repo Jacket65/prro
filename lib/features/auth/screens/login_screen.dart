@@ -12,16 +12,31 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // var theme = Theme.of(context);
     return Scaffold(
-      body: BlocBuilder<LoginBloc, LoginState>(
+      body: BlocConsumer<LoginBloc, LoginState>(
+        listener: (context, state) {
+          if (state is LoginSuccess) {
+            _routePage(context, SellerScreen());
+          }
+        },
+
         builder: (context, state) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                switch (state) {
-                  LoginSuccess() => Text("Logined as ${state.username}"),
-                  LoginFailure() => Text(state.error),
-                  _ => Text("Старт"),
+                ...switch (state) {
+                  LoginSuccess() => [Text("Logined as ${state.username}")],
+                  LoginFailure() => [
+                    Text(
+                      state.error,
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                  _ => [Text("Старт")],
                 },
                 SizedBox(
                   width: 300,
@@ -54,14 +69,15 @@ class LoginScreen extends StatelessWidget {
                     usernameController.clear();
                     passwordController.clear();
                   },
-                  child: Text("Login"),
+                  child: Text("Login as seller"),
                 ),
                 SizedBox(height: 18),
-                ElevatedButton(
-                  onPressed: () => _routePage(context, SellerScreen()),
-                  child: Text("Продавець"),
-                ),
-                SizedBox(height: 18),
+                // ElevatedButton(
+                //   onPressed: () {},
+                //   // onPressed: () => _routePage(context, SellerScreen()),
+                //   child: Text("Продавець"),
+                // ),
+                // SizedBox(height: 18),
                 ElevatedButton(
                   onPressed: () => _routePage(context, MainScreen()),
                   child: Text("Адміністратор"),
