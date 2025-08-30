@@ -638,25 +638,26 @@ class _SellerScreenState extends State<SellerScreen> {
                                     itemCount: item.items.length,
                                   ),
                                 ),
+                              } else if (item is Product) ...{
+                                Text("${item.name}"),
+
+                                //TODO: Натиснення на продукт
+                                Expanded(
+                                  child: GridView.builder(
+                                    gridDelegate:
+                                        SliverGridDelegateWithMaxCrossAxisExtent(
+                                          maxCrossAxisExtent: 250,
+                                        ),
+                                    itemBuilder: (context, index) {
+                                      return Card(
+                                        color: Colors.white,
+                                        child: ShowItem(item),
+                                      );
+                                    },
+                                    itemCount: 1,
+                                  ),
+                                ),
                               },
-                              // else if (item is Product) ...{
-                              //   //TODO: Натиснення на продукт
-                              //   Expanded(
-                              //     child: GridView.builder(
-                              //       gridDelegate:
-                              //           SliverGridDelegateWithMaxCrossAxisExtent(
-                              //             maxCrossAxisExtent: 250,
-                              //           ),
-                              //       itemBuilder: (context, index) {
-                              //         return Card(
-                              //           color: Colors.white,
-                              //           child: ShowItem(item),
-                              //         );
-                              //       },
-                              //       itemCount: listOfCategories.length,
-                              //     ),
-                              //   ),
-                              // },
                             ],
                           ),
                         ),
@@ -691,7 +692,7 @@ class ShowItem<T extends Item> extends StatelessWidget {
         behavior: HitTestBehavior.translucent,
         onTap: () {
           log('product');
-          // context.read<ItemsTilesBloc>().add(SelectedItemsTiles(product));
+          context.read<ItemsTilesBloc>().add(SelectedItemsTiles(product));
           //TODO: Логіка для переходу на деталі товару
         },
         child: Column(
