@@ -1,16 +1,21 @@
-abstract class Item {}
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:equatable/equatable.dart';
+
+abstract class Item extends Equatable {}
 
 final class Product extends Item {
   final String id;
   final String name;
   final double price;
-  final String? imageUrl;
+  final String imageUrl;
+  final int quantity;
 
   Product({
     required this.id,
+    this.quantity = 0,
     required this.name,
     required this.price,
-    this.imageUrl,
+    required this.imageUrl,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -19,8 +24,28 @@ final class Product extends Item {
       name: json['name'],
       price: (json['price'] ?? 0).toDouble(),
       imageUrl: json['image_url'],
+      quantity: (json['quantity'] ?? 0),
     );
   }
+
+  Product copyWith({
+    String? id,
+    String? name,
+    double? price,
+    String? imageUrl,
+    int? quantity,
+  }) {
+    return Product(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      price: price ?? this.price,
+      imageUrl: imageUrl ?? this.imageUrl,
+      quantity: quantity ?? this.quantity,
+    );
+  }
+
+  @override
+  List<Object> get props => [id, name, price, imageUrl, quantity];
 }
 
 final class Category extends Item {
@@ -34,10 +59,12 @@ final class Category extends Item {
     return Category(
       id: json['id'].toString(),
       name: json['name'],
-      items:
-          (json['items'] as List<dynamic>? ?? [])
-              .map((item) => Category.fromJson(item))
-              .toList(),
+      items: (json['items'] as List<dynamic>? ?? [])
+          .map((item) => Category.fromJson(item))
+          .toList(),
     );
   }
+
+  @override
+  List<Object?> get props => [id, name, items];
 }

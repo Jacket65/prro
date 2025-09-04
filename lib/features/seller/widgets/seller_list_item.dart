@@ -1,75 +1,127 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:prro/features/seller/bloc/orders_list_bloc.dart';
 
 class ListItem extends StatelessWidget {
-  const ListItem({super.key});
+  final String id;
+  final String name;
+  final double price;
+  final String imageUrl;
+  final int quantity;
+
+  const ListItem({
+    super.key,
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.imageUrl,
+    required this.quantity,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 80,
-      decoration: BoxDecoration(
-        // border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
+    return BlocBuilder<OrdersListBloc, OrdersListState>(
+      builder: (context, state) {
+        if (state is! OrdersListUpdated) {
+          return CircularProgressIndicator();
+        }
+        return Container(
+          height: 80,
+          decoration: BoxDecoration(
+            // border: Border.all(color: Colors.grey.shade300),
             borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              "https://img-1.skyservice.pro/uploads/images/2c9ae82f-1b4e-4e17-861b-3a22e30c90c4/8HibneQ3Q2SSBis6.png",
-              width: 120,
-              height: 80,
-              fit: BoxFit.cover,
-            ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'Київський торт',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4),
-                Text('180.00₴', style: TextStyle(color: Colors.grey)),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Row(
             children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 10.0),
-                child: const Text(
-                  '180.00₴',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  imageUrl,
+                  width: 120,
+                  height: 80,
+                  fit: BoxFit.cover,
                 ),
               ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      price.toStringAsFixed(2),
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.remove_circle_outline),
-                    onPressed: () {},
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: Text(
+                      price.toStringAsFixed(2),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: 4),
-                  const Text('1'),
-                  const SizedBox(width: 4),
-                  IconButton(
-                    padding: EdgeInsets.zero,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove_circle_outline),
+                        onPressed: () {
+                          final productId = state.products.indexWhere(
+                            (element) => element.id == id,
+                          );
+                          context.read<OrdersListBloc>().add(
+                            RemoveProduct(state.products[productId]),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 4),
+                      Text("$quantity"),
+                      const SizedBox(width: 4),
+                      IconButton(
+                        padding: EdgeInsets.zero,
 
-                    icon: const Icon(Icons.add_circle_outline),
-                    onPressed: () {},
+                        icon: const Icon(Icons.add_circle_outline),
+                        onPressed: () {
+                          final productId = state.products.indexWhere((
+                            element,
+                          ) {
+                            log(element.name);
+                            return element.id == id;
+                          });
+                          context.read<OrdersListBloc>().add(
+                            AddProduct(state.products[productId]),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

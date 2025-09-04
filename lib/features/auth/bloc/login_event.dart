@@ -16,3 +16,7 @@ class LoginSubmitted extends LoginEvent {
   @override
   List<Object> get props => [username, password];
 }
+
+class LoginGetInitial extends LoginEvent {
+  const LoginGetInitial();
+}
