@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/features/seller/bloc/orders_list_bloc.dart';
+import 'package:prro/features/seller/bloc/orders_list/orders_list_bloc.dart';
 import 'package:prro/features/seller/widgets/seller_list_item.dart';
+import 'package:prro/features/user/bloc/user_bloc.dart';
 
-class CheckMainInfo extends StatelessWidget {
+class CheckMainInfo extends StatefulWidget {
   const CheckMainInfo({super.key});
 
+  @override
+  State<CheckMainInfo> createState() => _CheckMainInfoState();
+}
+
+class _CheckMainInfoState extends State<CheckMainInfo> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -15,9 +21,24 @@ class CheckMainInfo extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Канал замовлення:"),
-              Text("Замовлення №:"),
-              Text("Працівник: "),
+              BlocBuilder<UserBloc, UserState>(
+                builder: (context, state) {
+                  switch (state) {
+                    case UserLoaded(:final username):
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [Text("Працівник: $username")],
+                      );
+                    case UserLoading():
+                      return const CircularProgressIndicator();
+                    case UserError():
+                      return const Text("Працівник: не вказано");
+                    default:
+                      return const Text("Працівник: ...");
+                  }
+                },
+              ),
+              Text("Замовлення №: WIP"),
               SizedBox(height: 15),
               Divider(),
               SizedBox(height: 8),
@@ -42,13 +63,14 @@ class CheckMainInfo extends StatelessWidget {
                     separatorBuilder: (_, _) => Divider(),
                   ),
                 );
+              } else {
+                return Center(
+                  child: Text(
+                    "Місце для замовлень",
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                );
               }
-              return Center(
-                child: Text(
-                  "Місце для замовлень",
-                  style: theme.textTheme.bodyLarge,
-                ),
-              );
             },
           ),
         ],

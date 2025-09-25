@@ -24,3 +24,10 @@ final class RemoveProduct extends OrdersListEvent {
   @override
   List<Object> get props => [product];
 }
+
+final class ClearProducts extends OrdersListEvent {
+  const ClearProducts();
+
+  @override
+  List<Object> get props => [];
+}

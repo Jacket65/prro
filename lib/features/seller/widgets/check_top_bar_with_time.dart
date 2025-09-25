@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class CheckTopBarWithTime extends StatelessWidget {
-  const CheckTopBarWithTime({super.key});
+class CheckTopBar extends StatelessWidget {
+  const CheckTopBar({super.key});
 
   @override
   Widget build(BuildContext context) {

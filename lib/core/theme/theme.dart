@@ -7,6 +7,8 @@ final lightTheme = ThemeData(
     brightness: Brightness.light,
   ),
   useMaterial3: true,
+  scaffoldBackgroundColor: Colors.grey[300],
+  appBarTheme: AppBarTheme(backgroundColor: Colors.grey[800]),
   textButtonTheme: TextButtonThemeData(
     style: TextButton.styleFrom(foregroundColor: Colors.black),
   ),

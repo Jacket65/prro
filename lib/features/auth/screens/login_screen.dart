@@ -2,98 +2,142 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/seller/seller.dart';
-import 'package:prro/main_screen/main_screen.dart';
+import 'package:prro/features/user/bloc/user_bloc.dart';
+// import 'package:prro/main_screen/main_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
-  final usernameController = TextEditingController();
-  final passwordController = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    // var theme = Theme.of(context);
     return Scaffold(
       body: BlocConsumer<LoginBloc, LoginState>(
         listener: (context, state) {
-          if (state is LoginSuccess) {
-            _routePage(context, SellerScreen());
+          switch (state) {
+            case LoginSuccess():
+              _showSnackBar(context, "Вітаємо вас на роботі!");
+              context.read<UserBloc>().add(LoadUserEvent());
+              _navigateTo(context, const SellerScreen());
+            case LoginFailure():
+              _showSnackBar(context, "Сталася помилка ${state.error}");
+            case LoginLoading():
+            case LoginInitial():
           }
         },
-
         builder: (context, state) {
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ...switch (state) {
-                  LoginSuccess() => [Text("Logined as ${state.username}")],
-                  LoginFailure() => [
-                    Text(
-                      state.error,
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildStateMessage(state),
+                    const SizedBox(height: 24),
+                    _buildTextField(
+                      controller: _usernameController,
+                      label: 'Username',
+                      obscureText: false,
                     ),
-                  ],
-                  _ => [Text("Старт")],
-                },
-                SizedBox(
-                  width: 300,
-                  child: TextField(
-                    textInputAction: TextInputAction.next,
-                    controller: usernameController,
-                    decoration: InputDecoration(labelText: 'Username'),
-                  ),
-                ),
-                SizedBox(height: 18),
-                SizedBox(
-                  width: 300,
-                  child: TextField(
-                    textInputAction: TextInputAction.next,
-                    controller: passwordController,
-                    obscureText: true,
+                    const SizedBox(height: 18),
+                    _buildTextField(
+                      controller: _passwordController,
+                      label: 'Password',
+                      obscureText: true,
+                    ),
+                    const SizedBox(height: 18),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          context.read<LoginBloc>().add(
+                            LoginSubmitted(
+                              username: _usernameController.text,
+                              password: _passwordController.text,
+                            ),
+                          );
+                          _clearTextFields();
+                        }
+                      },
 
-                    decoration: InputDecoration(labelText: 'Password'),
-                  ),
+                      child: const Text("Enter as seller"),
+                    ),
+                    if (state is LoginLoading) ...[
+                      const SizedBox(height: 18),
+                      const Center(child: CircularProgressIndicator()),
+                    ],
+                    // const SizedBox(height: 18),
+                    // ElevatedButton(
+                    //   onPressed: () => _navigateTo(context, const MainScreen()),
+                    //   child: const Text("Адміністратор"),
+                    // ),
+                  ],
                 ),
-                SizedBox(height: 18),
-                ElevatedButton(
-                  onPressed: () {
-                    context.read<LoginBloc>().add(
-                      LoginSubmitted(
-                        username: usernameController.text,
-                        password: passwordController.text,
-                      ),
-                    );
-                    usernameController.clear();
-                    passwordController.clear();
-                  },
-                  child: Text("Login as seller"),
-                ),
-                SizedBox(height: 18),
-                // ElevatedButton(
-                //   onPressed: () {},
-                //   // onPressed: () => _routePage(context, SellerScreen()),
-                //   child: Text("Продавець"),
-                // ),
-                // SizedBox(height: 18),
-                ElevatedButton(
-                  onPressed: () => _routePage(context, MainScreen()),
-                  child: Text("Адміністратор"),
-                ),
-              ],
+              ),
             ),
           );
         },
       ),
     );
   }
-}
 
-void _routePage(BuildContext context, Widget route) {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => route),
-  );
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message, textAlign: TextAlign.center)),
+    );
+  }
+
+  void _clearTextFields() {
+    _usernameController.clear();
+    _passwordController.clear();
+  }
+
+  Widget _buildStateMessage(LoginState state) {
+    return switch (state) {
+      LoginSuccess() => Text("Logged in as ${state.username}"),
+      LoginFailure() => Text(
+        state.error,
+        style: const TextStyle(
+          color: Colors.red,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      LoginLoading() => const Text("Logging in..."),
+      _ => const Text("Введіть дані для входу"),
+    };
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required bool obscureText,
+  }) {
+    return SizedBox(
+      width: 300,
+      child: TextFormField(
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter some text';
+          }
+          return null;
+        },
+        controller: controller,
+        obscureText: obscureText,
+        textInputAction: TextInputAction.next,
+        decoration: InputDecoration(labelText: label),
+      ),
+    );
+  }
+
+  void _navigateTo(BuildContext context, Widget route) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => route),
+    );
+  }
 }

@@ -1,9 +1,10 @@
 import 'package:prro/data/models/seller_item.dart';
 
-final List<Category> listOfCategories = [
+const List<Item> listOfCategories = [
   Category(
     id: '1',
     name: 'Електроніка',
+
     items: [
       Category(
         id: '1_1',

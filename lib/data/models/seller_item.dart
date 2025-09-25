@@ -1,7 +1,8 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:equatable/equatable.dart';
 
-abstract class Item extends Equatable {}
+abstract class Item extends Equatable {
+  const Item();
+}
 
 final class Product extends Item {
   final String id;
@@ -10,9 +11,9 @@ final class Product extends Item {
   final String imageUrl;
   final int quantity;
 
-  Product({
+  const Product({
     required this.id,
-    this.quantity = 0,
+    this.quantity = 1,
     required this.name,
     required this.price,
     required this.imageUrl,
@@ -53,15 +54,27 @@ final class Category extends Item {
   final String name;
   final List<Item> items;
 
-  Category({required this.id, required this.name, this.items = const []});
+  const Category({required this.id, required this.name, this.items = const []});
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
       id: json['id'].toString(),
       name: json['name'],
-      items: (json['items'] as List<dynamic>? ?? [])
-          .map((item) => Category.fromJson(item))
-          .toList(),
+      items: (json['items'] as List<dynamic>? ?? []).map<Item>((itemJson) {
+        if (itemJson.containsKey('price')) {
+          return Product.fromJson(itemJson);
+        } else {
+          return Category.fromJson(itemJson);
+        }
+        //: Варіант 2: якщо в JSON є поле 'type'
+        // switch (itemJson['type']) {
+        //   case 'product':
+        //     return Product.fromJson(itemJson);
+        //   case 'category':
+        //   default:
+        //     return Category.fromJson(itemJson);
+        // }
+      }).toList(),
     );
   }
 
