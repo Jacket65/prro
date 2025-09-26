@@ -1,18 +1,75 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/data/models/seller_item.dart';
+import 'package:prro/data/repositories/repositories.dart';
 
 part 'items_tiles_event.dart';
 part 'items_tiles_state.dart';
 
 class ItemsTilesBloc extends Bloc<ItemsTilesEvent, ItemsTilesState> {
-  ItemsTilesBloc() : super(ItemsTilesInitial()) {
-    on<SelectedItemsTiles>((event, emit) {
-      emit(ItemsTilesSelected(event.item));
-    });
+  final ItemsRepositoryI _repository;
+  final List<Category> _categoryStack = [];
 
-    on<GetInitialItemsTiles>((event, emit) {
-      emit(ItemsTilesInitial());
-    });
+  ItemsTilesBloc({required ItemsRepositoryI itemsRepository})
+    : _repository = itemsRepository,
+      super(ItemsTilesLoading()) {
+    on<ItemsTilesStarted>(_onStarted);
+    on<ItemsTilesEnterCategory>(_onEnterCategory);
+    on<ItemsTilesBack>(_onBack);
+  }
+
+  void _onStarted(
+    ItemsTilesStarted event,
+    Emitter<ItemsTilesState> emit,
+  ) async {
+    emit(ItemsTilesLoading());
+    try {
+      final rootItems = await _repository.fetchItems();
+      _categoryStack.clear();
+      emit(ItemsTilesLoaded(items: rootItems, canGoBack: false));
+    } catch (e) {
+      emit(ItemsTilesError(message: 'Не вдалося завантажити елементи.'));
+    }
+  }
+
+  Future<void> _onEnterCategory(
+    ItemsTilesEnterCategory event,
+    Emitter<ItemsTilesState> emit,
+  ) async {
+    final item = event.item;
+    if (item is! Category) {
+      emit(ItemsTilesError(message: 'Це не категорія.'));
+      return;
+    }
+    emit(ItemsTilesLoading());
+    try {
+      _categoryStack.add(item);
+      final categoryItems = await _repository.fetchItemsForCategory(item);
+      emit(ItemsTilesLoaded(items: categoryItems, canGoBack: true));
+    } catch (e) {
+      emit(ItemsTilesError(message: 'Не вдалося завантажити категорію.'));
+    }
+  }
+
+  Future<void> _onBack(
+    ItemsTilesBack event,
+    Emitter<ItemsTilesState> emit,
+  ) async {
+    if (_categoryStack.isNotEmpty) {
+      _categoryStack.removeLast();
+      emit(ItemsTilesLoading());
+      try {
+        if (_categoryStack.isEmpty) {
+          final rootItems = await _repository.fetchItems();
+          emit(ItemsTilesLoaded(items: rootItems, canGoBack: false));
+        } else {
+          final parentCategory = _categoryStack.last;
+          final items = await _repository.fetchItemsForCategory(parentCategory);
+          emit(ItemsTilesLoaded(items: items, canGoBack: true));
+        }
+      } catch (e) {
+        emit(ItemsTilesError(message: 'Не вдалося повернутися назад.'));
+      }
+    }
   }
 }

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-abstract class Item extends Equatable {
+sealed class Item extends Equatable {
   const Item();
 }
 
@@ -25,7 +25,7 @@ final class Product extends Item {
       name: json['name'],
       price: (json['price'] ?? 0).toDouble(),
       imageUrl: json['image_url'],
-      quantity: (json['quantity'] ?? 0),
+      quantity: (json['quantity'] ?? 1),
     );
   }
 

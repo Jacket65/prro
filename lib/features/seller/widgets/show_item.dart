@@ -28,11 +28,14 @@ class ShowItem<T extends Item> extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Image.network(
-              product.imageUrl,
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
+            SizedBox(
+              width: 120,
+              child: Image.network(
+                product.imageUrl,
+                errorBuilder: (context, error, stackTrace) =>
+                    Center(child: Text('No image')),
+                fit: BoxFit.cover,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -55,7 +58,7 @@ class ShowItem<T extends Item> extends StatelessWidget {
         behavior: HitTestBehavior.translucent,
         onTap: () {
           log('category');
-          context.read<ItemsTilesBloc>().add(SelectedItemsTiles(category));
+          context.read<ItemsTilesBloc>().add(ItemsTilesEnterCategory(category));
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

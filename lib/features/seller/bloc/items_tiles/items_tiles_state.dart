@@ -6,18 +6,23 @@ sealed class ItemsTilesState extends Equatable {
   List<Object> get props => [];
 }
 
-final class ItemsTilesInitial extends ItemsTilesState {
-  const ItemsTilesInitial();
+final class ItemsTilesLoading extends ItemsTilesState {}
+
+class ItemsTilesLoaded extends ItemsTilesState {
+  final List<Item> items;
+  final bool canGoBack;
+
+  const ItemsTilesLoaded({required this.items, required this.canGoBack});
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [items, canGoBack];
 }
 
-final class ItemsTilesSelected extends ItemsTilesState {
-  final Item item;
+final class ItemsTilesError extends ItemsTilesState {
+  final String message;
 
-  const ItemsTilesSelected(this.item);
+  const ItemsTilesError({required this.message});
 
   @override
-  List<Object> get props => [item];
+  List<Object> get props => [message];
 }

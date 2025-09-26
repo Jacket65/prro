@@ -7,18 +7,15 @@ sealed class ItemsTilesEvent extends Equatable {
   List<Object> get props => [];
 }
 
-final class SelectedItemsTiles extends ItemsTilesEvent {
+class ItemsTilesStarted extends ItemsTilesEvent {}
+
+class ItemsTilesEnterCategory extends ItemsTilesEvent {
   final Item item;
 
-  const SelectedItemsTiles(this.item);
+  const ItemsTilesEnterCategory(this.item);
 
   @override
   List<Object> get props => [item];
 }
 
-final class GetInitialItemsTiles extends ItemsTilesEvent {
-  const GetInitialItemsTiles();
-
-  @override
-  List<Object> get props => [];
-}
+class ItemsTilesBack extends ItemsTilesEvent {}

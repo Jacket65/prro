@@ -10,12 +10,15 @@ class ItemNameText extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ItemsTilesBloc, ItemsTilesState>(
       builder: (context, state) {
-        if (state is ItemsTilesSelected) {
-          final item = state.item;
-          if (item is Product) {
-            return Text(item.name);
-          } else if (item is Category) {
-            return Text(item.name);
+        if (state is ItemsTilesLoaded) {
+          final items = state.items;
+          if (items.isNotEmpty) {
+            final item = items.first;
+            if (item is Product) {
+              return Text(item.name);
+            } else if (item is Category) {
+              return Text(item.name);
+            }
           }
         }
         return const SizedBox.shrink();

@@ -39,11 +39,14 @@ class ListItem extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  imageUrl,
+                child: SizedBox(
                   width: 120,
-                  height: 80,
-                  fit: BoxFit.cover,
+                  child: Image.network(
+                    imageUrl,
+                    errorBuilder: (context, error, stackTrace) =>
+                        Center(child: Text('No image')),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),

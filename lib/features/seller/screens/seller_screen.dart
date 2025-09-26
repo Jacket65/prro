@@ -29,7 +29,12 @@ class _SellerScreenState extends State<SellerScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: _buildAppBar(context),
-      body: Row(children: [CheckColumn(), ItemsTiles()]),
+      body: Row(
+        children: [
+          CheckColumn(),
+          Expanded(child: ItemsTiles()),
+        ],
+      ),
     );
   }
 
