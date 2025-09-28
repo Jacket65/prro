@@ -10,7 +10,7 @@ class ItemsRepository implements ItemsRepositoryI {
 
   @override
   Future<List<Item>> getItems() {
-    return _productService.getProduct();
+    return _productService.getItems();
   }
 
   @override

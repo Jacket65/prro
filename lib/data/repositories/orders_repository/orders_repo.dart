@@ -36,4 +36,12 @@ class OrdersRepository implements OrdersRepositoryI {
   void clearProducts() {
     _products.clear();
   }
+
+  @override
+  double get totalPrice {
+    return _products.fold(
+      0.0,
+      (sum, product) => sum + (product.price * product.quantity),
+    );
+  }
 }

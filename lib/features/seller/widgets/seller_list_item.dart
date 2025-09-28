@@ -1,5 +1,4 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -77,7 +76,7 @@ class ListItem extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(right: 10.0),
                     child: Text(
-                      price.toStringAsFixed(2),
+                      (price * quantity).toStringAsFixed(2),
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -91,7 +90,7 @@ class ListItem extends StatelessWidget {
                         icon: const Icon(Icons.remove_circle_outline),
                         onPressed: () {
                           final productId = state.products.indexWhere(
-                            (element) => element.id == id,
+                            (e) => e.id == id,
                           );
                           context.read<OrdersListBloc>().add(
                             RemoveProduct(state.products[productId]),
@@ -106,12 +105,9 @@ class ListItem extends StatelessWidget {
 
                         icon: const Icon(Icons.add_circle_outline),
                         onPressed: () {
-                          final productId = state.products.indexWhere((
-                            element,
-                          ) {
-                            log(element.name);
-                            return element.id == id;
-                          });
+                          final productId = state.products.indexWhere(
+                            (e) => e.id == id,
+                          );
                           context.read<OrdersListBloc>().add(
                             AddProduct(state.products[productId]),
                           );

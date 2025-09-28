@@ -5,4 +5,5 @@ abstract interface class OrdersRepositoryI {
   void addProduct(Product product);
   void removeProduct(Product product);
   void clearProducts();
+  double get totalPrice;
 }

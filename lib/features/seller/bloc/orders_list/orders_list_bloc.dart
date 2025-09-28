@@ -21,7 +21,12 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
     Emitter<OrdersListState> emit,
   ) {
     _ordersRepository.addProduct(event.product);
-    emit(OrdersListUpdated(_ordersRepository.products));
+    emit(
+      OrdersListUpdated(
+        products: _ordersRepository.products,
+        total: _ordersRepository.totalPrice,
+      ),
+    );
   }
 
   FutureOr<void> _onRemoveProduct(
@@ -33,7 +38,12 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
     if (updatedList.isEmpty) {
       emit(OrdersListInitial());
     } else {
-      emit(OrdersListUpdated(updatedList));
+      emit(
+        OrdersListUpdated(
+          products: updatedList,
+          total: _ordersRepository.totalPrice,
+        ),
+      );
     }
   }
 

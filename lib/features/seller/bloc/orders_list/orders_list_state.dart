@@ -11,8 +11,10 @@ final class OrdersListInitial extends OrdersListState {}
 
 final class OrdersListUpdated extends OrdersListState {
   final List<Product> products;
+  final double total;
 
-  const OrdersListUpdated(this.products);
+  const OrdersListUpdated({required this.products, required this.total});
+
   @override
-  List<Object> get props => [products];
+  List<Object> get props => [products, total];
 }

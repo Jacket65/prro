@@ -1,11 +1,14 @@
 import 'package:prro/data/models/seller_item.dart';
+import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 import 'package:prro/data/services/services.dart';
 
-class ItemsService {
-  Future<List<Item>> getProduct() async {
+class ItemsService implements ItemsRepositoryI {
+  @override
+  Future<List<Item>> getItems() async {
     return listOfCategories;
   }
 
+  @override
   Future<List<Item>> fetchItems() async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 500));
@@ -29,5 +32,10 @@ class ItemsService {
         ],
       ),
     ];
+  }
+
+  @override
+  Future<List<Item>> fetchItemsForCategory(Category category) {
+    return Future.value(category.items);
   }
 }
