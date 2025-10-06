@@ -15,7 +15,7 @@ class ItemsRepository implements ItemsRepositoryI {
 
   @override
   Future<List<Item>> fetchItems() {
-    return _productService.fetchItems();
+    return _productService.getItems();
   }
 
   @override

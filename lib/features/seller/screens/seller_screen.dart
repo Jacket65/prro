@@ -13,15 +13,6 @@ class SellerScreen extends StatefulWidget {
 }
 
 class _SellerScreenState extends State<SellerScreen> {
-  void _logout(BuildContext context) {
-    context.read<LoginBloc>().add(LoginGetInitial());
-    context.read<UserBloc>().add(ClearUserEvent());
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => LoginScreen()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -70,6 +61,15 @@ class _SellerScreenState extends State<SellerScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _logout(BuildContext context) {
+    context.read<LoginBloc>().add(LoginGetInitial());
+    context.read<UserBloc>().add(ClearUserEvent());
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => LoginScreen()),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 const primaryColor = Colors.brown;
+final dialogBackgroundColor = Colors.brown[50];
 final lightTheme = ThemeData(
   colorScheme: ColorScheme.fromSeed(
     seedColor: primaryColor,
@@ -19,4 +20,5 @@ final lightTheme = ThemeData(
       // textStyle: TextStyle(fontSize: 52),
     ),
   ),
+  dialogTheme: DialogThemeData(backgroundColor: dialogBackgroundColor),
 );
