@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:prro/features/seller/bloc/orders_list/orders_list_bloc.dart';
 
-class ListItem extends StatelessWidget {
+class ListItem extends StatefulWidget {
   final String id;
   final String name;
   final double price;
@@ -22,6 +22,13 @@ class ListItem extends StatelessWidget {
   });
 
   @override
+  State<ListItem> createState() => _ListItemState();
+}
+
+class _ListItemState extends State<ListItem> {
+  bool _isChecked = false;
+
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<OrdersListBloc, OrdersListState>(
       builder: (context, state) {
@@ -36,25 +43,50 @@ class ListItem extends StatelessWidget {
           ),
           child: Row(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  width: 120,
-                  child: Image.network(
-                    imageUrl,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Center(child: Text('No image')),
-                    fit: BoxFit.cover,
-                  ),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isChecked = !_isChecked;
+                  });
+                },
+                child: Stack(
+                  alignment: Alignment.topLeft,
+                  children: [
+                    SizedBox(
+                      width: 120,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          opacity: _isChecked
+                              ? AlwaysStoppedAnimation(0.5)
+                              : AlwaysStoppedAnimation(1),
+                          widget.imageUrl,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Center(child: Text('No image')),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+
+                    Checkbox(
+                      value: _isChecked,
+                      onChanged: (bool? newValue) {
+                        setState(() {
+                          _isChecked = newValue ?? false;
+                        });
+                      },
+                    ),
+                  ],
                 ),
               ),
+
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name,
+                      widget.name,
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -62,7 +94,7 @@ class ListItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      price.toStringAsFixed(2),
+                      widget.price.toStringAsFixed(2),
                       style: const TextStyle(color: Colors.grey),
                     ),
                   ],
@@ -76,7 +108,7 @@ class ListItem extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(right: 10.0),
                     child: Text(
-                      (price * quantity).toStringAsFixed(2),
+                      (widget.price * widget.quantity).toStringAsFixed(2),
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -90,7 +122,7 @@ class ListItem extends StatelessWidget {
                         icon: const Icon(Icons.remove_circle_outline),
                         onPressed: () {
                           final productId = state.products.indexWhere(
-                            (e) => e.id == id,
+                            (e) => e.id == widget.id,
                           );
                           context.read<OrdersListBloc>().add(
                             RemoveProduct(state.products[productId]),
@@ -98,7 +130,7 @@ class ListItem extends StatelessWidget {
                         },
                       ),
                       const SizedBox(width: 4),
-                      Text("$quantity"),
+                      Text("${widget.quantity}"),
                       const SizedBox(width: 4),
                       IconButton(
                         padding: EdgeInsets.zero,
@@ -106,7 +138,7 @@ class ListItem extends StatelessWidget {
                         icon: const Icon(Icons.add_circle_outline),
                         onPressed: () {
                           final productId = state.products.indexWhere(
-                            (e) => e.id == id,
+                            (e) => e.id == widget.id,
                           );
                           context.read<OrdersListBloc>().add(
                             AddProduct(state.products[productId]),
