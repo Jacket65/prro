@@ -1,9 +1,11 @@
-import 'package:prro/data/models/models.dart';
+import 'package:prro/data/api/models/models.dart';
 
 abstract interface class OrdersRepositoryI {
   List<Product> get products;
+  double get totalPrice;
   void addProduct(Product product);
   void removeProduct(Product product);
   void clearProducts();
-  double get totalPrice;
+
+  Future<void> sell(String paymentMethod);
 }
