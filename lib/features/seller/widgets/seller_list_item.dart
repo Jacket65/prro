@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:prro/features/seller/bloc/orders_list/orders_list_bloc.dart';
+import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 
 class ListItem extends StatefulWidget {
   final String id;
@@ -29,10 +29,10 @@ class _ListItemState extends State<ListItem> {
   bool _isChecked = false;
 
   @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<OrdersListBloc, OrdersListState>(
+  Widget build(BuildContext sellerContext) {
+    return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
-        if (state is! OrdersListUpdated) {
+        if (state is! OrdersUpdated) {
           return CircularProgressIndicator();
         }
         return Container(
@@ -124,7 +124,7 @@ class _ListItemState extends State<ListItem> {
                           final productId = state.products.indexWhere(
                             (e) => e.id == widget.id,
                           );
-                          context.read<OrdersListBloc>().add(
+                          context.read<OrdersBloc>().add(
                             RemoveProduct(state.products[productId]),
                           );
                         },
@@ -140,7 +140,7 @@ class _ListItemState extends State<ListItem> {
                           final productId = state.products.indexWhere(
                             (e) => e.id == widget.id,
                           );
-                          context.read<OrdersListBloc>().add(
+                          context.read<OrdersBloc>().add(
                             AddProduct(state.products[productId]),
                           );
                         },

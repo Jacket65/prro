@@ -1,9 +1,8 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/data/models/models.dart';
+import 'package:prro/data/api/models/models.dart';
 import 'package:prro/features/seller/bloc/items_tiles/items_tiles_bloc.dart';
-import 'package:prro/features/seller/bloc/orders_list/orders_list_bloc.dart';
+import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 
 class ShowItem<T extends Item> extends StatelessWidget {
   final T item;
@@ -21,8 +20,7 @@ class ShowItem<T extends Item> extends StatelessWidget {
       return GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
-          log('product');
-          context.read<OrdersListBloc>().add(AddProduct(product));
+          context.read<OrdersBloc>().add(AddProduct(product));
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -31,7 +29,10 @@ class ShowItem<T extends Item> extends StatelessWidget {
             SizedBox(
               width: 120,
               child: Image.network(
-                product.imageUrl,
+                // product.name
+                "https://cdn.egersund.ua/fb454aa0-07ed-487a-0c75-2ed3fbd7cd00/origin/origin",
+
+                // : product.imageUrl,
                 errorBuilder: (context, error, stackTrace) =>
                     Center(child: Text('No image')),
                 fit: BoxFit.cover,
@@ -46,7 +47,7 @@ class ShowItem<T extends Item> extends StatelessWidget {
               ),
             ),
             Text(
-              '\$${product.price.toStringAsFixed(2)}',
+              '${product.price.toStringAsFixed(2)}₴',
               style: TextStyle(color: Colors.grey),
             ),
           ],
@@ -57,7 +58,6 @@ class ShowItem<T extends Item> extends StatelessWidget {
       return GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
-          log('category');
           context.read<ItemsTilesBloc>().add(ItemsTilesEnterCategory(category));
         },
         child: Column(

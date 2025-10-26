@@ -1,25 +1,22 @@
-import 'package:prro/data/models/seller_item.dart';
+import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/data/repositories/items_repository/items_repository.dart';
-import 'package:prro/data/services/items_service.dart';
 
 class ItemsRepository implements ItemsRepositoryI {
-  final ItemsService _productService;
+  final ItemsServiceI _itemsService;
 
-  ItemsRepository({required ItemsService productService})
-    : _productService = productService;
-
-  @override
-  Future<List<Item>> getItems() {
-    return _productService.getItems();
-  }
+  ItemsRepository({required ItemsServiceI itemsService})
+    : _itemsService = itemsService;
 
   @override
-  Future<List<Item>> fetchItems() {
-    return _productService.getItems();
-  }
+  Future<List<Item>> getItemsCategory() => _itemsService.getItemsCategory();
 
   @override
-  Future<List<Item>> fetchItemsForCategory(Category category) {
-    return Future.value(category.items);
-  }
+  Future<List<Item>> getItems(int id) => _itemsService.getItems(id);
+
+  @override
+  Future<List<Item>> fetchItems() => _itemsService.getItemsCategory();
+
+  @override
+  Future<List<Item>> fetchItemsForCategory(Category category) =>
+      Future.value(category.items);
 }

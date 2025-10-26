@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/data/models/seller_item.dart';
+import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/data/repositories/repositories.dart';
 
 part 'items_tiles_event.dart';
@@ -9,7 +9,7 @@ part 'items_tiles_state.dart';
 class ItemsTilesBloc extends Bloc<ItemsTilesEvent, ItemsTilesState> {
   final ItemsRepositoryI _repository;
   final List<Category> _categoryStack = [];
-  final Map<String, List<Item>> _cachedItems = {};
+  final Map<int?, List<Item>> _cachedItems = {};
 
   ItemsTilesBloc({required ItemsRepositoryI itemsRepository})
     : _repository = itemsRepository,
@@ -24,19 +24,9 @@ class ItemsTilesBloc extends Bloc<ItemsTilesEvent, ItemsTilesState> {
     Emitter<ItemsTilesState> emit,
   ) async {
     emit(ItemsTilesLoading());
-    try {
-      if (_cachedItems.containsKey('root')) {
-        _categoryStack.clear();
-        emit(ItemsTilesLoaded(items: _cachedItems['root']!, canGoBack: false));
-      } else {
-        final rootItems = await _repository.fetchItems();
-        _cachedItems['root'] = rootItems;
-        _categoryStack.clear();
-        emit(ItemsTilesLoaded(items: rootItems, canGoBack: false));
-      }
-    } catch (e) {
-      emit(ItemsTilesError(message: 'Не вдалося завантажити елементи.'));
-    }
+    _categoryStack.clear();
+    _cachedItems.clear();
+    await _loadCategoryItems(null, emit, canGoBack: false);
   }
 
   Future<void> _onEnterCategory(
@@ -48,64 +38,52 @@ class ItemsTilesBloc extends Bloc<ItemsTilesEvent, ItemsTilesState> {
       emit(ItemsTilesError(message: 'Це не категорія.'));
       return;
     }
-    emit(ItemsTilesLoading());
-    try {
-      _categoryStack.add(item);
-      final categoryKey = item.id;
-      if (_cachedItems.containsKey(categoryKey)) {
-        emit(
-          ItemsTilesLoaded(items: _cachedItems[categoryKey]!, canGoBack: true),
-        );
-      } else {
-        final categoryItems = await _repository.fetchItemsForCategory(item);
-        _cachedItems[categoryKey] = categoryItems;
-        emit(ItemsTilesLoaded(items: categoryItems, canGoBack: true));
-      }
-    } catch (e) {
-      emit(ItemsTilesError(message: 'Не вдалося завантажити категорію.'));
-    }
+    _categoryStack.add(item);
+    await _loadCategoryItems(item.id, emit, canGoBack: true);
   }
 
   Future<void> _onBack(
     ItemsTilesBack event,
     Emitter<ItemsTilesState> emit,
   ) async {
-    if (_categoryStack.isNotEmpty) {
-      _categoryStack.removeLast();
-      emit(ItemsTilesLoading());
-      try {
-        if (_categoryStack.isEmpty) {
-          if (_cachedItems.containsKey('root')) {
-            emit(
-              ItemsTilesLoaded(items: _cachedItems['root']!, canGoBack: false),
-            );
-          } else {
-            final parentCategory = _categoryStack.last;
-            final categoryKey = parentCategory.id;
+    if (_categoryStack.isEmpty) return;
+    _categoryStack.removeLast();
+    final parentCategoryId = _categoryStack.isNotEmpty
+        ? _categoryStack.last.id
+        : null;
+    final canGoBack = _categoryStack.isNotEmpty;
 
-            if (_cachedItems.containsKey(categoryKey)) {
-              emit(
-                ItemsTilesLoaded(
-                  items: _cachedItems[categoryKey]!,
-                  canGoBack: true,
-                ),
-              );
-            } else {
-              final items = await _repository.fetchItemsForCategory(
-                parentCategory,
-              );
-              _cachedItems[categoryKey] = items;
-              emit(ItemsTilesLoaded(items: items, canGoBack: true));
-            }
-          }
-        } else {
-          final parentCategory = _categoryStack.last;
-          final items = await _repository.fetchItemsForCategory(parentCategory);
-          emit(ItemsTilesLoaded(items: items, canGoBack: true));
-        }
-      } catch (e) {
-        emit(ItemsTilesError(message: 'Не вдалося повернутися назад.'));
+    await _loadCategoryItems(parentCategoryId, emit, canGoBack: canGoBack);
+  }
+
+  Future<void> _loadCategoryItems(
+    int? categoryId,
+    Emitter<ItemsTilesState> emit, {
+    required bool canGoBack,
+  }) async {
+    emit(ItemsTilesLoading());
+
+    try {
+      if (_cachedItems.containsKey(categoryId)) {
+        emit(
+          ItemsTilesLoaded(
+            items: _cachedItems[categoryId]!,
+            canGoBack: canGoBack,
+          ),
+        );
+      } else {
+        final items = categoryId == null
+            ? await _repository.getItemsCategory()
+            : await _repository.getItems(categoryId);
+
+        _cachedItems[categoryId] = items;
+        emit(ItemsTilesLoaded(items: items, canGoBack: canGoBack));
       }
+    } catch (e) {
+      final message = categoryId == null
+          ? 'Не вдалося завантажити елементи.'
+          : 'Не вдалося завантажити категорію.';
+      emit(ItemsTilesError(message: message));
     }
   }
 }
