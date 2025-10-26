@@ -1,11 +1,49 @@
-import 'package:prro/data/models/seller_item.dart';
-import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
-import 'package:prro/data/services/services.dart';
+import 'dart:convert';
+import 'dart:developer';
 
-class ItemsService implements ItemsRepositoryI {
+import 'package:prro/data/api/api_client.dart';
+import 'package:prro/data/api/models/seller_item.dart';
+import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
+// import 'package:prro/data/services/services.dart';
+
+class ItemsService implements ItemsServiceI {
+  final ApiClient _apiClient;
+
+  ItemsService({required ApiClient apiClient}) : _apiClient = apiClient;
   @override
-  Future<List<Item>> getItems() async {
-    return listOfCategories;
+  Future<List<Item>> getItemsCategory() async {
+    try {
+      final response = await _apiClient.get("/seller/categories");
+
+      final List<dynamic> data = jsonDecode(response.data)['data'];
+
+      final List<Category> listOfCategories = data
+          .map((json) => Category.fromJson(json))
+          .toList();
+
+      return listOfCategories;
+    } catch (e, stackTrace) {
+      log("Error in getItems: $e", stackTrace: stackTrace);
+      return [];
+    }
+  }
+
+  @override
+  Future<List<Item>> getItems(int id) async {
+    try {
+      final response = await _apiClient.get("/seller/category/$id");
+
+      final List<dynamic> data = jsonDecode(response.data)['data'];
+
+      final List<Item> listOfItems = data
+          .map((json) => Product.fromJson(json))
+          .toList();
+
+      return listOfItems;
+    } catch (e, stackTrace) {
+      log("Error in getItems: $e", stackTrace: stackTrace);
+      return [];
+    }
   }
 
   @override
@@ -16,7 +54,7 @@ class ItemsService implements ItemsRepositoryI {
     // Sample data
     return [
       Category(
-        id: 'cat1',
+        id: 1,
         name: 'Electronics',
         items: [
           Product(id: 'prod1', name: 'Smartphone', price: 52, imageUrl: ''),
@@ -24,7 +62,7 @@ class ItemsService implements ItemsRepositoryI {
         ],
       ),
       Category(
-        id: 'cat2',
+        id: 2,
         name: 'Clothing',
         items: [
           Product(id: 'prod3', name: 'T-Shirt', price: 32, imageUrl: ''),

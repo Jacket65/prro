@@ -6,11 +6,12 @@ class CustomPopupMenu extends StatelessWidget {
   final String name;
   final IconData icon;
   final Color color;
-
+  final List<Widget>? widgets;
   const CustomPopupMenu({
     super.key,
     required this.name,
     required this.icon,
+    this.widgets,
     this.color = Colors.white,
   });
 
@@ -33,11 +34,9 @@ class CustomPopupMenu extends StatelessWidget {
             )
           : IconButton(onPressed: null, icon: Icon(icon, color: color)),
       offset: Offset(00, 40),
-
       itemBuilder: (BuildContext context) => <PopupMenuEntry>[
-        const PopupMenuItem(
-          child: ListTile(leading: Icon(Icons.add), title: Text('Item 1')),
-        ),
+        ...?widgets?.map((widget) => PopupMenuItem(child: widget)),
+        const PopupMenuDivider(),
         const PopupMenuItem(
           child: ListTile(leading: Icon(Icons.anchor), title: Text('Item 2')),
         ),
