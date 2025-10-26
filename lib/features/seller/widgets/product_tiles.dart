@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/data/models/seller_item.dart';
+import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/features/seller/bloc/items_tiles/items_tiles_bloc.dart';
 import 'package:prro/features/seller/widgets/show_item.dart';
 

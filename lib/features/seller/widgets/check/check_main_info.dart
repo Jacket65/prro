@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/features/seller/bloc/orders_list/orders_list_bloc.dart';
+import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 import 'package:prro/features/seller/widgets/seller_list_item.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
 
@@ -13,8 +13,8 @@ class CheckMainInfo extends StatefulWidget {
 
 class _CheckMainInfoState extends State<CheckMainInfo> {
   @override
-  Widget build(BuildContext context) {
-    var theme = Theme.of(context);
+  Widget build(BuildContext sellerContext) {
+    var theme = Theme.of(sellerContext);
     return Expanded(
       child: Column(
         children: [
@@ -44,9 +44,9 @@ class _CheckMainInfoState extends State<CheckMainInfo> {
               SizedBox(height: 8),
             ],
           ),
-          BlocBuilder<OrdersListBloc, OrdersListState>(
+          BlocBuilder<OrdersBloc, OrdersState>(
             builder: (context, state) {
-              if (state is OrdersListUpdated) {
+              if (state is OrdersUpdated) {
                 return Expanded(
                   child: ListView.separated(
                     itemCount: state.products.length,

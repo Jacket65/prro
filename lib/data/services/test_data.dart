@@ -1,13 +1,13 @@
-import 'package:prro/data/models/seller_item.dart';
+import 'package:prro/data/api/models/seller_item.dart';
 
 const List<Item> listOfCategories = [
   Category(
-    id: '1',
+    id: 1,
     name: 'Електроніка',
 
     items: [
       Category(
-        id: '1_1',
+        id: 1_1,
         name: 'Мобільні телефони',
         items: [
           Product(
@@ -27,7 +27,7 @@ const List<Item> listOfCategories = [
         ],
       ),
       Category(
-        id: '1_2',
+        id: 1_2,
         name: 'Ноутбуки',
         items: [
           Product(
@@ -56,12 +56,12 @@ const List<Item> listOfCategories = [
     ],
   ),
   Category(
-    id: '2',
+    id: 2,
     name: 'Одежда',
 
     items: [
       Category(
-        id: '2_1',
+        id: 2_1,
         name: 'Чоловіча',
         items: [
           Product(
@@ -81,7 +81,7 @@ const List<Item> listOfCategories = [
         ],
       ),
       Category(
-        id: '2_2',
+        id: 2_2,
         name: 'Жіноча',
         items: [
           Product(

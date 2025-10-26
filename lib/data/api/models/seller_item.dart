@@ -24,9 +24,25 @@ final class Product extends Item {
       id: json['id'].toString(),
       name: json['name'],
       price: (json['price'] ?? 0).toDouble(),
-      imageUrl: json['image_url'],
+      imageUrl: json['image_url'] ?? "",
       quantity: (json['quantity'] ?? 1),
     );
+  }
+   Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'price': price,
+      'image_url': imageUrl,
+      'quantity': quantity,
+    };
+  }
+
+  Map<String, dynamic> toOrderJson() {
+    return {
+      'product_id': int.tryParse(id) ?? id,
+      'quantity': quantity,
+    };
   }
 
   Product copyWith({
@@ -50,7 +66,7 @@ final class Product extends Item {
 }
 
 final class Category extends Item {
-  final String id;
+  final int id;
   final String name;
   final List<Item> items;
 
@@ -58,7 +74,7 @@ final class Category extends Item {
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
-      id: json['id'].toString(),
+      id: json['id'],
       name: json['name'],
       items: (json['items'] as List<dynamic>? ?? []).map<Item>((itemJson) {
         if (itemJson.containsKey('price')) {
