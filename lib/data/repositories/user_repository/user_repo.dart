@@ -1,37 +1,33 @@
-import 'package:prro/data/repositories/user_repository/user.dart';
-import 'package:prro/data/services/user_service.dart';
+import 'package:prro/data/repositories/user_repository/user_repo_i.dart';
 
 class UserRepository implements UserRepositoryI {
-  final UserService _userService;
+  final UserServiceI _userService;
 
-  UserRepository({required UserService userService})
+  String? _usernameCache;
+
+  UserRepository({required UserServiceI userService})
     : _userService = userService;
 
   @override
-  Future<void> saveUsername(String username) {
-    return _userService.saveUsername(username);
-  }
-
-  @override
-  Future<String?> getUsername() {
-    return _userService.getUsername();
-  }
-
-  @override
-  Future<void> clearUsername() {
-    return _userService.clearUsername();
-  }
-
-  @override
-  Future<bool> login({
-    required String username,
-    required String password,
-  }) async {
-    await Future.delayed(const Duration(seconds: 1));
-    if (username == '1' && password == '1') {
-      return Future.value(true);
-    } else {
-      return Future.value(false);
+  Future<String?> getUsername() async {
+    if (_usernameCache != null) {
+      return _usernameCache;
     }
+
+    final username = await _userService.getUsername();
+    _usernameCache = username;
+    return username;
+  }
+
+  @override
+  Future<void> saveUsername(String username) async {
+    _usernameCache = username;
+    await _userService.saveUsername(username);
+  }
+
+  @override
+  Future<void> clearUsername() async {
+    _usernameCache = null;
+    await _userService.clearUsername();
   }
 }

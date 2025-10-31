@@ -5,6 +5,11 @@ abstract class UserEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadUserEvent extends UserEvent {}
+class LoadUser extends UserEvent {
+  final String username;
+  LoadUser({required this.username});
+  @override
+  List<Object> get props => [username];
+}
 
-class ClearUserEvent extends UserEvent {}
+class ClearUser extends UserEvent {}
