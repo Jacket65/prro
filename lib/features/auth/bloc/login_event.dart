@@ -19,4 +19,14 @@ class LoginSubmitted extends LoginEvent {
 
 class LoginGetInitial extends LoginEvent {
   const LoginGetInitial();
+
+  @override
+  List<Object> get props => [];
+}
+
+class LoginCheckAutoLogin extends LoginEvent {
+  const LoginCheckAutoLogin();
+
+  @override
+  List<Object> get props => [];
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
-import 'package:prro/features/seller/seller.dart';
+import 'package:prro/features/shift/screens/shift.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
-// import 'package:prro/main_screen/main_screen.dart';
+import 'package:prro/main_screen/main_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -17,16 +17,7 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       body: BlocConsumer<LoginBloc, LoginState>(
         listener: (context, state) {
-          switch (state) {
-            case LoginSuccess():
-              _showSnackBar(context, "Вітаємо вас на роботі!");
-              context.read<UserBloc>().add(LoadUserEvent());
-              _navigateTo(context, const SellerScreen());
-            case LoginFailure():
-              _showSnackBar(context, "Сталася помилка ${state.error}");
-            case LoginLoading():
-            case LoginInitial():
-          }
+          _checkState(state, context);
         },
         builder: (context, state) {
           return Center(
@@ -37,6 +28,7 @@ class LoginScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Text(state.toString()),
                     _buildStateMessage(state),
                     const SizedBox(height: 24),
                     _buildTextField(
@@ -66,15 +58,29 @@ class LoginScreen extends StatelessWidget {
 
                       child: const Text("Enter as seller"),
                     ),
+                    const SizedBox(height: 18),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<LoginBloc>().add(
+                          LoginSubmitted(
+                            username: "+380931234567",
+                            password: "123456",
+                          ),
+                        );
+                        _clearTextFields();
+                      },
+
+                      child: const Text("seller"),
+                    ),
                     if (state is LoginLoading) ...[
                       const SizedBox(height: 18),
                       const Center(child: CircularProgressIndicator()),
                     ],
-                    // const SizedBox(height: 18),
-                    // ElevatedButton(
-                    //   onPressed: () => _navigateTo(context, const MainScreen()),
-                    //   child: const Text("Адміністратор"),
-                    // ),
+                    const SizedBox(height: 18),
+                    ElevatedButton(
+                      onPressed: () => _navigateTo(context, const MainScreen()),
+                      child: const Text("Адміністратор"),
+                    ),
                   ],
                 ),
               ),
@@ -83,6 +89,19 @@ class LoginScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  void _checkState(LoginState state, BuildContext context) {
+    switch (state) {
+      case LoginSuccess():
+        _showSnackBar(context, "Вітаємо вас на роботі!");
+        context.read<UserBloc>().add(LoadUser(username: state.username));
+        _navigateTo(context, const Shift());
+      case LoginFailure():
+        _showSnackBar(context, "Сталася помилка ${state.error}");
+      case LoginLoading():
+      case LoginInitial():
+    }
   }
 
   void _showSnackBar(BuildContext context, String message) {
