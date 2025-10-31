@@ -2,57 +2,76 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:prro/core/theme/theme.dart';
-import 'package:prro/data/repositories/items_repository/items_repository.dart';
-import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
-import 'package:prro/data/repositories/user_repository/user.dart';
+import 'package:prro/data/api/api_client.dart';
+import 'package:prro/data/repositories/balance/balance.dart';
+import 'package:prro/data/repositories/balance/balance_i.dart';
+import 'package:prro/data/repositories/login_repository/login_repository.dart';
+import 'package:prro/data/repositories/repositories.dart';
+import 'package:prro/data/repositories/shift_repository/shift_repo.dart';
+import 'package:prro/data/repositories/shift_repository/shift_repo_i.dart';
+import 'package:prro/data/services/balance.dart';
+
 import 'package:prro/data/services/items_service.dart';
+import 'package:prro/data/services/login_service.dart';
 import 'package:prro/data/services/user_service.dart';
 import 'package:prro/features/auth/auth.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
-import 'package:prro/features/seller/bloc/items_tiles/items_tiles_bloc.dart';
-import 'package:prro/features/seller/bloc/orders_list/orders_list_bloc.dart';
+import 'package:prro/features/shift/bloc/bloc.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final SharedPreferences prefs;
+
+  final ApiClient apiClient;
+
+  const MyApp({super.key, required this.prefs, required this.apiClient});
 
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<ItemsService>(create: (context) => ItemsService()),
         RepositoryProvider<ItemsRepositoryI>(
           create: (context) =>
-              ItemsRepository(productService: context.read<ItemsService>()),
+              ItemsRepository(itemsService: ItemsService(apiClient: apiClient)),
+        ),
+        RepositoryProvider<UserRepositoryI>(
+          create: (context) => UserRepository(
+            userService: UserService(apiClient: apiClient, prefs: prefs),
+          ),
+        ),
+        RepositoryProvider<LoginRepositoryI>(
+          create: (context) => LoginRepository(
+            userService: LoginService(apiClient: apiClient, prefs: prefs),
+          ),
         ),
         RepositoryProvider<OrdersRepositoryI>(
-          create: (context) => OrdersRepository(),
+          create: (context) => OrdersRepository(apiClient: apiClient),
         ),
-        RepositoryProvider<UserService>(create: (context) => UserService()),
-
-        RepositoryProvider<UserRepositoryI>(
-          create: (context) =>
-              UserRepository(userService: context.read<UserService>()),
+        RepositoryProvider<BalanceRepositoryI>(
+          create: (context) => BalanceRepository(
+            balanceService: BalanceService(apiClient: apiClient),
+          ),
+        ),
+        RepositoryProvider<ShiftRepositoryI>(
+          create: (context) => ShiftRepository(
+            shiftService: ShiftService(apiClient: apiClient, prefs: prefs),
+          ),
         ),
       ],
       child: MultiBlocProvider(
         providers: [
-          BlocProvider(
-            create: (context) => ItemsTilesBloc(
-              itemsRepository: context.read<ItemsRepositoryI>(),
-            )..add(ItemsTilesStarted()),
-          ),
-          BlocProvider(
-            create: (context) =>
-                OrdersListBloc(context.read<OrdersRepositoryI>()),
-          ),
           BlocProvider(
             create: (context) =>
                 UserBloc(userRepository: context.read<UserRepositoryI>()),
           ),
           BlocProvider(
             create: (context) =>
-                LoginBloc(userRepository: context.read<UserRepositoryI>()),
+                LoginBloc(loginRepository: context.read<LoginRepositoryI>())
+                  ..add(LoginCheckAutoLogin()),
+          ),
+          BlocProvider(
+            create: (context) => ShiftCubit(context.read<ShiftRepositoryI>()),
           ),
         ],
         child: MaterialApp(

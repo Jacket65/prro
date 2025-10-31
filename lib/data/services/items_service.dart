@@ -13,6 +13,7 @@ class ItemsService implements ItemsServiceI {
   @override
   Future<List<Item>> getItemsCategory() async {
     try {
+      await Future.delayed(const Duration(seconds: 1));
       final response = await _apiClient.get("/seller/categories");
 
       final List<dynamic> data = jsonDecode(response.data)['data'];
@@ -31,6 +32,7 @@ class ItemsService implements ItemsServiceI {
   @override
   Future<List<Item>> getItems(int id) async {
     try {
+      await Future.delayed(const Duration(seconds: 1));
       final response = await _apiClient.get("/seller/category/$id");
 
       final List<dynamic> data = jsonDecode(response.data)['data'];
@@ -49,7 +51,7 @@ class ItemsService implements ItemsServiceI {
   @override
   Future<List<Item>> fetchItems() async {
     // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(seconds: 1));
 
     // Sample data
     return [

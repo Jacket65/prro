@@ -2,5 +2,6 @@
   "editor.rename.enablePreview": false,
   "workbench.editor.enablePreview": false,
   "workbench.editor.enablePreviewFromQuickOpen": false,
-  "workbench.editor.enablePreviewFromCodeNavigation": false
+  "workbench.editor.enablePreviewFromCodeNavigation": false,
+  "python.analysis.autoImportCompletions": true
 }
