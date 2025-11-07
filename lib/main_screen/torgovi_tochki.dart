@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:prro/core/constants/settings.dart';
 
-class ttochki extends StatelessWidget {
-  const ttochki({
-    super.key,
-  });
+class Ttochki extends StatelessWidget {
+  const Ttochki({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,20 +17,21 @@ class ttochki extends StatelessWidget {
                   Expanded(
                     child: SingleChildScrollView(
                       child: DataTable(
-                          columnSpacing: 70,
-                          // horizontalMargin: 0,
-                          dataRowMinHeight: 0,
-                          dataRowMaxHeight: double.infinity,
-                          showCheckboxColumn: false,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          // headingRowColor: WidgetStatePropertyAll(
-                          //     const Color.fromARGB(31, 168, 168, 168)),
-                          columns: novaTThead(extraText: ttrows),
-                          rows: rowsName),
+                        columnSpacing: 70,
+                        // horizontalMargin: 0,
+                        dataRowMinHeight: 0,
+                        dataRowMaxHeight: double.infinity,
+                        showCheckboxColumn: false,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        // headingRowColor: WidgetStatePropertyAll(
+                        //     const Color.fromARGB(31, 168, 168, 168)),
+                        columns: novaTThead(extraText: ttrows),
+                        rows: rowsName,
+                      ),
                     ),
                   ),
                 ],

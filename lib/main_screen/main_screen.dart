@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:prro/login_screen/login_screen.dart';
+import 'package:prro/login_screen/screens/login_screen.dart';
 
 import 'package:prro/items_screen/items_screen.dart';
+import 'package:prro/main_screen/main_screen_widgets/dialog_dpi.dart';
 import 'package:prro/main_screen/torgovi_tochki.dart';
 import 'package:prro/core/constants/settings.dart';
-import 'package:prro/main_screen/main_screen_widgets/show_dialog_func1.dart';
 import 'package:prro/tellers_screen/fill_teller_rows.dart';
 import 'package:prro/tellers_screen/teller.dart';
 
@@ -20,35 +20,37 @@ class MainScreenState extends State<MainScreen> {
     // final Increment _increment = Increment();
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 8.0),
-      child: Container(
-        child: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.only(bottom: 5),
-              decoration: BoxDecoration(
-                  border: Border(
-                      bottom: BorderSide(
-                color:
-                    selecteIndex == selecteIndexW ? Colors.blue : Colors.white,
-                width: 2,
-              ))),
-              child: TextButton(
-                onPressed: () {
-                  selecteIndex = selecteIndexW;
-                  changeContent(lable);
-                  setState(() {});
-                },
-                child: Text(
-                  lable,
-                  style: TextStyle(
-                      color: selecteIndex == selecteIndexW
-                          ? Colors.black
-                          : Colors.grey),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.only(bottom: 5),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: selecteIndex == selecteIndexW
+                      ? Colors.blue
+                      : Colors.white,
+                  width: 2,
                 ),
               ),
             ),
-          ],
-        ),
+            child: TextButton(
+              onPressed: () {
+                selecteIndex = selecteIndexW;
+                changeContent(lable);
+                setState(() {});
+              },
+              child: Text(
+                lable,
+                style: TextStyle(
+                  color: selecteIndex == selecteIndexW
+                      ? Colors.black
+                      : Colors.grey,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -65,7 +67,7 @@ class MainScreenState extends State<MainScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return ShowDialogFunc1(title, context, changeState);
+        return DialogDpi(title: title);
       },
     );
   }
@@ -73,12 +75,16 @@ class MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     for (int i = 0; i < userLenght; i++) {
-      listOfTllers.add(fillTellerRows(extraText: [
-        initUser[i]["name"],
-        initUser[i]["name"],
-        initUser[i]["name"],
-        initUser[i]["status2"],
-      ]));
+      listOfTllers.add(
+        fillTellerRows(
+          extraText: [
+            initUser[i]["name"],
+            initUser[i]["name"],
+            initUser[i]["name"],
+            initUser[i]["status2"],
+          ],
+        ),
+      );
       tellerGroup.add([
         initUser[i]["name"],
         initUser[i]["name"],
@@ -100,21 +106,21 @@ class MainScreenState extends State<MainScreen> {
         actions: [
           TextButton(
             style: ButtonStyle(
-                shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5))),
-                backgroundColor: WidgetStatePropertyAll(Colors.blueAccent)),
+              shape: WidgetStatePropertyAll(
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+              ),
+              backgroundColor: WidgetStatePropertyAll(Colors.blueAccent),
+            ),
             onPressed: () {
               Navigator.pushReplacement(
-                  context,
-                  DialogRoute(
-                    context: context,
-                    builder: (context) => LoginScreen(),
-                  ));
+                context,
+                DialogRoute(
+                  context: context,
+                  builder: (context) => LoginScreen(),
+                ),
+              );
             },
-            child: Text(
-              'Зберегти',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: Text('Зберегти', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -133,7 +139,9 @@ class MainScreenState extends State<MainScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           topBarButtons(
-                              lable: 'Торгові точки та ПРРО', selecteIndexW: 1),
+                            lable: 'Торгові точки та ПРРО',
+                            selecteIndexW: 1,
+                          ),
                           topBarButtons(lable: 'Касири', selecteIndexW: 2),
                           topBarButtons(lable: 'Товари', selecteIndexW: 3),
                           topBarButtons(lable: 'Журнал', selecteIndexW: 4),
@@ -144,9 +152,11 @@ class MainScreenState extends State<MainScreen> {
                       if (currentContent == 'Торгові точки та ПРРО')
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5)),
-                              backgroundColor: Colors.blueAccent),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            backgroundColor: Colors.blueAccent,
+                          ),
                           onPressed: () {
                             showDialogFunc('Зазначте код ДПІ');
                             setState(() {});
@@ -158,13 +168,11 @@ class MainScreenState extends State<MainScreen> {
                         ),
                     ],
                   ),
-                  SizedBox(
-                    height: 20,
-                  ),
+                  SizedBox(height: 20),
                 ],
               ),
               switch (currentContent) {
-                'Торгові точки та ПРРО' => ttochki(),
+                'Торгові точки та ПРРО' => Ttochki(),
                 'Касири' => Teller(),
                 'Товари' => Items(),
                 _ => Text('В процесі'),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:prro/main_screen/main_screen_widgets/find_in_dictionary.dart';
@@ -13,7 +14,7 @@ class Teller extends StatefulWidget {
   State<Teller> createState() => TellerState();
 }
 
-void select_teller(List<String> extraText) {
+void selectTeller(List<String> extraText) {
   counter = !counter;
 
   rowTapSettings = !rowTapSettings;
@@ -26,7 +27,8 @@ class TellerState extends State<Teller> {
     return List.generate(listOfTllers.length, (index) {
       return DataRow(
         color: WidgetStatePropertyAll(
-            _selectedRowIndex == index ? Colors.orange[100] : Colors.white),
+          _selectedRowIndex == index ? Colors.orange[100] : Colors.white,
+        ),
         cells: cells(tellerGroup[index]),
         onSelectChanged: (bool? selected) {
           _selectedRowIndex = _selectedRowIndex == index ? -1 : index;
@@ -41,9 +43,10 @@ class TellerState extends State<Teller> {
 
   int _selectedRowIndex = -1;
 
-  editTeller(BuildContext context) {
-    isActiveTeller =
-        tellerGroup[_selectedRowIndex].last == 'Active' ? true : false;
+  void editTeller(BuildContext context) {
+    isActiveTeller = tellerGroup[_selectedRowIndex].last == 'Active'
+        ? true
+        : false;
 
     showDialog(
       context: context,
@@ -78,7 +81,7 @@ class TellerState extends State<Teller> {
                         builder: (context, setState) {
                           return Switch(
                             value: isActiveTeller,
-                            activeColor: Colors.blueAccent,
+                            activeThumbColor: Colors.blueAccent,
                             onChanged: (bool value) {
                               isActiveTeller = value;
 
@@ -120,10 +123,10 @@ class TellerState extends State<Teller> {
     );
   }
 
-  String PIB = '';
+  String pib = '';
   int? tellerType = 1;
   var tleer = {1: "Старший касир", 2: "Касир"};
-  editT(BuildContext context) {
+  void editT(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
@@ -166,24 +169,29 @@ class TellerState extends State<Teller> {
                                     ),
                                     border: OutlineInputBorder(
                                       borderSide: const BorderSide(
-                                          color: Colors.white, width: 2.0),
+                                        color: Colors.white,
+                                        width: 2.0,
+                                      ),
                                       borderRadius: BorderRadius.circular(5.0),
                                     ),
                                   ),
                                 ),
                               ),
                               IconButton(
-                                  onPressed: () {}, icon: Icon(Icons.search)),
+                                onPressed: () {},
+                                icon: Icon(Icons.search),
+                              ),
                             ],
                           ),
                           SizedBox(height: 20),
                           Text('ПІБ'),
                           TextField(
                             onChanged: (value) {
-                              PIB = value;
+                              pib = value;
                             },
-                            decoration:
-                                InputDecoration(border: OutlineInputBorder()),
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
                           ),
                           SizedBox(height: 20),
                           Text('Код ДПІ'),
@@ -193,22 +201,22 @@ class TellerState extends State<Teller> {
                                 width: MediaQuery.of(context).size.width * 0.15,
                                 child: TextField(
                                   decoration: InputDecoration(
-                                      border: OutlineInputBorder()),
+                                    border: OutlineInputBorder(),
+                                  ),
                                 ),
                               ),
-                              SizedBox(
-                                width: 20,
-                              ),
+                              SizedBox(width: 20),
                               ElevatedButton(
-                                  onPressed: () {}, child: Text('Перевірити')),
-                              SizedBox(
-                                width: 20,
+                                onPressed: () {},
+                                child: Text('Перевірити'),
                               ),
+                              SizedBox(width: 20),
                               ElevatedButton(
-                                  onPressed: () {
-                                    findInDictionary(context);
-                                  },
-                                  child: Text('Знайти у довіднику'))
+                                onPressed: () {
+                                  findInDictionary(context);
+                                },
+                                child: Text('Знайти у довіднику'),
+                              ),
                             ],
                           ),
                           SizedBox(height: 20),
@@ -220,20 +228,21 @@ class TellerState extends State<Teller> {
                             initialSelection: 10,
                             expandedInsets: EdgeInsets.zero,
                             focusNode: FocusNode(canRequestFocus: false),
-                            trailingIcon: Icon(
-                              Icons.arrow_drop_down,
-                            ),
+                            trailingIcon: Icon(Icons.arrow_drop_down),
                             dropdownMenuEntries: [
                               DropdownMenuEntry(
-                                  value: 1, label: 'Старший касир'),
+                                value: 1,
+                                label: 'Старший касир',
+                              ),
                               DropdownMenuEntry(value: 2, label: 'Касир'),
                             ],
                           ),
                           SizedBox(height: 20),
                           Text('Вкажіть пароль від SmartID'),
                           TextField(
-                            decoration:
-                                InputDecoration(border: OutlineInputBorder()),
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -244,9 +253,7 @@ class TellerState extends State<Teller> {
                       ),
                       Text(
                         'Подання форми про надання інформації про кваліфікований сертифікат відкритого ключа до ДПС',
-                        style: TextStyle(
-                          color: Colors.red,
-                        ),
+                        style: TextStyle(color: Colors.red),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -259,14 +266,22 @@ class TellerState extends State<Teller> {
               TextButton(
                 onPressed: () {
                   sendJsonData();
-                  listOfTllers.add(fillTellerRows(extraText: [
-                    PIB,
-                    tellerType.toString(),
+                  listOfTllers.add(
+                    fillTellerRows(
+                      extraText: [
+                        pib,
+                        tellerType.toString(),
+                        'Зареєстрований',
+                        'Inactive',
+                      ],
+                    ),
+                  );
+                  tellerGroup.add([
+                    pib,
+                    tleer[tellerType]!,
                     'Зареєстрований',
-                    'Inactive'
-                  ]));
-                  tellerGroup.add(
-                      [PIB, tleer[tellerType]!, 'Зареєстрований', 'Inactive']);
+                    'Inactive',
+                  ]);
                   Navigator.of(context).pop();
                   setState(() {});
                 },
@@ -287,11 +302,12 @@ class TellerState extends State<Teller> {
 
   Future<void> sendJsonData() async {
     // final url = Uri.parse('http://localhost:8080/admin/sellers');
-    final response =
-        await http.get(Uri.parse('http://localhost:8080/admin/sellers'));
+    final response = await http.get(
+      Uri.parse('http://localhost:8080/admin/sellers'),
+    );
 
     if (response.statusCode == 200) {
-      print(json.decode(response.body));
+      log(json.decode(response.body));
     } else {
       throw Exception('Failed to load data');
     }
@@ -337,9 +353,11 @@ class TellerState extends State<Teller> {
             children: [
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5)),
-                    backgroundColor: Colors.blueAccent),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  backgroundColor: Colors.blueAccent,
+                ),
                 onPressed: () {
                   editT(context);
                 },
@@ -348,36 +366,35 @@ class TellerState extends State<Teller> {
                   style: TextStyle(color: Colors.white),
                 ),
               ),
-              Container(
-                // decoration: BoxDecoration(border: Border.all()),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 300,
-                      child: TextField(
-                        cursorWidth: 1,
-                        cursorColor: Colors.grey,
-                        decoration: InputDecoration(
-                          hintText: 'Пошук касира ПІБ',
-                          hintStyle: TextStyle(color: Colors.grey),
-                          isDense: true,
-                          contentPadding: EdgeInsets.all(10),
-                          fillColor: Colors.white,
-                          focusColor: Colors.white,
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 300,
+                    child: TextField(
+                      cursorWidth: 1,
+                      cursorColor: Colors.grey,
+                      decoration: InputDecoration(
+                        hintText: 'Пошук касира ПІБ',
+                        hintStyle: TextStyle(color: Colors.grey),
+                        isDense: true,
+                        contentPadding: EdgeInsets.all(10),
+                        fillColor: Colors.white,
+                        focusColor: Colors.white,
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Colors.white,
+                            width: 2.0,
                           ),
-                          border: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                color: Colors.white, width: 2.0),
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
+                          borderRadius: BorderRadius.circular(5.0),
                         ),
                       ),
                     ),
-                    IconButton(onPressed: () {}, icon: Icon(Icons.search)),
-                  ],
-                ),
+                  ),
+                  IconButton(onPressed: () {}, icon: Icon(Icons.search)),
+                ],
               ),
             ],
           ),
@@ -395,62 +412,56 @@ class TellerState extends State<Teller> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 0.0),
-                        child: Container(
-                          // width: 300,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              'Інформація по касирам',
-                              style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            'Інформація по касирам',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ),
-                      Icon(
-                        Icons.info_outline,
-                        color: Colors.grey,
-                      ),
+                      Icon(Icons.info_outline, color: Colors.grey),
                     ],
                   ),
                   Row(
                     children: [
                       Visibility(
-                          visible: rowTapSettings,
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.drive_file_rename_outline_rounded,
-                                color: Colors.grey,
+                        visible: rowTapSettings,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.drive_file_rename_outline_rounded,
+                              color: Colors.grey,
+                            ),
+                            TextButton(
+                              child: Text(
+                                'Редагувати',
+                                style: TextStyle(color: Colors.blue),
                               ),
-                              TextButton(
-                                child: Text(
-                                  'Редагувати',
-                                  style: TextStyle(color: Colors.blue),
-                                ),
-                                onPressed: () {
-                                  editTeller(context);
-                                },
+                              onPressed: () {
+                                editTeller(context);
+                              },
+                            ),
+                            Icon(
+                              Icons.delete_forever_rounded,
+                              color: Colors.grey,
+                            ),
+                            TextButton(
+                              child: Text(
+                                'Видалити',
+                                style: TextStyle(color: Colors.blue),
                               ),
-                              Icon(
-                                Icons.delete_forever_rounded,
-                                color: Colors.grey,
-                              ),
-                              TextButton(
-                                child: Text(
-                                  'Видалити',
-                                  style: TextStyle(color: Colors.blue),
-                                ),
-                                onPressed: () {},
-                              ),
-                            ],
-                          )),
+                              onPressed: () {},
+                            ),
+                          ],
+                        ),
+                      ),
                       IconButton(
                         onPressed: () {},
-                        icon: Icon(
-                          Icons.replay_outlined,
-                        ),
+                        icon: Icon(Icons.replay_outlined),
                         color: Colors.blue,
                       ),
                     ],
@@ -497,9 +508,7 @@ class TellerState extends State<Teller> {
                     initialSelection: 10,
                     expandedInsets: EdgeInsets.zero,
                     focusNode: FocusNode(canRequestFocus: false),
-                    trailingIcon: Icon(
-                      Icons.arrow_drop_down,
-                    ),
+                    trailingIcon: Icon(Icons.arrow_drop_down),
                     dropdownMenuEntries: [
                       DropdownMenuEntry(value: 5, label: '5'),
                       DropdownMenuEntry(value: 10, label: '10'),
@@ -512,25 +521,28 @@ class TellerState extends State<Teller> {
                   child: Text('1 із 1'),
                 ),
                 IconButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    onPressed: null,
-                    icon: Icon(Icons.skip_previous_outlined)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  onPressed: null,
+                  icon: Icon(Icons.skip_previous_outlined),
+                ),
                 IconButton(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   onPressed: null,
                   icon: Icon(Icons.navigate_before),
                 ),
                 IconButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    onPressed: null,
-                    icon: Icon(Icons.navigate_next)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  onPressed: null,
+                  icon: Icon(Icons.navigate_next),
+                ),
                 IconButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    onPressed: null,
-                    icon: Icon(Icons.skip_next_outlined)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  onPressed: null,
+                  icon: Icon(Icons.skip_next_outlined),
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -584,5 +596,7 @@ final user = jsonDecode('''
 
 final initUser = user["items"];
 final userLenght = initUser.length;
-List<DataColumn> tellerTop =
-    novaTThead(showStatus: true, extraText: ['ПІБ', 'Тип', 'Статус в ДПС']);
+List<DataColumn> tellerTop = novaTThead(
+  showStatus: true,
+  extraText: ['ПІБ', 'Тип', 'Статус в ДПС'],
+);

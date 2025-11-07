@@ -10,7 +10,7 @@ DataRow fillTellerRows({required List<String>? extraText}) {
     color: WidgetStatePropertyAll(color333),
     cells: a,
     onSelectChanged: (value) {
-      select_teller(extraText!);
+      selectTeller(extraText!);
       // setState(() {});
     },
   );
