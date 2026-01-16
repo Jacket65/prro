@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:prro/core/constants/settings.dart';
 import 'package:prro/tellers_screen/cells.dart';
 import 'package:prro/tellers_screen/teller.dart';
 
 DataRow fillTellerRows({required List<String>? extraText}) {
-  List<DataCell> a = cells(extraText);
+  List<DataCell> cell = cells(extraText);
 
   return DataRow(
-    color: WidgetStatePropertyAll(color333),
-    cells: a,
+    color: WidgetStatePropertyAll(Colors.white),
+    cells: cell,
     onSelectChanged: (value) {
       selectTeller(extraText!);
       // setState(() {});

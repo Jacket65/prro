@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-List<DataRow> rowsName = [];
 List<String> rowsText = [
   'Кафе',
   'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, w',
@@ -8,7 +7,7 @@ List<String> rowsText = [
   '228',
   'зареєстровано',
   'trikrapki',
-  'iconDown'
+  'iconDown',
 ];
 List<String> ttrows = [
   'Назва',
@@ -17,35 +16,34 @@ List<String> ttrows = [
   'Ідентифікатор',
   'Статус у ДПС',
   'Дії',
-  ''
+  '',
 ];
 
-List<DataColumn> novaTThead(
-    {bool showStatus = false, List<String>? extraText}) {
+List<DataColumn> novaTThead({
+  bool showStatus = false,
+  List<String>? extraText,
+}) {
   List<DataColumn> list = [];
   for (String i in extraText!) {
     list.add(
-      DataColumn(
-          label: Expanded(
-              child: Text(
-        i,
-        softWrap: true,
-      ))),
+      DataColumn(label: Expanded(child: Text(i, softWrap: true))),
       // DataColumn(label: Flexible(child: FittedBox(child: Text(i)))),
     );
   }
   if (showStatus) {
     list.add(
       DataColumn(
-          label: Expanded(
-              child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
-          'Стан активності',
-          textAlign: TextAlign.center,
-          softWrap: true,
+        label: Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Стан активності',
+              textAlign: TextAlign.center,
+              softWrap: true,
+            ),
+          ),
         ),
-      ))),
+      ),
       // DataColumn(label: Flexible(child: FittedBox(child: Text(i)))),
     );
   }
@@ -62,28 +60,27 @@ List<String> largestCities = [
   'Львів',
   'Кривий Ріг',
   'Миколаїв',
-  'Маріуполь'
+  'Маріуполь',
 ];
 String currentContent = 'Торгові точки та ПРРО';
 
 int selecteIndex = 1;
 List<DataRow> listOfTllers = [];
-List<List<String>> tellerGroup = [];
+
 List<String> tellerText = [
   'Зеленський Володимир Олександрович',
   '1',
   'Зареєстрований',
-  'Inactive'
+  'Inactive',
 ];
 List<String> tellerTextN = [
   'Зеленський Володимир Олександрович',
   '1',
   'Зареєстрований',
-  'Active'
+  'Active',
 ];
 var currentValue = 1;
 
-Color color333 = Colors.white;
 bool counter = false;
 bool rowTapSettings = false;
 

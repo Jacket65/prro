@@ -1,12 +1,25 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:prro/core/constants/settings.dart';
-import 'package:prro/main_screen/main_screen_widgets/fill_rows.dart';
 import 'package:prro/main_screen/main_screen_widgets/find_in_dictionary.dart';
 
 class DialogDpi extends StatefulWidget {
   final String title;
-  const DialogDpi({super.key, required this.title});
+  final List<DataRow> rowsName;
+
+  final void Function({
+    required List<String> rowData,
+    required List<DataRow> rowsList,
+    required int rowIndex,
+  })
+  fillRows;
+
+  const DialogDpi({
+    super.key,
+    required this.title,
+    required this.rowsName,
+    required this.fillRows,
+  });
 
   @override
   State<DialogDpi> createState() => _DialogDpiState();
@@ -106,7 +119,11 @@ class _DialogDpiState extends State<DialogDpi> {
                 backgroundColor: WidgetStatePropertyAll(Colors.blue),
               ),
               onPressed: () {
-                fillRows(extraText: rowsText);
+                widget.fillRows(
+                  rowData: rowsText,
+                  rowsList: widget.rowsName,
+                  rowIndex: 0,
+                );
                 setState(() {});
                 Navigator.of(context).pop();
               },

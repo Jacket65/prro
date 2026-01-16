@@ -72,15 +72,22 @@ class LoginScreen extends StatelessWidget {
 
                       child: const Text("seller"),
                     ),
-                    if (state is LoginLoading) ...[
-                      const SizedBox(height: 18),
-                      const Center(child: CircularProgressIndicator()),
-                    ],
+
                     const SizedBox(height: 18),
                     ElevatedButton(
                       onPressed: () => _navigateTo(context, const MainScreen()),
                       child: const Text("Адміністратор"),
                     ),
+                    // const SizedBox(height: 18),
+                    // ElevatedButton(
+                    //   onPressed: () {},
+
+                    //   child: const Text("admin"),
+                    // ),
+                    // if (state is LoginLoading) ...[
+                    //   const SizedBox(height: 18),
+                    //   const Center(child: CircularProgressIndicator()),
+                    // ],
                   ],
                 ),
               ),
@@ -96,6 +103,7 @@ class LoginScreen extends StatelessWidget {
       case LoginSuccess():
         _showSnackBar(context, "Вітаємо вас на роботі!");
         context.read<UserBloc>().add(LoadUser(username: state.username));
+
         _navigateTo(context, const Shift());
       case LoginFailure():
         _showSnackBar(context, "Сталася помилка ${state.error}");

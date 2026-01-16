@@ -1,6 +1,20 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:prro/items_screen/category_pick_screen.dart';
-import 'package:prro/items_screen/custom_card.dart';
+import 'package:provider/provider.dart';
+import 'package:prro/items_screen/models/measure.dart';
+// Assuming CategoryPickScreen is the actual widget name for category_pick_screen.dart
+import 'package:prro/items_screen/widgets/category_pick_screen.dart';
+import 'package:prro/items_screen/widgets/custom_card.dart';
+import 'package:prro/items_screen/widgets/custom_search_field.dart';
+import 'package:prro/main_screen/services/api_service.dart';
+
+class Category {
+  final String title;
+  final int id;
+
+  Category(this.title, this.id);
+}
 
 class Items extends StatefulWidget {
   const Items({super.key});
@@ -10,152 +24,62 @@ class Items extends StatefulWidget {
 }
 
 class _ItemsState extends State<Items> {
+  final List<Category> _categories = [];
+  ApiService get _apiService => context.read<ApiService>();
+  int get _retailOutletId => context.read<int>();
+
+  final TextEditingController _searchController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+
+    _apiService.fetchCategories(retailOutlet: _retailOutletId).then((value) {
+      setState(() {
+        _categories.clear();
+        _categories.addAll(
+          value.map((value) => Category(value['name'], value['id'])),
+        );
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 16.0),
       child: Column(
-        children: [
-          Row(
-            children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5)),
-                    backgroundColor: Colors.blueAccent),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (BuildContext context) => CategoryPick(),
-                    ),
-                  );
-                },
-                child: Text(
-                  'Новий товар',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              SizedBox(
-                width: 20,
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5)),
-                    backgroundColor: Colors.blueGrey[50]),
-                onPressed: () {},
-                child: Text(
-                  'Імпорт товарів',
-                  style: TextStyle(color: Colors.black),
-                ),
-              ),
-              SizedBox(
-                width: 20,
-              ),
-              IconButton(
-                constraints: BoxConstraints(),
-                padding: EdgeInsets.all(4),
-                icon: Icon(
-                  Icons.create_new_folder_rounded,
-                  color: Colors.grey,
-                ),
-                style: ButtonStyle(
-                  shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4))),
-                  backgroundColor: WidgetStatePropertyAll(Colors.blueGrey[50]),
-                ),
-                onPressed: () {
-                  addCategory(context);
-                },
-              ),
-              SizedBox(
-                width: 20,
-              ),
-              SizedBox(
-                width: 32,
-                height: 32,
-                child: PopupMenuButton(
-                  tooltip: "Додатково",
-                  iconColor: Colors.grey,
-                  // padding: EdgeInsets.zero,
-                  style: ButtonStyle(
-                      backgroundColor:
-                          WidgetStatePropertyAll(Colors.blueGrey[50]),
-                      padding: WidgetStatePropertyAll(EdgeInsets.zero),
-                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4)))),
-                  // (
-                  // borderRadius: BorderRadius.circular(2)))),
-                  offset: Offset(0, 42),
-                  menuPadding: EdgeInsets.all(4),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          _buildActionButtons(context),
+          const SizedBox(height: 16),
 
-                  itemBuilder: (context) {
-                    return [
-                      PopupMenuItem(child: Text('Історія імпорту')),
-                      PopupMenuItem(child: Text('Експорт товарів')),
-                      PopupMenuItem(child: Text('Видалити всі категорії')),
-                      PopupMenuItem(child: Text('Переглянути інструкцію')),
-                    ];
-                  },
-                ),
-              )
-            ],
-          ),
-          SizedBox(
-            height: 20,
-            width: 20,
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  cursorWidth: 1,
-                  cursorColor: Colors.grey,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search),
-                    hintText: 'Пошук по категоріям',
-                    hintStyle: TextStyle(color: Colors.grey),
-                    isDense: true,
-                    contentPadding: EdgeInsets.all(10),
-                    fillColor: Colors.white,
-                    focusColor: Colors.white,
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                    border: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.white, width: 2.0),
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 20,
-          ),
+          CustomSearchField(searchController: _searchController),
+          const SizedBox(height: 16),
+
           Expanded(
-            child: SingleChildScrollView(
-              child: GridView.builder(
-                shrinkWrap: true,
-                primary: true,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 8.0,
-                  mainAxisSpacing: 8.0,
-                  childAspectRatio: 3.5,
-                ),
-                itemCount: cardTitles.length,
-                itemBuilder: (context, index) {
-                  // categoryItems.add([[]]);
-
-                  return CustomCard(
-                    cardInx: index,
-                    cardTit: cardTitles[index],
-                  );
-                },
+            child: GridView.builder(
+              // key: PageStorageKey('categoryGrid'), // Good for maintaining scroll position
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3, // Number of cards per row
+                crossAxisSpacing: 12.0,
+                mainAxisSpacing: 12.0,
+                childAspectRatio: 3.5,
               ),
+              itemCount: _categories.length,
+              itemBuilder: (context, index) {
+                final category = _categories[index];
+                return CustomCard(
+                  title: category.title,
+                  index: category.id,
+                  categoryList: _categories,
+                );
+              },
             ),
           ),
         ],
@@ -163,80 +87,71 @@ class _ItemsState extends State<Items> {
     );
   }
 
-  Future<dynamic> addCategory(BuildContext context) {
-    var input = 'Нова категорія';
-    return showDialog(
+  Future<void> _addCategoryDialog(BuildContext context) {
+    String newCategoryName = '';
+
+    return showDialog<void>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-          backgroundColor: Colors.white,
+          // Use Theme or a separate function for styling for consistency
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Нова категорія'),
+              const Text('Нова категорія'),
               IconButton(
-                  padding: EdgeInsets.all(0),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  icon: Icon(Icons.cancel))
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                icon: const Icon(Icons.close),
+              ),
             ],
           ),
-          content: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.35,
-            // height: MediaQuery.of(context).size.height * 0.4,
-            child: SingleChildScrollView(
+          content: SingleChildScrollView(
+            // Use FractionallySizedBox to define a relative width for large screens
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.35,
               child: Column(
+                mainAxisSize: MainAxisSize.min, // Use minimum space
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Назва категрії'),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
+                  const Text('Назва категорії'),
+                  const SizedBox(height: 10),
                   TextField(
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Вкажіть назву категорії',
-                        hintStyle: TextStyle(color: Colors.black26)),
+                    autofocus: true,
                     onChanged: (value) {
-                      input = value;
+                      newCategoryName = value.trim();
                     },
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Вкажіть назву категорії',
+                      hintStyle: TextStyle(color: Colors.black26),
+                      isDense: true,
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                TextButton(
-                  style: ButtonStyle(
-                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5))),
-                      backgroundColor: WidgetStatePropertyAll(Colors.blue)),
-                  onPressed: () {
-                    cardTitles.add(input);
-                    setState(() {});
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    'Зберегти',
-                    style: TextStyle(color: Colors.white),
-                  ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Скасувати'),
+            ),
+            // Use ElevatedButton for primary actions
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Скасувати'),
-                ),
-              ],
+              ),
+              onPressed: () async {
+                await _createCategory(newCategoryName, context, dialogContext);
+              },
+              child: const Text('Зберегти'),
             ),
           ],
         );
@@ -244,45 +159,151 @@ class _ItemsState extends State<Items> {
     );
   }
 
-  var items = ['1', '2', '3', '4', '5'];
-}
+  Future<void> _createCategory(
+    String newCategoryName,
+    BuildContext context,
+    BuildContext dialogContext,
+  ) async {
+    if (newCategoryName.trim().isNotEmpty) {
+      // State update should happen only if the name is valid
+      for (int i = 0; i < _categories.length; i++) {
+        if (_categories[i].title == newCategoryName) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Категорія з таким ім\'ям вже існує')),
+          );
+          Navigator.of(context).pop();
+          return;
+        }
+      }
+    }
+    try {
+      await _apiService.createCategories(
+        name: newCategoryName,
+        outletId: _retailOutletId,
+      );
 
-List<List<List<String>>> categoryItems = [
-  [
-    ['', '', '', '', '', ''],
-    ['', '', '', '', '', ''],
-  ],
-  [
-    ['', '', '', '', '', ''],
-    ['', '', '', '', '', ''],
-  ],
-  [
-    ['', '', '', '', '', ''],
-    ['', '', '', '', '', ''],
-  ],
-  [
-    ['', '', '', '', '', ''],
-    ['', '', '', '', '', ''],
-  ],
-  [
-    ['', '', '', '', '', ''],
-    ['', '', '', '', '', ''],
-  ],
-  [
-    ['', '', '', '', '', ''],
-    ['', '', '', '', '', ''],
-  ],
-  [
-    ['', '', '', '', '', ''],
-    ['', '', '', '', '', ''],
-  ],
-];
-final List<String> cardTitles = [
-  'Холодні напої',
-  'Солодощі',
-  'Чай ваговий',
-  'Додатки',
-  'Кава вагова',
-  'Кавоварка',
-  'Кавоварка2',
-];
+      _categories.add(Category(newCategoryName, _categories.length));
+      setState(() {});
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Категорія успішно створена')));
+        Navigator.of(dialogContext).pop();
+      }
+      return;
+    } catch (e) {
+      log("$e");
+      return;
+    }
+  }
+
+  // Extracted widget for action buttons
+  Widget _buildActionButtons(BuildContext context) {
+    // Define a common style for the secondary buttons for consistency
+    final ButtonStyle secondaryButtonStyle = ElevatedButton.styleFrom(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      backgroundColor: Colors.grey[100],
+      foregroundColor: Colors.black,
+      elevation: 0,
+    );
+
+    return Row(
+      children: [
+        // Primary Action: New Item (Новий товар)
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blueAccent,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          onPressed: () {
+            // Navigate to CategoryPick screen, passing the list of category titles
+            final measures = Provider.of<List<Measure>>(context, listen: false);
+            Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) {
+                  return MultiProvider(
+                    providers: [
+                      Provider<List<Measure>>.value(value: measures),
+                      Provider<int>.value(value: _retailOutletId),
+                    ],
+                    child: CategoryPick(categoryList: _categories),
+                  );
+                },
+              ),
+            );
+          },
+          icon: const Icon(Icons.add),
+          label: const Text('Новий товар'),
+        ),
+        const SizedBox(width: 12),
+
+        // Secondary Action: Import Items (Імпорт товарів)
+        ElevatedButton(
+          style: secondaryButtonStyle,
+          onPressed: () {
+            // TODO: Implement Import logic
+          },
+          child: const Text('Імпорт товарів'),
+        ),
+        const SizedBox(width: 12),
+
+        // Action: Add Category (Створити категорію)
+        IconButton(
+          style: secondaryButtonStyle.copyWith(
+            minimumSize: WidgetStateProperty.all(const Size(32, 32)),
+            padding: WidgetStateProperty.all(const EdgeInsets.all(4)),
+            // Explicitly setting icon color, as IconButton style might override it
+          ),
+          icon: Icon(Icons.create_new_folder_rounded, color: Colors.grey[700]),
+          tooltip: 'Створити категорію',
+          onPressed: () => _addCategoryDialog(context),
+        ),
+        const SizedBox(width: 12),
+
+        // Action: More Options (Додатково) - PopupMenuButton
+        SizedBox(
+          width: 36, // Slightly increased size for better touch area
+          height: 36,
+          child: PopupMenuButton<String>(
+            tooltip: "Додатково",
+            icon: Icon(Icons.more_vert, color: Colors.grey[700]),
+            color: Colors.white, // Ensure menu background is white
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            offset: const Offset(0, 42),
+            padding: EdgeInsets.zero,
+            itemBuilder: (context) => [
+              const PopupMenuItem<String>(
+                value: 'import_history',
+                child: Text('Історія імпорту'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'export_items',
+                child: Text('Експорт товарів'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'delete_categories',
+                child: Text('Видалити всі категорії'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'view_instruction',
+                child: Text('Переглянути інструкцію'),
+              ),
+            ],
+            onSelected: (String value) {
+              // TODO: Implement logic based on selected value
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Selected: $value')));
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
