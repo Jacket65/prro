@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prro/features/auth/auth.dart';
 import 'package:prro/features/seller/screens/screens.dart';
 import 'package:prro/features/shift/bloc/bloc.dart';
 
@@ -24,16 +25,7 @@ class _ShiftState extends State<Shift> {
     return BlocConsumer<ShiftCubit, ShiftState>(
       listenWhen: (previous, current) => current != previous,
       listener: (context, state) {
-        if (state case ShiftOpened()) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => SellerScreen()),
-          );
-        } else if (state case ShiftError()) {
-          _showSnackBar(context, state.message);
-        } else if (state case ShiftClosed()) {
-          _showSnackBar(context, "Зміна закрита");
-        }
+        checkState(state, context);
       },
       builder: (context, state) {
         return Scaffold(
@@ -48,16 +40,41 @@ class _ShiftState extends State<Shift> {
                         },
                         child: const Text("Open shift"),
                       ),
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginScreen(),
+                          ),
+                        ),
+                        child: Text("Get back"),
+                      ),
                     ],
                   )
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [Text("Shift is already open $state")],
+                    children: [
+                      Text("Shift is already open. Processing... $state"),
+                    ],
                   ),
           ),
         );
       },
     );
+  }
+
+  void checkState(ShiftState state, BuildContext context) {
+    if (state case ShiftOpened()) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SellerScreen()),
+      );
+    } else if (state case ShiftError()) {
+      _showSnackBar(context, state.message);
+    } else if (state case ShiftClosed()) {
+      _showSnackBar(context, "Зміна закрита");
+    }
   }
 
   void _showSnackBar(BuildContext context, String message) {

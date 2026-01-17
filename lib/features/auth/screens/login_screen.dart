@@ -28,7 +28,7 @@ class LoginScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(state.toString()),
+                    // Text(state.toString()),
                     _buildStateMessage(state),
                     const SizedBox(height: 24),
                     _buildTextField(
@@ -56,8 +56,9 @@ class LoginScreen extends StatelessWidget {
                         }
                       },
 
-                      child: const Text("Enter as seller"),
+                      child: const Text("Я продавець"),
                     ),
+
                     const SizedBox(height: 18),
                     ElevatedButton(
                       onPressed: () {
@@ -72,11 +73,10 @@ class LoginScreen extends StatelessWidget {
 
                       child: const Text("seller"),
                     ),
-
                     const SizedBox(height: 18),
                     ElevatedButton(
                       onPressed: () => _navigateTo(context, const MainScreen()),
-                      child: const Text("Адміністратор"),
+                      child: const Text("Я адміністратор"),
                     ),
                     // const SizedBox(height: 18),
                     // ElevatedButton(

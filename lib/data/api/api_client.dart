@@ -10,8 +10,8 @@ class ApiClient {
     : _dio = dio,
       _prefs = prefs {
     _initializeInterceptors();
-    // _dio.options.baseUrl = "http://127.0.0.1:8080/";
-    _dio.options.baseUrl = "http://pos.grainsworld.click";
+    _dio.options.baseUrl = "http://127.0.0.1:8080/";
+    // _dio.options.baseUrl = "http://pos.grainsworld.click";
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);
   }
@@ -40,6 +40,7 @@ class ApiClient {
           return handler.next(response);
         },
         onError: (DioException error, handler) {
+          log('[ERROR DATA] ${error.response?.data}');
           log('[ERROR] ${error.response?.statusCode} ${error.message}');
           if (error.response?.statusCode == 401) {
             // TODO: Handle logout or token refresh

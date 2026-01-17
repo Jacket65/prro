@@ -13,6 +13,9 @@ class ShowItem<T extends Item> extends StatelessWidget {
     return ShowItem._(item: item);
   }
 
+  final String previewImg =
+      "https://cdn.egersund.ua/fb454aa0-07ed-487a-0c75-2ed3fbd7cd00/origin/origin";
+
   @override
   Widget build(BuildContext context) {
     if (item is Product) {
@@ -29,8 +32,8 @@ class ShowItem<T extends Item> extends StatelessWidget {
             SizedBox(
               width: 120,
               child: Image.network(
-                // product.name
-                "https://cdn.egersund.ua/fb454aa0-07ed-487a-0c75-2ed3fbd7cd00/origin/origin",
+                product.name,
+                // previewImg,
 
                 // : product.imageUrl,
                 errorBuilder: (context, error, stackTrace) =>

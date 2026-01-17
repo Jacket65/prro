@@ -62,10 +62,17 @@ class _SellerScreenState extends State<SellerScreen> {
                     widgets: [
                       BlocBuilder<ShiftCubit, ShiftState>(
                         bloc: context.read<ShiftCubit>(),
-                        builder: (conext, state) => ElevatedButton(
-                          onPressed: () =>
-                              context.read<ShiftCubit>().closeShift(),
+                        builder: (conext, state) => PopupMenuItem(
                           child: Text("Close shift"),
+                          onTap: () {
+                            context.read<ShiftCubit>().closeShift();
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LoginScreen(),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
