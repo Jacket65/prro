@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:prro/data/api/api_client.dart';
+import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
 
 class BalanceService implements BalanceServiceI {
-  final ApiClient _apiClient;
+  final ApiClientI _apiClient;
 
-  BalanceService({required ApiClient apiClient}) : _apiClient = apiClient;
+  BalanceService({required ApiClientI apiClient}) : _apiClient = apiClient;
   @override
   Future<int> getBalance() async {
     try {

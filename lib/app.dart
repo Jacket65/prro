@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:prro/core/theme/theme.dart';
-import 'package:prro/data/api/api_client.dart';
+import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/repositories/balance/balance.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
 import 'package:prro/data/repositories/login_repository/login_repository.dart';
@@ -24,7 +24,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class MyApp extends StatelessWidget {
   final SharedPreferences prefs;
   final List<DataRow> rowsName = [];
-  final ApiClient apiClient;
+  final ApiClientI apiClient;
   final ApiService api = ApiService();
   MyApp({super.key, required this.prefs, required this.apiClient});
 

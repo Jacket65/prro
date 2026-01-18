@@ -1,8 +1,9 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
+import 'package:prro/data/api/api_client_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ApiClient {
+class ApiClient implements ApiClientI {
   final Dio _dio;
   final SharedPreferences _prefs;
 
@@ -15,8 +16,6 @@ class ApiClient {
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);
   }
-
-  Dio get dio => _dio;
 
   void _initializeInterceptors() {
     _dio.interceptors.clear();
@@ -52,7 +51,18 @@ class ApiClient {
     );
   }
 
+  @override
   Future<Response> get(String path) async {
     return await _dio.get(path);
+  }
+
+  @override
+  Future<Response<dynamic>> post(String path, {dynamic data}) {
+    return _dio.post(path, data: data);
+  }
+
+  @override
+  Future<Response<dynamic>> patch(String path, {dynamic data}) {
+    return _dio.patch(path, data: data);
   }
 }

@@ -1,10 +1,10 @@
-import 'package:prro/data/api/api_client.dart';
+import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/repositories/user_repository/user_repo_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final class UserService implements UserServiceI {
   final SharedPreferences prefs;
-  final ApiClient apiClient;
+  final ApiClientI apiClient;
 
   UserService({required this.prefs, required this.apiClient});
 

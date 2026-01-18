@@ -1,10 +1,10 @@
-import 'package:prro/data/api/api_client.dart';
+import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final class LoginService implements LoginServiceI {
   final SharedPreferences prefs;
-  final ApiClient apiClient;
+  final ApiClientI apiClient;
 
   LoginService({required this.prefs, required this.apiClient});
 
@@ -14,7 +14,7 @@ final class LoginService implements LoginServiceI {
     required String password,
   }) async {
     await Future.delayed(const Duration(seconds: 1));
-    final response = await apiClient.dio.post(
+    final response = await apiClient.post(
       '/auth/seller',
       data: {'phone_number': username, 'password': password},
     );

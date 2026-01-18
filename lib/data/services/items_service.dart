@@ -1,15 +1,15 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:prro/data/api/api_client.dart';
+import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 // import 'package:prro/data/services/services.dart';
 
 class ItemsService implements ItemsServiceI {
-  final ApiClient _apiClient;
+  final ApiClientI _apiClient;
 
-  ItemsService({required ApiClient apiClient}) : _apiClient = apiClient;
+  ItemsService({required ApiClientI apiClient}) : _apiClient = apiClient;
   @override
   Future<List<Item>> getItemsCategory() async {
     try {

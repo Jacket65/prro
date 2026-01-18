@@ -2,16 +2,16 @@ import 'dart:async';
 // import 'dart:convert';
 import 'dart:developer';
 
-import 'package:prro/data/api/api_client.dart';
+import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/api/models/models.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
 
 class OrdersRepository implements OrdersRepositoryI {
-  final ApiClient _apiClient;
+  final ApiClientI _apiClient;
 
   final List<Product> _products = [];
 
-  OrdersRepository({required ApiClient apiClient}) : _apiClient = apiClient;
+  OrdersRepository({required ApiClientI apiClient}) : _apiClient = apiClient;
 
   @override
   List<Product> get products => List.unmodifiable(_products);
@@ -54,7 +54,7 @@ class OrdersRepository implements OrdersRepositoryI {
         "payment_method": paymentMethod,
       };
       // final response =
-      await _apiClient.dio.post("/seller/order", data: request);
+      await _apiClient.post("/seller/order", data: request);
       // final data = jsonDecode(response.data);
       // log("Sell success: $data");
     } catch (e, stack) {

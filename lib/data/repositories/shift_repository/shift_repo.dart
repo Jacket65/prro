@@ -1,20 +1,22 @@
 import 'dart:developer';
 
-import 'package:prro/data/api/api_client.dart';
+import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/repositories/shift_repository/shift_repo_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ShiftService implements ShiftServiceI {
-  final ApiClient _apiClient;
+  final ApiClientI _apiClient;
   final SharedPreferences _prefs;
 
-  ShiftService({required ApiClient apiClient, required SharedPreferences prefs})
-    : _apiClient = apiClient,
-      _prefs = prefs;
+  ShiftService({
+    required ApiClientI apiClient,
+    required SharedPreferences prefs,
+  }) : _apiClient = apiClient,
+       _prefs = prefs;
   @override
   Future<dynamic> openShift() async {
     try {
-      return await _apiClient.dio.post("/seller/open_shift");
+      return await _apiClient.post("/seller/open_shift");
     } catch (e, stackTrace) {
       log("Error in getItems: $e", stackTrace: stackTrace);
       rethrow;
@@ -24,7 +26,7 @@ class ShiftService implements ShiftServiceI {
   @override
   Future<void> closeShift() async {
     try {
-      await _apiClient.dio.patch("/seller/close_shift");
+      await _apiClient.patch("/seller/close_shift");
     } catch (e, stackTrace) {
       log("Error in getItems: $e", stackTrace: stackTrace);
       rethrow;
