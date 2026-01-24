@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 // import 'package:prro/items_screen/widgets/inside_category_screen.dart';
 // import 'package:prro/items_screen/items_screen.dart';
 import 'package:prro/core/constants/settings.dart';
-import 'package:prro/items_screen/items_screen.dart';
-import 'package:prro/items_screen/models/measure.dart';
-import 'package:prro/main_screen/services/api_service.dart';
+import 'package:prro/features/admin/screens/items_screen/items_screen.dart';
+import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
+import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
 
 class CategoryPick extends StatefulWidget {
   final List<Category> categoryList;

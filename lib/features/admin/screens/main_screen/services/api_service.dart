@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
-import 'package:prro/items_screen/models/measure.dart';
+import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 

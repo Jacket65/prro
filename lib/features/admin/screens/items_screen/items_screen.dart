@@ -2,12 +2,12 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:prro/items_screen/models/measure.dart';
+import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
 // Assuming CategoryPickScreen is the actual widget name for category_pick_screen.dart
-import 'package:prro/items_screen/widgets/category_pick_screen.dart';
-import 'package:prro/items_screen/widgets/custom_card.dart';
-import 'package:prro/items_screen/widgets/custom_search_field.dart';
-import 'package:prro/main_screen/services/api_service.dart';
+import 'package:prro/features/admin/screens/items_screen/widgets/category_pick_screen.dart';
+import 'package:prro/features/admin/screens/items_screen/widgets/custom_card.dart';
+import 'package:prro/features/admin/screens/items_screen/widgets/custom_search_field.dart';
+import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
 
 class Category {
   final String title;

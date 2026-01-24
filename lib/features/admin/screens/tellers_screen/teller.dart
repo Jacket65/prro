@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 // import 'package:prro/main_screen/main_screen_widgets/find_in_dictionary.dart';
 import 'package:prro/core/constants/settings.dart';
-import 'package:prro/tellers_screen/cells.dart';
+import 'package:prro/features/admin/screens/tellers_screen/cells.dart';
 // import 'package:prro/tellers_screen/fill_teller_rows.dart';
 
 // class Teller extends StatefulWidget {

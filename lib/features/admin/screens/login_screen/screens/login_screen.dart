@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:prro/main_screen/main_screen.dart';
+import 'package:prro/features/admin/screens/main_screen/main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

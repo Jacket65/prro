@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/shift/screens/shift.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
-import 'package:prro/main_screen/main_screen.dart';
+import 'package:prro/features/admin/screens/main_screen/main_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});

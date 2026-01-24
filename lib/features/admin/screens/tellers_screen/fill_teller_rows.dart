@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:prro/tellers_screen/cells.dart';
-import 'package:prro/tellers_screen/teller.dart';
+import 'package:prro/features/admin/screens/tellers_screen/cells.dart';
+import 'package:prro/features/admin/screens/tellers_screen/teller.dart';
 
 DataRow fillTellerRows({required List<String>? extraText}) {
   List<DataCell> cell = cells(extraText);

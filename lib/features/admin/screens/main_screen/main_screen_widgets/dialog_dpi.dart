@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:prro/core/constants/settings.dart';
-import 'package:prro/main_screen/main_screen_widgets/find_in_dictionary.dart';
+import 'package:prro/features/admin/screens/main_screen/main_screen_widgets/find_in_dictionary.dart';
 
 class DialogDpi extends StatefulWidget {
   final String title;

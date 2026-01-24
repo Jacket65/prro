@@ -18,7 +18,7 @@ import 'package:prro/features/auth/auth.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/shift/bloc/bloc.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
-import 'package:prro/main_screen/services/api_service.dart';
+import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyApp extends StatelessWidget {
