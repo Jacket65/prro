@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "46325475883",
+    "project_id": "prro-586b8",
+    "storage_bucket": "prro-586b8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46325475883:android:40eb82d7e7b40282dd586e",
+        "android_client_info": {
+          "package_name": "com.example.prro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClDGoy4OXCKFEmEjDsI0Zfc5bf25OC-kk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

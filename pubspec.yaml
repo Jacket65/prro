@@ -9,16 +9,27 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.6.0
   cupertino_icons: ^1.0.8
+
+  #http
+  http: ^1.6.0
   dio: ^5.9.0
-  path_provider: ^2.1.5
+
+  #bloc
   flutter_bloc: ^9.1.1
   equatable: ^2.0.8
-  shared_preferences: ^2.5.4
   talker: ^5.1.11
   talker_bloc_logger: ^5.0.1
+
+  #provider
   provider: ^6.1.5+1
+  path_provider: ^2.1.5
+
+  #storage
+  shared_preferences: ^2.5.4
+
+  #firebase
+  firebase_core: ^4.4.0
 
 dev_dependencies:
   flutter_test:
