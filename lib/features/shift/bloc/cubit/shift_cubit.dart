@@ -1,47 +1,60 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prro/data/api/models/shift.dart';
 import 'package:prro/data/repositories/shift_repository/shift_repository.dart';
 
 part 'shift_state.dart';
 
+/// Single source of truth for the cashier's shift state. The backend decides;
+/// we only cache the last [ShiftResponse] in the current state. After close we
+/// drop it (→ [ShiftNone]) so nothing stale lingers.
 class ShiftCubit extends Cubit<ShiftState> {
   final ShiftRepositoryI _shiftRepository;
 
-  ShiftCubit(this._shiftRepository) : super(ShiftInitial());
+  ShiftCubit(this._shiftRepository) : super(const ShiftInitial());
 
-  Future<void> openShift() async {
-    emit(ShiftLoading());
+  /// Fetches the current shift. 404 → [ShiftNone] (open-shift gate), an open
+  /// shift → [ShiftOpen], any real failure → [ShiftError].
+  Future<void> loadCurrent() async {
+    emit(const ShiftLoading());
     try {
-      await _shiftRepository.openShift();
-      emit(ShiftOpened());
-      saveShiftState(true);
+      final shift = await _shiftRepository.currentShift();
+      emit(shift == null ? const ShiftNone() : ShiftOpen(shift));
     } catch (e) {
       emit(ShiftError(e.toString()));
     }
   }
 
-  Future<void> closeShift() async {
-    emit(ShiftLoading());
+  Future<void> openShift({
+    required String idempotencyKey,
+    String cashStart = '0.00',
+  }) async {
+    emit(const ShiftLoading());
     try {
-      await _shiftRepository.closeShift();
-      emit(ShiftClosed());
-      saveShiftState(false);
+      final shift = await _shiftRepository.openShift(
+        cashStart: cashStart,
+        idempotencyKey: idempotencyKey,
+      );
+      emit(ShiftOpen(shift));
     } catch (e) {
       emit(ShiftError(e.toString()));
     }
   }
 
-  Future<void> saveShiftState(bool isOpen) async {
-    await _shiftRepository.saveShiftState(isOpen);
-  }
-
-  Future<void> loadSavedState() async {
-    emit(ShiftLoading());
-    final bool isShiftOpened = _shiftRepository.getShiftState();
-    if (isShiftOpened) {
-      emit(ShiftOpened());
-    } else {
-      emit(ShiftClosed());
+  Future<void> closeShift({
+    required String cashEnd,
+    required String idempotencyKey,
+  }) async {
+    emit(const ShiftLoading());
+    try {
+      await _shiftRepository.closeShift(
+        cashEnd: cashEnd,
+        idempotencyKey: idempotencyKey,
+      );
+      // Clear the cached shift — no open shift until the cashier opens a new one.
+      emit(const ShiftNone());
+    } catch (e) {
+      emit(ShiftError(e.toString()));
     }
   }
 }

@@ -9,7 +9,6 @@ import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
 import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
 import 'package:prro/features/admin/screens/main_screen/torgovi_tochki.dart';
 import 'package:prro/core/constants/settings.dart';
-import 'package:prro/features/admin/screens/tellers_screen/fill_teller_rows.dart';
 import 'package:prro/features/admin/screens/tellers_screen/teller.dart';
 
 class MainScreen extends StatefulWidget {
@@ -20,13 +19,15 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
-  int retailOutletId = 1;
+  // -1 means "no outlet picked yet"; downstream screens render a hint until set.
+  int retailOutletId = -1;
   List<List<String>> tellerGroup = [];
   List<String> outletsData = [];
   List<List<String>> outletsDataList = [];
   List<dynamic> outlets = [];
   bool loadingMeasures = false;
-  int? selectedRowIndex = 0;
+  bool loadingSellers = false;
+  int? selectedRowIndex;
   List<Measure> measures = [];
 
   @override
@@ -34,32 +35,39 @@ class MainScreenState extends State<MainScreen> {
     super.initState();
     _loadOutlets();
     _loadMeasures();
-    for (int i = 0; i < userLenght; i++) {
-      final List<String> tellerData = [
-        initUser[i]["name"],
-        initUser[i]["name"],
-        initUser[i]["name"],
-        initUser[i]["status2"],
-      ];
-      listOfTllers.add(fillTellerRows(extraText: tellerData));
-    }
   }
 
-  Future<void> _loadSellers() async {
-    final data = await context.read<ApiService>().fetchRetailSeller(
-      retailOutlet: outlets[0]['id'],
-    );
-
-    for (int j = 0; j < data.length; j++) {
-      final List<String> sellersData = [
-        "${data[j]['first_name']} ${data[j]['second_name']}",
-        data[j]['id'].toString(),
-        data[j]['retail_outlet_id'].toString(),
-        'Not set',
-      ];
-
-      tellerGroup.add(sellersData);
-      log("sellers $sellersData");
+  Future<void> _loadSellers(int outletId) async {
+    setState(() {
+      loadingSellers = true;
+      tellerGroup = [];
+    });
+    try {
+      final data = await context.read<ApiService>().fetchRetailSeller(
+        retailOutlet: outletId,
+      );
+      final next = <List<String>>[];
+      for (final raw in data) {
+        final m = (raw as Map).cast<String, dynamic>();
+        next.add([
+          "${m['first_name'] ?? ''} ${m['last_name'] ?? ''}".trim(),
+          (m['role'] ?? '').toString(),
+          'Зареєстрований',
+          'Active',
+        ]);
+      }
+      if (!mounted) return;
+      setState(() {
+        tellerGroup = next;
+      });
+    } catch (e) {
+      log('Error loading sellers: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          loadingSellers = false;
+        });
+      }
     }
   }
 
@@ -70,12 +78,12 @@ class MainScreenState extends State<MainScreen> {
     });
     try {
       final loginAdmin = await api.loginAdmin(
-        phoneNumber: '+380123456789',
-        password: '123456',
+        phoneNumber: 'admin',
+        password: 'admin123',
       );
       final list = await api.fetchRetailOutlets();
       outlets = list;
-      _loadSellers();
+      outletsDataList = [];
       for (int i = 0; i < outlets.length; i++) {
         outletsDataList.add([
           outlets[i]['name'],
@@ -87,7 +95,15 @@ class MainScreenState extends State<MainScreen> {
           'Not set',
         ]);
       }
+      // Auto-pick the first outlet so the rest of the UI has something to work with.
+      if (outlets.isNotEmpty) {
+        selectedRowIndex = 0;
+        retailOutletId = (outlets.first['id'] as num).toInt();
+      }
       setState(() {});
+      if (retailOutletId > 0) {
+        await _loadSellers(retailOutletId);
+      }
       log("loginAdmin $loginAdmin");
       log("$outlets");
     } catch (e) {
@@ -98,6 +114,15 @@ class MainScreenState extends State<MainScreen> {
         loadingMeasures = false;
       });
     }
+  }
+
+  void _onOutletSelected(int index) {
+    final id = int.parse(outletsDataList[index][2]);
+    setState(() {
+      selectedRowIndex = index;
+      retailOutletId = id;
+    });
+    _loadSellers(id);
   }
 
   @override
@@ -225,23 +250,43 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildBody() {
+    if (retailOutletId <= 0 &&
+        currentContent != 'Торгові точки та ПРРО') {
+      return const Expanded(
+        child: Center(
+          child: Text(
+            'Спершу виберіть торгову точку у вкладці «Торгові точки та ПРРО».',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
+      );
+    }
     switch (currentContent) {
       case 'Торгові точки та ПРРО':
         return Ttochki(
           data: outletsDataList,
           selectedIndex: selectedRowIndex,
-          onRowSelect: (index) {
-            setState(() {
-              selectedRowIndex = index;
-              retailOutletId = int.parse(outletsDataList[index][2]);
-            });
-          },
+          onRowSelect: _onOutletSelected,
         );
       case 'Касири':
-        return Expanded(child: Teller(tellerGroup: tellerGroup));
+        if (loadingSellers) {
+          return const Expanded(
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return Expanded(
+          // Rebuild Teller when outlet changes so it picks up the new tellerGroup.
+          child: Teller(
+            key: ValueKey('teller-$retailOutletId'),
+            tellerGroup: tellerGroup,
+          ),
+        );
       case 'Товари':
         return Expanded(
+          // Outlet change → drop & rebuild the items subtree so it re-fetches.
           child: MultiProvider(
+            key: ValueKey('items-$retailOutletId'),
             providers: [
               Provider<int>.value(value: retailOutletId),
               Provider<List<Measure>>.value(value: measures),

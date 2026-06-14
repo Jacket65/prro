@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
-import 'package:prro/features/shift/screens/shift.dart';
+import 'package:prro/features/seller/screens/screens.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
 import 'package:prro/features/admin/screens/main_screen/main_screen.dart';
 
@@ -64,14 +64,14 @@ class LoginScreen extends StatelessWidget {
                       onPressed: () {
                         context.read<LoginBloc>().add(
                           LoginSubmitted(
-                            username: "+380931234567",
-                            password: "123456",
+                            username: "cashier1",
+                            password: "cashier123",
                           ),
                         );
                         _clearTextFields();
                       },
 
-                      child: const Text("seller"),
+                      child: const Text("seller (cashier1)"),
                     ),
                     const SizedBox(height: 18),
                     ElevatedButton(
@@ -104,7 +104,9 @@ class LoginScreen extends StatelessWidget {
         _showSnackBar(context, "Вітаємо вас на роботі!");
         context.read<UserBloc>().add(LoadUser(username: state.username));
 
-        _navigateTo(context, const Shift());
+        // SellerScreen self-gates on the shift state (open-shift gate when
+        // there is no open shift), so we land there directly.
+        _navigateTo(context, const SellerScreen());
       case LoginFailure():
         _showSnackBar(context, "Сталася помилка ${state.error}");
       case LoginLoading():

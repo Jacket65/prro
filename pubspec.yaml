@@ -15,6 +15,9 @@ dependencies:
   http: ^1.6.0
   dio: ^5.9.0
 
+  #money/quantity decimals
+  decimal: ^2.3.3
+
   #bloc
   flutter_bloc: ^9.1.1
   equatable: ^2.0.8
@@ -27,9 +30,6 @@ dependencies:
 
   #storage
   shared_preferences: ^2.5.4
-
-  #firebase
-  firebase_core: ^4.4.0
 
 dev_dependencies:
   flutter_test:

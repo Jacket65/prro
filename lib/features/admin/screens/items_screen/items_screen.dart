@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
 // Assuming CategoryPickScreen is the actual widget name for category_pick_screen.dart
+import 'package:prro/features/admin/screens/items_screen/widgets/admin_dialogs.dart';
 import 'package:prro/features/admin/screens/items_screen/widgets/category_pick_screen.dart';
 import 'package:prro/features/admin/screens/items_screen/widgets/custom_card.dart';
 import 'package:prro/features/admin/screens/items_screen/widgets/custom_search_field.dart';
@@ -78,6 +79,8 @@ class _ItemsState extends State<Items> {
                   title: category.title,
                   index: category.id,
                   categoryList: _categories,
+                  onRename: () => _renameCategory(category),
+                  onDelete: () => _deleteCategory(category),
                 );
               },
             ),
@@ -159,6 +162,61 @@ class _ItemsState extends State<Items> {
     );
   }
 
+  Future<void> _renameCategory(Category category) async {
+    final name = await showAdminTextPrompt(
+      context,
+      title: 'Перейменувати категорію',
+      label: 'Нова назва',
+      initialValue: category.title,
+    );
+    if (name == null || name.isEmpty || name == category.title) return;
+    try {
+      await _apiService.updateCategory(id: category.id, name: name);
+      final idx = _categories.indexWhere((c) => c.id == category.id);
+      if (idx != -1) {
+        setState(() {
+          _categories[idx] = Category(name, category.id);
+        });
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Категорію оновлено')),
+      );
+    } catch (e) {
+      log('rename category failed: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Не вдалося перейменувати: $e')),
+      );
+    }
+  }
+
+  Future<void> _deleteCategory(Category category) async {
+    final ok = await showAdminConfirm(
+      context,
+      title: 'Видалити категорію?',
+      message:
+          'Категорію «${category.title}» буде видалено разом з прив\'язаними товарами.',
+    );
+    if (!ok) return;
+    try {
+      await _apiService.deleteCategory(id: category.id);
+      setState(() {
+        _categories.removeWhere((c) => c.id == category.id);
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Категорію видалено')),
+      );
+    } catch (e) {
+      log('delete category failed: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Не вдалося видалити: $e')),
+      );
+    }
+  }
+
   Future<void> _createCategory(
     String newCategoryName,
     BuildContext context,
@@ -177,12 +235,18 @@ class _ItemsState extends State<Items> {
       }
     }
     try {
-      await _apiService.createCategories(
+      final created = await _apiService.createCategories(
         name: newCategoryName,
         outletId: _retailOutletId,
       );
 
-      _categories.add(Category(newCategoryName, _categories.length));
+      int? newId;
+      if (created.isNotEmpty && created.first is Map) {
+        final m = created.first as Map;
+        final id = m['id'];
+        if (id is int) newId = id;
+      }
+      _categories.add(Category(newCategoryName, newId ?? -1));
       setState(() {});
       if (context.mounted) {
         ScaffoldMessenger.of(

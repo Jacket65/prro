@@ -1,158 +1,212 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:prro/data/api/models/models.dart';
 import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
+import 'package:prro/features/seller/widgets/options_picker_dialog.dart';
 
-class ListItem extends StatefulWidget {
-  final String id;
+class ListItem extends StatelessWidget {
+  final String lineId;
   final String name;
   final double price;
   final String imageUrl;
-  final int quantity;
+  final Decimal quantity;
+  final MeasureUnit? unit;
+  final List<SelectedOption> selectedOptions;
+  final Bean? selectedBean;
 
   const ListItem({
     super.key,
-    required this.id,
+    required this.lineId,
     required this.name,
     required this.price,
     required this.imageUrl,
     required this.quantity,
+    this.unit,
+    this.selectedOptions = const [],
+    this.selectedBean,
   });
 
-  @override
-  State<ListItem> createState() => _ListItemState();
-}
+  /// Whether the line carries any customisation (drives the tap hint).
+  bool get _hasChoices => selectedOptions.isNotEmpty || selectedBean != null;
 
-class _ListItemState extends State<ListItem> {
-  bool _isChecked = false;
+  /// Short summary of picked options and bean, e.g. "Соєве · Сироп ×2 · Арабіка
+  /// Колумбія".
+  String get _choicesSummary {
+    final parts = selectedOptions
+        .map((o) => o.quantity > 1 ? '${o.name} ×${o.quantity}' : o.name)
+        .toList();
+    if (selectedBean != null) parts.add(selectedBean!.name);
+    return parts.join(' · ');
+  }
 
   @override
   Widget build(BuildContext sellerContext) {
     return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
         if (state is! OrdersUpdated) {
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         }
-        return Container(
-          height: 80,
-          decoration: BoxDecoration(
-            // border: Border.all(color: Colors.grey.shade300),
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
             borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _isChecked = !_isChecked;
-                  });
-                },
-                child: Stack(
-                  alignment: Alignment.topLeft,
-                  children: [
-                    SizedBox(
-                      width: 120,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          opacity: _isChecked
-                              ? AlwaysStoppedAnimation(0.5)
-                              : AlwaysStoppedAnimation(1),
-                          widget.imageUrl,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Center(child: Text('No image')),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-
-                    Checkbox(
-                      value: _isChecked,
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          _isChecked = newValue ?? false;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.name,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.price.toStringAsFixed(2),
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            onTap: () => _onTap(context, state),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10.0),
-                    child: Text(
-                      (widget.price * widget.quantity).toStringAsFixed(2),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  SizedBox(
+                    width: 64,
+                    height: 64,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: imageUrl.isNotEmpty
+                          ? Image.network(
+                              imageUrl,
+                              errorBuilder: (_, _, _) => const _Placeholder(),
+                              fit: BoxFit.cover,
+                            )
+                          : const _Placeholder(),
                     ),
                   ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          name,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (_hasChoices) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            _choicesSummary,
+                            style: TextStyle(
+                              color: Colors.blueGrey.shade600,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 2),
+                        Text(
+                          '${price.toStringAsFixed(2)}₴',
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
+                        ),
+                        if (_hasChoices) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            'тап → опції',
+                            style: TextStyle(
+                              color: Colors.blue.shade400,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: () {
-                          final productId = state.products.indexWhere(
-                            (e) => e.id == widget.id,
-                          );
-                          context.read<OrdersBloc>().add(
-                            RemoveProduct(state.products[productId]),
-                          );
-                        },
+                      Text(
+                        (price * quantity.toDouble()).toStringAsFixed(2),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      const SizedBox(width: 4),
-                      Text("${widget.quantity}"),
-                      const SizedBox(width: 4),
-                      IconButton(
-                        padding: EdgeInsets.zero,
-
-                        icon: const Icon(Icons.add_circle_outline),
-                        onPressed: () {
-                          final productId = state.products.indexWhere(
-                            (e) => e.id == widget.id,
-                          );
-                          context.read<OrdersBloc>().add(
-                            AddProduct(state.products[productId]),
-                          );
-                        },
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            icon: const Icon(Icons.remove_circle_outline),
+                            onPressed: () {
+                              final i = state.products.indexWhere(
+                                (e) => e.lineId == lineId,
+                              );
+                              if (i == -1) return;
+                              context.read<OrdersBloc>().add(
+                                RemoveProduct(state.products[i]),
+                              );
+                            },
+                          ),
+                          Text(
+                            formatQuantity(quantity, unit),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(Icons.add_circle_outline),
+                            onPressed: () {
+                              final i = state.products.indexWhere(
+                                (e) => e.lineId == lineId,
+                              );
+                              if (i == -1) return;
+                              context.read<OrdersBloc>().add(
+                                AddProduct(state.products[i]),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         );
       },
+    );
+  }
+
+  /// Tapping a cart line lets the cashier change the drink's options/bean.
+  /// Opens the line editor (quantity + options).
+  void _onTap(BuildContext context, OrdersUpdated state) {
+    final product = state.products.firstWhere(
+      (p) => p.lineId == lineId,
+      // The line always exists in state; this fallback keeps the type checker
+      // happy. Recover the variant id from the lineId prefix.
+      orElse: () => Product(
+        id: lineId.split('#').first,
+        name: name,
+        price: price,
+        imageUrl: imageUrl,
+        quantity: quantity,
+        unit: unit,
+        selectedOptions: selectedOptions,
+        selectedBean: selectedBean,
+      ),
+    );
+    openLineEditor(context, product);
+  }
+}
+
+class _Placeholder extends StatelessWidget {
+  const _Placeholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.grey.shade100,
+      child: const Icon(Icons.local_cafe_outlined, color: Colors.grey),
     );
   }
 }

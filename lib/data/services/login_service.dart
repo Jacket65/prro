@@ -13,21 +13,66 @@ final class LoginService implements LoginServiceI {
     required String username,
     required String password,
   }) async {
-    await Future.delayed(const Duration(seconds: 1));
     final response = await apiClient.post(
-      '/auth/seller',
-      data: {'phone_number': username, 'password': password},
+      '/auth/login',
+      data: {'login': username, 'password': password},
     );
 
-    final token = response.headers.value('Authorization');
-
-    if (token != null && response.statusCode == 200) {
-      await prefs.setString('auth_token', token);
-      await prefs.setString('username', username);
-      await prefs.setBool('isLogged', true);
-      return true;
-    } else {
+    if (response.statusCode != 200) {
       return false;
+    }
+
+    final authHeader = response.headers.value('Authorization');
+    if (authHeader == null || !authHeader.toLowerCase().startsWith('bearer ')) {
+      return false;
+    }
+    final token = authHeader.substring(7).trim();
+    if (token.isEmpty) {
+      return false;
+    }
+
+    await prefs.setString('auth_token', token);
+    await prefs.setString('username', username);
+    await prefs.setBool('isLogged', true);
+
+    final data = response.data is Map ? response.data['data'] : null;
+    if (data is Map<String, dynamic>) {
+      final role = data['role'];
+      if (role is String) {
+        await prefs.setString('user_role', role);
+      }
+      final userId = data['id'];
+      if (userId is int) {
+        await prefs.setInt('user_id', userId);
+      }
+      // The access token lives 15 min; the refresh token (in the body) is used
+      // by the Dio interceptor to silently renew it on a 401.
+      final refresh = data['refresh_token'];
+      if (refresh is String && refresh.isNotEmpty) {
+        await prefs.setString('refresh_token', refresh);
+      }
+    }
+
+    await _resolveOutletId();
+    return true;
+  }
+
+  // Picks the first outlet the authenticated user has access to and stores it.
+  // The /auth/me endpoint does not return outlet_id yet, so we use the list as the source of truth.
+  Future<void> _resolveOutletId() async {
+    try {
+      final response = await apiClient.get('/retail-outlets/');
+      if (response.statusCode != 200) return;
+      final body = response.data;
+      final list = body is Map ? body['data'] : null;
+      if (list is List && list.isNotEmpty) {
+        final first = list.first;
+        if (first is Map && first['id'] is int) {
+          await prefs.setInt('outlet_id', first['id'] as int);
+        }
+      }
+    } catch (_) {
+      // optional, ignore — UI surfaces will fail later with clearer errors
     }
   }
 
@@ -49,8 +94,12 @@ final class LoginService implements LoginServiceI {
   @override
   Future<void> logout() async {
     await prefs.remove('auth_token');
+    await prefs.remove('refresh_token');
     await prefs.setBool('isLogged', false);
     await prefs.remove('username');
+    await prefs.remove('user_role');
+    await prefs.remove('user_id');
+    await prefs.remove('outlet_id');
   }
 
   @override

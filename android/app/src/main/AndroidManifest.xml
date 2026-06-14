@@ -1,8 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required for all builds (debug/profile add it too, but release uses
+         only this manifest) — the app talks to the POS REST backend over HTTP. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="prro"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"

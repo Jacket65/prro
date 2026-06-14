@@ -1,23 +1,14 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
 
+// TODO: backend balance endpoint is not implemented yet.
+// Once `/api/v1/.../balance` exists, replace this stub with a real call.
 class BalanceService implements BalanceServiceI {
+  // ignore: unused_field
   final ApiClientI _apiClient;
 
   BalanceService({required ApiClientI apiClient}) : _apiClient = apiClient;
-  @override
-  Future<int> getBalance() async {
-    try {
-      final response = await _apiClient.get("/seller/balance");
 
-      final int data = jsonDecode(response.data)['amount'];
-      return data;
-    } catch (e, stackTrace) {
-      log("Error in getItems: $e", stackTrace: stackTrace);
-      rethrow;
-    }
-  }
+  @override
+  Future<int> getBalance() async => 0;
 }

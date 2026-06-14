@@ -6,10 +6,14 @@ import 'package:prro/data/repositories/repositories.dart';
 part 'items_tiles_event.dart';
 part 'items_tiles_state.dart';
 
+/// Two-level navigation: categories → abstract products.
+/// Variants are shown in a modal dialog spawned from the [ProductGroup] tile,
+/// so they are NOT part of the navigation stack.
+///   - empty stack:        showing categories
+///   - 1 entry (category): showing abstract products
 class ItemsTilesBloc extends Bloc<ItemsTilesEvent, ItemsTilesState> {
   final ItemsRepositoryI _repository;
-  final List<Category> _categoryStack = [];
-  final Map<int?, List<Item>> _cachedItems = {};
+  final List<Category> _stack = [];
 
   ItemsTilesBloc({required ItemsRepositoryI itemsRepository})
     : _repository = itemsRepository,
@@ -19,14 +23,12 @@ class ItemsTilesBloc extends Bloc<ItemsTilesEvent, ItemsTilesState> {
     on<ItemsTilesBack>(_onBack);
   }
 
-  void _onStarted(
+  Future<void> _onStarted(
     ItemsTilesStarted event,
     Emitter<ItemsTilesState> emit,
   ) async {
-    emit(ItemsTilesLoading());
-    _categoryStack.clear();
-    _cachedItems.clear();
-    await _loadCategoryItems(null, emit, canGoBack: false);
+    _stack.clear();
+    await _loadForCurrentDepth(emit);
   }
 
   Future<void> _onEnterCategory(
@@ -35,54 +37,43 @@ class ItemsTilesBloc extends Bloc<ItemsTilesEvent, ItemsTilesState> {
   ) async {
     final item = event.item;
     if (item is! Category) {
-      emit(ItemsTilesError(message: 'Це не категорія.'));
+      // ProductGroup and Product are leaves at this level.
       return;
     }
-    _categoryStack.add(item);
-    await _loadCategoryItems(item.id, emit, canGoBack: true);
+    if (_stack.isNotEmpty) {
+      // Already inside a category — refuse to go deeper.
+      return;
+    }
+    _stack.add(item);
+    await _loadForCurrentDepth(emit);
   }
 
   Future<void> _onBack(
     ItemsTilesBack event,
     Emitter<ItemsTilesState> emit,
   ) async {
-    if (_categoryStack.isEmpty) return;
-    _categoryStack.removeLast();
-    final parentCategoryId = _categoryStack.isNotEmpty
-        ? _categoryStack.last.id
-        : null;
-    final canGoBack = _categoryStack.isNotEmpty;
-
-    await _loadCategoryItems(parentCategoryId, emit, canGoBack: canGoBack);
+    if (_stack.isEmpty) return;
+    _stack.removeLast();
+    await _loadForCurrentDepth(emit);
   }
 
-  Future<void> _loadCategoryItems(
-    int? categoryId,
-    Emitter<ItemsTilesState> emit, {
-    required bool canGoBack,
-  }) async {
+  Future<void> _loadForCurrentDepth(Emitter<ItemsTilesState> emit) async {
     emit(ItemsTilesLoading());
-
     try {
-      if (_cachedItems.containsKey(categoryId)) {
-        emit(
-          ItemsTilesLoaded(
-            items: _cachedItems[categoryId]!,
-            canGoBack: canGoBack,
-          ),
-        );
-      } else {
-        final items = categoryId == null
-            ? await _repository.getItemsCategory()
-            : await _repository.getItems(categoryId);
-
-        _cachedItems[categoryId] = items;
-        emit(ItemsTilesLoaded(items: items, canGoBack: canGoBack));
+      final List<Item> items;
+      switch (_stack.length) {
+        case 0:
+          items = await _repository.getCategories();
+        case 1:
+          items = await _repository.getProducts(_stack.last.id);
+        default:
+          items = const [];
       }
-    } catch (e) {
-      final message = categoryId == null
-          ? 'Не вдалося завантажити елементи.'
-          : 'Не вдалося завантажити категорію.';
+      emit(ItemsTilesLoaded(items: items, canGoBack: _stack.isNotEmpty));
+    } catch (_) {
+      final message = _stack.isEmpty
+          ? 'Не вдалося завантажити категорії.'
+          : 'Не вдалося завантажити товари.';
       emit(ItemsTilesError(message: message));
     }
   }

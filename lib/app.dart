@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -21,12 +23,40 @@ import 'package:prro/features/user/bloc/user_bloc.dart';
 import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final SharedPreferences prefs;
-  final List<DataRow> rowsName = [];
   final ApiClientI apiClient;
+  const MyApp({super.key, required this.prefs, required this.apiClient});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   final ApiService api = ApiService();
-  MyApp({super.key, required this.prefs, required this.apiClient});
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  StreamSubscription<void>? _authSub;
+
+  SharedPreferences get prefs => widget.prefs;
+  ApiClientI get apiClient => widget.apiClient;
+
+  @override
+  void initState() {
+    super.initState();
+    // When a token refresh fails, the session is dead → back to login.
+    _authSub = widget.apiClient.onUnauthorized.listen((_) {
+      _navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => LoginScreen()),
+        (route) => false,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +64,9 @@ class MyApp extends StatelessWidget {
       providers: [
         RepositoryProvider.value(value: api),
         RepositoryProvider<ItemsRepositoryI>(
-          create: (context) =>
-              ItemsRepository(itemsService: ItemsService(apiClient: apiClient)),
+          create: (context) => ItemsRepository(
+            itemsService: ItemsService(apiClient: apiClient, prefs: prefs),
+          ),
         ),
         RepositoryProvider<UserRepositoryI>(
           create: (context) => UserRepository(
@@ -48,7 +79,8 @@ class MyApp extends StatelessWidget {
           ),
         ),
         RepositoryProvider<OrdersRepositoryI>(
-          create: (context) => OrdersRepository(apiClient: apiClient),
+          create: (context) =>
+              OrdersRepository(apiClient: apiClient, prefs: prefs),
         ),
         RepositoryProvider<BalanceRepositoryI>(
           create: (context) => BalanceRepository(
@@ -78,6 +110,7 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           title: "Prro beta",
+          navigatorKey: _navigatorKey,
           theme: lightTheme,
           debugShowCheckedModeBanner: false,
           home: LoginScreen(),

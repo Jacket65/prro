@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:prro/features/admin/screens/items_screen/items_screen.dart';
 import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
+import 'package:prro/features/admin/screens/items_screen/widgets/admin_dialogs.dart';
+import 'package:prro/features/admin/screens/items_screen/widgets/admin_variants_dialog.dart';
 import 'package:prro/features/admin/screens/items_screen/widgets/category_pick_screen.dart';
 import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
 
@@ -27,11 +29,11 @@ class InsideCategory extends StatefulWidget {
 }
 
 class _InsideCategoryState extends State<InsideCategory> {
-  List<List<String>> categoryData = [];
-  List<bool> selectedRows = [];
+  List<Map<String, dynamic>> products = [];
   bool loading = true;
   String? errorMessage;
   int get outletId => provider.Provider.of<int>(context, listen: false);
+
   @override
   void initState() {
     super.initState();
@@ -39,30 +41,80 @@ class _InsideCategoryState extends State<InsideCategory> {
   }
 
   Future<void> _loadProducts() async {
-    // Чекаємо, поки контекст буде готовим після першого фрейму
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
         final api = Provider.of<ApiService>(context, listen: false);
-        final data = await api.fetchProducts(
-          retailOutlet: outletId,
-          categoryId: widget.cardInx,
-        );
+        final data = await api.fetchProducts(categoryId: widget.cardInx);
         if (!mounted) return;
-
         setState(() {
-          categoryData = List<List<String>>.from(data);
-          selectedRows = List<bool>.filled(categoryData.length, false);
+          products = data;
           loading = false;
+          errorMessage = null;
         });
       } catch (e) {
         if (!mounted) return;
         setState(() {
           loading = false;
-          errorMessage = "Помилка завантаження товарів: $e";
+          errorMessage = 'Помилка завантаження товарів: $e';
           log(errorMessage!);
         });
       }
     });
+  }
+
+  Future<void> _renameProduct(Map<String, dynamic> product) async {
+    final api = Provider.of<ApiService>(context, listen: false);
+    final messenger = ScaffoldMessenger.of(context);
+    final newName = await showAdminTextPrompt(
+      context,
+      title: 'Перейменувати товар',
+      label: 'Нова назва',
+      initialValue: (product['name'] ?? '').toString(),
+    );
+    if (newName == null || newName.isEmpty) return;
+    try {
+      await api.updateProduct(
+        id: (product['id'] as num).toInt(),
+        name: newName,
+      );
+      _loadProducts();
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Не вдалося перейменувати: $e')),
+      );
+    }
+  }
+
+  Future<void> _deleteProduct(Map<String, dynamic> product) async {
+    final api = Provider.of<ApiService>(context, listen: false);
+    final messenger = ScaffoldMessenger.of(context);
+    final name = (product['name'] ?? '').toString();
+    final ok = await showAdminConfirm(
+      context,
+      title: 'Видалити товар?',
+      message: 'Товар «$name» буде видалено разом з усіма варіаціями.',
+    );
+    if (!ok) return;
+    try {
+      await api.deleteProduct(id: (product['id'] as num).toInt());
+      _loadProducts();
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Не вдалося видалити: $e')),
+      );
+    }
+  }
+
+  Future<void> _openVariants(Map<String, dynamic> product) async {
+    await AdminVariantsDialog.show(
+      context,
+      productId: (product['id'] as num).toInt(),
+      productName: (product['name'] ?? '').toString(),
+      outletId: outletId,
+    );
+    // Variant changes don't alter the products list itself, but refresh anyway
+    // in case the user renamed/deleted a product elsewhere.
+    _loadProducts();
   }
 
   @override
@@ -93,20 +145,13 @@ class _InsideCategoryState extends State<InsideCategory> {
     );
   }
 
-  // -----------------------------
-  // UI BLOCKS
-  // -----------------------------
-
   Widget _buildTopRow() {
     return Row(
       children: [
         Expanded(child: _buildSearchField()),
         const SizedBox(width: 20),
-
         _buildNewItemButton(),
-
         const SizedBox(width: 20),
-
         _buildSettingsButton(),
       ],
     );
@@ -167,7 +212,6 @@ class _InsideCategoryState extends State<InsideCategory> {
                 Provider<int>.value(value: outletId),
                 Provider<List<Measure>>.value(value: measures),
               ],
-
               child: CategoryPick(categoryList: widget.categoryList),
             ),
           ),
@@ -207,8 +251,8 @@ class _InsideCategoryState extends State<InsideCategory> {
       );
     }
 
-    if (categoryData.isEmpty) {
-      return const Center(child: Text("Немає товарів у цій категорії."));
+    if (products.isEmpty) {
+      return const Center(child: Text('Немає товарів у цій категорії.'));
     }
 
     return Container(
@@ -229,7 +273,7 @@ class _InsideCategoryState extends State<InsideCategory> {
             child: DataTable(
               headingRowColor: WidgetStatePropertyAll(Colors.blueGrey[100]),
               dataRowMaxHeight: 60,
-              showCheckboxColumn: true,
+              showCheckboxColumn: false,
               showBottomBorder: true,
               columns: _buildColumns(),
               rows: _buildRows(),
@@ -241,15 +285,7 @@ class _InsideCategoryState extends State<InsideCategory> {
   }
 
   List<DataColumn> _buildColumns() {
-    const columnNames = [
-      'Товар',
-      'Одиниці',
-      'Код УКТЗЕД',
-      'Податкова ставка',
-      'Штрихкод',
-      'Артикул',
-    ];
-
+    const columnNames = ['Товар', 'ID', 'Дії'];
     return columnNames
         .map(
           (name) => DataColumn(
@@ -263,17 +299,40 @@ class _InsideCategoryState extends State<InsideCategory> {
   }
 
   List<DataRow> _buildRows() {
-    return List.generate(categoryData.length, (i) {
-      final row = categoryData[i];
-
+    return List.generate(products.length, (i) {
+      final product = products[i];
+      final name = (product['name'] ?? '').toString();
+      final id = (product['id'] ?? '').toString();
       return DataRow(
-        selected: selectedRows[i],
-        onSelectChanged: (selected) {
-          setState(() => selectedRows[i] = selected ?? false);
-        },
-        cells: row
-            .map((cell) => DataCell(Text(cell.isEmpty ? '-' : cell)))
-            .toList(),
+        cells: [
+          DataCell(Text(name.isEmpty ? '-' : name)),
+          DataCell(Text(id)),
+          DataCell(
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton.icon(
+                  onPressed: () => _openVariants(product),
+                  icon: const Icon(Icons.tune, size: 18),
+                  label: const Text('Варіації'),
+                ),
+                IconButton(
+                  tooltip: 'Перейменувати',
+                  icon: const Icon(Icons.edit),
+                  onPressed: () => _renameProduct(product),
+                ),
+                IconButton(
+                  tooltip: 'Видалити',
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.redAccent,
+                  ),
+                  onPressed: () => _deleteProduct(product),
+                ),
+              ],
+            ),
+          ),
+        ],
       );
     });
   }
@@ -284,7 +343,6 @@ class _InsideCategoryState extends State<InsideCategory> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // left side
           Row(
             children: [
               const Text('Показати по:'),
@@ -305,8 +363,6 @@ class _InsideCategoryState extends State<InsideCategory> {
               ),
             ],
           ),
-
-          // right side
           Row(
             children: const [
               Padding(

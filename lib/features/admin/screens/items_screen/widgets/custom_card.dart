@@ -11,11 +11,15 @@ class CustomCard extends StatelessWidget {
     required this.title,
     required this.index,
     required this.categoryList,
+    required this.onRename,
+    required this.onDelete,
   });
 
   final String title;
   final int index;
   final List<Category> categoryList;
+  final VoidCallback onRename;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -68,8 +72,21 @@ class CustomCard extends StatelessWidget {
                   ),
                 ],
               ),
-
-              Icon(Icons.more_vert, color: Colors.grey.shade700),
+              PopupMenuButton<String>(
+                tooltip: 'Дії з категорією',
+                icon: Icon(Icons.more_vert, color: Colors.grey.shade700),
+                onSelected: (value) {
+                  if (value == 'rename') {
+                    onRename();
+                  } else if (value == 'delete') {
+                    onDelete();
+                  }
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: 'rename', child: Text('Перейменувати')),
+                  PopupMenuItem(value: 'delete', child: Text('Видалити')),
+                ],
+              ),
             ],
           ),
         ),

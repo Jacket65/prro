@@ -55,9 +55,12 @@ class _CheckMainInfoState extends State<CheckMainInfo> {
                       return ListItem(
                         quantity: product.quantity,
                         name: product.name,
-                        id: product.id,
-                        price: product.price,
+                        lineId: product.lineId,
+                        price: product.effectiveUnitPrice,
                         imageUrl: product.imageUrl,
+                        unit: product.unit,
+                        selectedOptions: product.selectedOptions,
+                        selectedBean: product.selectedBean,
                       );
                     },
                     separatorBuilder: (_, _) => Divider(),

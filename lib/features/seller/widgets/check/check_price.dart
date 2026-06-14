@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prro/core/money.dart';
 import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 
 class CheckPrice extends StatelessWidget {
@@ -8,16 +9,16 @@ class CheckPrice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    final total = context.select<OrdersBloc, double>(
-      (bloc) =>
-          bloc.state is OrdersUpdated ? (bloc.state as OrdersUpdated).total : 0,
-    );
+    final totalKopecks = context.select<OrdersBloc, int>((bloc) {
+      final state = bloc.state;
+      return state is OrdersUpdated ? uahToKopecks(state.total) : 0;
+    });
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Text(
-          "Разом: ${total.toStringAsFixed(2)}₴",
+          'Разом: ${formatUah(totalKopecks)}',
           style: theme.textTheme.bodyLarge!.copyWith(fontSize: 18),
         ),
       ],

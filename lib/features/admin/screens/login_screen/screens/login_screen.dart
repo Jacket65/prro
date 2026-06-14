@@ -12,10 +12,10 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _phoneController = TextEditingController(
-    text: '+380123456789',
+    text: 'admin',
   );
   final TextEditingController _passwordController = TextEditingController(
-    text: '123456',
+    text: 'admin123',
   );
   bool _isLoading = false;
 
@@ -156,22 +156,24 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<String?> _authenticateUser(String phone, String password) async {
-    final dio = Dio(BaseOptions(baseUrl: 'http://pos.grainsworld.click'));
+  Future<String?> _authenticateUser(String login, String password) async {
+    final dio = Dio(
+      BaseOptions(baseUrl: 'http://pos.grainsworld.click/api/v1'),
+    );
 
     try {
       final response = await dio.post(
-        '/auth/admin',
-        data: {'phone_number': phone, 'password': password},
+        '/auth/login',
+        data: {'login': login, 'password': password},
       );
 
       log('Response status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final authHeader = response.headers['authorization']?.first;
-        if (authHeader != null) {
-          final token = authHeader.split(' ')[1];
-          return token;
+        if (authHeader != null &&
+            authHeader.toLowerCase().startsWith('bearer ')) {
+          return authHeader.substring(7).trim();
         }
       }
     } catch (e) {
