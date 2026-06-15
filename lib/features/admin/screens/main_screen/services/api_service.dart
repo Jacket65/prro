@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' show Random;
+
 import 'package:http/http.dart' as http;
 import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String _baseUrl = 'http://localhost:8080/api/v1';
+  static const String _baseUrl = 'http://pos.coffeebeans.space.test/api/v1';
   static const Map<String, String> _defaultHeaders = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
