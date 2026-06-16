@@ -6,6 +6,7 @@ import 'package:prro/data/api/models/models.dart';
 import 'package:prro/data/repositories/items_repository/items_repository.dart';
 import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 import 'package:prro/features/seller/widgets/bean_picker_dialog.dart';
+import 'package:prro/features/seller/widgets/pos_quantity_formatter.dart';
 
 /// Default option selection applied when a drink is added from the catalog,
 /// per group type:
@@ -30,7 +31,11 @@ List<SelectedOption> _defaultSelection(List<OptionGroup> groups) {
     } else {
       for (final o in g.options.where((o) => o.isDefault)) {
         out.add(
-          SelectedOption(optionId: o.id, name: o.name, priceDelta: o.priceDelta),
+          SelectedOption(
+            optionId: o.id,
+            name: o.name,
+            priceDelta: o.priceDelta,
+          ),
         );
       }
     }
@@ -208,10 +213,10 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
     });
   }
 
-  void _onQuantityTyped(String raw) {
-    if (raw.trim().isEmpty) return;
-    _setQuantity(parseDecimal(raw, fallback: _step));
-  }
+  // void _onQuantityTyped(String raw) {
+  //   if (raw.trim().isEmpty) return;
+  //   _setQuantity(parseDecimal(raw, fallback: _step));
+  // }
 
   /// Live line total = unit price × quantity (preview only).
   double get _previewLineTotal => _previewPrice * _quantity.toDouble();
@@ -234,7 +239,8 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
     for (final g in widget.groups) {
       if (g.selectionType == OptionSelectionType.single) {
         final optId = _single[g.id];
-        if (optId != null && optId > 0) total += _optionById(g, optId).priceDelta;
+        if (optId != null && optId > 0)
+          total += _optionById(g, optId).priceDelta;
       } else {
         final portions = _multi[g.id] ?? const {};
         for (final entry in portions.entries) {
@@ -363,10 +369,7 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
           padding: const EdgeInsets.only(top: 8, bottom: 4),
           child: Row(
             children: [
-              Text(
-                g.name,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
+              Text(g.name, style: const TextStyle(fontWeight: FontWeight.bold)),
               if (g.isRequired)
                 const Padding(
                   padding: EdgeInsets.only(left: 6),
@@ -555,6 +558,19 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
               child: TextField(
                 controller: _qtyController,
                 textAlign: TextAlign.center,
+                onEditingComplete: () {
+                  _setQuantity(
+                    parseDecimal(_qtyController.text, fallback: _step),
+                  );
+                },
+                inputFormatters: [
+                  PosQuantityFormatter(
+                    scale: 3,
+                    onValue: (v) {
+                      _quantity = v;
+                    },
+                  ),
+                ],
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
@@ -570,7 +586,6 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
                     vertical: 10,
                   ),
                 ),
-                onChanged: _onQuantityTyped,
               ),
             ),
             const SizedBox(width: 8),
