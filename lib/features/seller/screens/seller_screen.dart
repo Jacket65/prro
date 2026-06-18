@@ -172,14 +172,17 @@ class _SellerScreenState extends State<SellerScreen> {
     }
   }
 
-  void _logout(BuildContext context) {
-    context.read<LoginBloc>().add(LoginGetInitial());
-    context.read<UserBloc>().add(ClearUser());
-    context.read<OrdersBloc>().add(ClearProducts());
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => LoginScreen()),
-    );
+  void _logout(BuildContext context) async {
+    final confirmed = await LogoutConfirmationDialog.show(context);
+    if (confirmed == true && context.mounted) {
+      context.read<LoginBloc>().add(LoginGetInitial());
+      context.read<UserBloc>().add(ClearUser());
+      context.read<OrdersBloc>().add(ClearProducts());
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => LoginScreen()),
+      );
+    }
   }
 
   void _closeShift(BuildContext context) {

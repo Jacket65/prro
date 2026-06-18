@@ -6,6 +6,7 @@ export 'check/check_price.dart';
 export 'check/check_top_bar_with_time.dart';
 export 'custom_popup_menu.dart';
 export 'items_tiles.dart';
+export 'logout_confirmation_dialog.dart';
 export 'product_tiles.dart';
 export 'search_field.dart';
 export 'seller_list_item.dart';

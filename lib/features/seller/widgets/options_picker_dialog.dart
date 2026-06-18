@@ -239,8 +239,9 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
     for (final g in widget.groups) {
       if (g.selectionType == OptionSelectionType.single) {
         final optId = _single[g.id];
-        if (optId != null && optId > 0)
+        if (optId != null && optId > 0) {
           total += _optionById(g, optId).priceDelta;
+        }
       } else {
         final portions = _multi[g.id] ?? const {};
         for (final entry in portions.entries) {
