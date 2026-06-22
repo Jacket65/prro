@@ -199,11 +199,20 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
   /// Sets the quantity, clamped to a minimum of one step and rounded to the
   /// unit's precision; keeps the text field in sync.
   void _setQuantity(Decimal value) {
+    const max = '99999.999';
+
     var v = value < _step ? _step : value;
+
     v = Decimal.parse(v.toStringAsFixed(unitScale(_unit)));
+
+    if (v > Decimal.parse(max)) {
+      v = Decimal.parse(max);
+    }
+
     setState(() {
       _quantity = v;
       final text = formatQuantityValue(_quantity, _unit);
+
       if (_qtyController.text != text) {
         _qtyController.value = TextEditingValue(
           text: text,
@@ -212,11 +221,6 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
       }
     });
   }
-
-  // void _onQuantityTyped(String raw) {
-  //   if (raw.trim().isEmpty) return;
-  //   _setQuantity(parseDecimal(raw, fallback: _step));
-  // }
 
   /// Live line total = unit price × quantity (preview only).
   double get _previewLineTotal => _previewPrice * _quantity.toDouble();
@@ -555,7 +559,7 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
                   : null,
             ),
             SizedBox(
-              width: 96,
+              width: 120,
               child: TextField(
                 controller: _qtyController,
                 textAlign: TextAlign.center,
@@ -567,6 +571,7 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
                 inputFormatters: [
                   PosQuantityFormatter(
                     scale: 3,
+                    maxIntegerDigits: 5,
                     onValue: (v) {
                       _quantity = v;
                     },
