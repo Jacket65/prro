@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:decimal/decimal.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,6 +19,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   OrdersBloc(this._ordersRepository) : super(OrdersInitial()) {
     on<AddProduct>(_onAddProduct);
     on<RemoveProduct>(_onRemoveProduct);
+    on<DeleteProductLine>(_onDeleteProductLine);
     on<ClearProducts>(_onClearProducts);
     on<PayOrder>(_onPayOrder);
     on<AcknowledgePayment>(_onAcknowledgePayment);
@@ -41,6 +43,18 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
 
   void _onRemoveProduct(RemoveProduct event, Emitter<OrdersState> emit) {
     _ordersRepository.removeProduct(event.product);
+    if (_ordersRepository.products.isEmpty) {
+      emit(OrdersInitial());
+    } else {
+      emit(_buildUpdatedState());
+    }
+  }
+
+  void _onDeleteProductLine(
+    DeleteProductLine event,
+    Emitter<OrdersState> emit,
+  ) {
+    _ordersRepository.deleteProductLine(event.product);
     if (_ordersRepository.products.isEmpty) {
       emit(OrdersInitial());
     } else {

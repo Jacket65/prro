@@ -10,6 +10,8 @@ abstract interface class OrdersRepositoryI {
 
   /// Drops one unit step from the matching line (removing it at the minimum).
   void removeProduct(Product product);
+
+  void deleteProductLine(Product product);
   void clearProducts();
 
   /// Replaces the selected options, bean and (if given) [quantity] of the cart

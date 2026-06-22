@@ -62,6 +62,12 @@ class OrdersRepository implements OrdersRepositoryI {
   }
 
   @override
+  void deleteProductLine(Product product) {
+    // Видаляємо всю позицію за її унікальним lineId за один раз
+    _products.removeWhere((p) => p.lineId == product.lineId);
+  }
+
+  @override
   void clearProducts() => _products.clear();
 
   @override

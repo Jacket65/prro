@@ -25,6 +25,11 @@ final class RemoveProduct extends OrdersEvent {
   List<Object> get props => [product];
 }
 
+final class DeleteProductLine extends OrdersEvent {
+  final Product product;
+  const DeleteProductLine(this.product);
+}
+
 final class ClearProducts extends OrdersEvent {
   const ClearProducts();
 
