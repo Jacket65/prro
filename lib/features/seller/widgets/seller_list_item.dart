@@ -93,12 +93,16 @@ class _ListItemState extends State<ListItem> {
           ),
 
           child: Material(
-            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
             child: InkWell(
-              borderRadius: BorderRadius.circular(8),
+              splashColor: Colors.grey.shade200,
+              borderRadius: BorderRadius.horizontal(left: Radius.circular(8)),
               onTap: () => _onTap(context, state),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4.0,
+                  vertical: 8,
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -161,57 +165,54 @@ class _ListItemState extends State<ListItem> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: Text(
-                              (widget.price * widget.quantity.toDouble())
-                                  .toStringAsFixed(2),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Text(
+                            (widget.price * widget.quantity.toDouble())
+                                .toStringAsFixed(2),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                visualDensity: VisualDensity.standard,
-                                icon: const Icon(Icons.remove_circle_outline),
-                                onPressed: () {
-                                  if (currentProduct == null) return;
-                                  context.read<OrdersBloc>().add(
-                                    RemoveProduct(currentProduct),
-                                  );
-                                },
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              visualDensity: VisualDensity.standard,
+                              icon: const Icon(Icons.remove_circle_outline),
+                              onPressed: () {
+                                if (currentProduct == null) return;
+                                context.read<OrdersBloc>().add(
+                                  RemoveProduct(currentProduct),
+                                );
+                              },
+                            ),
+                            Text(
+                              formatQuantity(widget.quantity, widget.unit),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
                               ),
-                              Text(
-                                formatQuantity(widget.quantity, widget.unit),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              IconButton(
-                                visualDensity: VisualDensity.standard,
-                                padding: EdgeInsets.zero,
-                                icon: const Icon(Icons.add_circle_outline),
-                                onPressed: () {
-                                  if (currentProduct == null) return;
-                                  context.read<OrdersBloc>().add(
-                                    AddProduct(currentProduct),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                            IconButton(
+                              visualDensity: VisualDensity.standard,
+                              padding: EdgeInsets.zero,
+                              icon: const Icon(Icons.add_circle_outline),
+                              onPressed: () {
+                                if (currentProduct == null) return;
+                                context.read<OrdersBloc>().add(
+                                  AddProduct(currentProduct),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),

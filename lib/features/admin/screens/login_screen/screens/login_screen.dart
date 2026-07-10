@@ -1,6 +1,7 @@
 import 'dart:developer';
-import 'package:flutter/material.dart';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:prro/features/admin/screens/main_screen/main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -158,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<String?> _authenticateUser(String login, String password) async {
     final dio = Dio(
-      BaseOptions(baseUrl: 'http://pos.grainsworld.click/api/v1'),
+      BaseOptions(baseUrl: 'http://pos.coffeebeans.space.test/api/v1'),
     );
 
     try {

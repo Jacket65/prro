@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:prro/core/theme/theme.dart';
 import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/repositories/balance/balance.dart';
@@ -12,15 +11,14 @@ import 'package:prro/data/repositories/repositories.dart';
 import 'package:prro/data/repositories/shift_repository/shift_repo.dart';
 import 'package:prro/data/repositories/shift_repository/shift_repo_i.dart';
 import 'package:prro/data/services/balance.dart';
-
 import 'package:prro/data/services/items_service.dart';
 import 'package:prro/data/services/login_service.dart';
 import 'package:prro/data/services/user_service.dart';
+import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
 import 'package:prro/features/auth/auth.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/shift/bloc/bloc.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
-import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyApp extends StatefulWidget {
