@@ -9,34 +9,34 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.9
   flutter_slidable: ^4.0.3
 
   #http
   http: ^1.6.0
-  dio: ^5.9.0
+  dio: ^5.10.0
 
   #money/quantity decimals
-  decimal: ^2.3.3
+  decimal: ^3.2.4
 
   #bloc
   flutter_bloc: ^9.1.1
-  equatable: ^2.0.8
-  talker: ^5.1.11
-  talker_bloc_logger: ^5.0.1
+  equatable: ^2.1.0
+  talker: ^5.1.17
+  talker_bloc_logger: ^5.1.17
 
   #provider
   provider: ^6.1.5+1
-  path_provider: ^2.1.5
+  path_provider: ^2.1.6
 
   #storage
-  shared_preferences: ^2.5.4
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  mocktail: ^1.0.4
+  mocktail: ^1.0.5
   bloc_test: ^10.0.0
 
 flutter:

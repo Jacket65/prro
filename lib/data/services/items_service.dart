@@ -72,7 +72,7 @@ class ItemsService implements ItemsServiceI {
       '/retail-outlets/$outletId/products',
       queryParameters: {
         if (query.isNotEmpty) 'q': query,
-        if (categoryId != null) 'category_id': categoryId,
+        'category_id': ?categoryId,
       },
       cancelToken: cancelToken,
     );
