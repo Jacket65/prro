@@ -32,6 +32,9 @@ dependencies:
   #storage
   shared_preferences: ^2.5.5
 
+  #analysis
+  very_good_analysis: ^10.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -141,10 +141,10 @@ packages:
     dependency: "direct main"
     description:
       name: decimal
-      sha256: "24a261d5d5c87e86c7651c417a5dbdf8bcd7080dd592533910e8d0505a279f21"
+      sha256: fc706a5618b81e5b367b01dd62621def37abc096f2b46a9bd9068b64c1fa36d0
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.3"
+    version: "3.2.4"
   diff_match_patch:
     dependency: transitive
     description:
@@ -288,6 +288,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: "1ca20c894b1717686a2319b8548763d812bc0aabdac580420a44c5178c57a867"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.20.3"
   io:
     dependency: transitive
     description:
@@ -749,6 +757,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  very_good_analysis:
+    dependency: "direct main"
+    description:
+      name: very_good_analysis
+      sha256: "481af67ab5877af20325251dc215a4ebac7666a1c8cf09198ffd457bc612b33d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.3.0"
   vm_service:
     dependency: transitive
     description:
