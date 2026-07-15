@@ -5,19 +5,18 @@ import 'package:prro/data/api/models/models.dart';
 /// catalogue stays manageable: type to filter across all groups, or browse by
 /// group when the search is empty. Returns the picked [Bean] (or null).
 class BeanPickerDialog extends StatefulWidget {
+
+  const BeanPickerDialog({
+    required this.groups, super.key,
+    this.selectedBeanId,
+    this.popular = const [],
+  });
   final List<BeanGroup> groups;
   final int? selectedBeanId;
 
   /// Most-used beans, shown first as a "Часто вживані" shortcut so the common
   /// choices are one tap away.
   final List<Bean> popular;
-
-  const BeanPickerDialog({
-    super.key,
-    required this.groups,
-    this.selectedBeanId,
-    this.popular = const [],
-  });
 
   static Future<Bean?> show(
     BuildContext context,

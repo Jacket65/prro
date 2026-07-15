@@ -125,18 +125,16 @@ Future<void> openLineEditor(BuildContext context, Product line) async {
 /// selection; confirming dispatches [UpdateOptions] (which may merge the line
 /// with an identical existing one).
 class OptionsPickerDialog extends StatefulWidget {
+
+  const OptionsPickerDialog({
+    required this.line, required this.groups, super.key,
+    this.beanGroups = const [],
+    this.popularBeans = const [],
+  });
   final Product line;
   final List<OptionGroup> groups;
   final List<BeanGroup> beanGroups;
   final List<Bean> popularBeans;
-
-  const OptionsPickerDialog({
-    super.key,
-    required this.line,
-    required this.groups,
-    this.beanGroups = const [],
-    this.popularBeans = const [],
-  });
 
   @override
   State<OptionsPickerDialog> createState() => _OptionsPickerDialogState();
@@ -570,8 +568,6 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
                 },
                 inputFormatters: [
                   PosQuantityFormatter(
-                    scale: 3,
-                    maxIntegerDigits: 5,
                     onValue: (v) {
                       _quantity = v;
                     },

@@ -6,18 +6,17 @@ class CheckBottomButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
           onPressed: () {},
-          icon: Icon(Icons.manage_accounts_outlined),
+          icon: const Icon(Icons.manage_accounts_outlined),
         ),
-        IconButton(onPressed: () {}, icon: Icon(Icons.percent_outlined)),
-        IconButton(onPressed: () {}, icon: Icon(Icons.mail_outline)),
-        IconButton(onPressed: () {}, icon: Icon(Icons.cut_outlined)),
-        IconButton(onPressed: () {}, icon: Icon(Icons.print_outlined)),
-        IconButton(onPressed: () {}, icon: Icon(Icons.menu_outlined)),
+        IconButton(onPressed: () {}, icon: const Icon(Icons.percent_outlined)),
+        IconButton(onPressed: () {}, icon: const Icon(Icons.mail_outline)),
+        IconButton(onPressed: () {}, icon: const Icon(Icons.cut_outlined)),
+        IconButton(onPressed: () {}, icon: const Icon(Icons.print_outlined)),
+        IconButton(onPressed: () {}, icon: const Icon(Icons.menu_outlined)),
       ],
     );
   }

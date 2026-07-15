@@ -14,7 +14,7 @@ class CheckMainInfo extends StatefulWidget {
 class _CheckMainInfoState extends State<CheckMainInfo> {
   @override
   Widget build(BuildContext sellerContext) {
-    var theme = Theme.of(sellerContext);
+    final theme = Theme.of(sellerContext);
     return Expanded(
       child: Column(
         children: [
@@ -27,21 +27,21 @@ class _CheckMainInfoState extends State<CheckMainInfo> {
                     case UserLoaded(:final username):
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [Text("Працівник: $username")],
+                        children: [Text('Працівник: $username')],
                       );
                     case UserLoading():
                       return const CircularProgressIndicator();
                     case UserError():
-                      return const Text("Працівник: не вказано");
+                      return const Text('Працівник: не вказано');
                     default:
-                      return const Text("Працівник: ...");
+                      return const Text('Працівник: ...');
                   }
                 },
               ),
-              Text("Замовлення №: WIP"),
-              SizedBox(height: 15),
-              Divider(),
-              SizedBox(height: 8),
+              const Text('Замовлення №: WIP'),
+              const SizedBox(height: 15),
+              const Divider(),
+              const SizedBox(height: 8),
             ],
           ),
           BlocBuilder<OrdersBloc, OrdersState>(
@@ -63,13 +63,13 @@ class _CheckMainInfoState extends State<CheckMainInfo> {
                         selectedBean: product.selectedBean,
                       );
                     },
-                    separatorBuilder: (_, _) => Divider(),
+                    separatorBuilder: (_, _) => const Divider(),
                   ),
                 );
               } else {
                 return Center(
                   child: Text(
-                    "Місце для замовлень",
+                    'Місце для замовлень',
                     style: theme.textTheme.bodyLarge,
                   ),
                 );

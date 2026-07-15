@@ -1,10 +1,10 @@
 import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
 
 class LoginRepository implements LoginRepositoryI {
-  final LoginServiceI _loginService;
 
   LoginRepository({required LoginServiceI userService})
     : _loginService = userService;
+  final LoginServiceI _loginService;
 
   @override
   Future<bool> login({
@@ -45,6 +45,6 @@ class LoginRepository implements LoginRepositoryI {
 
   @override
   Future<bool> tryAutoLogin() async {
-    return await _loginService.tryAutoLogin();
+    return _loginService.tryAutoLogin();
   }
 }

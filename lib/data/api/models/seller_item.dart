@@ -10,24 +10,6 @@ sealed class Item extends Equatable {
 }
 
 final class Product extends Item {
-  final String id;
-  final String name;
-  final double price;
-  final String imageUrl;
-
-  /// Quantity on the order line. Decimal because weight goods sell fractionally
-  /// (e.g. `0.250` kg). Stepped by [unit.step]; minimum is one step.
-  final Decimal quantity;
-
-  /// Measure unit of the variant (id/name/step). `null` → piece (step 1).
-  final MeasureUnit? unit;
-
-  /// Options the cashier picked for this cart line (empty for catalog tiles).
-  final List<SelectedOption> selectedOptions;
-
-  /// Coffee bean picked for this line, if the drink supports bean selection.
-  final Bean? selectedBean;
-
   const Product({
     required this.id,
     required this.quantity,
@@ -38,6 +20,46 @@ final class Product extends Item {
     this.selectedOptions = const [],
     this.selectedBean,
   });
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    final unit = json['unit'] is Map
+        ? MeasureUnit.fromJson((json['unit'] as Map).cast<String, dynamic>())
+        : null;
+    // A fresh catalog variant starts at one step (the minimum sellable qty);
+    // a serialized cart line carries its own quantity.
+    final quantity = json['quantity'] == null
+        ? unitStep(unit)
+        : parseDecimal(json['quantity'], fallback: unitStep(unit));
+
+    return Product(
+      id: json['id'].toString(),
+      name: (json['name'] ?? '').toString(),
+      // Backend ships price as a decimal STRING ("45.50"); some legacy paths
+      // still ship a number. parseDouble handles both.
+      price: parseDouble(json['price']),
+      imageUrl: (json['image_url'] ?? '').toString(),
+      quantity: quantity,
+      unit: unit,
+    );
+  }
+
+  final String id;
+  final String name;
+  final double price;
+  final String imageUrl;
+
+  /// Quantity on the order line. Decimal because weight goods sell fractionally
+  /// (e.g. `0.250` kg). Stepped by [MeasureUnit.step]; minimum is one step.
+  final Decimal quantity;
+
+  /// Measure unit of the variant (id/name/step). `null` → piece (step 1).
+  final MeasureUnit? unit;
+
+  /// Options the cashier picked for this cart line (empty for catalog tiles).
+  final List<SelectedOption> selectedOptions;
+
+  /// Coffee bean picked for this line, if the drink supports bean selection.
+  final Bean? selectedBean;
 
   /// Stable identity of a cart line: same variant with different options/bean
   /// is a distinct line. Options are sorted by id so order of selection is
@@ -57,26 +79,6 @@ final class Product extends Item {
       price +
       selectedOptions.fold(0.0, (sum, o) => sum + o.priceDelta * o.quantity);
 
-  factory Product.fromJson(Map<String, dynamic> json) {
-    final unit = json['unit'] is Map
-        ? MeasureUnit.fromJson((json['unit'] as Map).cast<String, dynamic>())
-        : null;
-    // A fresh catalog variant starts at one step (the minimum sellable qty);
-    // a serialized cart line carries its own quantity.
-    final quantity = json['quantity'] == null
-        ? unitStep(unit)
-        : parseDecimal(json['quantity'], fallback: unitStep(unit));
-    return Product(
-      id: json['id'].toString(),
-      name: (json['name'] ?? '').toString(),
-      // Backend ships price as a decimal STRING ("45.50"); some legacy paths
-      // still ship a number. parseDouble handles both.
-      price: parseDouble(json['price']),
-      imageUrl: (json['image_url'] ?? '').toString(),
-      quantity: quantity,
-      unit: unit,
-    );
-  }
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -122,15 +124,11 @@ final class Product extends Item {
   ];
 }
 
-/// Abstract product (e.g. "Американо") that owns one or more orderable variants.
+/// Abstract product (e.g. "Американо") that owns one or more orderable variants
 /// Tapping a [ProductGroup] opens a variant picker, not navigate. Variants are
 /// carried inline (served by `GET /categories/:id/products`), so the picker
 /// needs no extra request.
 final class ProductGroup extends Item {
-  final int id;
-  final String name;
-  final List<Product> variants;
-
   const ProductGroup({
     required this.id,
     required this.name,
@@ -139,39 +137,44 @@ final class ProductGroup extends Item {
 
   factory ProductGroup.fromJson(Map<String, dynamic> json) {
     return ProductGroup(
-      id: parseInt(json['id']),
+      id: json['id'] as int,
       name: (json['name'] ?? '').toString(),
       variants: (json['variants'] as List<dynamic>? ?? const [])
-          .whereType<Map>()
+          .whereType<Map<dynamic, dynamic>>()
           .map((v) => Product.fromJson(v.cast<String, dynamic>()))
           .toList(),
     );
   }
+
+  final int id;
+  final String name;
+  final List<Product> variants;
 
   @override
   List<Object> get props => [id, name, variants];
 }
 
 final class Category extends Item {
-  final int id;
-  final String name;
-  final List<Item> items;
-
   const Category({required this.id, required this.name, this.items = const []});
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
-      id: json['id'],
-      name: json['name'],
+      id: json['id'] as int,
+      name: (json['name'] ?? '').toString(),
       items: (json['items'] as List<dynamic>? ?? []).map<Item>((itemJson) {
-        if (itemJson.containsKey('price')) {
-          return Product.fromJson(itemJson);
+        final itemMap = (itemJson as Map).cast<String, dynamic>();
+        if (itemMap.containsKey('price')) {
+          return Product.fromJson(itemMap);
         } else {
-          return Category.fromJson(itemJson);
+          return Category.fromJson(itemMap);
         }
       }).toList(),
     );
   }
+
+  final int id;
+  final String name;
+  final List<Item> items;
 
   @override
   List<Object?> get props => [id, name, items];

@@ -12,8 +12,6 @@ part 'items_tiles_state.dart';
 ///   - empty stack:        showing categories
 ///   - 1 entry (category): showing abstract products
 class ItemsTilesBloc extends Bloc<ItemsTilesEvent, ItemsTilesState> {
-  final ItemsRepositoryI _repository;
-  final List<Category> _stack = [];
 
   ItemsTilesBloc({required ItemsRepositoryI itemsRepository})
     : _repository = itemsRepository,
@@ -22,6 +20,8 @@ class ItemsTilesBloc extends Bloc<ItemsTilesEvent, ItemsTilesState> {
     on<ItemsTilesEnterCategory>(_onEnterCategory);
     on<ItemsTilesBack>(_onBack);
   }
+  final ItemsRepositoryI _repository;
+  final List<Category> _stack = [];
 
   Future<void> _onStarted(
     ItemsTilesStarted event,

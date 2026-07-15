@@ -8,8 +8,8 @@ import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
 import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
 
 class CategoryPick extends StatefulWidget {
+  const CategoryPick({required this.categoryList, super.key});
   final List<Category> categoryList;
-  const CategoryPick({super.key, required this.categoryList});
 
   @override
   State<CategoryPick> createState() => _CategoryPickState();
@@ -32,27 +32,26 @@ class _CategoryPickState extends State<CategoryPick> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(backgroundColor: Colors.white, title: Text('Новий товар')),
+      appBar: AppBar(backgroundColor: Colors.white, title: const Text('Новий товар')),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Категорія'),
+              const Text('Категорія'),
               SizedBox(
                 width: 500,
                 child: DropdownMenu(
-                  hintText: "Вибрати категорію",
+                  hintText: 'Вибрати категорію',
                   onSelected: (value) {
                     indxCategory = value!;
                   },
                   initialSelection: lastCategory,
                   expandedInsets: EdgeInsets.zero,
                   focusNode: FocusNode(canRequestFocus: false),
-                  trailingIcon: Icon(Icons.arrow_drop_down),
+                  trailingIcon: const Icon(Icons.arrow_drop_down),
                   dropdownMenuEntries: List.generate(
                     widget.categoryList.length,
                     (index) {
@@ -64,8 +63,8 @@ class _CategoryPickState extends State<CategoryPick> {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
-              Text('Податкова ставка'),
+              const SizedBox(height: 20),
+              const Text('Податкова ставка'),
               Row(
                 children: [
                   Checkbox(
@@ -75,7 +74,7 @@ class _CategoryPickState extends State<CategoryPick> {
                       setState(() {});
                     },
                   ),
-                  Text('A - БЕЗ ПДВ 0%'),
+                  const Text('A - БЕЗ ПДВ 0%'),
                 ],
               ),
               Row(
@@ -84,7 +83,7 @@ class _CategoryPickState extends State<CategoryPick> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Назва'),
+                        const Text('Назва'),
                         SizedBox(
                           width: 400,
                           child: TextFormField(
@@ -103,20 +102,20 @@ class _CategoryPickState extends State<CategoryPick> {
                             cursorColor: Colors.grey,
                             decoration: InputDecoration(
                               hintText: 'Введіть назву товару чи послуги',
-                              hintStyle: TextStyle(color: Colors.grey),
+                              hintStyle: const TextStyle(color: Colors.grey),
                               isDense: true,
-                              contentPadding: EdgeInsets.all(10),
+                              contentPadding: const EdgeInsets.all(10),
                               fillColor: Colors.white,
                               focusColor: Colors.white,
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5.0),
+                                borderRadius: BorderRadius.circular(5),
                               ),
                               border: OutlineInputBorder(
                                 borderSide: const BorderSide(
                                   color: Colors.white,
-                                  width: 2.0,
+                                  width: 2,
                                 ),
-                                borderRadius: BorderRadius.circular(5.0),
+                                borderRadius: BorderRadius.circular(5),
                               ),
                             ),
                           ),
@@ -124,19 +123,19 @@ class _CategoryPickState extends State<CategoryPick> {
                       ],
                     ),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   Flexible(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Одиниці виміру'),
+                        const Text('Одиниці виміру'),
                         SizedBox(
                           // width: 200,
                           // height: 40,
                           child: DropdownMenu(
                             width: 140,
                             inputDecorationTheme: InputDecorationTheme(
-                              hintStyle: TextStyle(
+                              hintStyle: const TextStyle(
                                 color: Colors.grey,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -151,7 +150,7 @@ class _CategoryPickState extends State<CategoryPick> {
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ),
-                            hintText: "Вибрати",
+                            hintText: 'Вибрати',
 
                             onSelected: (value) {
                               selectedMeasure = value!;
@@ -159,7 +158,7 @@ class _CategoryPickState extends State<CategoryPick> {
                             initialSelection: 10,
                             // expandedInsets: EdgeInsets.zero,
                             focusNode: FocusNode(canRequestFocus: false),
-                            trailingIcon: Icon(Icons.arrow_drop_down),
+                            trailingIcon: const Icon(Icons.arrow_drop_down),
                             dropdownMenuEntries: List.generate(
                               measures.length,
                               (index) {
@@ -174,12 +173,12 @@ class _CategoryPickState extends State<CategoryPick> {
                       ],
                     ),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   Flexible(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Ціна'),
+                        const Text('Ціна'),
                         SizedBox(
                           width: 200,
                           child: TextField(
@@ -187,20 +186,20 @@ class _CategoryPickState extends State<CategoryPick> {
                             cursorColor: Colors.grey,
                             decoration: InputDecoration(
                               hintText: 'Ціна(грн)',
-                              hintStyle: TextStyle(color: Colors.grey),
+                              hintStyle: const TextStyle(color: Colors.grey),
                               isDense: true,
-                              contentPadding: EdgeInsets.all(10),
+                              contentPadding: const EdgeInsets.all(10),
                               fillColor: Colors.white,
                               focusColor: Colors.white,
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5.0),
+                                borderRadius: BorderRadius.circular(5),
                               ),
                               border: OutlineInputBorder(
                                 borderSide: const BorderSide(
                                   color: Colors.white,
-                                  width: 2.0,
+                                  width: 2,
                                 ),
-                                borderRadius: BorderRadius.circular(5.0),
+                                borderRadius: BorderRadius.circular(5),
                               ),
                             ),
                           ),
@@ -219,7 +218,7 @@ class _CategoryPickState extends State<CategoryPick> {
                       setState(() {});
                     },
                   ),
-                  Text('Зміна ціни'),
+                  const Text('Зміна ціни'),
                 ],
               ),
               Row(
@@ -231,7 +230,7 @@ class _CategoryPickState extends State<CategoryPick> {
                       setState(() {});
                     },
                   ),
-                  Text('Зміна ваги'),
+                  const Text('Зміна ваги'),
                 ],
               ),
               Row(
@@ -240,7 +239,7 @@ class _CategoryPickState extends State<CategoryPick> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Код УКТЗЕД'),
+                        const Text('Код УКТЗЕД'),
                         SizedBox(
                           width: 400,
                           child: TextField(
@@ -248,20 +247,20 @@ class _CategoryPickState extends State<CategoryPick> {
                             cursorColor: Colors.grey,
                             decoration: InputDecoration(
                               hintText: 'Необовязково',
-                              hintStyle: TextStyle(color: Colors.grey),
+                              hintStyle: const TextStyle(color: Colors.grey),
                               isDense: true,
-                              contentPadding: EdgeInsets.all(10),
+                              contentPadding: const EdgeInsets.all(10),
                               fillColor: Colors.white,
                               focusColor: Colors.white,
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5.0),
+                                borderRadius: BorderRadius.circular(5),
                               ),
                               border: OutlineInputBorder(
                                 borderSide: const BorderSide(
                                   color: Colors.white,
-                                  width: 2.0,
+                                  width: 2,
                                 ),
-                                borderRadius: BorderRadius.circular(5.0),
+                                borderRadius: BorderRadius.circular(5),
                               ),
                             ),
                           ),
@@ -269,12 +268,12 @@ class _CategoryPickState extends State<CategoryPick> {
                       ],
                     ),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   Flexible(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Артикул'),
+                        const Text('Артикул'),
                         SizedBox(
                           width: 400,
                           child: TextField(
@@ -282,20 +281,20 @@ class _CategoryPickState extends State<CategoryPick> {
                             cursorColor: Colors.grey,
                             decoration: InputDecoration(
                               hintText: 'Необовязково',
-                              hintStyle: TextStyle(color: Colors.grey),
+                              hintStyle: const TextStyle(color: Colors.grey),
                               isDense: true,
-                              contentPadding: EdgeInsets.all(10),
+                              contentPadding: const EdgeInsets.all(10),
                               fillColor: Colors.white,
                               focusColor: Colors.white,
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5.0),
+                                borderRadius: BorderRadius.circular(5),
                               ),
                               border: OutlineInputBorder(
                                 borderSide: const BorderSide(
                                   color: Colors.white,
-                                  width: 2.0,
+                                  width: 2,
                                 ),
-                                borderRadius: BorderRadius.circular(5.0),
+                                borderRadius: BorderRadius.circular(5),
                               ),
                             ),
                           ),
@@ -303,12 +302,12 @@ class _CategoryPickState extends State<CategoryPick> {
                       ],
                     ),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   Flexible(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Штрихкод'),
+                        const Text('Штрихкод'),
                         SizedBox(
                           width: 400,
                           child: TextField(
@@ -316,20 +315,20 @@ class _CategoryPickState extends State<CategoryPick> {
                             cursorColor: Colors.grey,
                             decoration: InputDecoration(
                               hintText: 'Необовязково',
-                              hintStyle: TextStyle(color: Colors.grey),
+                              hintStyle: const TextStyle(color: Colors.grey),
                               isDense: true,
-                              contentPadding: EdgeInsets.all(10),
+                              contentPadding: const EdgeInsets.all(10),
                               fillColor: Colors.white,
                               focusColor: Colors.white,
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5.0),
+                                borderRadius: BorderRadius.circular(5),
                               ),
                               border: OutlineInputBorder(
                                 borderSide: const BorderSide(
                                   color: Colors.white,
-                                  width: 2.0,
+                                  width: 2,
                                 ),
-                                borderRadius: BorderRadius.circular(5.0),
+                                borderRadius: BorderRadius.circular(5),
                               ),
                             ),
                           ),
@@ -339,7 +338,7 @@ class _CategoryPickState extends State<CategoryPick> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Wrap(
                 // mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -350,7 +349,7 @@ class _CategoryPickState extends State<CategoryPick> {
                           borderRadius: BorderRadius.circular(5),
                         ),
                       ),
-                      backgroundColor: WidgetStatePropertyAll(Colors.blue),
+                      backgroundColor: const WidgetStatePropertyAll(Colors.blue),
                     ),
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
@@ -363,23 +362,23 @@ class _CategoryPickState extends State<CategoryPick> {
                         );
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Товар створено')),
+                          const SnackBar(content: Text('Товар створено')),
                         );
                         setState(() {});
                         Navigator.pop(context, true);
                       }
                     },
-                    child: Text(
+                    child: const Text(
                       'Створити',
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
-                    child: Text('Скасувати'),
+                    child: const Text('Скасувати'),
                   ),
                 ],
               ),

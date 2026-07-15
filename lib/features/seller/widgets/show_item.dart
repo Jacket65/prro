@@ -6,13 +6,13 @@ import 'package:prro/features/seller/widgets/options_picker_dialog.dart';
 import 'package:prro/features/seller/widgets/variant_picker_dialog.dart';
 
 class ShowItem<T extends Item> extends StatelessWidget {
-  final T item;
-
-  const ShowItem._({super.key, required this.item});
 
   factory ShowItem(T item) {
     return ShowItem._(item: item);
   }
+
+  const ShowItem._({required this.item, super.key});
+  final T item;
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +29,8 @@ class ShowItem<T extends Item> extends StatelessWidget {
 }
 
 class _ProductTile extends StatelessWidget {
-  final Product product;
   const _ProductTile({required this.product});
+  final Product product;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,6 @@ class _ProductTile extends StatelessWidget {
       onTap: () => startAddToCart(context, product),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: 120,
@@ -54,7 +53,7 @@ class _ProductTile extends StatelessWidget {
                 : const Center(child: Icon(Icons.local_cafe_outlined)),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8),
             child: Text(
               product.name,
               textAlign: TextAlign.center,
@@ -72,8 +71,8 @@ class _ProductTile extends StatelessWidget {
 }
 
 class _ProductGroupTile extends StatelessWidget {
-  final ProductGroup group;
   const _ProductGroupTile({required this.group});
+  final ProductGroup group;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +81,6 @@ class _ProductGroupTile extends StatelessWidget {
       onTap: () => VariantPickerDialog.show(context, group),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Padding(
             padding: EdgeInsets.only(top: 12, bottom: 4),
@@ -113,8 +111,8 @@ class _ProductGroupTile extends StatelessWidget {
 }
 
 class _CategoryTile extends StatelessWidget {
-  final Category category;
   const _CategoryTile({required this.category});
+  final Category category;
 
   @override
   Widget build(BuildContext context) {
@@ -125,14 +123,13 @@ class _CategoryTile extends StatelessWidget {
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Padding(
             padding: EdgeInsets.only(top: 12),
             child: Icon(Icons.folder_outlined, size: 36, color: Colors.grey),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8),
             child: Text(
               category.name,
               textAlign: TextAlign.center,

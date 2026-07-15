@@ -22,9 +22,9 @@ import 'package:prro/features/user/bloc/user_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyApp extends StatefulWidget {
+  const MyApp({required this.prefs, required this.apiClient, super.key});
   final SharedPreferences prefs;
   final ApiClientI apiClient;
-  const MyApp({super.key, required this.prefs, required this.apiClient});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -100,14 +100,14 @@ class _MyAppState extends State<MyApp> {
           BlocProvider(
             create: (context) =>
                 LoginBloc(loginRepository: context.read<LoginRepositoryI>())
-                  ..add(LoginCheckAutoLogin()),
+                  ..add(const LoginCheckAutoLogin()),
           ),
           BlocProvider(
             create: (context) => ShiftCubit(context.read<ShiftRepositoryI>()),
           ),
         ],
         child: MaterialApp(
-          title: "Prro beta",
+          title: 'Prro beta',
           navigatorKey: _navigatorKey,
           theme: lightTheme,
           debugShowCheckedModeBanner: false,

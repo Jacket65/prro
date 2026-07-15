@@ -17,31 +17,31 @@ enum PaymentMethod {
 // [OrdersRepository] builds the request map inline.
 
 class SelectedOptionDto {
+  const SelectedOptionDto({required this.optionId, this.quantity = 1});
   final int optionId;
   final int quantity;
-  const SelectedOptionDto({required this.optionId, this.quantity = 1});
 }
 
 class OrderLineDto {
-  final String productId;
-  final int quantity;
-  final List<SelectedOptionDto> options;
-  final int? beanId;
   const OrderLineDto({
     required this.productId,
     required this.quantity,
     this.options = const [],
     this.beanId,
   });
+  final String productId;
+  final int quantity;
+  final List<SelectedOptionDto> options;
+  final int? beanId;
 }
 
 class PaymentDto {
+  const PaymentDto({required this.method, required this.tenderedKopecks});
   final PaymentMethod method;
 
   /// Cash: amount the customer handed over (≥ total).
   /// Card: must equal total.
   final int tenderedKopecks;
-  const PaymentDto({required this.method, required this.tenderedKopecks});
 }
 
 // ── Receipt (backend → cart, the authoritative result of POST /orders) ───────
@@ -49,14 +49,6 @@ class PaymentDto {
 /// One printed line of the receipt. Money is `int` kopecks; the backend ships
 /// it as a decimal string, parsed via [kopecksFromString].
 class ReceiptLine {
-  final String productId;
-  final String name;
-
-  /// Quantity as the backend returned it (decimal string, e.g. "0.250" / "2");
-  /// kept as text since it may be fractional for weight goods.
-  final String quantity;
-  final int unitPriceKopecks;
-  final int subtotalKopecks;
 
   const ReceiptLine({
     required this.productId,
@@ -83,23 +75,18 @@ class ReceiptLine {
       subtotalKopecks: kopecksFromString((json['line_total'] ?? '0').toString()),
     );
   }
+  final String productId;
+  final String name;
+
+  /// Quantity as the backend returned it (decimal string, e.g. "0.250" / "2");
+  /// kept as text since it may be fractional for weight goods.
+  final String quantity;
+  final int unitPriceKopecks;
+  final int subtotalKopecks;
 }
 
 /// The receipt the cashier sees after a successful sale.
 class OrderReceipt {
-  final String orderId;
-  final List<ReceiptLine> lines;
-  final int totalKopecks;
-  final int tenderedKopecks;
-  final int changeKopecks;
-  final PaymentMethod method;
-  final String status;
-  final DateTime issuedAt;
-
-  /// Header info for the printout. The order response carries neither, so the
-  /// caller supplies them (store from config, cashier from the session).
-  final String storeName;
-  final String cashierName;
 
   const OrderReceipt({
     required this.orderId,
@@ -145,6 +132,19 @@ class OrderReceipt {
       cashierName: cashierName,
     );
   }
+  final String orderId;
+  final List<ReceiptLine> lines;
+  final int totalKopecks;
+  final int tenderedKopecks;
+  final int changeKopecks;
+  final PaymentMethod method;
+  final String status;
+  final DateTime issuedAt;
+
+  /// Header info for the printout. The order response carries neither, so the
+  /// caller supplies them (store from config, cashier from the session).
+  final String storeName;
+  final String cashierName;
 
   @override
   String toString() =>

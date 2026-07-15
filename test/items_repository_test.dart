@@ -17,7 +17,7 @@ void main() {
   });
 
   test('getCategories returns list from service', () async {
-    final categories = [Category(id: 1, name: 'Test', items: [])];
+    final categories = [const Category(id: 1, name: 'Test')];
 
     when(() => service.getCategories()).thenAnswer((_) async => categories);
 

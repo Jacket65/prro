@@ -6,9 +6,6 @@ import 'package:dio/dio.dart';
 /// [ApiException.fromDio] unwraps that envelope; connection/timeout failures get
 /// a friendly Ukrainian message instead of a raw Dio dump.
 class ApiException implements Exception {
-  final String message;
-  final String? code;
-  final int? statusCode;
 
   const ApiException(this.message, {this.code, this.statusCode});
 
@@ -25,6 +22,9 @@ class ApiException implements Exception {
     }
     return ApiException(_friendly(e), statusCode: e.response?.statusCode);
   }
+  final String message;
+  final String? code;
+  final int? statusCode;
 
   static String _friendly(DioException e) {
     switch (e.type) {

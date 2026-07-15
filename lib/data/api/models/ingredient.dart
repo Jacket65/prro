@@ -8,14 +8,6 @@ import 'package:prro/core/json.dart';
 /// `cost_per_unit`, `quantity`, `min_stock_alert` arrive as decimal STRINGS
 /// (shopspring/decimal). Parse them via [parseDouble].
 class Ingredient extends Equatable {
-  final int id;
-  final String name;
-  final int? retailOutletId;
-  final int? categoryId;
-  final int unitId;
-  final double costPerUnit;
-  final double quantity;
-  final double? minStockAlert;
 
   const Ingredient({
     required this.id,
@@ -46,6 +38,14 @@ class Ingredient extends Equatable {
           : parseDouble(json['min_stock_alert']),
     );
   }
+  final int id;
+  final String name;
+  final int? retailOutletId;
+  final int? categoryId;
+  final int unitId;
+  final double costPerUnit;
+  final double quantity;
+  final double? minStockAlert;
 
   @override
   List<Object?> get props => [id, name, unitId];

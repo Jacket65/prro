@@ -3,10 +3,10 @@ import 'dart:developer';
 import 'package:prro/data/repositories/balance/balance_i.dart';
 
 class BalanceRepository implements BalanceRepositoryI {
-  final BalanceServiceI _balanceService;
 
   BalanceRepository({required BalanceServiceI balanceService})
     : _balanceService = balanceService;
+  final BalanceServiceI _balanceService;
 
   @override
   Future<int> getBalance() {

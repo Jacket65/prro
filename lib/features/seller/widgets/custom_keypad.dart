@@ -44,6 +44,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 
 class CustomKeypad extends StatelessWidget {
+
+  CustomKeypad({super.key});
   final List<String> keys = [
     '1',
     '2',
@@ -59,27 +61,25 @@ class CustomKeypad extends StatelessWidget {
     'back',
   ];
 
-  CustomKeypad({super.key});
-
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
+    final size = MediaQuery.of(context).size;
 
     /*24 is for notification bar on Android*/
-    final double itemHeight = (size.height);
-    final double itemWidth = size.width;
+    final itemHeight = size.height;
+    final itemWidth = size.width;
     return Flexible(
       child: Column(
         children: [
           Expanded(
             child: GridView.builder(
               padding: EdgeInsets.zero,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               itemCount: keys.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
-                childAspectRatio: (itemWidth / itemHeight),
+                childAspectRatio: itemWidth / itemHeight,
               ),
               itemBuilder: (context, index) {
                 final key = keys[index];
@@ -102,12 +102,12 @@ class CustomKeypad extends StatelessWidget {
         child: Container(
           width: 50,
           height: 80,
-          margin: EdgeInsets.all(1),
+          margin: const EdgeInsets.all(1),
 
           child: Center(
             child: key == 'back'
-                ? Icon(Icons.backspace)
-                : Text(key, style: TextStyle(fontSize: 24)),
+                ? const Icon(Icons.backspace)
+                : Text(key, style: const TextStyle(fontSize: 24)),
           ),
         ),
       ),

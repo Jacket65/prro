@@ -34,7 +34,7 @@ class _SellerScreenState extends State<SellerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
+    final theme = Theme.of(context);
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -62,7 +62,7 @@ class _SellerScreenState extends State<SellerScreen> {
           return BlocListener<ShiftCubit, ShiftState>(
             listenWhen: (prev, curr) => curr is ShiftNone,
             listener: (context, state) {
-              context.read<OrdersBloc>().add(ClearProducts());
+              context.read<OrdersBloc>().add(const ClearProducts());
             },
             child: Scaffold(
               backgroundColor: theme.scaffoldBackgroundColor,
@@ -72,9 +72,9 @@ class _SellerScreenState extends State<SellerScreen> {
                   children: [
                     TextButton.icon(
                       onPressed: () => _logout(context),
-                      icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                       label: const Text(
-                        "Logout",
+                        'Logout',
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
@@ -83,11 +83,11 @@ class _SellerScreenState extends State<SellerScreen> {
                         // "Закрити зміну" is only meaningful with an open shift.
                         if (state is! ShiftOpen) return const SizedBox.shrink();
                         return CustomPopupMenu(
-                          name: "Меню",
+                          name: 'Меню',
                           icon: Icons.menu,
                           widgets: [
                             PopupMenuItem(
-                              child: const Text("Закрити зміну"),
+                              child: const Text('Закрити зміну'),
                               onTap: () => _closeShift(context),
                             ),
                           ],
@@ -95,7 +95,7 @@ class _SellerScreenState extends State<SellerScreen> {
                       },
                     ),
                     CustomPopupMenu(
-                      name: "Каса",
+                      name: 'Каса',
                       icon: Icons.attach_money_sharp,
                       widgets: [
                         BlocBuilder<BalanceCubit, BalanceState>(
@@ -106,15 +106,15 @@ class _SellerScreenState extends State<SellerScreen> {
                       ],
                     ),
                     const Spacer(),
-                    SearchField(),
-                    CustomPopupMenu(name: '', icon: Icons.notifications),
+                    const SearchField(),
+                    const CustomPopupMenu(name: '', icon: Icons.notifications),
                     _buildUsername(),
                   ],
                 ),
               ),
               body: BlocBuilder<ShiftCubit, ShiftState>(
                 builder: (context, state) => switch (state) {
-                  ShiftOpen() => Row(
+                  ShiftOpen() => const Row(
                     children: [CheckColumn(), Expanded(child: ItemsTiles())],
                   ),
                   ShiftNone() => const _OpenShiftGate(),
@@ -150,8 +150,8 @@ class _SellerScreenState extends State<SellerScreen> {
 
   Widget _buildBalance(BalanceState state) {
     if (state is BalanceLoading) {
-      return Row(
-        children: const [
+      return const Row(
+        children: [
           Text('balance: '),
           SizedBox(
             width: 16,
@@ -172,12 +172,12 @@ class _SellerScreenState extends State<SellerScreen> {
     }
   }
 
-  void _logout(BuildContext context) async {
+  Future<void> _logout(BuildContext context) async {
     final confirmed = await LogoutConfirmationDialog.show(context);
     if (confirmed == true && context.mounted) {
-      context.read<LoginBloc>().add(LoginGetInitial());
+      context.read<LoginBloc>().add(const LoginGetInitial());
       context.read<UserBloc>().add(ClearUser());
-      context.read<OrdersBloc>().add(ClearProducts());
+      context.read<OrdersBloc>().add(const ClearProducts());
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => LoginScreen()),
@@ -230,8 +230,8 @@ class _OpenShiftGate extends StatelessWidget {
 
 /// A real failure while checking the shift — offers a retry.
 class _ShiftErrorView extends StatelessWidget {
-  final String message;
   const _ShiftErrorView({required this.message});
+  final String message;
 
   @override
   Widget build(BuildContext context) {

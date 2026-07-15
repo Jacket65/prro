@@ -14,7 +14,6 @@ part 'orders_event.dart';
 part 'orders_state.dart';
 
 class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
-  final OrdersRepositoryI _ordersRepository;
 
   OrdersBloc(this._ordersRepository) : super(OrdersInitial()) {
     on<AddProduct>(_onAddProduct);
@@ -25,6 +24,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     on<AcknowledgePayment>(_onAcknowledgePayment);
     on<UpdateOptions>(_onUpdateOptions);
   }
+  final OrdersRepositoryI _ordersRepository;
 
   void _onUpdateOptions(UpdateOptions event, Emitter<OrdersState> emit) {
     _ordersRepository.updateOptions(

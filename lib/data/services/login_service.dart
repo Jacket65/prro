@@ -3,10 +3,10 @@ import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final class LoginService implements LoginServiceI {
-  final SharedPreferences prefs;
-  final ApiClientI apiClient;
 
   LoginService({required this.prefs, required this.apiClient});
+  final SharedPreferences prefs;
+  final ApiClientI apiClient;
 
   @override
   Future<bool> login({
@@ -78,17 +78,17 @@ final class LoginService implements LoginServiceI {
 
   @override
   Future<void> saveLoginState(bool state) async {
-    await prefs.setBool("isLogged", state);
+    await prefs.setBool('isLogged', state);
   }
 
   @override
   bool getLoginState() {
-    return prefs.getBool("isLogged") ?? false;
+    return prefs.getBool('isLogged') ?? false;
   }
 
   @override
   String getSavedUsername() {
-    return prefs.getString("username") ?? "Error";
+    return prefs.getString('username') ?? 'Error';
   }
 
   @override

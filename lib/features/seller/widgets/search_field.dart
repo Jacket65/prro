@@ -54,7 +54,7 @@ class _SearchFieldState extends State<SearchField> {
               cursorColor: Colors.white,
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration.collapsed(
-                hintText: "Пошук",
+                hintText: 'Пошук',
                 hintStyle: TextStyle(color: Colors.white70),
               ),
             ),

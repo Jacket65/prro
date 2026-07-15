@@ -10,10 +10,10 @@ part 'catalog_search_state.dart';
 /// [search] immediately cancels the previous request's [CancelToken] (the last
 /// query wins; stale results never show).
 class CatalogSearchCubit extends Cubit<CatalogSearchState> {
-  final ItemsRepositoryI _repository;
-  CancelToken? _cancel;
 
   CatalogSearchCubit(this._repository) : super(const CatalogSearchIdle());
+  final ItemsRepositoryI _repository;
+  CancelToken? _cancel;
 
   Future<void> search(String query) async {
     final q = query.trim();

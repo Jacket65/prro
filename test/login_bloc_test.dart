@@ -1,8 +1,8 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
+import 'package:prro/features/auth/bloc/login_bloc.dart';
 
 class MockLoginRepository extends Mock implements LoginRepositoryI {}
 
@@ -31,8 +31,8 @@ void main() {
         return loginBloc;
       },
       act: (bloc) =>
-          bloc.add(LoginSubmitted(username: 'test', password: '1234')),
-      expect: () => [LoginLoading(), LoginSuccess('test')],
+          bloc.add(const LoginSubmitted(username: 'test', password: '1234')),
+      expect: () => [LoginLoading(), const LoginSuccess('test')],
       verify: (_) {
         verify(
           () => repository.login(username: 'test', password: '1234'),
@@ -55,10 +55,10 @@ void main() {
         return loginBloc;
       },
       act: (bloc) =>
-          bloc.add(LoginSubmitted(username: 'test', password: 'wrong')),
+          bloc.add(const LoginSubmitted(username: 'test', password: 'wrong')),
       expect: () => [
         LoginLoading(),
-        LoginFailure('Невірне ім’я користувача або пароль'),
+        const LoginFailure('Невірне ім’я користувача або пароль'),
       ],
       verify: (_) {
         verify(
@@ -79,8 +79,8 @@ void main() {
 
         return loginBloc;
       },
-      act: (bloc) => bloc.add(LoginCheckAutoLogin()),
-      expect: () => [LoginLoading(), LoginSuccess('savedUser')],
+      act: (bloc) => bloc.add(const LoginCheckAutoLogin()),
+      expect: () => [LoginLoading(), const LoginSuccess('savedUser')],
       verify: (_) {
         verify(() => repository.tryAutoLogin()).called(1);
         verify(() => repository.getSavedUsername()).called(1);
@@ -93,7 +93,7 @@ void main() {
         when(() => repository.tryAutoLogin()).thenAnswer((_) async => false);
         return loginBloc;
       },
-      act: (bloc) => bloc.add(LoginCheckAutoLogin()),
+      act: (bloc) => bloc.add(const LoginCheckAutoLogin()),
       expect: () => [LoginLoading(), LoginInitial()],
       verify: (_) {
         verify(() => repository.tryAutoLogin()).called(1);
@@ -109,7 +109,7 @@ void main() {
         when(() => repository.logout()).thenAnswer((_) async {});
         return loginBloc;
       },
-      act: (bloc) => bloc.add(LoginGetInitial()),
+      act: (bloc) => bloc.add(const LoginGetInitial()),
       expect: () => [LoginInitial()],
       verify: (_) {
         verify(() => repository.logout()).called(1);

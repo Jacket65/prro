@@ -1,12 +1,12 @@
 import 'package:prro/data/repositories/user_repository/user_repo_i.dart';
 
 class UserRepository implements UserRepositoryI {
-  final UserServiceI _userService;
-
-  String? _usernameCache;
 
   UserRepository({required UserServiceI userService})
     : _userService = userService;
+  final UserServiceI _userService;
+
+  String? _usernameCache;
 
   @override
   Future<String?> getUsername() async {

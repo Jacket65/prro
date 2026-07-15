@@ -9,16 +9,16 @@ import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrdersRepository implements OrdersRepositoryI {
-  final ApiClientI _apiClient;
-  final SharedPreferences _prefs;
-
-  final List<Product> _products = [];
 
   OrdersRepository({
     required ApiClientI apiClient,
     required SharedPreferences prefs,
   }) : _apiClient = apiClient,
        _prefs = prefs;
+  final ApiClientI _apiClient;
+  final SharedPreferences _prefs;
+
+  final List<Product> _products = [];
 
   @override
   List<Product> get products => List.unmodifiable(_products);
@@ -28,7 +28,7 @@ class OrdersRepository implements OrdersRepositoryI {
   /// surcharge of each line's selected options via [Product.effectiveUnitPrice].
   @override
   double get totalPrice => _products.fold(
-    0.0,
+    0,
     (sum, p) => sum + (p.effectiveUnitPrice * p.quantity.toDouble()),
   );
 

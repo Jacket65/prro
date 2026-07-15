@@ -17,11 +17,6 @@ enum OptionSelectionType {
 /// A group of options offered for a drink variant (e.g. "Молоко", "Сироп").
 /// Mirrors a `groups[]` entry of `GET /variants/:id/options`.
 class OptionGroup extends Equatable {
-  final int id;
-  final String name;
-  final OptionSelectionType selectionType;
-  final bool isRequired;
-  final List<DrinkOption> options;
 
   const OptionGroup({
     required this.id,
@@ -45,6 +40,11 @@ class OptionGroup extends Equatable {
           .toList(),
     );
   }
+  final int id;
+  final String name;
+  final OptionSelectionType selectionType;
+  final bool isRequired;
+  final List<DrinkOption> options;
 
   @override
   List<Object?> get props => [id, name, selectionType, isRequired, options];
@@ -53,13 +53,6 @@ class OptionGroup extends Equatable {
 /// A single selectable option with its (variant-effective) surcharge.
 /// `price_delta` arrives as a decimal STRING — parse via [parseDouble].
 class DrinkOption extends Equatable {
-  final int id;
-  final String name;
-  final double priceDelta;
-
-  /// Whether this option is preselected by default (the value the cashier gets
-  /// without touching the group).
-  final bool isDefault;
 
   const DrinkOption({
     required this.id,
@@ -77,6 +70,13 @@ class DrinkOption extends Equatable {
       isDefault: json['is_default'] == true,
     );
   }
+  final int id;
+  final String name;
+  final double priceDelta;
+
+  /// Whether this option is preselected by default (the value the cashier gets
+  /// without touching the group).
+  final bool isDefault;
 
   @override
   List<Object?> get props => [id, name, priceDelta, isDefault];
@@ -86,10 +86,6 @@ class DrinkOption extends Equatable {
 /// portions (e.g. 2 syrups), each multiplying [priceDelta]. [name]/[priceDelta]
 /// are kept for display and the local "Разом" approximation.
 class SelectedOption extends Equatable {
-  final int optionId;
-  final String name;
-  final double priceDelta;
-  final int quantity;
 
   const SelectedOption({
     required this.optionId,
@@ -97,6 +93,10 @@ class SelectedOption extends Equatable {
     this.priceDelta = 0,
     this.quantity = 1,
   });
+  final int optionId;
+  final String name;
+  final double priceDelta;
+  final int quantity;
 
   SelectedOption copyWith({
     int? optionId,

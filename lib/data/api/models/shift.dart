@@ -8,15 +8,6 @@ import 'package:prro/core/json.dart';
 /// `cashStart`/`cashEnd` are decimal **strings** (`shopspring/decimal`), kept
 /// verbatim so we never lose precision to a double.
 class ShiftResponse extends Equatable {
-  final int id;
-  final int outletId;
-  final int openedBy;
-  final int? closedBy;
-  final String openedAt;
-  final String? closedAt;
-  final String cashStart;
-  final String? cashEnd;
-  final String status;
 
   const ShiftResponse({
     required this.id,
@@ -29,8 +20,6 @@ class ShiftResponse extends Equatable {
     this.closedAt,
     this.cashEnd,
   });
-
-  bool get isOpen => status == 'open';
 
   factory ShiftResponse.fromJson(Map<String, dynamic> json) {
     return ShiftResponse(
@@ -45,6 +34,17 @@ class ShiftResponse extends Equatable {
       status: (json['status'] ?? '').toString(),
     );
   }
+  final int id;
+  final int outletId;
+  final int openedBy;
+  final int? closedBy;
+  final String openedAt;
+  final String? closedAt;
+  final String cashStart;
+  final String? cashEnd;
+  final String status;
+
+  bool get isOpen => status == 'open';
 
   @override
   List<Object?> get props => [

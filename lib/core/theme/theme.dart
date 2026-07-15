@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
-const primaryColor = Colors.brown;
-final dialogBackgroundColor = Colors.brown[50];
+const MaterialColor primaryColor = Colors.brown;
+final Color? dialogBackgroundColor = Colors.brown[50];
 final lightTheme = ThemeData(
   colorScheme: ColorScheme.fromSeed(
     seedColor: primaryColor,
-    brightness: Brightness.light,
   ),
   useMaterial3: true,
   scaffoldBackgroundColor: Colors.grey[300],

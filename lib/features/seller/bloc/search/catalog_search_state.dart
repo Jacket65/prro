@@ -17,16 +17,16 @@ final class CatalogSearchLoading extends CatalogSearchState {
 }
 
 final class CatalogSearchResults extends CatalogSearchState {
-  final List<Item> items;
   const CatalogSearchResults(this.items);
+  final List<Item> items;
 
   @override
   List<Object> get props => [items];
 }
 
 final class CatalogSearchError extends CatalogSearchState {
-  final String message;
   const CatalogSearchError(this.message);
+  final String message;
 
   @override
   List<Object> get props => [message];

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 class CustomSearchField extends StatelessWidget {
   const CustomSearchField({
-    super.key,
-    required TextEditingController searchController,
+    required TextEditingController searchController, super.key,
   }) : _searchController = searchController;
 
   final TextEditingController _searchController;
@@ -23,12 +22,12 @@ class CustomSearchField extends StatelessWidget {
         fillColor: Colors.white,
         filled: true,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide
               .none, // Usually looks cleaner without an explicit border color
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5),
         ),
       ),

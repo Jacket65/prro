@@ -9,9 +9,9 @@ part 'shift_state.dart';
 /// we only cache the last [ShiftResponse] in the current state. After close we
 /// drop it (→ [ShiftNone]) so nothing stale lingers.
 class ShiftCubit extends Cubit<ShiftState> {
-  final ShiftRepositoryI _shiftRepository;
 
   ShiftCubit(this._shiftRepository) : super(const ShiftInitial());
+  final ShiftRepositoryI _shiftRepository;
 
   /// Fetches the current shift. 404 → [ShiftNone] (open-shift gate), an open
   /// shift → [ShiftOpen], any real failure → [ShiftError].

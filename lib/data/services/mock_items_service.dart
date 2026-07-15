@@ -10,10 +10,10 @@ import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 /// Routes ItemsServiceI calls to the in-process [MockBackend] so the seller
 /// flow can be exercised without the real Go backend.
 class MockItemsService implements ItemsServiceI {
-  final MockBackend _backend;
 
   MockItemsService({MockBackend? backend})
     : _backend = backend ?? MockBackend.instance;
+  final MockBackend _backend;
 
   @override
   Future<List<Item>> getCategories() => _backend.getCategories();

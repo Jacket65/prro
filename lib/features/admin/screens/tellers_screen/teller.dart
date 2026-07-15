@@ -592,7 +592,7 @@ final user = jsonDecode('''
 }
 ''');
 
-final initUser = user["items"];
+final initUser = user['items'];
 final userLenght = initUser.length;
 List<DataColumn> tellerTop = novaTThead(
   showStatus: true,
@@ -600,8 +600,8 @@ List<DataColumn> tellerTop = novaTThead(
 );
 
 class Teller extends StatefulWidget {
+  const Teller({required this.tellerGroup, super.key});
   final List<List<String>> tellerGroup;
-  const Teller({super.key, required this.tellerGroup});
 
   @override
   State<Teller> createState() => _TellerState();
@@ -649,7 +649,7 @@ class _TellerState extends State<Teller> {
               isDense: true,
               contentPadding: const EdgeInsets.all(10),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5.0),
+                borderRadius: BorderRadius.circular(5),
               ),
             ),
           ),
@@ -711,7 +711,6 @@ class _TellerState extends State<Teller> {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
               child: DataTable(
                 showCheckboxColumn: false,
                 showBottomBorder: true,
@@ -745,9 +744,9 @@ class _TellerState extends State<Teller> {
   Widget _buildFooter() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.end,
-        children: const [
+        children: [
           Text('Записів на сторінці'),
           SizedBox(width: 8),
           DropdownMenu<int>(

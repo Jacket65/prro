@@ -3,10 +3,10 @@ import 'package:prro/data/repositories/user_repository/user_repo_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final class UserService implements UserServiceI {
-  final SharedPreferences prefs;
-  final ApiClientI apiClient;
 
   UserService({required this.prefs, required this.apiClient});
+  final SharedPreferences prefs;
+  final ApiClientI apiClient;
 
   static const _keyUsername = 'username';
 

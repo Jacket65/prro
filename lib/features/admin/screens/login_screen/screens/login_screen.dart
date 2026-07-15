@@ -58,9 +58,8 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text('Телефон'),
@@ -79,14 +78,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     fillColor: Colors.white,
                     focusColor: Colors.white,
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
+                      borderRadius: BorderRadius.circular(5),
                     ),
                     border: OutlineInputBorder(
                       borderSide: const BorderSide(
                         color: Colors.white,
-                        width: 2.0,
+                        width: 2,
                       ),
-                      borderRadius: BorderRadius.circular(5.0),
+                      borderRadius: BorderRadius.circular(5),
                     ),
                   ),
                 ),
@@ -109,14 +108,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     fillColor: Colors.white,
                     focusColor: Colors.white,
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
+                      borderRadius: BorderRadius.circular(5),
                     ),
                     border: OutlineInputBorder(
                       borderSide: const BorderSide(
                         color: Colors.white,
-                        width: 2.0,
+                        width: 2,
                       ),
-                      borderRadius: BorderRadius.circular(5.0),
+                      borderRadius: BorderRadius.circular(5),
                     ),
                   ),
                 ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 List<DataCell> cells(List<String>? extraText) {
-  List<DataCell> a = [];
+  final a = <DataCell>[];
 
-  for (String i in extraText!) {
+  for (final i in extraText!) {
     if (i != extraText[extraText.length - 1]) {
       a.add(
         DataCell(
@@ -18,7 +18,6 @@ List<DataCell> cells(List<String>? extraText) {
       a.add(
         DataCell(
           Align(
-            alignment: Alignment.center,
             child: Icon(
               Icons.circle,
               color: i == 'Active' ? Colors.green : Colors.red,

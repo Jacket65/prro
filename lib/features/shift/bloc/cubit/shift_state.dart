@@ -19,8 +19,8 @@ final class ShiftLoading extends ShiftState {
 
 /// An open shift exists — sales are allowed.
 final class ShiftOpen extends ShiftState {
-  final ShiftResponse shift;
   const ShiftOpen(this.shift);
+  final ShiftResponse shift;
 
   @override
   List<Object?> get props => [shift];
@@ -34,8 +34,8 @@ final class ShiftNone extends ShiftState {
 
 /// A real failure (network, 500, …) while talking to the shift endpoints.
 final class ShiftError extends ShiftState {
-  final String message;
   const ShiftError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];

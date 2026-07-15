@@ -6,7 +6,6 @@ part 'login_event.dart';
 part 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  final LoginRepositoryI _loginRepository;
 
   LoginBloc({required LoginRepositoryI loginRepository})
     : _loginRepository = loginRepository,
@@ -15,6 +14,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<LoginGetInitial>(_getInitial);
     on<LoginCheckAutoLogin>(_onCheckAutoLogin);
   }
+  final LoginRepositoryI _loginRepository;
 
   Future<void> _onLoginSubmitted(
     LoginSubmitted event,
@@ -31,7 +31,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginSuccess(event.username));
       await _loginRepository.saveLoginState(true);
     } else {
-      emit(LoginFailure('Невірне ім’я користувача або пароль'));
+      emit(const LoginFailure('Невірне ім’я користувача або пароль'));
     }
   }
 

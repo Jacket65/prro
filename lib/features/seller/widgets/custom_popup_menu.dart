@@ -1,40 +1,40 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-
 import 'package:flutter/material.dart';
 
 class CustomPopupMenu extends StatelessWidget {
+  const CustomPopupMenu({
+    required this.name,
+    required this.icon,
+    super.key,
+    this.widgets,
+    this.color = Colors.white,
+  });
   final String name;
   final IconData icon;
   final Color color;
   final List<Widget>? widgets;
-  const CustomPopupMenu({
-    super.key,
-    required this.name,
-    required this.icon,
-    this.widgets,
-    this.color = Colors.white,
-  });
 
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton(
-      style: ButtonStyle().copyWith(
-        padding: WidgetStatePropertyAll(EdgeInsetsGeometry.all(0)),
+      style: const ButtonStyle().copyWith(
+        padding: const WidgetStatePropertyAll(EdgeInsetsGeometry.zero),
       ),
-      padding: EdgeInsetsGeometry.all(0),
-      tooltip: "",
+      padding: EdgeInsetsGeometry.zero,
+      tooltip: '',
       icon: name.isNotEmpty
           ? TextButton.icon(
-              style: ButtonStyle().copyWith(
-                padding: WidgetStatePropertyAll(EdgeInsetsGeometry.all(10)),
+              style: const ButtonStyle().copyWith(
+                padding: const WidgetStatePropertyAll(
+                  EdgeInsetsGeometry.all(10),
+                ),
               ),
               onPressed: null,
               icon: Icon(icon, color: color),
-              label: Text(name, style: TextStyle(color: Colors.white)),
+              label: Text(name, style: const TextStyle(color: Colors.white)),
             )
           : IconButton(onPressed: null, icon: Icon(icon, color: color)),
-      offset: Offset(00, 40),
-      itemBuilder: (BuildContext context) => <PopupMenuEntry>[
+      offset: const Offset(00, 40),
+      itemBuilder: (context) => <PopupMenuEntry>[
         ...?widgets?.map((widget) => PopupMenuItem(child: widget)),
         const PopupMenuDivider(),
         const PopupMenuItem(

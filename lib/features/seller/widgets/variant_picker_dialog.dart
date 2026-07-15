@@ -7,9 +7,9 @@ import 'package:prro/features/seller/widgets/options_picker_dialog.dart';
 /// through [startAddToCart] (which may open the options picker before it lands
 /// in the cart).
 class VariantPickerDialog extends StatelessWidget {
-  final ProductGroup group;
 
-  const VariantPickerDialog({super.key, required this.group});
+  const VariantPickerDialog({required this.group, super.key});
+  final ProductGroup group;
 
   static Future<void> show(BuildContext context, ProductGroup group) async {
     final selected = await showDialog<Product>(

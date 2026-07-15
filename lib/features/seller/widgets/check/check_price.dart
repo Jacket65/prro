@@ -8,7 +8,7 @@ class CheckPrice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
+    final theme = Theme.of(context);
     final totalKopecks = context.select<OrdersBloc, int>((bloc) {
       final state = bloc.state;
       return state is OrdersUpdated ? uahToKopecks(state.total) : 0;

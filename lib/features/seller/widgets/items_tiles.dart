@@ -10,7 +10,7 @@ class ItemsTiles extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: Column(
         children: [
           Row(
@@ -22,8 +22,8 @@ class ItemsTiles extends StatelessWidget {
                 },
                 icon: const Icon(Icons.house_rounded),
               ),
-              CustomPopupMenu(
-                name: "",
+              const CustomPopupMenu(
+                name: '',
                 icon: Icons.compare_arrows_outlined,
                 color: Colors.black,
               ),
@@ -44,7 +44,7 @@ class ItemsTiles extends StatelessWidget {
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.all(24),
-                    child: Text("Нічого не знайдено"),
+                    child: Text('Нічого не знайдено'),
                   ),
                 ),
               CatalogSearchResults(:final items) => ProductTiles(
@@ -68,7 +68,7 @@ class _CatalogView extends StatelessWidget {
       builder: (context, state) {
         return switch (state) {
           ItemsTilesLoaded(:final items) when items.isEmpty => const Center(
-            child: Text("No items available."),
+            child: Text('No items available.'),
           ),
           ItemsTilesLoading() => const Center(
             child: CircularProgressIndicator(),

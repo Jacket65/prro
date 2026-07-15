@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 
 class TopBarButton extends StatelessWidget {
-  final int selectedIndex;
-  final int index;
-
-  final String label;
-  final Function(String) onSelect;
 
   const TopBarButton({
     required this.selectedIndex,
@@ -14,13 +9,18 @@ class TopBarButton extends StatelessWidget {
     required this.onSelect,
     super.key,
   });
+  final int selectedIndex;
+  final int index;
+
+  final String label;
+  final Function(String) onSelect;
 
   @override
   Widget build(BuildContext context) {
     final isSelected = selectedIndex == index;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Column(
         children: [
           Container(

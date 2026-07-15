@@ -2,23 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:prro/core/constants/settings.dart';
 
 void findInDictionary(BuildContext context) {
-  var title = 'Пошук ДПІ у довіднику ?';
+  const title = 'Пошук ДПІ у довіднику ?';
 
   showDialog(
     context: context,
-    builder: (BuildContext context) {
+    builder: (context) {
       return AlertDialog(
         backgroundColor: Colors.white,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title),
+            const Text(title),
             IconButton(
-              padding: EdgeInsets.all(0),
+              padding: const EdgeInsets.all(0),
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              icon: Icon(Icons.cancel),
+              icon: const Icon(Icons.cancel),
             ),
           ],
         ),
@@ -37,21 +37,21 @@ void findInDictionary(BuildContext context) {
                         color: Colors.white,
                       ),
                       child: ExpansionTile(
-                        shape: Border(),
+                        shape: const Border(),
                         title: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8),
                           child: Text(largestCities[index]),
                         ),
                         children: [
                           Container(
-                            margin: EdgeInsets.all(16),
+                            margin: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: Colors.lightBlue,
                               borderRadius: BorderRadius.circular(5),
                             ),
                             child: ListTile(
                               title: Padding(
-                                padding: const EdgeInsets.all(16.0),
+                                padding: const EdgeInsets.all(16),
                                 child: Text(largestCities[index]),
                               ),
                             ),
@@ -59,7 +59,7 @@ void findInDictionary(BuildContext context) {
                         ],
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                   ],
                 );
               },
@@ -68,7 +68,6 @@ void findInDictionary(BuildContext context) {
         ),
         actions: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               TextButton(
                 style: ButtonStyle(
@@ -77,18 +76,18 @@ void findInDictionary(BuildContext context) {
                       borderRadius: BorderRadius.circular(5),
                     ),
                   ),
-                  backgroundColor: WidgetStatePropertyAll(Colors.blue),
+                  backgroundColor: const WidgetStatePropertyAll(Colors.blue),
                 ),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text('Вибрати', style: TextStyle(color: Colors.white)),
+                child: const Text('Вибрати', style: TextStyle(color: Colors.white)),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text('Скасувати'),
+                child: const Text('Скасувати'),
               ),
             ],
           ),

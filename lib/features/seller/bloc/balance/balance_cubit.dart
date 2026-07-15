@@ -5,9 +5,9 @@ import 'package:prro/data/repositories/balance/balance_i.dart';
 part 'balance_state.dart';
 
 class BalanceCubit extends Cubit<BalanceState> {
-  final BalanceRepositoryI balanceRepository;
 
   BalanceCubit(this.balanceRepository) : super(const BalanceInitial());
+  final BalanceRepositoryI balanceRepository;
 
   Future<void> fetchBalance() async {
     try {

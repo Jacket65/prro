@@ -7,6 +7,13 @@ import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 import 'package:prro/features/seller/widgets/options_picker_dialog.dart';
 
 class ListItem extends StatefulWidget {
+
+  const ListItem({
+    required this.lineId, required this.name, required this.price, required this.imageUrl, required this.quantity, super.key,
+    this.unit,
+    this.selectedOptions = const [],
+    this.selectedBean,
+  });
   final String lineId;
   final String name;
   final double price;
@@ -15,18 +22,6 @@ class ListItem extends StatefulWidget {
   final MeasureUnit? unit;
   final List<SelectedOption> selectedOptions;
   final Bean? selectedBean;
-
-  const ListItem({
-    super.key,
-    required this.lineId,
-    required this.name,
-    required this.price,
-    required this.imageUrl,
-    required this.quantity,
-    this.unit,
-    this.selectedOptions = const [],
-    this.selectedBean,
-  });
 
   @override
   State<ListItem> createState() => _ListItemState();
@@ -96,15 +91,14 @@ class _ListItemState extends State<ListItem> {
             borderRadius: BorderRadius.circular(8),
             child: InkWell(
               splashColor: Colors.grey.shade200,
-              borderRadius: BorderRadius.horizontal(left: Radius.circular(8)),
+              borderRadius: const BorderRadius.horizontal(left: Radius.circular(8)),
               onTap: () => _onTap(context, state),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 4.0,
+                  horizontal: 4,
                   vertical: 8,
                 ),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
                       width: 64,
@@ -181,7 +175,6 @@ class _ListItemState extends State<ListItem> {
                           ),
                         ),
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             IconButton(
                               visualDensity: VisualDensity.standard,
@@ -251,7 +244,7 @@ class _Placeholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.grey.shade100,
       child: const Icon(Icons.local_cafe_outlined, color: Colors.grey),
     );

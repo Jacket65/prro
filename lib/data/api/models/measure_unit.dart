@@ -9,10 +9,6 @@ import 'package:prro/core/json.dart';
 /// fractional digits implied by it ("1" → 0, "0.001" → 3), used for display and
 /// rounding. A `null` unit elsewhere means piece semantics (step 1, scale 0).
 class MeasureUnit extends Equatable {
-  final int id;
-  final String name;
-  final Decimal step;
-  final int scale;
 
   const MeasureUnit({
     required this.id,
@@ -32,6 +28,10 @@ class MeasureUnit extends Equatable {
       scale: _scaleOf(raw),
     );
   }
+  final int id;
+  final String name;
+  final Decimal step;
+  final int scale;
 
   static int _scaleOf(String raw) {
     final dot = raw.indexOf('.');

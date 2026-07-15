@@ -7,12 +7,7 @@ import 'package:prro/features/admin/screens/items_screen/widgets/inside_category
 
 class CustomCard extends StatelessWidget {
   const CustomCard({
-    super.key,
-    required this.title,
-    required this.index,
-    required this.categoryList,
-    required this.onRename,
-    required this.onDelete,
+    required this.title, required this.index, required this.categoryList, required this.onRename, required this.onDelete, super.key,
   });
 
   final String title;
@@ -25,10 +20,10 @@ class CustomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: Colors.blueGrey[50],
-      elevation: 2.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(8),
         onTap: () {
           lastCategory = categoryList.indexOf(
             categoryList.firstWhere((element) => element.title == title),
@@ -54,19 +49,18 @@ class CustomCard extends StatelessWidget {
           );
         },
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(Icons.folder, color: Colors.grey.shade700, size: 32.0),
-                  const SizedBox(width: 16.0),
+                  Icon(Icons.folder, color: Colors.grey.shade700, size: 32),
+                  const SizedBox(width: 16),
                   Text(
                     title,
                     style: const TextStyle(
-                      fontSize: 16.0,
+                      fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

@@ -62,7 +62,7 @@ class CheckPayButton extends StatelessWidget {
 }
 
 class PaymentDialog extends StatefulWidget {
-  const PaymentDialog({super.key, required this.totalKopecks});
+  const PaymentDialog({required this.totalKopecks, super.key});
 
   /// Client-side total at the moment the dialog opened. Treated as the
   /// "to charge" figure for input/validation UX; the authoritative total

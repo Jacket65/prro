@@ -8,7 +8,6 @@ class LogoutConfirmationDialog extends StatelessWidget {
   static Future<bool?> show(BuildContext context) {
     return showDialog<bool>(
       context: context,
-      barrierDismissible: true,
       builder: (_) => const LogoutConfirmationDialog(),
     );
   }

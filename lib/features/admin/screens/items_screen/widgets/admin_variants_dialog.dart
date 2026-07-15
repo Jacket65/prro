@@ -10,16 +10,13 @@ import 'package:prro/features/admin/screens/main_screen/services/api_service.dar
 /// Lists variants for a product. Admin can create, rename, change price,
 /// edit recipe, and delete each one.
 class AdminVariantsDialog extends StatefulWidget {
+
+  const AdminVariantsDialog({
+    required this.productId, required this.productName, required this.outletId, super.key,
+  });
   final int productId;
   final String productName;
   final int outletId;
-
-  const AdminVariantsDialog({
-    super.key,
-    required this.productId,
-    required this.productName,
-    required this.outletId,
-  });
 
   static Future<void> show(
     BuildContext context, {
@@ -339,7 +336,7 @@ class _AdminVariantsDialogState extends State<AdminVariantsDialog> {
 }
 
 class _VariantDraft {
+  _VariantDraft({required this.name, required this.price});
   final String name;
   final double price;
-  _VariantDraft({required this.name, required this.price});
 }

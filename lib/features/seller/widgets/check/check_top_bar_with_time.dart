@@ -18,10 +18,10 @@ class CheckTopBar extends StatelessWidget {
 
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                border: Border(
-                  top: BorderSide(color: Colors.black),
-                  right: BorderSide(color: Colors.black),
-                  left: BorderSide(color: Colors.black),
+                border: const Border(
+                  top: BorderSide(),
+                  right: BorderSide(),
+                  left: BorderSide(),
                 ),
               ),
               padding: EdgeInsets.zero,
@@ -29,10 +29,10 @@ class CheckTopBar extends StatelessWidget {
                 padding: EdgeInsets.zero,
 
                 onPressed: () {},
-                icon: Icon(Icons.add_outlined, size: 15),
+                icon: const Icon(Icons.add_outlined, size: 15),
               ),
             ),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
             SizedBox(
               width: 250,
               height: 30,
@@ -41,11 +41,11 @@ class CheckTopBar extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context, index) {
                   return Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       border: Border(
-                        top: BorderSide(color: Colors.black),
-                        right: BorderSide(color: Colors.black),
-                        left: BorderSide(color: Colors.black),
+                        top: BorderSide(),
+                        right: BorderSide(),
+                        left: BorderSide(),
                       ),
                     ),
                     child: TextButton(
@@ -56,8 +56,8 @@ class CheckTopBar extends StatelessWidget {
                     ),
                   );
                 },
-                separatorBuilder: (BuildContext context, int index) {
-                  return SizedBox(width: 4);
+                separatorBuilder: (context, index) {
+                  return const SizedBox(width: 4);
                 },
               ),
             ),

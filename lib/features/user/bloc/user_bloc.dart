@@ -6,7 +6,6 @@ part 'user_event.dart';
 part 'user_state.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
-  final UserRepositoryI _userRepository;
 
   UserBloc({required UserRepositoryI userRepository})
     : _userRepository = userRepository,
@@ -14,6 +13,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     on<LoadUser>(_onLoadUser);
     on<ClearUser>(_onClearUser);
   }
+  final UserRepositoryI _userRepository;
 
   Future<void> _onLoadUser(LoadUser event, Emitter<UserState> emit) async {
     emit(UserLoading());
@@ -22,7 +22,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       await _userRepository.saveUsername(event.username);
       emit(UserLoaded(event.username));
     } catch (e) {
-      emit(UserError('Failed to load username: ${e.toString()}'));
+      emit(UserError('Failed to load username: $e'));
     }
   }
 

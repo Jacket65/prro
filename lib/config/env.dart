@@ -13,5 +13,5 @@ class Env {
 
   /// Store name shown on the printed receipt. The order-create response does
   /// not carry the outlet name yet, so we fall back to this constant.
-  static const String storeName = "Coffee Beans";
+  static const String storeName = 'Coffee Beans';
 }

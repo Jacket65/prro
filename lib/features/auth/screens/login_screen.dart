@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prro/features/admin/screens/main_screen/main_screen.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/seller/screens/screens.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
-import 'package:prro/features/admin/screens/main_screen/main_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -56,27 +56,27 @@ class LoginScreen extends StatelessWidget {
                         }
                       },
 
-                      child: const Text("Я продавець"),
+                      child: const Text('Я продавець'),
                     ),
 
                     const SizedBox(height: 18),
                     ElevatedButton(
                       onPressed: () {
                         context.read<LoginBloc>().add(
-                          LoginSubmitted(
-                            username: "cashier1",
-                            password: "cashier123",
+                          const LoginSubmitted(
+                            username: 'cashier1',
+                            password: 'cashier123',
                           ),
                         );
                         _clearTextFields();
                       },
 
-                      child: const Text("seller (cashier1)"),
+                      child: const Text('seller (cashier1)'),
                     ),
                     const SizedBox(height: 18),
                     ElevatedButton(
                       onPressed: () => _navigateTo(context, const MainScreen()),
-                      child: const Text("Я адміністратор"),
+                      child: const Text('Я адміністратор'),
                     ),
                     // const SizedBox(height: 18),
                     // ElevatedButton(
@@ -101,14 +101,14 @@ class LoginScreen extends StatelessWidget {
   void _checkState(LoginState state, BuildContext context) {
     switch (state) {
       case LoginSuccess():
-        _showSnackBar(context, "Вітаємо вас на роботі!");
+        _showSnackBar(context, 'Вітаємо вас на роботі!');
         context.read<UserBloc>().add(LoadUser(username: state.username));
 
         // SellerScreen self-gates on the shift state (open-shift gate when
         // there is no open shift), so we land there directly.
         _navigateTo(context, const SellerScreen());
       case LoginFailure():
-        _showSnackBar(context, "Сталася помилка ${state.error}");
+        _showSnackBar(context, 'Сталася помилка ${state.error}');
       case LoginLoading():
       case LoginInitial():
     }
@@ -127,7 +127,7 @@ class LoginScreen extends StatelessWidget {
 
   Widget _buildStateMessage(LoginState state) {
     return switch (state) {
-      LoginSuccess() => Text("Logged in as ${state.username}"),
+      LoginSuccess() => Text('Logged in as ${state.username}'),
       LoginFailure() => Text(
         state.error,
         style: const TextStyle(
@@ -136,8 +136,8 @@ class LoginScreen extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
-      LoginLoading() => const Text("Logging in..."),
-      _ => const Text("Введіть дані для входу"),
+      LoginLoading() => const Text('Logging in...'),
+      _ => const Text('Введіть дані для входу'),
     };
   }
 

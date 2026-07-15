@@ -38,9 +38,7 @@ class MockBackend {
 
   Future<List<Item>> getCategories() async {
     await _network();
-    return _catalog
-        .map((c) => Category(id: c.id, name: c.name, items: const []))
-        .toList();
+    return _catalog.map((c) => Category(id: c.id, name: c.name)).toList();
   }
 
   Future<List<Item>> getProducts(int categoryId) async {
@@ -49,7 +47,6 @@ class MockBackend {
       (c) => c.id == categoryId,
       orElse: () => _CatalogCategory(id: -1, name: '', products: const []),
     );
-
     final out = <Item>[];
     for (final p in cat.products) {
       if (p.variants.isEmpty) continue;
@@ -89,7 +86,7 @@ class MockBackend {
   // ──────────────────────────────────────────────────────────────────────────
 
   /// Option groups (Молоко / Сироп ...) for a variant, with the surcharge that
-  /// is effective for THIS variant already applied. Empty if the drink has none.
+  /// is effective for THIS variant already applied. Empty if the drink has none
   Future<List<OptionGroup>> getVariantOptions(int variantId) async {
     await _network();
     final v = _findVariant(variantId.toString());
@@ -316,7 +313,9 @@ class MockBackend {
       );
     }
     if (totalKopecks <= 0) {
-      throw const MockBackendException('Сума замовлення має бути більшою за 0.');
+      throw const MockBackendException(
+        'Сума замовлення має бути більшою за 0.',
+      );
     }
 
     final int changeKopecks;
@@ -332,7 +331,7 @@ class MockBackend {
         changeKopecks = payment.tenderedKopecks - totalKopecks;
       case PaymentMethod.card:
         if (payment.tenderedKopecks != totalKopecks) {
-          throw MockBackendException(
+          throw const MockBackendException(
             'Сума оплати карткою має точно дорівнювати сумі чека.',
           );
         }
@@ -373,9 +372,11 @@ class MockBackend {
   }
 
   Future<void> _network() async {
-    await Future.delayed(latency);
+    await Future<void>.delayed(latency);
     if (simulateError) {
-      throw const MockBackendException('Помилка сервера (мок). Спробуйте ще раз.');
+      throw const MockBackendException(
+        'Помилка сервера (мок). Спробуйте ще раз.',
+      );
     }
   }
 
@@ -384,7 +385,7 @@ class MockBackend {
   // ──────────────────────────────────────────────────────────────────────────
 
   List<_CatalogCategory> _seedCatalog() {
-    int variantId = 1;
+    var variantId = 1;
     _CatalogVariant variant(
       String name,
       num uah, {
@@ -531,8 +532,8 @@ class MockBackend {
 // API path). Only the mock-specific exception remains here.
 
 class MockBackendException implements Exception {
-  final String message;
   const MockBackendException(this.message);
+  final String message;
   @override
   String toString() => message;
 }
@@ -540,46 +541,41 @@ class MockBackendException implements Exception {
 // ── Internal catalog model (kept private — not exposed to the rest of the app)
 
 class _CatalogCategory {
-  final int id;
-  final String name;
-  final List<_CatalogProduct> products;
   _CatalogCategory({
     required this.id,
     required this.name,
     required this.products,
   });
+  final int id;
+  final String name;
+  final List<_CatalogProduct> products;
 }
 
 class _CatalogProduct {
-  final int id;
-  final String name;
-  final List<_CatalogVariant> variants;
   _CatalogProduct({
     required this.id,
     required this.name,
     required this.variants,
   });
+  final int id;
+  final String name;
+  final List<_CatalogVariant> variants;
 }
 
 class _CatalogVariant {
-  final int id;
-  final String name;
-  final int priceKopecks;
-  final List<_OptionGroup> optionGroups;
   _CatalogVariant({
     required this.id,
     required this.name,
     required this.priceKopecks,
     this.optionGroups = const [],
   });
+  final int id;
+  final String name;
+  final int priceKopecks;
+  final List<_OptionGroup> optionGroups;
 }
 
 class _OptionGroup {
-  final int id;
-  final String name;
-  final OptionSelectionType selectionType;
-  final bool isRequired;
-  final List<_Option> options;
   _OptionGroup({
     required this.id,
     required this.name,
@@ -587,21 +583,26 @@ class _OptionGroup {
     required this.isRequired,
     required this.options,
   });
+  final int id;
+  final String name;
+  final OptionSelectionType selectionType;
+  final bool isRequired;
+  final List<_Option> options;
 }
 
 class _Option {
-  final int id;
-  final String name;
-  final int priceDeltaKopecks;
   _Option({
     required this.id,
     required this.name,
     required this.priceDeltaKopecks,
   });
+  final int id;
+  final String name;
+  final int priceDeltaKopecks;
 }
 
 class _VariantInfo {
+  const _VariantInfo({required this.name, required this.priceKopecks});
   final String name;
   final int priceKopecks;
-  const _VariantInfo({required this.name, required this.priceKopecks});
 }

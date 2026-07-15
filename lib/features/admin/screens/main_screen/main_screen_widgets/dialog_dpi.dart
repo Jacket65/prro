@@ -4,6 +4,10 @@ import 'package:prro/core/constants/settings.dart';
 import 'package:prro/features/admin/screens/main_screen/main_screen_widgets/find_in_dictionary.dart';
 
 class DialogDpi extends StatefulWidget {
+
+  const DialogDpi({
+    required this.title, required this.rowsName, required this.fillRows, super.key,
+  });
   final String title;
   final List<DataRow> rowsName;
 
@@ -13,13 +17,6 @@ class DialogDpi extends StatefulWidget {
     required int rowIndex,
   })
   fillRows;
-
-  const DialogDpi({
-    super.key,
-    required this.title,
-    required this.rowsName,
-    required this.fillRows,
-  });
 
   @override
   State<DialogDpi> createState() => _DialogDpiState();
@@ -36,11 +33,11 @@ class _DialogDpiState extends State<DialogDpi> {
         children: [
           Text(widget.title),
           IconButton(
-            padding: EdgeInsets.all(0),
+            padding: const EdgeInsets.all(0),
             onPressed: () {
               Navigator.of(context).pop();
             },
-            icon: Icon(Icons.cancel),
+            icon: const Icon(Icons.cancel),
           ),
         ],
       ),
@@ -56,8 +53,8 @@ class _DialogDpiState extends State<DialogDpi> {
                   border: Border.all(),
                   borderRadius: BorderRadius.circular(5),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                child: const Padding(
+                  padding: EdgeInsets.all(8),
                   child: Row(
                     children: [
                       Icon(Icons.info_outline, color: Colors.grey),
@@ -72,11 +69,11 @@ class _DialogDpiState extends State<DialogDpi> {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Код ДПІ'),
+                  const Text('Код ДПІ'),
                   Row(
                     children: [
                       RichText(
@@ -86,15 +83,15 @@ class _DialogDpiState extends State<DialogDpi> {
                               findInDictionary(context);
                             },
                           text: 'Вибрати в довіднику',
-                          style: TextStyle(color: Colors.blue),
+                          style: const TextStyle(color: Colors.blue),
                         ),
                       ),
                     ],
                   ),
                 ],
               ),
-              SizedBox(height: 10),
-              TextField(
+              const SizedBox(height: 10),
+              const TextField(
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: 'Введіть код ДПІ',
@@ -107,7 +104,6 @@ class _DialogDpiState extends State<DialogDpi> {
       ),
       actions: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             TextButton(
               style: ButtonStyle(
@@ -116,7 +112,7 @@ class _DialogDpiState extends State<DialogDpi> {
                     borderRadius: BorderRadius.circular(5),
                   ),
                 ),
-                backgroundColor: WidgetStatePropertyAll(Colors.blue),
+                backgroundColor: const WidgetStatePropertyAll(Colors.blue),
               ),
               onPressed: () {
                 widget.fillRows(
@@ -127,13 +123,13 @@ class _DialogDpiState extends State<DialogDpi> {
                 setState(() {});
                 Navigator.of(context).pop();
               },
-              child: Text('Зберегти', style: TextStyle(color: Colors.white)),
+              child: const Text('Зберегти', style: TextStyle(color: Colors.white)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Скасувати'),
+              child: const Text('Скасувати'),
             ),
           ],
         ),

@@ -9,16 +9,13 @@ import 'package:prro/features/admin/screens/main_screen/services/api_service.dar
 /// catalogue via `GET /retail-outlets/:outlet/ingredients`, then commits via
 /// `PUT /variants/:id/recipe` when the user presses save.
 class AdminRecipeDialog extends StatefulWidget {
+
+  const AdminRecipeDialog({
+    required this.variantId, required this.variantName, required this.outletId, super.key,
+  });
   final int variantId;
   final String variantName;
   final int outletId;
-
-  const AdminRecipeDialog({
-    super.key,
-    required this.variantId,
-    required this.variantName,
-    required this.outletId,
-  });
 
   static Future<bool> show(
     BuildContext context, {
@@ -46,14 +43,14 @@ class AdminRecipeDialog extends StatefulWidget {
 }
 
 class _RecipeRow {
-  int ingredientId;
-  String name;
-  double quantity;
   _RecipeRow({
     required this.ingredientId,
     required this.name,
     required this.quantity,
   });
+  int ingredientId;
+  String name;
+  double quantity;
 }
 
 class _AdminRecipeDialogState extends State<AdminRecipeDialog> {
@@ -356,20 +353,15 @@ class _AdminRecipeDialogState extends State<AdminRecipeDialog> {
 }
 
 class _RecipeRowWidget extends StatefulWidget {
+
+  const _RecipeRowWidget({
+    required this.name, required this.quantity, required this.unit, required this.onQuantityChanged, required this.onRemove, super.key,
+  });
   final String name;
   final double quantity;
   final String unit;
   final ValueChanged<double> onQuantityChanged;
   final VoidCallback onRemove;
-
-  const _RecipeRowWidget({
-    super.key,
-    required this.name,
-    required this.quantity,
-    required this.unit,
-    required this.onQuantityChanged,
-    required this.onRemove,
-  });
 
   @override
   State<_RecipeRowWidget> createState() => _RecipeRowWidgetState();
@@ -432,7 +424,7 @@ class _RecipeRowWidgetState extends State<_RecipeRowWidget> {
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                FilteringTextInputFormatter.allow(RegExp('[0-9.,]')),
               ],
               decoration: const InputDecoration(
                 isDense: true,

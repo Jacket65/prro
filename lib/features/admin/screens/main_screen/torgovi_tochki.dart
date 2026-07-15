@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:prro/core/constants/settings.dart';
 
 class Ttochki extends StatefulWidget {
-  final List<List<String>> data;
-  final int? selectedIndex;
-  final Function(int index)? onRowSelect;
 
   const Ttochki({
-    super.key,
-    required this.data,
+    required this.data, super.key,
     this.selectedIndex,
     this.onRowSelect,
   });
+  final List<List<String>> data;
+  final int? selectedIndex;
+  final Function(int index)? onRowSelect;
 
   @override
   State<Ttochki> createState() => _TtochkiState();
@@ -23,12 +22,10 @@ class _TtochkiState extends State<Ttochki> {
     return Expanded(
       child: SingleChildScrollView(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Expanded(
               child: DataTable(
                 columnSpacing: 70,
-                showCheckboxColumn: true,
                 columns: novaTThead(extraText: ttrows),
 
                 rows: List.generate(widget.data.length, (index) {
@@ -36,7 +33,7 @@ class _TtochkiState extends State<Ttochki> {
 
                   return DataRow(
                     selected: widget.selectedIndex == index,
-                    onSelectChanged: (bool? selected) {
+                    onSelectChanged: (selected) {
                       if (widget.onRowSelect != null) {
                         widget.onRowSelect!(index);
                       }

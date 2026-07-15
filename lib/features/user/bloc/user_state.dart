@@ -10,18 +10,18 @@ class UserInitial extends UserState {}
 class UserLoading extends UserState {}
 
 class UserLoaded extends UserState {
-  final String username;
 
   UserLoaded(this.username);
+  final String username;
 
   @override
   List<Object?> get props => [username];
 }
 
 class UserError extends UserState {
-  final String message;
 
   UserError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];

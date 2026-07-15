@@ -9,7 +9,7 @@ class CheckColumn extends StatelessWidget {
     return Container(
       width: 350,
       color: Colors.white,
-      child: Column(
+      child: const Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           CheckTopBar(),

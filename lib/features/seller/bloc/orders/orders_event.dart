@@ -8,26 +8,26 @@ sealed class OrdersEvent extends Equatable {
 }
 
 final class AddProduct extends OrdersEvent {
-  final Product product;
 
   const AddProduct(this.product);
+  final Product product;
 
   @override
   List<Object> get props => [product];
 }
 
 final class RemoveProduct extends OrdersEvent {
-  final Product product;
 
   const RemoveProduct(this.product);
+  final Product product;
 
   @override
   List<Object> get props => [product];
 }
 
 final class DeleteProductLine extends OrdersEvent {
-  final Product product;
   const DeleteProductLine(this.product);
+  final Product product;
 }
 
 final class ClearProducts extends OrdersEvent {
@@ -41,15 +41,15 @@ final class ClearProducts extends OrdersEvent {
 /// [idempotencyKey] is generated when the dialog opens (NOT on each click),
 /// so accidental double taps replay the same key and get the same receipt.
 final class PayOrder extends OrdersEvent {
-  final PaymentMethod method;
-  final int tenderedKopecks;
-  final String idempotencyKey;
 
   const PayOrder({
     required this.method,
     required this.tenderedKopecks,
     required this.idempotencyKey,
   });
+  final PaymentMethod method;
+  final int tenderedKopecks;
+  final String idempotencyKey;
 
   @override
   List<Object> get props => [method, tenderedKopecks, idempotencyKey];
@@ -66,10 +66,6 @@ final class AcknowledgePayment extends OrdersEvent {
 /// current [lineId]). Changing them changes the line identity, so the
 /// repository may merge it into an identical existing line.
 final class UpdateOptions extends OrdersEvent {
-  final String lineId;
-  final List<SelectedOption> options;
-  final Bean? bean;
-  final Decimal? quantity;
 
   const UpdateOptions({
     required this.lineId,
@@ -77,6 +73,10 @@ final class UpdateOptions extends OrdersEvent {
     this.bean,
     this.quantity,
   });
+  final String lineId;
+  final List<SelectedOption> options;
+  final Bean? bean;
+  final Decimal? quantity;
 
   @override
   List<Object?> get props => [lineId, options, bean, quantity];

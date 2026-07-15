@@ -10,14 +10,11 @@ import 'package:prro/features/admin/screens/items_screen/widgets/admin_variants_
 import 'package:prro/features/admin/screens/items_screen/widgets/category_pick_screen.dart';
 import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
 
-const double kDefaultPaddingWidth = 25.0;
+const double kDefaultPaddingWidth = 25;
 
 class InsideCategory extends StatefulWidget {
   const InsideCategory({
-    super.key,
-    required this.cardInx,
-    required this.cardTil,
-    required this.categoryList,
+    required this.cardInx, required this.cardTil, required this.categoryList, super.key,
   });
 
   final int cardInx;
@@ -127,7 +124,7 @@ class _InsideCategoryState extends State<InsideCategory> {
       backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.symmetric(
-          vertical: 8.0,
+          vertical: 8,
           horizontal: kDefaultPaddingWidth,
         ),
         child: Column(
@@ -175,7 +172,7 @@ class _InsideCategoryState extends State<InsideCategory> {
               topRight: Radius.circular(5),
               bottomRight: Radius.circular(5),
             ),
-            border: Border.all(color: Colors.black, width: 0.7),
+            border: Border.all(width: 0.7),
           ),
           child: IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
         ),
@@ -189,7 +186,7 @@ class _InsideCategoryState extends State<InsideCategory> {
 
   OutlineInputBorder _border({Color color = Colors.black}) {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(5.0),
+      borderRadius: BorderRadius.circular(5),
       borderSide: BorderSide(color: color, width: 0.7),
     );
   }
@@ -257,11 +254,10 @@ class _InsideCategoryState extends State<InsideCategory> {
 
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(width: 1, color: Colors.grey.shade300),
+        border: Border.all(color: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(5),
       ),
       child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: ConstrainedBox(
@@ -339,7 +335,7 @@ class _InsideCategoryState extends State<InsideCategory> {
 
   Widget _buildPaginationRow() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -363,10 +359,10 @@ class _InsideCategoryState extends State<InsideCategory> {
               ),
             ],
           ),
-          Row(
-            children: const [
+          const Row(
+            children: [
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.0),
+                padding: EdgeInsets.symmetric(horizontal: 24),
                 child: Text('1 із 1'),
               ),
               Icon(Icons.skip_previous_outlined, color: Colors.grey),
