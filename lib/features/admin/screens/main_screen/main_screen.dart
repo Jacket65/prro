@@ -1,15 +1,14 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:prro/features/auth/screens/login_screen.dart';
 import 'package:prro/features/admin/screens/items_screen/items_screen.dart';
 import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
-// import 'package:prro/main_screen/main_screen_widgets/dialog_dpi.dart';
 import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
 import 'package:prro/features/admin/screens/main_screen/torgovi_tochki.dart';
-import 'package:prro/core/constants/settings.dart';
 import 'package:prro/features/admin/screens/tellers_screen/teller.dart';
+import 'package:prro/features/auth/screens/login_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -19,22 +18,23 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
-  // -1 means "no outlet picked yet"; downstream screens render a hint until set.
   int retailOutletId = -1;
   List<List<String>> tellerGroup = [];
   List<String> outletsData = [];
   List<List<String>> outletsDataList = [];
-  List<dynamic> outlets = [];
+  List<Map<String, dynamic>> outlets = [];
   bool loadingMeasures = false;
   bool loadingSellers = false;
   int? selectedRowIndex;
   List<Measure> measures = [];
+  int selectedIndex = 1;
+  String currentContent = 'Торгові точки та ПРРО';
 
   @override
   void initState() {
     super.initState();
-    _loadOutlets();
-    _loadMeasures();
+    unawaited(_loadOutlets());
+    unawaited(_loadMeasures());
   }
 
   Future<void> _loadSellers(int outletId) async {
@@ -60,7 +60,7 @@ class MainScreenState extends State<MainScreen> {
       setState(() {
         tellerGroup = next;
       });
-    } catch (e) {
+    } on Object catch (e) {
       log('Error loading sellers: $e');
     } finally {
       if (mounted) {
@@ -73,6 +73,7 @@ class MainScreenState extends State<MainScreen> {
 
   Future<void> _loadOutlets() async {
     final api = context.read<ApiService>();
+    if (!mounted) return;
     setState(() {
       loadingMeasures = true;
     });
@@ -84,29 +85,31 @@ class MainScreenState extends State<MainScreen> {
       final list = await api.fetchRetailOutlets();
       outlets = list;
       outletsDataList = [];
-      for (int i = 0; i < outlets.length; i++) {
+      for (var i = 0; i < outlets.length; i++) {
         outletsDataList.add([
-          outlets[i]['name'],
+          (outlets[i]['name'] as String?) ?? 'Unknown',
           'Not set',
-          outlets[i]['id'].toString(),
+          (outlets[i]['id'] as num?)?.toString() ?? '',
           'Not set',
           'Not set',
           'Not set',
           'Not set',
         ]);
       }
-      // Auto-pick the first outlet so the rest of the UI has something to work with.
+      // Auto-pick the first outlet so the rest of the UI
+      // has something to work with
       if (outlets.isNotEmpty) {
         selectedRowIndex = 0;
-        retailOutletId = (outlets.first['id'] as num).toInt();
+        retailOutletId = (outlets.first['id'] as num?)?.toInt() ?? 0;
       }
+      if (!mounted) return;
       setState(() {});
       if (retailOutletId > 0) {
         await _loadSellers(retailOutletId);
       }
-      log("loginAdmin $loginAdmin");
-      log("$outlets");
-    } catch (e) {
+      log('loginAdmin $loginAdmin');
+      log('$outlets');
+    } on Object catch (e) {
       // обробка помилки, можливо перенаправлення на логін
       log('Error loading outlets: $e');
     } finally {
@@ -122,7 +125,7 @@ class MainScreenState extends State<MainScreen> {
       selectedRowIndex = index;
       retailOutletId = id;
     });
-    _loadSellers(id);
+    unawaited(_loadSellers(id));
   }
 
   @override
@@ -133,7 +136,7 @@ class MainScreenState extends State<MainScreen> {
       appBar: _buildAppBar(context),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: Column(
             children: [
               _buildTopBar(),
@@ -179,10 +182,10 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget _topBarButton({required String label, required int index}) {
-    final bool isSelected = selecteIndex == index;
+    final isSelected = selectedIndex == index;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Column(
         children: [
           Container(
@@ -198,7 +201,7 @@ class MainScreenState extends State<MainScreen> {
             child: TextButton(
               onPressed: () {
                 setState(() {
-                  selecteIndex = index;
+                  selectedIndex = index;
                   currentContent = label;
                 });
               },
@@ -215,10 +218,10 @@ class MainScreenState extends State<MainScreen> {
     );
   }
 
-  void _showDialog(String title) {
-    showDialog(
+  Future<void> _showDialog(String title) {
+    return showDialog<void>(
       context: context,
-      builder: (_) => Scaffold(),
+      builder: (_) => const Scaffold(),
       // DialogDpi(title: title, rowsName: rowsList, fillRows: fillRows),
     );
   }
@@ -234,14 +237,14 @@ class MainScreenState extends State<MainScreen> {
       actions: [
         TextButton(
           style: ButtonStyle(
-            backgroundColor: WidgetStatePropertyAll(Colors.blueAccent),
+            backgroundColor: const WidgetStatePropertyAll(Colors.blueAccent),
             shape: WidgetStatePropertyAll(
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
             ),
           ),
           onPressed: () => Navigator.pushReplacement(
             context,
-            DialogRoute(context: context, builder: (_) => LoginScreen()),
+            DialogRoute<void>(context: context, builder: (_) => LoginScreen()),
           ),
           child: const Text('Зберегти', style: TextStyle(color: Colors.white)),
         ),
@@ -250,8 +253,7 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildBody() {
-    if (retailOutletId <= 0 &&
-        currentContent != 'Торгові точки та ПРРО') {
+    if (retailOutletId <= 0 && currentContent != 'Торгові точки та ПРРО') {
       return const Expanded(
         child: Center(
           child: Text(
@@ -276,7 +278,8 @@ class MainScreenState extends State<MainScreen> {
           );
         }
         return Expanded(
-          // Rebuild Teller when outlet changes so it picks up the new tellerGroup.
+          // Rebuild Teller when outlet changes
+          // so it picks up the new tellerGroup
           child: Teller(
             key: ValueKey('teller-$retailOutletId'),
             tellerGroup: tellerGroup,
@@ -291,7 +294,7 @@ class MainScreenState extends State<MainScreen> {
               Provider<int>.value(value: retailOutletId),
               Provider<List<Measure>>.value(value: measures),
             ],
-            child: Items(),
+            child: const Items(),
           ),
         );
       default:
@@ -300,20 +303,23 @@ class MainScreenState extends State<MainScreen> {
   }
 
   void _logout(BuildContext context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => LoginScreen()),
+    unawaited(
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute<void>(builder: (_) => LoginScreen()),
+      ),
     );
   }
 
   Future<void> _loadMeasures() async {
     final api = Provider.of<ApiService>(context, listen: false);
+    if (!mounted) return;
     setState(() {
       loadingMeasures = true;
     });
     try {
       measures = await api.fetchMeasures();
-    } catch (e) {
+    } on Object catch (e) {
       // обробка помилки, можливо перенаправлення на логін
       log('Error loading measures: $e');
     } finally {

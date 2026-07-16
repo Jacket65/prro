@@ -71,14 +71,14 @@ class ApiService {
     }
   }
 
-  Future<List<dynamic>> fetchRetailOutlets() async {
+  Future<List<Map<String, dynamic>>> fetchRetailOutlets() async {
     final url = Uri.parse('$_baseUrl/retail-outlets/');
     final response = await http.get(url, headers: await _authHeaders());
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
-      final outlets = data['data'] as List<dynamic>? ?? <dynamic>[];
-      return outlets;
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final outlets = data['data'] as List<dynamic>? ?? [];
+      return outlets.map((e) => e as Map<String, dynamic>).toList();
     } else if (response.statusCode == 401) {
       throw Exception('Unauthorized – invalid token');
     } else {
@@ -93,7 +93,7 @@ class ApiService {
     final response = await http.get(url, headers: await _authHeaders());
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
       final users = data['data'] as List<dynamic>? ?? <dynamic>[];
       log('Users in outlet $retailOutlet: $users');
       return users;
@@ -111,7 +111,7 @@ class ApiService {
     final response = await http.get(url, headers: await _authHeaders());
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
       final categories = data['data'] as List<dynamic>? ?? <dynamic>[];
       log('Categories: $categories');
       return categories;
@@ -136,7 +136,7 @@ class ApiService {
     );
 
     if (response.statusCode == 201) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
       log('Category created: $data');
       return [data['data']];
     } else if (response.statusCode == 401) {
@@ -159,7 +159,7 @@ class ApiService {
       body: jsonEncode({'name': name}),
     );
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
       return (data['data'] as Map).cast<String, dynamic>();
     }
     throw Exception(
@@ -185,10 +185,10 @@ class ApiService {
     final response = await http.get(url, headers: await _authHeaders());
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
       final items = data['data'] as List<dynamic>? ?? <dynamic>[];
       return items
-          .whereType<Map>()
+          .whereType<Map<String, dynamic>>()
           .map((m) => m.cast<String, dynamic>())
           .toList();
     }
@@ -202,10 +202,10 @@ class ApiService {
       final url = Uri.parse('$_baseUrl/measure-units');
       final response = await http.get(url, headers: await _authHeaders());
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
         final items = data['data'] as List<dynamic>? ?? <dynamic>[];
         final measures = items
-            .whereType<Map>()
+            .whereType<Map<String, dynamic>>()
             .map(
               (m) => Measure(
                 id: (m['id'] as num?)?.toInt() ?? 0,
@@ -215,7 +215,7 @@ class ApiService {
             .toList();
         if (measures.isNotEmpty) return measures;
       }
-    } catch (e) {
+    } on Object catch (e) {
       log('fetchMeasures failed, using stub: $e');
     }
     return _stubMeasures;
@@ -228,7 +228,8 @@ class ApiService {
     required int outletId,
     required int price,
   }) async {
-    // Current product create accepts only { name }; category id lives in the URL.
+    // Current product create accepts only { name };
+    // category id lives in the URL
     // measureId / price / outletId are unused server-side until the schema catches up.
     final url = Uri.parse('$_baseUrl/categories/$categoryId/products');
     final response = await http.post(
@@ -238,7 +239,7 @@ class ApiService {
     );
 
     if (response.statusCode == 201) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
       log('Product created: $data');
       return data;
     } else {
@@ -259,7 +260,7 @@ class ApiService {
       body: jsonEncode({'name': name}),
     );
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
       return (data['data'] as Map).cast<String, dynamic>();
     }
     throw Exception(
@@ -283,10 +284,10 @@ class ApiService {
     final url = Uri.parse('$_baseUrl/products/$productId/variants');
     final response = await http.get(url, headers: await _authHeaders());
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
       final items = data['data'] as List<dynamic>? ?? <dynamic>[];
       return items
-          .whereType<Map>()
+          .whereType<Map<String, dynamic>>()
           .map((m) => m.cast<String, dynamic>())
           .toList();
     }
@@ -312,7 +313,7 @@ class ApiService {
       }),
     );
     if (response.statusCode == 201) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
       return (data['data'] as Map).cast<String, dynamic>();
     }
     throw Exception(
@@ -332,7 +333,7 @@ class ApiService {
       body: jsonEncode({'name': name, 'price': price}),
     );
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
       return (data['data'] as Map).cast<String, dynamic>();
     }
     throw Exception(
@@ -356,10 +357,10 @@ class ApiService {
     final url = Uri.parse('$_baseUrl/variants/$variantId/recipe');
     final response = await http.get(url, headers: await _authHeaders());
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
       final items = data['data'] as List<dynamic>? ?? <dynamic>[];
       return items
-          .whereType<Map>()
+          .whereType<Map<String, dynamic>>()
           .map((m) => m.cast<String, dynamic>())
           .toList();
     }
@@ -391,10 +392,10 @@ class ApiService {
     final url = Uri.parse('$_baseUrl/retail-outlets/$outletId/ingredients');
     final response = await http.get(url, headers: await _authHeaders());
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
       final items = data['data'] as List<dynamic>? ?? <dynamic>[];
       return items
-          .whereType<Map>()
+          .whereType<Map<String, dynamic>>()
           .map((m) => m.cast<String, dynamic>())
           .toList();
     }
