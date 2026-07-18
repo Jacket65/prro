@@ -6,7 +6,6 @@ part 'user_event.dart';
 part 'user_state.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
-
   UserBloc({required UserRepositoryI userRepository})
     : _userRepository = userRepository,
       super(UserInitial()) {
@@ -21,7 +20,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     try {
       await _userRepository.saveUsername(event.username);
       emit(UserLoaded(event.username));
-    } catch (e) {
+    } on Object catch (e) {
       emit(UserError('Failed to load username: $e'));
     }
   }
@@ -31,8 +30,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     try {
       await _userRepository.clearUsername();
       emit(UserInitial());
-    } catch (e) {
-      emit(UserError('Failed to clear username'));
+    } on Object catch (e) {
+      emit(UserError('Failed to clear username: $e'));
     }
   }
 }

@@ -7,9 +7,13 @@ import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 import 'package:prro/features/seller/widgets/options_picker_dialog.dart';
 
 class ListItem extends StatefulWidget {
-
   const ListItem({
-    required this.lineId, required this.name, required this.price, required this.imageUrl, required this.quantity, super.key,
+    required this.lineId,
+    required this.name,
+    required this.price,
+    required this.imageUrl,
+    required this.quantity,
+    super.key,
     this.unit,
     this.selectedOptions = const [],
     this.selectedBean,
@@ -59,7 +63,8 @@ class _ListItemState extends State<ListItem> {
             : null;
 
         return Slidable(
-          // Ключ обов'язковий, щоб Slidable працював коректно всередині списків (ListView)
+          // Ключ обов'язковий, щоб Slidable працював
+          // коректно всередині списків (ListView)
           key: ValueKey(widget.lineId),
 
           // Налаштування шторки дії (зсув вліво, кнопка з'являється справа)
@@ -91,7 +96,9 @@ class _ListItemState extends State<ListItem> {
             borderRadius: BorderRadius.circular(8),
             child: InkWell(
               splashColor: Colors.grey.shade200,
-              borderRadius: const BorderRadius.horizontal(left: Radius.circular(8)),
+              borderRadius: const BorderRadius.horizontal(
+                left: Radius.circular(8),
+              ),
               onTap: () => _onTap(context, state),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -219,7 +226,7 @@ class _ListItemState extends State<ListItem> {
 
   /// Tapping a cart line lets the cashier change the drink's options/bean.
   /// Opens the line editor (quantity + options).
-  void _onTap(BuildContext context, OrdersUpdated state) {
+  Future<void> _onTap(BuildContext context, OrdersUpdated state) async {
     final product = state.products.firstWhere(
       (p) => p.lineId == widget.lineId,
       // The line always exists in state; this fallback keeps the type checker
@@ -235,7 +242,7 @@ class _ListItemState extends State<ListItem> {
         selectedBean: widget.selectedBean,
       ),
     );
-    openLineEditor(context, product);
+    await openLineEditor(context, product);
   }
 }
 

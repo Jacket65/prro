@@ -7,7 +7,7 @@ abstract interface class ApiClientI {
 
   /// GET with optional query parameters and a [cancelToken] (so an in-flight
   /// request can be aborted, e.g. superseded search input).
-  Future<Response> get(
+  Future<Response<dynamic>> get(
     String path, {
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
@@ -16,8 +16,16 @@ abstract interface class ApiClientI {
   /// POST. State-changing POSTs require an `Idempotency-Key`; pass
   /// [idempotencyKey] to use a stable one (e.g. generated when a payment modal
   /// opens). If omitted, the client auto-generates one per request.
-  Future<Response> post(String path, {dynamic data, String? idempotencyKey});
+  Future<Response<dynamic>> post(
+    String path, {
+    dynamic data,
+    String? idempotencyKey,
+  });
 
   /// PATCH. Same idempotency rules as [post].
-  Future<Response> patch(String path, {dynamic data, String? idempotencyKey});
+  Future<Response<dynamic>> patch(
+    String path, {
+    dynamic data,
+    String? idempotencyKey,
+  });
 }

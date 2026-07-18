@@ -44,7 +44,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 
 class CustomKeypad extends StatelessWidget {
-
   CustomKeypad({super.key});
   final List<String> keys = [
     '1',
@@ -97,7 +96,7 @@ class CustomKeypad extends StatelessWidget {
       child: InkWell(
         onTap: () {
           log('Key pressed: $key');
-          // TODO: handle tap
+          // TODO(me): handle tap
         },
         child: Container(
           width: 50,

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:prro/core/constants/settings.dart';
 
-void findInDictionary(BuildContext context) {
+Future<void> findInDictionary(BuildContext context) async {
   const title = 'Пошук ДПІ у довіднику ?';
 
-  showDialog(
+  await showDialog<void>(
     context: context,
     builder: (context) {
       return AlertDialog(
@@ -14,7 +14,7 @@ void findInDictionary(BuildContext context) {
           children: [
             const Text(title),
             IconButton(
-              padding: const EdgeInsets.all(0),
+              padding: EdgeInsets.zero,
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -81,7 +81,10 @@ void findInDictionary(BuildContext context) {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('Вибрати', style: TextStyle(color: Colors.white)),
+                child: const Text(
+                  'Вибрати',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
               TextButton(
                 onPressed: () {

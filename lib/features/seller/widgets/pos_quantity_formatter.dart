@@ -21,7 +21,7 @@ class PosQuantityFormatter extends TextInputFormatter {
 
     if (digits.isEmpty) {
       onValue(Decimal.zero);
-      return const TextEditingValue();
+      return TextEditingValue.empty;
     }
 
     if (digits.length > maxIntegerDigits + scale) {

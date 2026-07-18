@@ -17,7 +17,6 @@ enum OptionSelectionType {
 /// A group of options offered for a drink variant (e.g. "Молоко", "Сироп").
 /// Mirrors a `groups[]` entry of `GET /variants/:id/options`.
 class OptionGroup extends Equatable {
-
   const OptionGroup({
     required this.id,
     required this.name,
@@ -35,7 +34,7 @@ class OptionGroup extends Equatable {
       selectionType: OptionSelectionType.fromJson(json['selection_type']),
       isRequired: json['is_required'] == true,
       options: (json['options'] as List<dynamic>? ?? const [])
-          .whereType<Map>()
+          .whereType<Map<dynamic, dynamic>>()
           .map((m) => DrinkOption.fromJson(m.cast<String, dynamic>()))
           .toList(),
     );
@@ -53,7 +52,6 @@ class OptionGroup extends Equatable {
 /// A single selectable option with its (variant-effective) surcharge.
 /// `price_delta` arrives as a decimal STRING — parse via [parseDouble].
 class DrinkOption extends Equatable {
-
   const DrinkOption({
     required this.id,
     required this.name,
@@ -86,7 +84,6 @@ class DrinkOption extends Equatable {
 /// portions (e.g. 2 syrups), each multiplying [priceDelta]. [name]/[priceDelta]
 /// are kept for display and the local "Разом" approximation.
 class SelectedOption extends Equatable {
-
   const SelectedOption({
     required this.optionId,
     required this.name,

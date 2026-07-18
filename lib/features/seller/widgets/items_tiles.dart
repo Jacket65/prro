@@ -39,7 +39,9 @@ class ItemsTiles extends StatelessWidget {
                   child: CircularProgressIndicator(),
                 ),
               ),
-              CatalogSearchError(:final message) => Center(child: Text(message)),
+              CatalogSearchError(:final message) => Center(
+                child: Text(message),
+              ),
               CatalogSearchResults(:final items) when items.isEmpty =>
                 const Center(
                   child: Padding(

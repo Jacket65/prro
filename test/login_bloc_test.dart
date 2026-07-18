@@ -17,7 +17,7 @@ void main() {
 
   group('LoginSubmitted', () {
     blocTest<LoginBloc, LoginState>(
-      'emits [LoginLoading, LoginSuccess] and saves login state when login succeeds',
+      'emits [LoginLoading, LoginSuccess] and saves login state when succeeds',
       build: () {
         when(
           () => repository.login(
@@ -26,7 +26,9 @@ void main() {
           ),
         ).thenAnswer((_) async => true);
 
-        when(() => repository.saveLoginState(true)).thenAnswer((_) async {});
+        when(
+          () => repository.saveLoginState(state: true),
+        ).thenAnswer((_) async {});
 
         return loginBloc;
       },
@@ -38,7 +40,7 @@ void main() {
           () => repository.login(username: 'test', password: '1234'),
         ).called(1);
 
-        verify(() => repository.saveLoginState(true)).called(1);
+        verify(() => repository.saveLoginState(state: true)).called(1);
       },
     );
 
@@ -65,7 +67,7 @@ void main() {
           () => repository.login(username: 'test', password: 'wrong'),
         ).called(1);
 
-        verifyNever(() => repository.saveLoginState(any()));
+        verifyNever(() => repository.saveLoginState(state: any()));
       },
     );
   });

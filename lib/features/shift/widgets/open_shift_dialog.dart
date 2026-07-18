@@ -38,10 +38,11 @@ class _OpenShiftDialogState extends State<OpenShiftDialog> {
   }
 
   /// Normalized decimal string for `cash_start`, e.g. "0.00", "1234.50".
-  String get _cashStart => formatAmount(kopecksFromString(_cashController.text));
+  String get _cashStart =>
+      formatAmount(kopecksFromString(_cashController.text));
 
-  void _confirm() {
-    context.read<ShiftCubit>().openShift(
+  Future<void> _confirm() async {
+    await context.read<ShiftCubit>().openShift(
       cashStart: _cashStart,
       idempotencyKey: _idempotencyKey,
     );
@@ -93,7 +94,9 @@ class _OpenShiftDialogState extends State<OpenShiftDialog> {
           ),
           actions: [
             TextButton(
-              onPressed: loading ? null : () => Navigator.of(context).pop(false),
+              onPressed: loading
+                  ? null
+                  : () => Navigator.of(context).pop(false),
               child: const Text('Скасувати'),
             ),
             FilledButton(

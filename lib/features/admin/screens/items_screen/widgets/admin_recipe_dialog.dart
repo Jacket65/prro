@@ -9,9 +9,11 @@ import 'package:prro/features/admin/screens/main_screen/services/api_service.dar
 /// catalogue via `GET /retail-outlets/:outlet/ingredients`, then commits via
 /// `PUT /variants/:id/recipe` when the user presses save.
 class AdminRecipeDialog extends StatefulWidget {
-
   const AdminRecipeDialog({
-    required this.variantId, required this.variantName, required this.outletId, super.key,
+    required this.variantId,
+    required this.variantName,
+    required this.outletId,
+    super.key,
   });
   final int variantId;
   final String variantName;
@@ -156,7 +158,7 @@ class _AdminRecipeDialogState extends State<AdminRecipeDialog> {
       );
       if (!mounted) return;
       Navigator.of(context).pop(true);
-    } catch (e) {
+    } on Object catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Не вдалося зберегти рецепт: $e')),
@@ -300,12 +302,10 @@ class _AdminRecipeDialogState extends State<AdminRecipeDialog> {
                     _ingredients.isEmpty
                         ? 'У цій точці ще немає інгредієнтів'
                         : available.isEmpty
-                            ? 'Всі інгредієнти вже в рецепті'
-                            : 'Виберіть інгредієнт',
+                        ? 'Всі інгредієнти вже в рецепті'
+                        : 'Виберіть інгредієнт',
                     style: TextStyle(
-                      color: available.isEmpty
-                          ? Colors.grey
-                          : Colors.black87,
+                      color: available.isEmpty ? Colors.grey : Colors.black87,
                     ),
                   ),
                 ),
@@ -353,9 +353,13 @@ class _AdminRecipeDialogState extends State<AdminRecipeDialog> {
 }
 
 class _RecipeRowWidget extends StatefulWidget {
-
   const _RecipeRowWidget({
-    required this.name, required this.quantity, required this.unit, required this.onQuantityChanged, required this.onRemove, super.key,
+    required this.name,
+    required this.quantity,
+    required this.unit,
+    required this.onQuantityChanged,
+    required this.onRemove,
+    super.key,
   });
   final String name;
   final double quantity;
@@ -421,8 +425,9 @@ class _RecipeRowWidgetState extends State<_RecipeRowWidget> {
             child: TextField(
               controller: _controller,
               textAlign: TextAlign.center,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp('[0-9.,]')),
               ],

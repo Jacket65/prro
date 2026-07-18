@@ -3,7 +3,6 @@ import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final class LoginService implements LoginServiceI {
-
   LoginService({required this.prefs, required this.apiClient});
   final SharedPreferences prefs;
   final ApiClientI apiClient;
@@ -35,7 +34,11 @@ final class LoginService implements LoginServiceI {
     await prefs.setString('username', username);
     await prefs.setBool('isLogged', true);
 
-    final data = response.data is Map ? response.data['data'] : null;
+    final responseData = response.data;
+
+    final data = responseData is Map<String, dynamic>
+        ? responseData['data']
+        : null;
     if (data is Map<String, dynamic>) {
       final role = data['role'];
       if (role is String) {
@@ -71,13 +74,13 @@ final class LoginService implements LoginServiceI {
           await prefs.setInt('outlet_id', first['id'] as int);
         }
       }
-    } catch (_) {
+    } on Object catch (_) {
       // optional, ignore — UI surfaces will fail later with clearer errors
     }
   }
 
   @override
-  Future<void> saveLoginState(bool state) async {
+  Future<void> saveLoginState({required bool state}) async {
     await prefs.setBool('isLogged', state);
   }
 

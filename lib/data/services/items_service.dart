@@ -11,6 +11,11 @@ import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ItemsService implements ItemsServiceI {
+  ItemsService({
+    required ApiClientI apiClient,
+    required SharedPreferences prefs,
+  }) : _apiClient = apiClient,
+       _prefs = prefs;
   final ApiClientI _apiClient;
   final SharedPreferences _prefs;
 
@@ -19,12 +24,6 @@ class ItemsService implements ItemsServiceI {
   /// a single network round-trip instead of firing two identical GETs.
   final Map<int, List<OptionGroup>> _optionsCache = {};
   final Map<int, Future<List<OptionGroup>>> _optionsInFlight = {};
-
-  ItemsService({
-    required ApiClientI apiClient,
-    required SharedPreferences prefs,
-  }) : _apiClient = apiClient,
-       _prefs = prefs;
 
   int? _outletId() => _prefs.getInt('outlet_id');
 
@@ -40,8 +39,10 @@ class ItemsService implements ItemsServiceI {
         '/retail-outlets/$outletId/categories',
       );
       final data = _extractList(response.data);
-      return data.map<Item>((json) => Category.fromJson(json)).toList();
-    } catch (e, stackTrace) {
+      return data
+          .map<Item>((json) => Category.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } on Object catch (e, stackTrace) {
       log('Error in getCategories: $e', stackTrace: stackTrace);
       return [];
     }
@@ -52,7 +53,7 @@ class ItemsService implements ItemsServiceI {
     try {
       final response = await _apiClient.get('/categories/$categoryId/products');
       return _flattenProducts(_extractList(response.data));
-    } catch (e, stackTrace) {
+    } on Object catch (e, stackTrace) {
       log('Error in getProducts: $e', stackTrace: stackTrace);
       return [];
     }
@@ -85,7 +86,7 @@ class ItemsService implements ItemsServiceI {
   /// is hidden (unsellable).
   List<Item> _flattenProducts(List<dynamic> data) {
     final out = <Item>[];
-    for (final json in data.whereType<Map>()) {
+    for (final json in data.whereType<Map<dynamic, dynamic>>()) {
       final group = ProductGroup.fromJson(json.cast<String, dynamic>());
       if (group.variants.isEmpty) continue;
       out.add(group.variants.length == 1 ? group.variants.first : group);
@@ -102,10 +103,10 @@ class ItemsService implements ItemsServiceI {
       final data = _extractList(response.data);
       // Variants are the leaves — they have a price/unit and go into the cart.
       return data
-          .whereType<Map>()
+          .whereType<Map<dynamic, dynamic>>()
           .map<Item>((json) => Product.fromJson(json.cast<String, dynamic>()))
           .toList();
-    } catch (e, stackTrace) {
+    } on Object catch (e, stackTrace) {
       log('Error in getVariants: $e', stackTrace: stackTrace);
       return [];
     }
@@ -128,7 +129,7 @@ class ItemsService implements ItemsServiceI {
             (json) => Ingredient.fromJson(json as Map<String, dynamic>),
           )
           .toList();
-    } catch (e, stackTrace) {
+    } on Object catch (e, stackTrace) {
       log('Error in getIngredients: $e', stackTrace: stackTrace);
       return [];
     }
@@ -144,14 +145,14 @@ class ItemsService implements ItemsServiceI {
             (json) => MeasureUnit.fromJson(json as Map<String, dynamic>),
           )
           .toList();
-    } catch (e, stackTrace) {
+    } on Object catch (e, stackTrace) {
       log('Error in getMeasureUnits: $e', stackTrace: stackTrace);
       return [];
     }
   }
 
   /// The option group whose name marks "which coffee bean was used". Beans are
-  /// modelled on the wire as an ordinary option group; we single it out by name.
+  /// modelled on the wire as an ordinary option group; we single it out by name
   static const _beansGroupName = 'зерна';
 
   /// `GET /variants/:id/options` → every option group of the variant. Beans are
@@ -169,12 +170,12 @@ class ItemsService implements ItemsServiceI {
         final response = await _apiClient.get('/variants/$variantId/options');
         final data = _extractList(response.data);
         final groups = data
-            .whereType<Map>()
+            .whereType<Map<dynamic, dynamic>>()
             .map((m) => OptionGroup.fromJson(m.cast<String, dynamic>()))
             .toList();
         _optionsCache[variantId] = groups;
         return groups;
-      } catch (e, stackTrace) {
+      } on Object catch (e, stackTrace) {
         // Don't cache failures — let the next selection retry.
         log(
           'Error in getVariantOptions($variantId): $e',
@@ -182,7 +183,7 @@ class ItemsService implements ItemsServiceI {
         );
         return const <OptionGroup>[];
       } finally {
-        _optionsInFlight.remove(variantId);
+        await _optionsInFlight.remove(variantId);
       }
     });
   }

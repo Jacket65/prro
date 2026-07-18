@@ -39,9 +39,9 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (token != null && mounted) {
-        Navigator.pushReplacement(
+        await Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const MainScreen()),
+          MaterialPageRoute<void>(builder: (context) => const MainScreen()),
         );
       }
     } finally {
@@ -162,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     try {
-      final response = await dio.post(
+      final response = await dio.post<Map<dynamic, dynamic>>(
         '/auth/login',
         data: {'login': login, 'password': password},
       );
@@ -176,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
           return authHeader.substring(7).trim();
         }
       }
-    } catch (e) {
+    } on Object catch (e) {
       log('Authentication error: $e');
     }
     return null;

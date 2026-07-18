@@ -3,7 +3,7 @@ abstract interface class LoginServiceI implements LoginRepositoryI {}
 abstract interface class LoginRepositoryI {
   Future<bool> login({required String username, required String password});
 
-  Future<void> saveLoginState(bool bool);
+  Future<void> saveLoginState({required bool state});
 
   bool getLoginState();
   Future<void> logout();

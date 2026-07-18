@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/features/seller/widgets/options_picker_dialog.dart';
 
-/// Modal that lists the variants of a [ProductGroup] (carried inline, no network
+/// Modal that lists the variants of a [ProductGroup]
+/// (carried inline, no network
 /// request) and lets the cashier pick one. The chosen variant is then routed
 /// through [startAddToCart] (which may open the options picker before it lands
 /// in the cart).
 class VariantPickerDialog extends StatelessWidget {
-
   const VariantPickerDialog({required this.group, super.key});
   final ProductGroup group;
 

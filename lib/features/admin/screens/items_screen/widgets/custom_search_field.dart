@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class CustomSearchField extends StatelessWidget {
   const CustomSearchField({
-    required TextEditingController searchController, super.key,
+    required TextEditingController searchController,
+    super.key,
   }) : _searchController = searchController;
 
   final TextEditingController _searchController;
@@ -31,7 +32,7 @@ class CustomSearchField extends StatelessWidget {
           borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5),
         ),
       ),
-      // TODO: Implement search/filtering logic using _searchController.text
+      // TODO(me): Implement search/filtering logic using _searchController.text
       onChanged: (value) {
         // Trigger a state change to filter the grid
       },

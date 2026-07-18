@@ -2,11 +2,11 @@ import 'package:dio/dio.dart';
 
 /// A normalized API error.
 ///
-/// The backend wraps errors as `{ "error": { "code": "...", "message": "..." } }`.
+/// The backend wraps errors as
+/// `{ "error": { "code": "...", "message": "..." } }`.
 /// [ApiException.fromDio] unwraps that envelope; connection/timeout failures get
 /// a friendly Ukrainian message instead of a raw Dio dump.
 class ApiException implements Exception {
-
   const ApiException(this.message, {this.code, this.statusCode});
 
   factory ApiException.fromDio(DioException e) {
@@ -32,9 +32,15 @@ class ApiException implements Exception {
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
         return 'Сервер не відповідає. Спробуйте ще раз.';
+
       case DioExceptionType.connectionError:
         return 'Немає зʼєднання з сервером.';
-      default:
+
+      case DioExceptionType.badCertificate:
+      case DioExceptionType.badResponse:
+      case DioExceptionType.cancel:
+      case DioExceptionType.unknown:
+      case DioExceptionType.transformTimeout:
         final status = e.response?.statusCode;
         return status != null
             ? 'Помилка сервера ($status).'

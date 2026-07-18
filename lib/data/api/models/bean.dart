@@ -5,7 +5,6 @@ import 'package:prro/core/json.dart';
 /// Beans don't change the price for now, but mirror the option shape so a
 /// surcharge can be added later if the backend introduces one.
 class Bean extends Equatable {
-
   const Bean({required this.id, required this.name});
 
   factory Bean.fromJson(Map<String, dynamic> json) {
@@ -27,15 +26,18 @@ class Bean extends Equatable {
 /// cashier expands a group and picks one specific bean; selection is single
 /// across all groups.
 class BeanGroup extends Equatable {
-
-  const BeanGroup({required this.id, required this.name, this.beans = const []});
+  const BeanGroup({
+    required this.id,
+    required this.name,
+    this.beans = const [],
+  });
 
   factory BeanGroup.fromJson(Map<String, dynamic> json) {
     return BeanGroup(
       id: parseInt(json['id']),
       name: (json['name'] ?? '').toString(),
       beans: (json['beans'] as List<dynamic>? ?? const [])
-          .whereType<Map>()
+          .whereType<Map<dynamic, dynamic>>()
           .map((m) => Bean.fromJson(m.cast<String, dynamic>()))
           .toList(),
     );

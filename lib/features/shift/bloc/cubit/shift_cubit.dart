@@ -9,7 +9,6 @@ part 'shift_state.dart';
 /// we only cache the last [ShiftResponse] in the current state. After close we
 /// drop it (→ [ShiftNone]) so nothing stale lingers.
 class ShiftCubit extends Cubit<ShiftState> {
-
   ShiftCubit(this._shiftRepository) : super(const ShiftInitial());
   final ShiftRepositoryI _shiftRepository;
 
@@ -20,7 +19,7 @@ class ShiftCubit extends Cubit<ShiftState> {
     try {
       final shift = await _shiftRepository.currentShift();
       emit(shift == null ? const ShiftNone() : ShiftOpen(shift));
-    } catch (e) {
+    } on Object catch (e) {
       emit(ShiftError(e.toString()));
     }
   }
@@ -36,7 +35,7 @@ class ShiftCubit extends Cubit<ShiftState> {
         idempotencyKey: idempotencyKey,
       );
       emit(ShiftOpen(shift));
-    } catch (e) {
+    } on Object catch (e) {
       emit(ShiftError(e.toString()));
     }
   }
@@ -51,9 +50,10 @@ class ShiftCubit extends Cubit<ShiftState> {
         cashEnd: cashEnd,
         idempotencyKey: idempotencyKey,
       );
-      // Clear the cached shift — no open shift until the cashier opens a new one.
+      // Clear the cached shift — no open shift
+      // until the cashier opens a new one.
       emit(const ShiftNone());
-    } catch (e) {
+    } on Object catch (e) {
       emit(ShiftError(e.toString()));
     }
   }

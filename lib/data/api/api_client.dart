@@ -1,11 +1,21 @@
 import 'dart:async';
 import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:prro/config/env.dart';
 import 'package:prro/data/api/api_client_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient implements ApiClientI {
+  ApiClient({required Dio dio, required SharedPreferences prefs})
+    : _dio = dio,
+      _prefs = prefs,
+      _refreshDio = Dio(BaseOptions(baseUrl: Env.baseUrl)) {
+    _dio.options.baseUrl = Env.baseUrl;
+    _dio.options.connectTimeout = const Duration(seconds: 10);
+    _dio.options.receiveTimeout = const Duration(seconds: 10);
+    _initializeInterceptors();
+  }
   final Dio _dio;
   final SharedPreferences _prefs;
 
@@ -17,17 +27,8 @@ class ApiClient implements ApiClientI {
   /// await one refresh instead of each firing its own.
   Future<bool>? _refreshFuture;
 
-  final StreamController<void> _unauthorized = StreamController<void>.broadcast();
-
-  ApiClient({required Dio dio, required SharedPreferences prefs})
-    : _dio = dio,
-      _prefs = prefs,
-      _refreshDio = Dio(BaseOptions(baseUrl: Env.baseUrl)) {
-    _dio.options.baseUrl = Env.baseUrl;
-    _dio.options.connectTimeout = const Duration(seconds: 10);
-    _dio.options.receiveTimeout = const Duration(seconds: 10);
-    _initializeInterceptors();
-  }
+  final StreamController<void> _unauthorized =
+      StreamController<void>.broadcast();
 
   @override
   Stream<void> get onUnauthorized => _unauthorized.stream;
@@ -51,10 +52,12 @@ class ApiClient implements ApiClientI {
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          log('[RESPONSE] ${response.statusCode} ${response.requestOptions.path}');
+          log(
+            '[RESPONSE] ${response.statusCode} ${response.requestOptions.path}',
+          );
           return handler.next(response);
         },
-        onError: (DioException error, handler) async {
+        onError: (error, handler) async {
           final status = error.response?.statusCode;
           log('[ERROR] $status ${error.requestOptions.path} ${error.message}');
 
@@ -76,7 +79,9 @@ class ApiClient implements ApiClientI {
                   error.requestOptions.headers['Authorization'] =
                       'Bearer $token';
                 }
-                final cloned = await _dio.fetch(error.requestOptions);
+                final cloned = await _dio.fetch<dynamic>(
+                  error.requestOptions,
+                );
                 return handler.resolve(cloned);
               } on DioException catch (retryError) {
                 return handler.next(retryError);
@@ -105,7 +110,7 @@ class ApiClient implements ApiClientI {
     final refresh = _prefs.getString('refresh_token');
     if (refresh == null || refresh.isEmpty) return false;
     try {
-      final response = await _refreshDio.post(
+      final response = await _refreshDio.post<dynamic>(
         '/auth/refresh',
         data: {'refresh_token': refresh},
       );
@@ -126,8 +131,8 @@ class ApiClient implements ApiClientI {
     }
   }
 
-  /// Clears the session and notifies listeners once (concurrent 401s collapse to
-  /// a single logout/redirect).
+  /// Clears the session and notifies listeners once
+  /// (concurrent 401s collapse to a single logout/redirect).
   Future<void> _onAuthFailure() async {
     final hadSession =
         (_prefs.getString('auth_token') ?? '').isNotEmpty ||
@@ -141,12 +146,12 @@ class ApiClient implements ApiClientI {
   }
 
   @override
-  Future<Response> get(
+  Future<Response<dynamic>> get(
     String path, {
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
   }) async {
-    return await _dio.get(
+    return _dio.get(
       path,
       queryParameters: queryParameters,
       cancelToken: cancelToken,

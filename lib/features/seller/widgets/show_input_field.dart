@@ -3,7 +3,12 @@ import 'package:flutter/services.dart';
 
 class ShowInputField extends StatefulWidget {
   const ShowInputField({
-    required this.title, required this.controller, required this.onChanged, required this.total, required this.onTap, super.key,
+    required this.title,
+    required this.controller,
+    required this.onChanged,
+    required this.total,
+    required this.onTap,
+    super.key,
   });
 
   final String title;
@@ -53,7 +58,7 @@ class _ShowInputFieldState extends State<ShowInputField> {
 
       onPressed: () {
         widget.controller.text = widget.total;
-        widget.onChanged;
+        widget.onChanged(widget.controller.text);
         myFocusNode.requestFocus();
         widget.onTap();
       },
@@ -71,7 +76,9 @@ class _ShowInputFieldState extends State<ShowInputField> {
                 controller: widget.controller,
                 onChanged: widget.onChanged,
 
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   LengthLimitingTextInputFormatter(10),
                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),

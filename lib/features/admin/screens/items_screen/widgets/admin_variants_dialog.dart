@@ -10,9 +10,11 @@ import 'package:prro/features/admin/screens/main_screen/services/api_service.dar
 /// Lists variants for a product. Admin can create, rename, change price,
 /// edit recipe, and delete each one.
 class AdminVariantsDialog extends StatefulWidget {
-
   const AdminVariantsDialog({
-    required this.productId, required this.productName, required this.outletId, super.key,
+    required this.productId,
+    required this.productName,
+    required this.outletId,
+    super.key,
   });
   final int productId;
   final String productName;
@@ -52,7 +54,9 @@ class _AdminVariantsDialogState extends State<AdminVariantsDialog> {
   }
 
   Future<List<Map<String, dynamic>>> _load() {
-    return context.read<ApiService>().fetchVariants(productId: widget.productId);
+    return context.read<ApiService>().fetchVariants(
+      productId: widget.productId,
+    );
   }
 
   void _refresh() {
@@ -74,7 +78,7 @@ class _AdminVariantsDialogState extends State<AdminVariantsDialog> {
         ingredients: const [],
       );
       _refresh();
-    } catch (e) {
+    } on Object catch (e) {
       log('create variant failed: $e');
       messenger.showSnackBar(
         SnackBar(content: Text('Не вдалося створити: $e')),
@@ -99,7 +103,7 @@ class _AdminVariantsDialogState extends State<AdminVariantsDialog> {
         price: draft.price,
       );
       _refresh();
-    } catch (e) {
+    } on Object catch (e) {
       log('update variant failed: $e');
       messenger.showSnackBar(
         SnackBar(content: Text('Не вдалося оновити: $e')),
@@ -120,7 +124,7 @@ class _AdminVariantsDialogState extends State<AdminVariantsDialog> {
     try {
       await api.deleteVariant(id: parseInt(variant['id']));
       _refresh();
-    } catch (e) {
+    } on Object catch (e) {
       log('delete variant failed: $e');
       messenger.showSnackBar(
         SnackBar(content: Text('Не вдалося видалити: $e')),
@@ -295,7 +299,7 @@ class _AdminVariantsDialogState extends State<AdminVariantsDialog> {
                           title: Text((v['name'] ?? '').toString()),
                           subtitle: Text(
                             // Backend ships price as decimal STRING.
-                            '${parseDouble(v['price']).toStringAsFixed(2)} грн · '
+                            '${parseDouble(v['price']).toStringAsFixed(2)} грн.'
                             '${ingredients.length} інгр.',
                           ),
                           trailing: Row(

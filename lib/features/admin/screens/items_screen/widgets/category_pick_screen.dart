@@ -32,7 +32,10 @@ class _CategoryPickState extends State<CategoryPick> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(backgroundColor: Colors.white, title: const Text('Новий товар')),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: const Text('Новий товар'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -91,7 +94,7 @@ class _CategoryPickState extends State<CategoryPick> {
                               if (value == null || value.isEmpty) {
                                 return 'Введіть назву товару';
                               } else if (value.length < 4) {
-                                return 'Текст повинен містити не менше 4 символів';
+                                return 'Текст повинен бути не менше 4 символів';
                               }
                               return null;
                             },
@@ -349,7 +352,9 @@ class _CategoryPickState extends State<CategoryPick> {
                           borderRadius: BorderRadius.circular(5),
                         ),
                       ),
-                      backgroundColor: const WidgetStatePropertyAll(Colors.blue),
+                      backgroundColor: const WidgetStatePropertyAll(
+                        Colors.blue,
+                      ),
                     ),
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {

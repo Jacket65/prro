@@ -12,7 +12,6 @@ part 'items_tiles_state.dart';
 ///   - empty stack:        showing categories
 ///   - 1 entry (category): showing abstract products
 class ItemsTilesBloc extends Bloc<ItemsTilesEvent, ItemsTilesState> {
-
   ItemsTilesBloc({required ItemsRepositoryI itemsRepository})
     : _repository = itemsRepository,
       super(ItemsTilesLoading()) {
@@ -70,7 +69,7 @@ class ItemsTilesBloc extends Bloc<ItemsTilesEvent, ItemsTilesState> {
           items = const [];
       }
       emit(ItemsTilesLoaded(items: items, canGoBack: _stack.isNotEmpty));
-    } catch (_) {
+    } on Object catch (_) {
       final message = _stack.isEmpty
           ? 'Не вдалося завантажити категорії.'
           : 'Не вдалося завантажити товари.';

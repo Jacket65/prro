@@ -21,7 +21,7 @@ Decimal parseDecimal(dynamic v, {Decimal? fallback}) {
   if (raw.isEmpty) return fb;
   try {
     return Decimal.parse(raw);
-  } catch (_) {
+  } on Object catch (_) {
     return fb;
   }
 }
@@ -44,7 +44,9 @@ int parseInt(dynamic v, {int fallback = 0}) {
   if (v is String) {
     final cleaned = v.trim();
     if (cleaned.isEmpty) return fallback;
-    return int.tryParse(cleaned) ?? double.tryParse(cleaned)?.toInt() ?? fallback;
+    return int.tryParse(cleaned) ??
+        double.tryParse(cleaned)?.toInt() ??
+        fallback;
   }
   return fallback;
 }

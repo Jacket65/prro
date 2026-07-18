@@ -1,5 +1,5 @@
 /// Money is stored everywhere as an `int` of kopecks (1/100 of UAH).
-/// Float arithmetic is forbidden for money — use [Money] math instead.
+/// Float arithmetic is forbidden for money — use `Money` math instead.
 library;
 
 /// Convert UAH expressed as `double` (e.g. seed/mock literals like `45.50`)

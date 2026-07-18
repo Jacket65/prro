@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:prro/core/constants/settings.dart';
 
 class Ttochki extends StatefulWidget {
-
   const Ttochki({
-    required this.data, super.key,
+    required this.data,
+    super.key,
     this.selectedIndex,
     this.onRowSelect,
   });
   final List<List<String>> data;
   final int? selectedIndex;
-  final Function(int index)? onRowSelect;
+  final void Function(int index)? onRowSelect;
 
   @override
   State<Ttochki> createState() => _TtochkiState();
@@ -35,7 +35,7 @@ class _TtochkiState extends State<Ttochki> {
                     selected: widget.selectedIndex == index,
                     onSelectChanged: (selected) {
                       if (widget.onRowSelect != null) {
-                        widget.onRowSelect!(index);
+                        widget.onRowSelect?.call(index);
                       }
                     },
                     cells: row.map((value) {

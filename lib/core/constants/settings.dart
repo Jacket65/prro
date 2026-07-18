@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 List<String> rowsText = [
   'Кафе',
-  'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, w',
+  'Lorem Ipsum is simply dummy text of the printing and typesetting industry. ',
+
   '88005553535',
   '228',
   'зареєстровано',
@@ -23,8 +24,8 @@ List<DataColumn> novaTThead({
   bool showStatus = false,
   List<String>? extraText,
 }) {
-  List<DataColumn> list = [];
-  for (String i in extraText!) {
+  final list = <DataColumn>[];
+  for (final i in extraText!) {
     list.add(
       DataColumn(label: Expanded(child: Text(i, softWrap: true))),
       // DataColumn(label: Flexible(child: FittedBox(child: Text(i)))),
@@ -32,10 +33,10 @@ List<DataColumn> novaTThead({
   }
   if (showStatus) {
     list.add(
-      DataColumn(
+      const DataColumn(
         label: Expanded(
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(8),
             child: Text(
               'Стан активності',
               textAlign: TextAlign.center,
@@ -62,9 +63,6 @@ List<String> largestCities = [
   'Миколаїв',
   'Маріуполь',
 ];
-String currentContent = 'Торгові точки та ПРРО';
-
-int selecteIndex = 1;
 List<DataRow> listOfTllers = [];
 
 List<String> tellerText = [
@@ -79,7 +77,7 @@ List<String> tellerTextN = [
   'Зареєстрований',
   'Active',
 ];
-var currentValue = 1;
+int currentValue = 1;
 
 bool counter = false;
 bool rowTapSettings = false;

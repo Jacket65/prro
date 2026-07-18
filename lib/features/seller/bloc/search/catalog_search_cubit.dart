@@ -10,7 +10,6 @@ part 'catalog_search_state.dart';
 /// [search] immediately cancels the previous request's [CancelToken] (the last
 /// query wins; stale results never show).
 class CatalogSearchCubit extends Cubit<CatalogSearchState> {
-
   CatalogSearchCubit(this._repository) : super(const CatalogSearchIdle());
   final ItemsRepositoryI _repository;
   CancelToken? _cancel;
@@ -36,7 +35,7 @@ class CatalogSearchCubit extends Cubit<CatalogSearchState> {
     } on DioException catch (e) {
       if (CancelToken.isCancel(e)) return; // superseded — ignore
       emit(const CatalogSearchError('Не вдалося виконати пошук.'));
-    } catch (_) {
+    } on Object catch (_) {
       emit(const CatalogSearchError('Не вдалося виконати пошук.'));
     }
   }

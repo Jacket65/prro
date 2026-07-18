@@ -49,7 +49,6 @@ class PaymentDto {
 /// One printed line of the receipt. Money is `int` kopecks; the backend ships
 /// it as a decimal string, parsed via [kopecksFromString].
 class ReceiptLine {
-
   const ReceiptLine({
     required this.productId,
     required this.name,
@@ -63,7 +62,7 @@ class ReceiptLine {
   factory ReceiptLine.fromJson(Map<String, dynamic> json) {
     final base = (json['name'] ?? '').toString();
     final optionNames = (json['options'] as List<dynamic>? ?? const [])
-        .whereType<Map>()
+        .whereType<Map<dynamic, dynamic>>()
         .map((o) => (o['name'] ?? '').toString())
         .where((s) => s.isNotEmpty)
         .toList();
@@ -71,8 +70,12 @@ class ReceiptLine {
       productId: (json['variant_id'] ?? '').toString(),
       name: optionNames.isEmpty ? base : '$base · ${optionNames.join(', ')}',
       quantity: (json['quantity'] ?? '1').toString(),
-      unitPriceKopecks: kopecksFromString((json['unit_price'] ?? '0').toString()),
-      subtotalKopecks: kopecksFromString((json['line_total'] ?? '0').toString()),
+      unitPriceKopecks: kopecksFromString(
+        (json['unit_price'] ?? '0').toString(),
+      ),
+      subtotalKopecks: kopecksFromString(
+        (json['line_total'] ?? '0').toString(),
+      ),
     );
   }
   final String productId;
@@ -87,7 +90,6 @@ class ReceiptLine {
 
 /// The receipt the cashier sees after a successful sale.
 class OrderReceipt {
-
   const OrderReceipt({
     required this.orderId,
     required this.lines,
@@ -111,7 +113,7 @@ class OrderReceipt {
     final payment =
         (json['payment'] as Map?)?.cast<String, dynamic>() ?? const {};
     final lines = (json['items'] as List<dynamic>? ?? const [])
-        .whereType<Map>()
+        .whereType<Map<dynamic, dynamic>>()
         .map((m) => ReceiptLine.fromJson(m.cast<String, dynamic>()))
         .toList();
     return OrderReceipt(
@@ -120,8 +122,9 @@ class OrderReceipt {
       totalKopecks: kopecksFromString(
         (json['total_price'] ?? payment['total'] ?? '0').toString(),
       ),
-      tenderedKopecks:
-          kopecksFromString((payment['tendered'] ?? '0').toString()),
+      tenderedKopecks: kopecksFromString(
+        (payment['tendered'] ?? '0').toString(),
+      ),
       changeKopecks: kopecksFromString((payment['change'] ?? '0').toString()),
       method: PaymentMethod.fromWire(payment['method']?.toString()),
       status: (json['status'] ?? '').toString(),

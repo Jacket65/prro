@@ -28,8 +28,8 @@ class _SearchFieldState extends State<SearchField> {
 
   void _onChanged(String value) {
     _debounce?.cancel();
-    _debounce = Timer(_debounceDuration, () {
-      context.read<CatalogSearchCubit>().search(value);
+    _debounce = Timer(_debounceDuration, () async {
+      await context.read<CatalogSearchCubit>().search(value);
     });
   }
 
@@ -65,7 +65,11 @@ class _SearchFieldState extends State<SearchField> {
                 ? const SizedBox(width: 8)
                 : IconButton(
                     visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.close, color: Colors.white, size: 20),
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     onPressed: _clear,
                   ),
           ),

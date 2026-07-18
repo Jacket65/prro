@@ -40,8 +40,8 @@ class _CloseShiftDialogState extends State<CloseShiftDialog> {
   /// Normalized decimal string for `cash_end`, e.g. "0.00", "1234.50".
   String get _cashEnd => formatAmount(kopecksFromString(_cashController.text));
 
-  void _confirm() {
-    context.read<ShiftCubit>().closeShift(
+  Future<void> _confirm() async {
+    await context.read<ShiftCubit>().closeShift(
       cashEnd: _cashEnd,
       idempotencyKey: _idempotencyKey,
     );
@@ -93,7 +93,9 @@ class _CloseShiftDialogState extends State<CloseShiftDialog> {
           ),
           actions: [
             TextButton(
-              onPressed: loading ? null : () => Navigator.of(context).pop(false),
+              onPressed: loading
+                  ? null
+                  : () => Navigator.of(context).pop(false),
               child: const Text('Скасувати'),
             ),
             FilledButton(

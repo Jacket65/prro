@@ -1,7 +1,6 @@
 import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
 
 class LoginRepository implements LoginRepositoryI {
-
   LoginRepository({required LoginServiceI userService})
     : _loginService = userService;
   final LoginServiceI _loginService;
@@ -18,14 +17,14 @@ class LoginRepository implements LoginRepositoryI {
       );
 
       return success;
-    } catch (e) {
+    } on Object catch (_) {
       return false;
     }
   }
 
   @override
-  Future<void> saveLoginState(bool state) async {
-    await _loginService.saveLoginState(state);
+  Future<void> saveLoginState({required bool state}) async {
+    await _loginService.saveLoginState(state: state);
   }
 
   @override

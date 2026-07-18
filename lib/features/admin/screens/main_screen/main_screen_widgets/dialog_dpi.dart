@@ -4,9 +4,11 @@ import 'package:prro/core/constants/settings.dart';
 import 'package:prro/features/admin/screens/main_screen/main_screen_widgets/find_in_dictionary.dart';
 
 class DialogDpi extends StatefulWidget {
-
   const DialogDpi({
-    required this.title, required this.rowsName, required this.fillRows, super.key,
+    required this.title,
+    required this.rowsName,
+    required this.fillRows,
+    super.key,
   });
   final String title;
   final List<DataRow> rowsName;
@@ -33,7 +35,7 @@ class _DialogDpiState extends State<DialogDpi> {
         children: [
           Text(widget.title),
           IconButton(
-            padding: const EdgeInsets.all(0),
+            padding: EdgeInsets.zero,
             onPressed: () {
               Navigator.of(context).pop();
             },
@@ -62,7 +64,9 @@ class _DialogDpiState extends State<DialogDpi> {
                       SizedBox(
                         width: 300,
                         child: Text(
-                          'Виберіть ДПІ за своїм місцем обліку. Ці дані збережуться у розділі Моя компанія.',
+                          '''
+Виберіть ДПІ за своїм місцем обліку.
+                          Ці дані збережуться у розділі Моя компанія.''',
                         ),
                       ),
                     ],
@@ -79,8 +83,8 @@ class _DialogDpiState extends State<DialogDpi> {
                       RichText(
                         text: TextSpan(
                           recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              findInDictionary(context);
+                            ..onTap = () async {
+                              await findInDictionary(context);
                             },
                           text: 'Вибрати в довіднику',
                           style: const TextStyle(color: Colors.blue),
@@ -123,7 +127,10 @@ class _DialogDpiState extends State<DialogDpi> {
                 setState(() {});
                 Navigator.of(context).pop();
               },
-              child: const Text('Зберегти', style: TextStyle(color: Colors.white)),
+              child: const Text(
+                'Зберегти',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
             TextButton(
               onPressed: () {

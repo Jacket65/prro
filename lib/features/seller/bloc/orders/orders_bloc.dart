@@ -14,7 +14,6 @@ part 'orders_event.dart';
 part 'orders_state.dart';
 
 class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
-
   OrdersBloc(this._ordersRepository) : super(OrdersInitial()) {
     on<AddProduct>(_onAddProduct);
     on<RemoveProduct>(_onRemoveProduct);
@@ -79,7 +78,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       emit(OrdersPaymentSuccess(receipt));
     } on ApiException catch (e) {
       emit(OrdersError(e.message));
-    } catch (e) {
+    } on Object catch (e) {
       emit(OrdersError('Не вдалося оплатити: $e'));
     }
   }

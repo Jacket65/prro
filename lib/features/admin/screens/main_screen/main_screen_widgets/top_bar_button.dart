@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class TopBarButton extends StatelessWidget {
-
   const TopBarButton({
     required this.selectedIndex,
     required this.index,
@@ -9,11 +8,11 @@ class TopBarButton extends StatelessWidget {
     required this.onSelect,
     super.key,
   });
+
   final int selectedIndex;
   final int index;
-
   final String label;
-  final Function(String) onSelect;
+  final void Function(String) onSelect;
 
   @override
   Widget build(BuildContext context) {

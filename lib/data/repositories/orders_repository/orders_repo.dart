@@ -9,7 +9,6 @@ import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrdersRepository implements OrdersRepositoryI {
-
   OrdersRepository({
     required ApiClientI apiClient,
     required SharedPreferences prefs,
@@ -25,7 +24,7 @@ class OrdersRepository implements OrdersRepositoryI {
 
   /// Client-side approximation used only for the live "разом" display.
   /// The authoritative total comes from [placeOrder]'s receipt. Includes the
-  /// surcharge of each line's selected options via [Product.effectiveUnitPrice].
+  /// surcharge of each line's selected options via [Product.effectiveUnitPrice]
   @override
   double get totalPrice => _products.fold(
     0,

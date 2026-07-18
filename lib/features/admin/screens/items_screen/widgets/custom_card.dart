@@ -7,7 +7,12 @@ import 'package:prro/features/admin/screens/items_screen/widgets/inside_category
 
 class CustomCard extends StatelessWidget {
   const CustomCard({
-    required this.title, required this.index, required this.categoryList, required this.onRename, required this.onDelete, super.key,
+    required this.title,
+    required this.index,
+    required this.categoryList,
+    required this.onRename,
+    required this.onDelete,
+    super.key,
   });
 
   final String title;
@@ -24,16 +29,16 @@ class CustomCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
-        onTap: () {
+        onTap: () async {
           lastCategory = categoryList.indexOf(
             categoryList.firstWhere((element) => element.title == title),
           );
 
           final outlet = Provider.of<int>(context, listen: false);
           final measures = Provider.of<List<Measure>>(context, listen: false);
-          Navigator.push(
+          await Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<void>(
               builder: (_) => MultiProvider(
                 providers: [
                   Provider<int>.value(value: outlet),

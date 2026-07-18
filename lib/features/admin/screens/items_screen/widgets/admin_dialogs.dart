@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Shows a simple text-input dialog. Returns the trimmed text, or null on cancel.
+/// Shows a simple text-input dialog.
+/// Returns the trimmed text, or null on cancel
 Future<String?> showAdminTextPrompt(
   BuildContext context, {
   required String title,
@@ -24,8 +25,7 @@ Future<String?> showAdminTextPrompt(
             border: const OutlineInputBorder(),
             isDense: true,
           ),
-          onSubmitted: (_) =>
-              Navigator.of(ctx).pop(controller.text.trim()),
+          onSubmitted: (_) => Navigator.of(ctx).pop(controller.text.trim()),
         ),
       ),
       actions: [

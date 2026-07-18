@@ -93,7 +93,8 @@ Future<void> startAddToCart(BuildContext context, Product variant) async {
 
 /// Opened by tapping a cart line: lets the cashier edit the line's quantity
 /// (stepped by the unit) and, when the drink has them, its options/bean. The
-/// quantity block always shows, so weight goods with no options are editable too.
+/// quantity block always shows,
+/// so weight goods with no options are editable too.
 Future<void> openLineEditor(BuildContext context, Product line) async {
   final repo = context.read<ItemsRepositoryI>();
   final variantId = int.tryParse(line.id);
@@ -125,9 +126,10 @@ Future<void> openLineEditor(BuildContext context, Product line) async {
 /// selection; confirming dispatches [UpdateOptions] (which may merge the line
 /// with an identical existing one).
 class OptionsPickerDialog extends StatefulWidget {
-
   const OptionsPickerDialog({
-    required this.line, required this.groups, super.key,
+    required this.line,
+    required this.groups,
+    super.key,
     this.beanGroups = const [],
     this.popularBeans = const [],
   });
@@ -534,7 +536,7 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
     );
   }
 
-  /// Quantity block: stepper [−] value [+] at the unit's step, with the unit
+  /// Quantity block: stepper `-` value `+` at the unit's step, with the unit
   /// label and a directly-editable value field.
   Widget _buildQuantity() {
     final label = _unit?.name ?? 'шт';

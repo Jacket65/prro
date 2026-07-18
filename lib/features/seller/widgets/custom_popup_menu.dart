@@ -34,7 +34,7 @@ class CustomPopupMenu extends StatelessWidget {
             )
           : IconButton(onPressed: null, icon: Icon(icon, color: color)),
       offset: const Offset(00, 40),
-      itemBuilder: (context) => <PopupMenuEntry>[
+      itemBuilder: (context) => <PopupMenuEntry<void>>[
         ...?widgets?.map((widget) => PopupMenuItem(child: widget)),
         const PopupMenuDivider(),
         const PopupMenuItem(

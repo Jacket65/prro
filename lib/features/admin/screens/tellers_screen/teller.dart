@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 // import 'dart:developer';
 // import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -165,24 +166,19 @@ void selectTeller(List<String> extraText) {
 //                                     fillColor: Colors.white,
 //                                     focusColor: Colors.white,
 //                                     focusedBorder: OutlineInputBorder(
-//                                       borderRadius: BorderRadius.circular(5.0),
+//                                    borderRadius: BorderRadius.circular(5.0),
 //                                     ),
-//                                     border: OutlineInputBorder(
-//                                       borderSide: const BorderSide(
-//                                         color: Colors.white,
-//                                         width: 2.0,
-//                                       ),
-//                                       borderRadius: BorderRadius.circular(5.0),
-//                                     ),
-//                                   ),
-//                                 ),
-//                               ),
-//                               IconButton(
-//                                 onPressed: () {},
-//                                 icon: Icon(Icons.search),
-//                               ),
-//                             ],
-//                           ),
+//         border: OutlineInputBorder(
+//           borderSide: const BorderSide(
+//             color: Colors.white,
+//             width: 2.0,
+//           ),
+//           borderRadius: BorderRadius.circular(5.0),
+//         ),
+//       ),
+//     ),
+//   ],
+// ),
 //                           SizedBox(height: 20),
 //                           Text('ПІБ'),
 //                           TextField(
@@ -198,7 +194,7 @@ void selectTeller(List<String> extraText) {
 //                           Row(
 //                             children: [
 //                               SizedBox(
-//                                 width: MediaQuery.of(context).size.width * 0.15,
+// width: MediaQuery.of(context).size.width * 0.15,
 //                                 child: TextField(
 //                                   decoration: InputDecoration(
 //                                     border: OutlineInputBorder(),
@@ -252,7 +248,8 @@ void selectTeller(List<String> extraText) {
 //                         ],
 //                       ),
 //                       Text(
-//                         'Подання форми про надання інформації про кваліфікований сертифікат відкритого ключа до ДПС',
+//                         'Подання форми про надання інформації про
+//кваліфікований сертифікат відкритого ключа до ДПС',
 //                         style: TextStyle(color: Colors.red),
 //                         textAlign: TextAlign.center,
 //                       ),
@@ -411,7 +408,7 @@ void selectTeller(List<String> extraText) {
 //                       Padding(
 //                         padding: const EdgeInsets.symmetric(horizontal: 0.0),
 //                         child: Padding(
-//                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
+// padding: void void EdgeInsets.void void symmetric(horizontal = 8.0),
 //                           child: Text(
 //                             'Інформація по касирам',
 //                             style: TextStyle(
@@ -549,7 +546,8 @@ void selectTeller(List<String> extraText) {
 
 // bool isActiveTeller = false;
 
-final user = jsonDecode('''
+final Map<String, dynamic> user =
+    jsonDecode('''
 {
   "items": [
     {
@@ -590,10 +588,14 @@ final user = jsonDecode('''
     }
   ]
 }
-''');
+''')
+        as Map<String, dynamic>;
 
-final initUser = user['items'];
-final userLenght = initUser.length;
+final List<Map<String, dynamic>> initUser = (user['items'] as List)
+    .map((item) => item as Map<String, dynamic>)
+    .toList();
+
+final int userLenght = initUser.length;
 List<DataColumn> tellerTop = novaTThead(
   showStatus: true,
   extraText: ['ПІБ', 'Тип', 'Статус в ДПС'],

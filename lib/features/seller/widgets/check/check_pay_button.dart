@@ -140,7 +140,9 @@ class _PaymentDialogState extends State<PaymentDialog> {
         }
 
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           insetPadding: const EdgeInsets.all(24),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 560),
@@ -483,10 +485,12 @@ class _SuccessView extends StatelessWidget {
           _ReceiptCard(receipt: receipt),
           const SizedBox(height: 20),
           FilledButton(
-            onPressed: () {
+            onPressed: () async {
               context.read<OrdersBloc>().add(const AcknowledgePayment());
-              context.read<BalanceCubit>().fetchBalance();
-              Navigator.of(context).pop();
+              await context.read<BalanceCubit>().fetchBalance();
+              if (context.mounted) {
+                Navigator.of(context).pop();
+              }
             },
             style: FilledButton.styleFrom(
               backgroundColor: Colors.green,
@@ -517,7 +521,9 @@ class _ReceiptCard extends StatelessWidget {
 
   String _fmtDateTime(DateTime d) {
     String two(int n) => n.toString().padLeft(2, '0');
-    return '${two(d.day)}.${two(d.month)}.${d.year} ${two(d.hour)}:${two(d.minute)}';
+
+    return '${two(d.day)}.${two(d.month)}.${d.year} '
+        '${two(d.hour)}:${two(d.minute)}';
   }
 
   String get _methodLabel => switch (receipt.method) {
