@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:provider/provider.dart' as provider;
 import 'package:prro/features/admin/screens/items_screen/items_screen.dart';
 import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
 import 'package:prro/features/admin/screens/items_screen/widgets/admin_dialogs.dart';
@@ -14,7 +14,10 @@ const double kDefaultPaddingWidth = 25;
 
 class InsideCategory extends StatefulWidget {
   const InsideCategory({
-    required this.cardInx, required this.cardTil, required this.categoryList, super.key,
+    required this.cardInx,
+    required this.cardTil,
+    required this.categoryList,
+    super.key,
   });
 
   final int cardInx;
@@ -29,34 +32,32 @@ class _InsideCategoryState extends State<InsideCategory> {
   List<Map<String, dynamic>> products = [];
   bool loading = true;
   String? errorMessage;
-  int get outletId => provider.Provider.of<int>(context, listen: false);
+  int get outletId => Provider.of<int>(context, listen: false);
 
   @override
   void initState() {
     super.initState();
-    _loadProducts();
+    unawaited(_loadProducts());
   }
 
   Future<void> _loadProducts() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        final api = Provider.of<ApiService>(context, listen: false);
-        final data = await api.fetchProducts(categoryId: widget.cardInx);
-        if (!mounted) return;
-        setState(() {
-          products = data;
-          loading = false;
-          errorMessage = null;
-        });
-      } catch (e) {
-        if (!mounted) return;
-        setState(() {
-          loading = false;
-          errorMessage = 'Помилка завантаження товарів: $e';
-          log(errorMessage!);
-        });
-      }
-    });
+    try {
+      final api = Provider.of<ApiService>(context, listen: false);
+      final data = await api.fetchProducts(categoryId: widget.cardInx);
+      if (!mounted) return;
+      setState(() {
+        products = data;
+        loading = false;
+        errorMessage = null;
+      });
+    } on Object catch (e) {
+      if (!mounted) return;
+      setState(() {
+        loading = false;
+        errorMessage = 'Помилка завантаження товарів: $e';
+        log(errorMessage!);
+      });
+    }
   }
 
   Future<void> _renameProduct(Map<String, dynamic> product) async {
@@ -74,8 +75,8 @@ class _InsideCategoryState extends State<InsideCategory> {
         id: (product['id'] as num).toInt(),
         name: newName,
       );
-      _loadProducts();
-    } catch (e) {
+      await _loadProducts();
+    } on Object catch (e) {
       messenger.showSnackBar(
         SnackBar(content: Text('Не вдалося перейменувати: $e')),
       );
@@ -94,8 +95,8 @@ class _InsideCategoryState extends State<InsideCategory> {
     if (!ok) return;
     try {
       await api.deleteProduct(id: (product['id'] as num).toInt());
-      _loadProducts();
-    } catch (e) {
+      await _loadProducts();
+    } on Object catch (e) {
       messenger.showSnackBar(
         SnackBar(content: Text('Не вдалося видалити: $e')),
       );
@@ -111,7 +112,7 @@ class _InsideCategoryState extends State<InsideCategory> {
     );
     // Variant changes don't alter the products list itself, but refresh anyway
     // in case the user renamed/deleted a product elsewhere.
-    _loadProducts();
+    await _loadProducts();
   }
 
   @override
@@ -203,7 +204,7 @@ class _InsideCategoryState extends State<InsideCategory> {
         final measures = Provider.of<List<Measure>>(context, listen: false);
         final result = await Navigator.push(
           context,
-          MaterialPageRoute(
+          MaterialPageRoute<bool>(
             builder: (_) => MultiProvider(
               providers: [
                 Provider<int>.value(value: outletId),
@@ -214,7 +215,7 @@ class _InsideCategoryState extends State<InsideCategory> {
           ),
         );
         if (result == true) {
-          _loadProducts();
+          await _loadProducts();
         }
       },
       icon: const Icon(Icons.add),

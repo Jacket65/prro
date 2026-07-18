@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/features/admin/screens/main_screen/main_screen.dart';
@@ -104,9 +106,10 @@ class LoginScreen extends StatelessWidget {
         _showSnackBar(context, 'Вітаємо вас на роботі!');
         context.read<UserBloc>().add(LoadUser(username: state.username));
 
-        // SellerScreen self-gates on the shift state (open-shift gate when
-        // there is no open shift), so we land there directly.
+        // Просто викликаємо навігацію без await.
+        // Екран заміниться миттєво, а context не "протухне".
         _navigateTo(context, const SellerScreen());
+
       case LoginFailure():
         _showSnackBar(context, 'Сталася помилка ${state.error}');
       case LoginLoading():
@@ -164,9 +167,11 @@ class LoginScreen extends StatelessWidget {
   }
 
   void _navigateTo(BuildContext context, Widget route) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => route),
+    unawaited(
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute<void>(builder: (context) => route),
+      ),
     );
   }
 }

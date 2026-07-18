@@ -42,9 +42,9 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     // When a token refresh fails, the session is dead → back to login.
-    _authSub = widget.apiClient.onUnauthorized.listen((_) {
-      _navigatorKey.currentState?.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => LoginScreen()),
+    _authSub = widget.apiClient.onUnauthorized.listen((_) async {
+      await _navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute<void>(builder: (_) => LoginScreen()),
         (route) => false,
       );
     });
@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
-    _authSub?.cancel();
+    unawaited(_authSub?.cancel());
     super.dispose();
   }
 

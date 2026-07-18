@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
-// Assuming CategoryPickScreen is the actual widget name for category_pick_screen.dart
+// Assuming CategoryPickScreen is the actual widget name for
+// category_pick_screen.dart
 import 'package:prro/features/admin/screens/items_screen/widgets/admin_dialogs.dart';
 import 'package:prro/features/admin/screens/items_screen/widgets/category_pick_screen.dart';
 import 'package:prro/features/admin/screens/items_screen/widgets/custom_card.dart';
@@ -11,10 +13,9 @@ import 'package:prro/features/admin/screens/items_screen/widgets/custom_search_f
 import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
 
 class Category {
+  Category(this.title, this.id);
   final String title;
   final int id;
-
-  Category(this.title, this.id);
 }
 
 class Items extends StatefulWidget {
@@ -34,14 +35,37 @@ class _ItemsState extends State<Items> {
   void initState() {
     super.initState();
 
-    _apiService.fetchCategories(retailOutlet: _retailOutletId).then((value) {
+    unawaited(_loadCategories());
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      // 1. Await the future properly in an async method
+      final rawData = await _apiService.fetchCategories(
+        retailOutlet: _retailOutletId,
+      );
+
+      // 2. Safely cast the dynamic 'rawData' target to an iterable List
+      final list = rawData as List<dynamic>? ?? const [];
+
+      if (!mounted) return;
+
       setState(() {
-        _categories.clear();
-        _categories.addAll(
-          value.map((value) => Category(value['name'], value['id'])),
-        );
+        _categories
+          ..clear()
+          ..addAll(
+            list.whereType<Map<dynamic, dynamic>>().map<Category>((item) {
+              final name = (item['name'] ?? '').toString();
+              final id = item['id'] as int;
+
+              // Note: Ensuring named parameters match your Category constructor
+              return Category(name, id);
+            }),
+          );
       });
-    });
+    } on Object catch (e) {
+      log('Failed to load categories: $e');
+    }
   }
 
   @override
@@ -53,7 +77,7 @@ class _ItemsState extends State<Items> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -68,8 +92,8 @@ class _ItemsState extends State<Items> {
               // key: PageStorageKey('categoryGrid'), // Good for maintaining scroll position
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3, // Number of cards per row
-                crossAxisSpacing: 12.0,
-                mainAxisSpacing: 12.0,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
                 childAspectRatio: 3.5,
               ),
               itemCount: _categories.length,
@@ -91,11 +115,11 @@ class _ItemsState extends State<Items> {
   }
 
   Future<void> _addCategoryDialog(BuildContext context) {
-    String newCategoryName = '';
+    var newCategoryName = '';
 
     return showDialog<void>(
       context: context,
-      builder: (BuildContext dialogContext) {
+      builder: (dialogContext) {
         return AlertDialog(
           // Use Theme or a separate function for styling for consistency
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -112,7 +136,8 @@ class _ItemsState extends State<Items> {
             ],
           ),
           content: SingleChildScrollView(
-            // Use FractionallySizedBox to define a relative width for large screens
+            // Use FractionallySizedBox to define a relative
+            //width for large screens
             child: SizedBox(
               width: MediaQuery.of(context).size.width * 0.35,
               child: Column(
@@ -182,7 +207,7 @@ class _ItemsState extends State<Items> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Категорію оновлено')),
       );
-    } catch (e) {
+    } on Object catch (e) {
       log('rename category failed: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -196,7 +221,9 @@ class _ItemsState extends State<Items> {
       context,
       title: 'Видалити категорію?',
       message:
-          'Категорію «${category.title}» буде видалено разом з прив\'язаними товарами.',
+          /// Ignore
+          // ignore: lines_longer_than_80_chars
+          "Категорію «${category.title}» буде видалено разом з прив'язаними товарами.",
     );
     if (!ok) return;
     try {
@@ -208,7 +235,7 @@ class _ItemsState extends State<Items> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Категорію видалено')),
       );
-    } catch (e) {
+    } on Object catch (e) {
       log('delete category failed: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -224,10 +251,10 @@ class _ItemsState extends State<Items> {
   ) async {
     if (newCategoryName.trim().isNotEmpty) {
       // State update should happen only if the name is valid
-      for (int i = 0; i < _categories.length; i++) {
+      for (var i = 0; i < _categories.length; i++) {
         if (_categories[i].title == newCategoryName) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Категорія з таким ім\'ям вже існує')),
+            const SnackBar(content: Text("Категорія з таким ім'ям вже існує")),
           );
           Navigator.of(context).pop();
           return;
@@ -251,12 +278,14 @@ class _ItemsState extends State<Items> {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Категорія успішно створена')));
+        ).showSnackBar(
+          const SnackBar(content: Text('Категорія успішно створена')),
+        );
         Navigator.of(dialogContext).pop();
       }
       return;
-    } catch (e) {
-      log("$e");
+    } on Object catch (e) {
+      log('$e');
       return;
     }
   }
@@ -264,7 +293,7 @@ class _ItemsState extends State<Items> {
   // Extracted widget for action buttons
   Widget _buildActionButtons(BuildContext context) {
     // Define a common style for the secondary buttons for consistency
-    final ButtonStyle secondaryButtonStyle = ElevatedButton.styleFrom(
+    final secondaryButtonStyle = ElevatedButton.styleFrom(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       backgroundColor: Colors.grey[100],
       foregroundColor: Colors.black,
@@ -282,10 +311,11 @@ class _ItemsState extends State<Items> {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          onPressed: () {
-            // Navigate to CategoryPick screen, passing the list of category titles
+          onPressed: () async {
+            // Navigate to CategoryPick screen, passing the list
+            // of category titles
             final measures = Provider.of<List<Measure>>(context, listen: false);
-            Navigator.push(
+            await Navigator.push(
               context,
               MaterialPageRoute<void>(
                 builder: (context) {
@@ -309,7 +339,7 @@ class _ItemsState extends State<Items> {
         ElevatedButton(
           style: secondaryButtonStyle,
           onPressed: () {
-            // TODO: Implement Import logic
+            // TODO(me): Implement Import logic
           },
           child: const Text('Імпорт товарів'),
         ),
@@ -320,7 +350,8 @@ class _ItemsState extends State<Items> {
           style: secondaryButtonStyle.copyWith(
             minimumSize: WidgetStateProperty.all(const Size(32, 32)),
             padding: WidgetStateProperty.all(const EdgeInsets.all(4)),
-            // Explicitly setting icon color, as IconButton style might override it
+            // Explicitly setting icon color,
+            //as IconButton style might override it
           ),
           icon: Icon(Icons.create_new_folder_rounded, color: Colors.grey[700]),
           tooltip: 'Створити категорію',
@@ -333,7 +364,7 @@ class _ItemsState extends State<Items> {
           width: 36, // Slightly increased size for better touch area
           height: 36,
           child: PopupMenuButton<String>(
-            tooltip: "Додатково",
+            tooltip: 'Додатково',
             icon: Icon(Icons.more_vert, color: Colors.grey[700]),
             color: Colors.white, // Ensure menu background is white
             shape: RoundedRectangleBorder(
@@ -359,8 +390,8 @@ class _ItemsState extends State<Items> {
                 child: Text('Переглянути інструкцію'),
               ),
             ],
-            onSelected: (String value) {
-              // TODO: Implement logic based on selected value
+            onSelected: (value) {
+              // TODO(me): Implement logic based on selected value
               ScaffoldMessenger.of(
                 context,
               ).showSnackBar(SnackBar(content: Text('Selected: $value')));
