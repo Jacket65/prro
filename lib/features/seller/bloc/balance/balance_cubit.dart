@@ -17,4 +17,8 @@ class BalanceCubit extends Cubit<BalanceState> {
       emit(BalanceError(e.toString()));
     }
   }
+
+  void mockBalance(int value) {
+    emit(BalanceLoaded(value));
+  }
 }

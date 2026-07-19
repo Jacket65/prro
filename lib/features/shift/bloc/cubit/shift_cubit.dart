@@ -57,4 +57,19 @@ class ShiftCubit extends Cubit<ShiftState> {
       emit(ShiftError(e.toString()));
     }
   }
+
+  void mockOpenShift() {
+    emit(
+      const ShiftOpen(
+        ShiftResponse(
+          id: 1,
+          outletId: 1,
+          openedBy: 1,
+          openedAt: '2024-01-01T00:00:00Z',
+          cashStart: '0.00',
+          status: 'open',
+        ),
+      ),
+    );
+  }
 }

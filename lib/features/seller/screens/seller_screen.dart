@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
 import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
+import 'package:prro/data/repositories/items_repository/mock_items_repo.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
 import 'package:prro/features/auth/auth.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
@@ -18,7 +19,8 @@ import 'package:prro/features/shift/widgets/open_shift_dialog.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
 
 class SellerScreen extends StatefulWidget {
-  const SellerScreen({super.key});
+  const SellerScreen({super.key, this.mockMode = false});
+  final bool mockMode;
 
   @override
   State<SellerScreen> createState() => _SellerScreenState();
@@ -30,18 +32,20 @@ class _SellerScreenState extends State<SellerScreen> {
     super.initState();
     // The backend is the source of truth — check the shift state on entry.
     // 404 → ShiftNone (open-shift gate), an open shift → sales unlocked.
-    unawaited(context.read<ShiftCubit>().loadCurrent());
+    if (!widget.mockMode) {
+      unawaited(context.read<ShiftCubit>().loadCurrent());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return MultiBlocProvider(
+    Widget buildBody(BuildContext context) => MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) =>
-              ItemsTilesBloc(itemsRepository: context.read<ItemsRepositoryI>())
-                ..add(ItemsTilesStarted()),
+          create: (context) => ItemsTilesBloc(
+            itemsRepository: context.read<ItemsRepositoryI>(),
+          )..add(ItemsTilesStarted()),
         ),
         BlocProvider(
           create: (context) => OrdersBloc(context.read<OrdersRepositoryI>()),
@@ -53,12 +57,15 @@ class _SellerScreenState extends State<SellerScreen> {
         BlocProvider(
           create: (context) {
             final cubit = BalanceCubit(context.read<BalanceRepositoryI>());
-            unawaited(cubit.fetchBalance());
+            if (!widget.mockMode) {
+              unawaited(cubit.fetchBalance());
+            } else {
+              cubit.mockBalance(10000);
+            }
             return cubit;
           },
         ),
       ],
-
       child: Builder(
         builder: (context) {
           // When there is no open shift, clear the cart so nothing carries over
@@ -138,46 +145,54 @@ class _SellerScreenState extends State<SellerScreen> {
         },
       ),
     );
+
+    if (widget.mockMode) {
+      return RepositoryProvider<ItemsRepositoryI>(
+        create: (context) => MockItemsRepository(),
+        child: buildBody(context),
+      );
+    }
+    return buildBody(context);
   }
 
   BlocBuilder<UserBloc, UserState> _buildUsername() {
     return BlocBuilder<UserBloc, UserState>(
-      builder: (context, state) {
-        switch (state) {
-          case UserLoaded(:final username):
-            return CustomPopupMenu(name: username, icon: Icons.lock);
-          case UserLoading():
-            return const CircularProgressIndicator();
-          case UserError():
-            return const CustomPopupMenu(name: 'Error', icon: Icons.lock);
-          default:
-            return const CustomPopupMenu(name: '...', icon: Icons.lock);
-        }
+      builder: (_, state) {
+        return switch (state) {
+          UserLoaded(:final username) => CustomPopupMenu(
+            name: username,
+            icon: Icons.lock,
+          ),
+          UserLoading() => const CircularProgressIndicator(),
+          UserError() => const CustomPopupMenu(name: 'Error', icon: Icons.lock),
+          _ => const CustomPopupMenu(name: '...', icon: Icons.lock),
+        };
       },
     );
   }
 
   Widget _buildBalance(BalanceState state) {
-    if (state is BalanceLoading) {
-      return const Row(
-        children: [
-          Text('balance: '),
-          SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ],
-      );
-    } else if (state is BalanceLoaded) {
-      return Text('balance: ${state.balance.toStringAsFixed(2)}');
-    } else if (state is BalanceError) {
-      return Text(
-        'Помилка: ${state.message}',
-        style: const TextStyle(color: Colors.redAccent),
-      );
-    } else {
-      return const Text('balance: ...');
+    switch (state) {
+      case BalanceLoaded(:final balance):
+        return Text('balance: ${balance.toStringAsFixed(2)}');
+      case BalanceLoading():
+        return const Row(
+          children: [
+            Text('balance: '),
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ],
+        );
+      case BalanceError():
+        return Text(
+          'Помилка: ${state.message}',
+          style: const TextStyle(color: Colors.redAccent),
+        );
+      default:
+        return const Text('balance: ...');
     }
   }
 

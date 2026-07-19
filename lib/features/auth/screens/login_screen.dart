@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/features/admin/screens/main_screen/main_screen.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/seller/screens/screens.dart';
+import 'package:prro/features/shift/bloc/bloc.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -73,7 +75,29 @@ class LoginScreen extends StatelessWidget {
                         _clearTextFields();
                       },
 
-                      child: const Text('seller (cashier1)'),
+                      child: const Text('seller (cashier1) - API'),
+                    ),
+                    const SizedBox(height: 18),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final nav = Navigator.of(context);
+                        final userBloc = context.read<UserBloc>();
+                        final shiftCubit = context.read<ShiftCubit>();
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setInt('outlet_id', 1);
+                        await prefs.setBool('isLogged', true);
+                        userBloc.add(LoadUser(username: 'cashier1'));
+                        shiftCubit.mockOpenShift();
+                        unawaited(
+                          nav.pushReplacement(
+                            MaterialPageRoute<void>(
+                              builder: (context) =>
+                                  const SellerScreen(mockMode: true),
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text('seller (cashier1) - Mock'),
                     ),
                     const SizedBox(height: 18),
                     ElevatedButton(
