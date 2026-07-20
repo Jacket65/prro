@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 import 'package:prro/features/seller/widgets/seller_list_item.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
@@ -46,12 +47,18 @@ class _CheckMainInfoState extends State<CheckMainInfo> {
           ),
           BlocBuilder<OrdersBloc, OrdersState>(
             builder: (context, state) {
-              if (state is OrdersUpdated) {
+              final products = switch (state) {
+                final OrdersUpdated s => s.products,
+                final OrdersError s => s.products,
+                final OrdersLoading s => s.products,
+                _ => const <Product>[],
+              };
+              if (products.isNotEmpty) {
                 return Expanded(
                   child: ListView.separated(
-                    itemCount: state.products.length,
+                    itemCount: products.length,
                     itemBuilder: (context, index) {
-                      final product = state.products[index];
+                      final product = products[index];
                       return ListItem(
                         quantity: product.quantity,
                         name: product.name,
@@ -66,14 +73,13 @@ class _CheckMainInfoState extends State<CheckMainInfo> {
                     separatorBuilder: (_, _) => const Divider(),
                   ),
                 );
-              } else {
-                return Center(
-                  child: Text(
-                    'Місце для замовлень',
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                );
               }
+              return Center(
+                child: Text(
+                  'Місце для замовлень',
+                  style: theme.textTheme.bodyLarge,
+                ),
+              );
             },
           ),
         ],

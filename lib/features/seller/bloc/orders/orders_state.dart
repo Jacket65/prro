@@ -9,10 +9,15 @@ sealed class OrdersState extends Equatable {
 
 final class OrdersInitial extends OrdersState {}
 
-final class OrdersLoading extends OrdersState {}
+final class OrdersLoading extends OrdersState {
+  const OrdersLoading({this.products = const []});
+  final List<Product> products;
+
+  @override
+  List<Object> get props => [products];
+}
 
 final class OrdersUpdated extends OrdersState {
-
   const OrdersUpdated({required this.products, required this.total});
   final List<Product> products;
   final double total;
@@ -30,8 +35,14 @@ final class OrdersPaymentSuccess extends OrdersState {
 }
 
 final class OrdersError extends OrdersState {
-  const OrdersError(this.message);
+  const OrdersError({
+    required this.message,
+    required this.products,
+    required this.total,
+  });
   final String message;
+  final List<Product> products;
+  final double total;
 
   @override
   List<Object> get props => [message];

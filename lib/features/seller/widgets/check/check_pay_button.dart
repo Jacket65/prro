@@ -13,9 +13,11 @@ class CheckPayButton extends StatelessWidget {
   Widget build(BuildContext sellerContext) {
     return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
-        final totalKopecks = state is OrdersUpdated
-            ? uahToKopecks(state.total)
-            : 0;
+        final totalKopecks = switch (state) {
+          final OrdersUpdated s => uahToKopecks(s.total),
+          final OrdersError s => uahToKopecks(s.total),
+          _ => 0,
+        };
         final enabled = totalKopecks > 0;
 
         return SizedBox(

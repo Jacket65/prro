@@ -50,16 +50,19 @@ class _ListItemState extends State<ListItem> {
   Widget build(BuildContext sellerContext) {
     return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
-        if (state is! OrdersUpdated) {
-          return const CircularProgressIndicator();
-        }
+        final products = switch (state) {
+          final OrdersUpdated s => s.products,
+          final OrdersError s => s.products,
+          final OrdersLoading s => s.products,
+          _ => <Product>[],
+        };
 
         // Знаходимо продукт у стані для передачі в івенти
-        final productIndex = state.products.indexWhere(
+        final productIndex = products.indexWhere(
           (e) => e.lineId == widget.lineId,
         );
         final currentProduct = productIndex != -1
-            ? state.products[productIndex]
+            ? products[productIndex]
             : null;
 
         return Slidable(
@@ -99,7 +102,7 @@ class _ListItemState extends State<ListItem> {
               borderRadius: const BorderRadius.horizontal(
                 left: Radius.circular(8),
               ),
-              onTap: () => _onTap(context, state),
+              onTap: () => _onTap(context, products),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 4,
@@ -226,8 +229,8 @@ class _ListItemState extends State<ListItem> {
 
   /// Tapping a cart line lets the cashier change the drink's options/bean.
   /// Opens the line editor (quantity + options).
-  Future<void> _onTap(BuildContext context, OrdersUpdated state) async {
-    final product = state.products.firstWhere(
+  Future<void> _onTap(BuildContext context, List<Product> products) async {
+    final product = products.firstWhere(
       (p) => p.lineId == widget.lineId,
       // The line always exists in state; this fallback keeps the type checker
       // happy. Recover the variant id from the lineId prefix.

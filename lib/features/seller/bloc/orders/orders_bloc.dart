@@ -67,7 +67,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   }
 
   Future<void> _onPayOrder(PayOrder event, Emitter<OrdersState> emit) async {
-    emit(OrdersLoading());
+    emit(OrdersLoading(products: _ordersRepository.products));
     try {
       final receipt = await _ordersRepository.placeOrder(
         method: event.method,
@@ -77,9 +77,21 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       _ordersRepository.clearProducts();
       emit(OrdersPaymentSuccess(receipt));
     } on ApiException catch (e) {
-      emit(OrdersError(e.message));
+      emit(
+        OrdersError(
+          message: e.message,
+          products: _ordersRepository.products,
+          total: _ordersRepository.totalPrice,
+        ),
+      );
     } on Object catch (e) {
-      emit(OrdersError('Не вдалося оплатити: $e'));
+      emit(
+        OrdersError(
+          message: 'Не вдалося оплатити: $e',
+          products: _ordersRepository.products,
+          total: _ordersRepository.totalPrice,
+        ),
+      );
     }
   }
 
