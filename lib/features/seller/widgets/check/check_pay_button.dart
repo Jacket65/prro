@@ -77,8 +77,8 @@ class PaymentDialog extends StatefulWidget {
 
 class _PaymentDialogState extends State<PaymentDialog> {
   late final String _idempotencyKey;
-  PaymentMethod _method = PaymentMethod.cash;
   late final TextEditingController _cashController;
+  PaymentMethod _method = PaymentMethod.cash;
 
   @override
   void initState() {
@@ -89,7 +89,6 @@ class _PaymentDialogState extends State<PaymentDialog> {
     _cashController = TextEditingController(
       text: formatAmount(widget.totalKopecks),
     );
-    _cashController.addListener(() => setState(() {}));
   }
 
   @override
@@ -122,38 +121,46 @@ class _PaymentDialogState extends State<PaymentDialog> {
       listener: (context, state) {},
       builder: (context, state) {
         final isLoading = state is OrdersLoading;
+        final isSuccess = state is OrdersPaymentSuccess;
 
-        Widget body;
-        if (state is OrdersPaymentSuccess) {
-          body = _SuccessView(receipt: state.receipt);
-        } else {
-          body = _FormView(
-            totalKopecks: widget.totalKopecks,
-            method: _method,
-            onMethodChanged: (m) => setState(() => _method = m),
-            cashController: _cashController,
-            changeKopecks: _changeKopecks,
-            canPay: _canPay,
-            isLoading: isLoading,
-            errorMessage: state is OrdersError ? state.message : null,
-            onCancel: () => Navigator.of(context).pop(),
-            onPay: _onPay,
-          );
-        }
-
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          insetPadding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 20,
+        return PopScope(
+          canPop:
+              !isLoading &&
+              !isSuccess, // Запобігає випадковому закриттю жест/кнопкою "Назад"
+          child: Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            insetPadding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 20,
+                ),
+                child: isSuccess
+                    ? _SuccessView(receipt: state.receipt)
+                    : ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _cashController,
+                        builder: (context, _, _) {
+                          return _FormView(
+                            totalKopecks: widget.totalKopecks,
+                            method: _method,
+                            onMethodChanged: (m) => setState(() => _method = m),
+                            cashController: _cashController,
+                            changeKopecks: _changeKopecks,
+                            canPay: _canPay,
+                            isLoading: isLoading,
+                            errorMessage: state is OrdersError
+                                ? state.message
+                                : null,
+                            onCancel: () => Navigator.of(context).pop(),
+                            onPay: _onPay,
+                          );
+                        },
+                      ),
               ),
-              child: body,
             ),
           ),
         );
@@ -229,8 +236,10 @@ class _FormView extends StatelessWidget {
           )
         else
           _CardField(totalKopecks: totalKopecks),
-        const SizedBox(height: 16),
-        if (errorMessage != null) _ErrorBanner(message: errorMessage!),
+        if (errorMessage != null) ...[
+          const SizedBox(height: 16),
+          _ErrorBanner(message: errorMessage!),
+        ],
         const SizedBox(height: 16),
         Row(
           children: [
@@ -299,9 +308,9 @@ class _MethodSelector extends StatelessWidget {
       ],
       selected: {method},
       onSelectionChanged: (s) => onChanged(s.first),
-      style: ButtonStyle(
-        padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      style: const ButtonStyle(
+        padding: WidgetStatePropertyAll(
+          EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         ),
       ),
     );
@@ -419,6 +428,7 @@ class _CardField extends StatelessWidget {
 
 class _ErrorBanner extends StatelessWidget {
   const _ErrorBanner({required this.message});
+
   final String message;
 
   @override
@@ -450,6 +460,7 @@ class _ErrorBanner extends StatelessWidget {
 
 class _SuccessView extends StatelessWidget {
   const _SuccessView({required this.receipt});
+
   final OrderReceipt receipt;
 
   @override
@@ -512,6 +523,7 @@ class _SuccessView extends StatelessWidget {
 
 class _ReceiptCard extends StatelessWidget {
   const _ReceiptCard({required this.receipt});
+
   final OrderReceipt receipt;
 
   static const _mono = TextStyle(
@@ -659,7 +671,7 @@ class _ReceiptCard extends StatelessWidget {
       color: color ?? (emphasis ? Colors.black87 : Colors.black54),
     );
     final valueStyle = style.copyWith(
-      color: color ?? (emphasis ? Colors.black87 : Colors.black87),
+      color: color ?? Colors.black87,
       fontWeight: FontWeight.w700,
     );
     return TableRow(
