@@ -92,16 +92,15 @@ class MockOrdersRepository implements OrdersRepositoryI {
     required String idempotencyKey,
   }) async {
     final items = _products.map((p) {
-      final optionDtos = <SelectedOptionDto>[
-        for (final o in p.selectedOptions)
-          SelectedOptionDto(optionId: o.optionId, quantity: o.quantity),
-        if (p.selectedBean != null)
-          SelectedOptionDto(optionId: p.selectedBean!.id),
-      ];
       return OrderLineDto(
         productId: p.id,
         quantity: p.quantity.toDouble().toInt(),
-        options: optionDtos,
+        options: p.selectedOptions
+            .map(
+              (o) =>
+                  SelectedOptionDto(optionId: o.optionId, quantity: o.quantity),
+            )
+            .toList(),
         beanId: p.selectedBean?.id,
       );
     }).toList();
