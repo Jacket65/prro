@@ -53,7 +53,11 @@ class MockBackend {
       if (p.variants.length == 1) {
         out.add(_variantToProduct(p, p.variants.single));
       } else {
-        out.add(ProductGroup(id: p.id, name: p.name));
+        out.add(ProductGroup(
+          id: p.id,
+          name: p.name,
+          variants: p.variants.map((v) => _variantToProduct(p, v)).toList(),
+        ));
       }
     }
     return out;
