@@ -48,7 +48,9 @@ class ApiClient implements ApiClientI {
           // NOTE: Idempotency-Key is set per-call by the caller (see post/patch
           // `idempotencyKey`), not auto-generated here — the key must be stable
           // across a logical action and its retries.
-          log('[REQUEST] ${options.method} ${options.path}');
+          log(
+            '[REQUEST] ${options.method} ${options.baseUrl} ${options.path}',
+          );
           return handler.next(options);
         },
         onResponse: (response, handler) {
