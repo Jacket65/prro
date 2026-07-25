@@ -10,7 +10,6 @@ import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 /// Routes ItemsServiceI calls to the in-process [MockBackend] so the seller
 /// flow can be exercised without the real Go backend.
 class MockItemsService implements ItemsServiceI {
-
   MockItemsService({MockBackend? backend})
     : _backend = backend ?? MockBackend.instance;
   final MockBackend _backend;
@@ -31,7 +30,16 @@ class MockItemsService implements ItemsServiceI {
     required String query,
     int? categoryId,
     CancelToken? cancelToken,
-  }) async => const [];
+  }) async {
+    if (cancelToken?.isCancelled == true) {
+      throw DioException(
+        requestOptions: RequestOptions(),
+        message: 'cancelled',
+        type: DioExceptionType.cancel,
+      );
+    }
+    return _backend.searchProducts(query: query, categoryId: categoryId);
+  }
 
   @override
   Future<List<Ingredient>> getIngredients() async => const [];

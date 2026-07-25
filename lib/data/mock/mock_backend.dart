@@ -71,6 +71,36 @@ class MockBackend {
     return const [];
   }
 
+  Future<List<Item>> searchProducts({
+    required String query,
+    int? categoryId,
+  }) async {
+    await _network();
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return const [];
+
+    final results = <Item>[];
+    for (final cat in _catalog) {
+      if (categoryId != null && cat.id != categoryId) continue;
+      for (final p in cat.products) {
+        if (p.name.toLowerCase().contains(q) ||
+            p.variants.any((v) => v.name.toLowerCase().contains(q))) {
+          if (p.variants.isEmpty) continue;
+          if (p.variants.length == 1) {
+            results.add(_variantToProduct(p, p.variants.single));
+          } else {
+            results.add(ProductGroup(
+              id: p.id,
+              name: p.name,
+              variants: p.variants.map((v) => _variantToProduct(p, v)).toList(),
+            ));
+          }
+        }
+      }
+    }
+    return results;
+  }
+
   /// Display name keeps the drink name; the size/variant is appended only when
   /// the product has more than one (so "Латте 300 мл", but plain "Еспресо").
   Product _variantToProduct(_CatalogProduct p, _CatalogVariant v) => Product(

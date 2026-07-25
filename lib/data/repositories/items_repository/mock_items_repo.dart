@@ -34,7 +34,10 @@ class MockItemsRepository implements ItemsRepositoryI {
     required String query,
     int? categoryId,
     CancelToken? cancelToken,
-  }) async => const [];
+  }) async {
+    await _cancelTokenOrDelay(cancelToken);
+    return _backend.searchProducts(query: query, categoryId: categoryId);
+  }
 
   @override
   Future<List<Ingredient>> getIngredients() async => const [];
@@ -57,4 +60,14 @@ class MockItemsRepository implements ItemsRepositoryI {
   @override
   Future<List<Item>> getVariants(int productId) =>
       _backend.getVariants(productId);
+
+  Future<void> _cancelTokenOrDelay(CancelToken? cancelToken) async {
+    if (cancelToken?.isCancelled == true) {
+      throw DioException(
+        requestOptions: RequestOptions(),
+        message: 'cancelled',
+        type: DioExceptionType.cancel,
+      );
+    }
+  }
 }
