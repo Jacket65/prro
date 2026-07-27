@@ -310,6 +310,12 @@ class MockBackend {
       var optionsKopecks = 0;
       final optionNames = <String>[];
       for (final opt in line.options) {
+        final bean = _beanForId(opt.optionId);
+        if (bean != null) {
+          optionNames.add(bean.name);
+          _beanUsage[bean.id] = (_beanUsage[bean.id] ?? 0) + line.quantity;
+          continue;
+        }
         final o = _optionForId(line.productId, opt.optionId);
         if (o == null) {
           throw MockBackendException(
@@ -320,26 +326,15 @@ class MockBackend {
         optionsKopecks += o.priceDeltaKopecks * portions;
         optionNames.add(portions > 1 ? '${o.name} ×$portions' : o.name);
       }
-      // Bean is a free choice; just resolve its name for the receipt.
-      final extras = [...optionNames];
-      if (line.beanId != null) {
-        final bean = _beanForId(line.beanId!);
-        if (bean == null) {
-          throw MockBackendException('Невідоме зерно: ${line.beanId}.');
-        }
-        extras.add(bean.name);
-        // Track usage so "Часто вживані" reflects real sales.
-        _beanUsage[bean.id] = (_beanUsage[bean.id] ?? 0) + line.quantity;
-      }
       final unitKopecks = info.priceKopecks + optionsKopecks;
       final subtotal = unitKopecks * line.quantity;
       totalKopecks += subtotal;
       receiptLines.add(
         ReceiptLine(
           productId: line.productId,
-          name: extras.isEmpty
+          name: optionNames.isEmpty
               ? info.name
-              : '${info.name} · ${extras.join(', ')}',
+              : '${info.name} · ${optionNames.join(', ')}',
           quantity: line.quantity.toString(),
           unitPriceKopecks: unitKopecks,
           subtotalKopecks: subtotal,

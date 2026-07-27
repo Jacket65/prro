@@ -1,4 +1,5 @@
 import 'package:decimal/decimal.dart';
+import 'package:prro/data/api/api_exception.dart';
 import 'package:prro/data/api/models/bean.dart';
 import 'package:prro/data/api/models/drink_option.dart';
 import 'package:prro/data/api/models/measure_unit.dart';
@@ -91,29 +92,29 @@ class MockOrdersRepository implements OrdersRepositoryI {
     required int tenderedKopecks,
     required String idempotencyKey,
   }) async {
-    final items = _products.map((p) {
-      return OrderLineDto(
-        productId: p.id,
-        quantity: p.quantity.toDouble().toInt(),
-        options: p.selectedOptions
-            .map(
-              (o) =>
-                  SelectedOptionDto(optionId: o.optionId, quantity: o.quantity),
-            )
-            .toList(),
-        beanId: p.selectedBean?.id,
+    try {
+      return _backend.placeOrder(
+        items: _products.map((p) {
+          return OrderLineDto(
+            productId: p.id,
+            quantity: p.quantity.toDouble().toInt(),
+            options: [
+              ...p.selectedOptions.map(
+                (o) => SelectedOptionDto(
+                  optionId: o.optionId,
+                  quantity: o.quantity,
+                ),
+              ),
+              if (p.selectedBean != null)
+                SelectedOptionDto(optionId: p.selectedBean!.id),
+            ],
+          );
+        }).toList(),
+        payment: PaymentDto(method: method, tenderedKopecks: tenderedKopecks),
+        idempotencyKey: idempotencyKey,
       );
-    }).toList();
-
-    final payment = PaymentDto(
-      method: method,
-      tenderedKopecks: tenderedKopecks,
-    );
-
-    return _backend.placeOrder(
-      items: items,
-      payment: payment,
-      idempotencyKey: idempotencyKey,
-    );
+    } on MockBackendException catch (e) {
+      throw ApiException(e.message);
+    }
   }
 }
