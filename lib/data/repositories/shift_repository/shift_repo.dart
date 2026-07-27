@@ -15,12 +15,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// The backend is the single source of truth for the shift state — we cache
 /// nothing in prefs here.
 class ShiftService implements ShiftServiceI {
-
   ShiftService({
-    required ApiClientI apiClient,
-    required SharedPreferences prefs,
-  }) : _apiClient = apiClient,
-       _prefs = prefs;
+    required this._apiClient,
+    required this._prefs,
+  });
   final ApiClientI _apiClient;
   final SharedPreferences _prefs;
 
@@ -56,7 +54,8 @@ class ShiftService implements ShiftServiceI {
 
   @override
   Future<ShiftResponse> openShift({
-    required String idempotencyKey, String cashStart = '0.00',
+    required String idempotencyKey,
+    String cashStart = '0.00',
   }) async {
     try {
       final response = await _apiClient.post(
@@ -88,9 +87,7 @@ class ShiftService implements ShiftServiceI {
 }
 
 class ShiftRepository implements ShiftRepositoryI {
-
-  ShiftRepository({required ShiftServiceI shiftService})
-    : _shiftService = shiftService;
+  ShiftRepository({required this._shiftService});
   final ShiftServiceI _shiftService;
 
   @override
@@ -105,7 +102,8 @@ class ShiftRepository implements ShiftRepositoryI {
 
   @override
   Future<ShiftResponse> openShift({
-    required String idempotencyKey, String cashStart = '0.00',
+    required String idempotencyKey,
+    String cashStart = '0.00',
   }) {
     try {
       return _shiftService.openShift(

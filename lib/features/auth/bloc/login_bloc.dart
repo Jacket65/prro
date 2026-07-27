@@ -6,9 +6,7 @@ part 'login_event.dart';
 part 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc({required LoginRepositoryI loginRepository})
-    : _loginRepository = loginRepository,
-      super(LoginInitial()) {
+  LoginBloc({required this._loginRepository}) : super(LoginInitial()) {
     on<LoginSubmitted>(_onLoginSubmitted);
     on<LoginGetInitial>(_getInitial);
     on<LoginCheckAutoLogin>(_onCheckAutoLogin);

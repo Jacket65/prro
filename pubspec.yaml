@@ -4,7 +4,7 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.10.0 <4.0.0"
+  sdk: ">=3.12.0 <4.0.0"
 
 dependencies:
   cupertino_icons: ^1.0.9
@@ -22,7 +22,6 @@ dependencies:
   shared_preferences: ^2.5.5
   talker: ^5.1.17
   talker_bloc_logger: ^5.1.17
-  very_good_analysis: ^10.3.0
 
 dev_dependencies:
   bloc_test: ^10.0.0
@@ -30,6 +29,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.5
+  very_good_analysis: ^10.3.0
 
 flutter:
   uses-material-design: true

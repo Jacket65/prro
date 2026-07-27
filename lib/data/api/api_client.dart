@@ -7,10 +7,8 @@ import 'package:prro/data/api/api_client_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient implements ApiClientI {
-  ApiClient({required Dio dio, required SharedPreferences prefs})
-    : _dio = dio,
-      _prefs = prefs,
-      _refreshDio = Dio(BaseOptions(baseUrl: Env.baseUrl)) {
+  ApiClient({required this._dio, required this._prefs})
+    : _refreshDio = Dio(BaseOptions(baseUrl: Env.baseUrl)) {
     _dio.options.baseUrl = Env.baseUrl;
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);

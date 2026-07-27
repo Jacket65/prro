@@ -1,9 +1,7 @@
 import 'package:prro/data/repositories/user_repository/user_repo_i.dart';
 
 class UserRepository implements UserRepositoryI {
-
-  UserRepository({required UserServiceI userService})
-    : _userService = userService;
+  UserRepository({required this._userService});
   final UserServiceI _userService;
 
   String? _usernameCache;

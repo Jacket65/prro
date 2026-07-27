@@ -12,10 +12,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ItemsService implements ItemsServiceI {
   ItemsService({
-    required ApiClientI apiClient,
-    required SharedPreferences prefs,
-  }) : _apiClient = apiClient,
-       _prefs = prefs;
+    required this._apiClient,
+    required this._prefs,
+  });
   final ApiClientI _apiClient;
   final SharedPreferences _prefs;
 

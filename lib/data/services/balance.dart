@@ -4,7 +4,7 @@ import 'package:prro/data/repositories/balance/balance_i.dart';
 // TODO(me): backend balance endpoint is not implemented yet.
 // Once `/api/v1/.../balance` exists, replace this stub with a real call.
 class BalanceService implements BalanceServiceI {
-  BalanceService({required ApiClientI apiClient}) : _apiClient = apiClient;
+  BalanceService({required this._apiClient});
   // ignore
   // ignore: unused_field
   final ApiClientI _apiClient;

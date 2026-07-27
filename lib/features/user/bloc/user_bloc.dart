@@ -6,9 +6,7 @@ part 'user_event.dart';
 part 'user_state.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
-  UserBloc({required UserRepositoryI userRepository})
-    : _userRepository = userRepository,
-      super(UserInitial()) {
+  UserBloc({required this._userRepository}) : super(UserInitial()) {
     on<LoadUser>(_onLoadUser);
     on<ClearUser>(_onClearUser);
   }
