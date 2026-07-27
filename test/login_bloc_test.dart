@@ -67,7 +67,9 @@ void main() {
           () => repository.login(username: 'test', password: 'wrong'),
         ).called(1);
 
-        verifyNever(() => repository.saveLoginState(state: any()));
+        verifyNever(
+          () => repository.saveLoginState(state: any(named: 'state')),
+        );
       },
     );
   });

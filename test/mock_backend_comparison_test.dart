@@ -63,7 +63,7 @@ void main() {
       });
 
       test('finds by product name case-insensitively', () async {
-        final results = await backend.searchProducts(query: 'есПрЕсСо');
+        final results = await backend.searchProducts(query: 'еСпРеСо');
         expect(results.length, 1);
         expect((results.first as Product).name, contains('Еспресо'));
       });
@@ -78,11 +78,11 @@ void main() {
 
       test('filters by categoryId when provided', () async {
         final coffeeResults = await backend.searchProducts(
-          query: 'tea',
+          query: 'Зелений',
           categoryId: 1,
         );
         final teaResults = await backend.searchProducts(
-          query: 'tea',
+          query: 'Зелений',
           categoryId: 2,
         );
         expect(coffeeResults, isEmpty);
@@ -136,8 +136,8 @@ void main() {
               ),
             );
 
-        expect(
-          () => backend.placeOrder(
+        await expectLater(
+          backend.placeOrder(
             items: [
               OrderLineDto(
                 productId: espresso.id,
@@ -166,8 +166,8 @@ void main() {
               ),
             );
 
-        expect(
-          () => backend.placeOrder(
+        await expectLater(
+          backend.placeOrder(
             items: [
               OrderLineDto(
                 productId: espresso.id,
@@ -188,8 +188,8 @@ void main() {
       });
 
       test('handles empty cart', () async {
-        expect(
-          () => backend.placeOrder(
+        await expectLater(
+          backend.placeOrder(
             items: [],
             payment: const PaymentDto(
               method: PaymentMethod.cash,
@@ -210,8 +210,8 @@ void main() {
               ),
             );
 
-        expect(
-          () => backend.placeOrder(
+        await expectLater(
+          backend.placeOrder(
             items: [
               OrderLineDto(
                 productId: espresso.id,
@@ -238,8 +238,8 @@ void main() {
               ),
             );
 
-        expect(
-          () => backend.placeOrder(
+        await expectLater(
+          backend.placeOrder(
             items: [
               OrderLineDto(
                 productId: espresso.id,
@@ -313,8 +313,8 @@ void main() {
       test('simulateError causes MockBackendException', () async {
         MockBackend.simulateError = true;
         try {
-          expect(
-            () => backend.getCategories(),
+          await expectLater(
+            backend.getCategories(),
             throwsA(isA<MockBackendException>()),
           );
         } finally {
