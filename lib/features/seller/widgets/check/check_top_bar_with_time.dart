@@ -37,10 +37,11 @@ class CheckTopBar extends StatelessWidget {
               width: 250,
               height: 30,
               child: ListView.separated(
-                itemCount: 3,
+                itemCount: 1,
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context, index) {
                   return Container(
+                    padding: EdgeInsets.zero,
                     decoration: const BoxDecoration(
                       border: Border(
                         top: BorderSide(),
@@ -49,9 +50,18 @@ class CheckTopBar extends StatelessWidget {
                       ),
                     ),
                     child: TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
                       onPressed: () {},
                       child: Text(
-                        DateTime.now().toString().split(' ')[1].split('.')[0],
+                        DateTime.now()
+                            .toString()
+                            .split(' ')[1]
+                            .split('.')[0]
+                            .substring(0, 5),
                       ),
                     ),
                   );

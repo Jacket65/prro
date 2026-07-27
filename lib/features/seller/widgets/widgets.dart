@@ -1,6 +1,6 @@
+export 'check/check_body.dart';
 export 'check/check_bottom_buttons.dart';
 export 'check/check_column.dart';
-export 'check/check_main_info.dart';
 export 'check/check_pay_button.dart';
 export 'check/check_price.dart';
 export 'check/check_top_bar_with_time.dart';

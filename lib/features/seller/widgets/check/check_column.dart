@@ -13,7 +13,7 @@ class CheckColumn extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           CheckTopBar(),
-          CheckMainInfo(),
+          Expanded(child: CheckBody()),
           CheckPrice(),
           CheckBottomButtons(),
           CheckPayButton(),

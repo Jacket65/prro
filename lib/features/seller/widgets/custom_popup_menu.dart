@@ -36,17 +36,19 @@ class CustomPopupMenu extends StatelessWidget {
       offset: const Offset(00, 40),
       itemBuilder: (context) => <PopupMenuEntry<void>>[
         ...?widgets?.map((widget) => PopupMenuItem(child: widget)),
-        const PopupMenuDivider(),
-        const PopupMenuItem(
-          child: ListTile(leading: Icon(Icons.anchor), title: Text('Item 2')),
-        ),
-        const PopupMenuItem(
-          child: ListTile(leading: Icon(Icons.article), title: Text('Item 3')),
-        ),
+        // const PopupMenuDivider(),
+        // const PopupMenuItem(
+        //   child: ListTile(leading: Icon(Icons.anchor),
+        //title: Text('Item 2')),
+        // ),
+        // const PopupMenuItem(
+        //   child: ListTile(leading: Icon(Icons.article),
+        //title: Text('Item 3')),
+        // ),
 
-        const PopupMenuDivider(),
-        const PopupMenuItem(child: Text('Item A')),
-        const PopupMenuItem(child: Text('Item B')),
+        // const PopupMenuDivider(),
+        // const PopupMenuItem(child: Text('Item A')),
+        // const PopupMenuItem(child: Text('Item B')),
       ],
     );
   }
