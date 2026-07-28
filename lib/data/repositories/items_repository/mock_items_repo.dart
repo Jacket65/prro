@@ -43,7 +43,8 @@ class MockItemsRepository implements ItemsRepositoryI {
   Future<List<Ingredient>> getIngredients() async => const [];
 
   @override
-  Future<List<MeasureUnit>> getMeasureUnits() async => const [];
+  Future<List<MeasureUnit>> getMeasureUnits() async =>
+      _backend.getMeasureUnits();
 
   @override
   Future<List<OptionGroup>> getVariantOptions(int variantId) =>

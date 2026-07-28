@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 class PosQuantityFormatter extends TextInputFormatter {
   const PosQuantityFormatter({
     required this.onValue,
-    this.scale = 3,
+    this.scale = 2,
     this.maxIntegerDigits = 5,
   });
 

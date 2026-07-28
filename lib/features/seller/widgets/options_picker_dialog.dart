@@ -199,7 +199,7 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
   /// Sets the quantity, clamped to a minimum of one step and rounded to the
   /// unit's precision; keeps the text field in sync.
   void _setQuantity(Decimal value) {
-    const max = '99999.999';
+    const max = '99999.99';
 
     var v = value < _step ? _step : value;
 

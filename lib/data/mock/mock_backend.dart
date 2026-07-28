@@ -5,6 +5,7 @@ import 'package:decimal/decimal.dart';
 import 'package:prro/core/money.dart';
 import 'package:prro/data/api/models/bean.dart';
 import 'package:prro/data/api/models/drink_option.dart';
+import 'package:prro/data/api/models/measure_unit.dart';
 import 'package:prro/data/api/models/order.dart';
 import 'package:prro/data/api/models/seller_item.dart';
 
@@ -31,6 +32,27 @@ class MockBackend {
   final Map<String, OrderReceipt> _receiptsByKey = {};
 
   // ──────────────────────────────────────────────────────────────────────────
+  // Measure Units (mirrors GET /measure-units)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /// Measure units available in the system. Matches the real backend's
+  /// /measure-units endpoint.
+  late final List<MeasureUnit> _measureUnits = _seedMeasureUnits();
+
+  List<MeasureUnit> _seedMeasureUnits() {
+    return [
+      MeasureUnit(id: 1, name: 'г', step: Decimal.parse('0.01'), scale: 2),
+      MeasureUnit(id: 2, name: 'мл', step: Decimal.parse('0.01'), scale: 2),
+      MeasureUnit(id: 3, name: 'шт', step: Decimal.one),
+    ];
+  }
+
+  Future<List<MeasureUnit>> getMeasureUnits() async {
+    await _network();
+    return _measureUnits;
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
   // Catalog
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -53,11 +75,13 @@ class MockBackend {
       if (p.variants.length == 1) {
         out.add(_variantToProduct(p, p.variants.single));
       } else {
-        out.add(ProductGroup(
-          id: p.id,
-          name: p.name,
-          variants: p.variants.map((v) => _variantToProduct(p, v)).toList(),
-        ));
+        out.add(
+          ProductGroup(
+            id: p.id,
+            name: p.name,
+            variants: p.variants.map((v) => _variantToProduct(p, v)).toList(),
+          ),
+        );
       }
     }
     return out;
@@ -93,11 +117,15 @@ class MockBackend {
           if (p.variants.length == 1) {
             results.add(_variantToProduct(p, p.variants.single));
           } else {
-            results.add(ProductGroup(
-              id: p.id,
-              name: p.name,
-              variants: p.variants.map((v) => _variantToProduct(p, v)).toList(),
-            ));
+            results.add(
+              ProductGroup(
+                id: p.id,
+                name: p.name,
+                variants: p.variants
+                    .map((v) => _variantToProduct(p, v))
+                    .toList(),
+              ),
+            );
           }
         }
       }
@@ -112,7 +140,8 @@ class MockBackend {
     name: p.variants.length > 1 ? '${p.name} ${v.name}' : p.name,
     price: v.priceKopecks / 100.0,
     imageUrl: '',
-    quantity: Decimal.one,
+    quantity: v.unit != null ? v.unit!.step : Decimal.one,
+    unit: v.unit,
   );
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -419,11 +448,13 @@ class MockBackend {
       String name,
       num uah, {
       List<_OptionGroup> groups = const [],
+      MeasureUnit? unit,
     }) => _CatalogVariant(
       id: variantId++,
       name: name,
       priceKopecks: uahToKopecks(uah),
       optionGroups: groups,
+      unit: unit,
     );
 
     // Shared coffee option groups. option ids are global; surcharges here are
@@ -455,6 +486,11 @@ class MockBackend {
     );
     final coffeeOptions = [milk, syrup];
 
+    // Measure units from the backend
+    final ml = _measureUnits.firstWhere((u) => u.name == 'мл');
+    final g = _measureUnits.firstWhere((u) => u.name == 'г');
+    final sht = _measureUnits.firstWhere((u) => u.name == 'шт');
+
     return [
       _CatalogCategory(
         id: 1,
@@ -463,37 +499,37 @@ class MockBackend {
           _CatalogProduct(
             id: 101,
             name: 'Еспресо',
-            variants: [variant('Одинарне', 35)],
+            variants: [variant('Одинарне', 35, unit: sht)],
           ),
           _CatalogProduct(
             id: 102,
             name: 'Американо',
             variants: [
-              variant('250 мл', 45),
-              variant('350 мл', 55),
+              variant('250 мл', 45, unit: sht),
+              variant('350 мл', 55, unit: sht),
             ],
           ),
           _CatalogProduct(
             id: 103,
             name: 'Капучино',
             variants: [
-              variant('250 мл', 60, groups: coffeeOptions),
-              variant('350 мл', 70, groups: coffeeOptions),
-              variant('450 мл', 85, groups: coffeeOptions),
+              variant('250 мл', 60, groups: coffeeOptions, unit: sht),
+              variant('350 мл', 70, groups: coffeeOptions, unit: sht),
+              variant('450 мл', 85, groups: coffeeOptions, unit: sht),
             ],
           ),
           _CatalogProduct(
             id: 104,
             name: 'Латте',
             variants: [
-              variant('300 мл', 70, groups: coffeeOptions),
-              variant('400 мл', 85, groups: coffeeOptions),
+              variant('300 мл', 70, groups: coffeeOptions, unit: sht),
+              variant('400 мл', 85, groups: coffeeOptions, unit: sht),
             ],
           ),
           _CatalogProduct(
             id: 105,
             name: 'Раф',
-            variants: [variant('350 мл', 80)],
+            variants: [variant('350 мл', 80, unit: sht)],
           ),
         ],
       ),
@@ -505,22 +541,22 @@ class MockBackend {
             id: 201,
             name: 'Чорний',
             variants: [
-              variant('400 мл', 40),
-              variant('700 мл', 60),
+              variant('400 мл', 40, unit: sht),
+              variant('700 мл', 60, unit: sht),
             ],
           ),
           _CatalogProduct(
             id: 202,
             name: 'Зелений',
             variants: [
-              variant('400 мл', 40),
-              variant('700 мл', 60),
+              variant('400 мл', 40, unit: sht),
+              variant('700 мл', 60, unit: sht),
             ],
           ),
           _CatalogProduct(
             id: 203,
             name: 'Імбирний',
-            variants: [variant('400 мл', 55)],
+            variants: [variant('400 мл', 55, unit: sht)],
           ),
         ],
       ),
@@ -531,25 +567,41 @@ class MockBackend {
           _CatalogProduct(
             id: 301,
             name: 'Чізкейк',
-            variants: [variant('Шматок', 95)],
+            variants: [variant('Шматок', 95, unit: sht)],
           ),
           _CatalogProduct(
             id: 302,
             name: 'Круасан',
-            variants: [variant('Класичний', 55)],
+            variants: [variant('Класичний', 55, unit: sht)],
           ),
           _CatalogProduct(
             id: 303,
             name: 'Мафін',
             variants: [
-              variant('Шоколадний', 60),
-              variant('Чорничний', 65),
+              variant('Шоколадний', 60, unit: sht),
+              variant('Чорничний', 65, unit: sht),
             ],
           ),
           _CatalogProduct(
             id: 304,
             name: 'Печиво',
-            variants: [variant('Вівсяне', 25)],
+            variants: [variant('Вівсяне', 25, unit: sht)],
+          ),
+        ],
+      ),
+      _CatalogCategory(
+        id: 4,
+        name: 'На вагу',
+        products: [
+          _CatalogProduct(
+            id: 401,
+            name: 'Печиво',
+            variants: [variant('Вівсяне', 25, unit: g)],
+          ),
+          _CatalogProduct(
+            id: 402,
+            name: 'Бензин',
+            variants: [variant('А95', 100, unit: ml)],
           ),
         ],
       ),
@@ -596,11 +648,13 @@ class _CatalogVariant {
     required this.id,
     required this.name,
     required this.priceKopecks,
+    this.unit,
     this.optionGroups = const [],
   });
   final int id;
   final String name;
   final int priceKopecks;
+  final MeasureUnit? unit;
   final List<_OptionGroup> optionGroups;
 }
 
