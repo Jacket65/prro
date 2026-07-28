@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:prro/app.dart';
+import 'package:prro/config/backend_config.dart';
 import 'package:prro/data/api/api_client.dart';
+import 'package:prro/data/api/mock_api_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:talker/talker.dart';
@@ -17,6 +19,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final dio = Dio();
   final prefs = await SharedPreferences.getInstance();
-  final apiClient = ApiClient(dio: dio, prefs: prefs);
+
+  // Create the appropriate API client based on backend configuration
+  final apiClient = BackendConfig.useMock
+      ? MockApiClient(prefs: prefs)
+      : ApiClient(dio: dio, prefs: prefs);
+
   runApp(MyApp(apiClient: apiClient, prefs: prefs));
 }
