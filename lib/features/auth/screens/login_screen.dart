@@ -2,12 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/data/repositories/balance/balance_i.dart';
-import 'package:prro/data/repositories/balance/mock_balance_repo.dart';
-import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
-import 'package:prro/data/repositories/items_repository/mock_items_repo.dart';
-import 'package:prro/data/repositories/orders_repository/mock_orders_repo.dart';
-import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
 import 'package:prro/features/admin/screens/main_screen/main_screen.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/seller/screens/screens.dart';
@@ -36,7 +30,6 @@ class LoginScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Text(state.toString()),
                     _buildStateMessage(state),
                     const SizedBox(height: 24),
                     _buildTextField(
@@ -63,10 +56,8 @@ class LoginScreen extends StatelessWidget {
                           _clearTextFields();
                         }
                       },
-
                       child: const Text('Я продавець'),
                     ),
-
                     const SizedBox(height: 18),
                     ElevatedButton(
                       onPressed: () {
@@ -78,7 +69,6 @@ class LoginScreen extends StatelessWidget {
                         );
                         _clearTextFields();
                       },
-
                       child: const Text('seller (cashier1) - API'),
                     ),
                     const SizedBox(height: 18),
@@ -91,21 +81,7 @@ class LoginScreen extends StatelessWidget {
                         unawaited(
                           nav.pushReplacement(
                             MaterialPageRoute<void>(
-                              builder: (context) => MultiRepositoryProvider(
-                                providers: [
-                                  RepositoryProvider<ItemsRepositoryI>(
-                                    create: (context) => MockItemsRepository(),
-                                  ),
-                                  RepositoryProvider<OrdersRepositoryI>(
-                                    create: (context) => MockOrdersRepository(),
-                                  ),
-                                  RepositoryProvider<BalanceRepositoryI>(
-                                    create: (context) =>
-                                        MockBalanceRepository(),
-                                  ),
-                                ],
-                                child: const MockSellerScreen(),
-                              ),
+                              builder: (context) => const MockSellerScreen(),
                             ),
                           ),
                         );
@@ -117,16 +93,6 @@ class LoginScreen extends StatelessWidget {
                       onPressed: () => _navigateTo(context, const MainScreen()),
                       child: const Text('Я адміністратор'),
                     ),
-                    // const SizedBox(height: 18),
-                    // ElevatedButton(
-                    //   onPressed: () {},
-
-                    //   child: const Text("admin"),
-                    // ),
-                    // if (state is LoginLoading) ...[
-                    //   const SizedBox(height: 18),
-                    //   const Center(child: CircularProgressIndicator()),
-                    // ],
                   ],
                 ),
               ),
@@ -142,11 +108,7 @@ class LoginScreen extends StatelessWidget {
       case LoginSuccess():
         _showSnackBar(context, 'Вітаємо вас на роботі!');
         context.read<UserBloc>().add(LoadUser(username: state.username));
-
-        // Просто викликаємо навігацію без await.
-        // Екран заміниться миттєво, а context не "протухне".
         _navigateTo(context, const SellerScreen());
-
       case LoginFailure():
         _showSnackBar(context, 'Сталася помилка ${state.error}');
       case LoginLoading():

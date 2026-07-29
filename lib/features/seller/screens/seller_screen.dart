@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
 import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
-import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
+import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
 import 'package:prro/features/auth/auth.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/seller/bloc/balance/balance_cubit.dart';
@@ -16,6 +17,8 @@ import 'package:prro/features/shift/bloc/bloc.dart';
 import 'package:prro/features/shift/widgets/close_shift_dialog.dart';
 import 'package:prro/features/shift/widgets/open_shift_dialog.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
+
+final GetIt getIt = GetIt.instance;
 
 class SellerScreen extends StatefulWidget {
   const SellerScreen({super.key});
@@ -40,25 +43,23 @@ class _SellerScreenState extends State<SellerScreen> {
       providers: [
         BlocProvider(
           create: (context) =>
-              ItemsTilesBloc(itemsRepository: context.read<ItemsRepositoryI>())
+              ItemsTilesBloc(itemsRepository: getIt<ItemsRepositoryI>())
                 ..add(ItemsTilesStarted()),
         ),
         BlocProvider(
-          create: (context) => OrdersBloc(context.read<OrdersRepositoryI>()),
+          create: (context) => OrdersBloc(getIt<OrdersRepositoryI>()),
         ),
         BlocProvider(
-          create: (context) =>
-              CatalogSearchCubit(context.read<ItemsRepositoryI>()),
+          create: (context) => CatalogSearchCubit(getIt<ItemsRepositoryI>()),
         ),
         BlocProvider(
           create: (context) {
-            final cubit = BalanceCubit(context.read<BalanceRepositoryI>());
+            final cubit = BalanceCubit(getIt<BalanceRepositoryI>());
             unawaited(cubit.fetchBalance());
             return cubit;
           },
         ),
       ],
-
       child: Builder(
         builder: (context) {
           // When there is no open shift, clear the cart so nothing carries over
@@ -87,7 +88,6 @@ class _SellerScreenState extends State<SellerScreen> {
                     ),
                     BlocBuilder<ShiftCubit, ShiftState>(
                       builder: (context, state) {
-                        // "Закрити зміну" is only meaningful with an open shift
                         if (state is! ShiftOpen) return const SizedBox.shrink();
                         return CustomPopupMenu(
                           name: 'Меню',
@@ -161,23 +161,23 @@ class _SellerScreenState extends State<SellerScreen> {
       case BalanceLoaded(:final balance):
         return Text('balance: ${balance.toStringAsFixed(2)}');
       case BalanceLoading():
-      return const Row(
-        children: [
-          Text('balance: '),
-          SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ],
-      );
+        return const Row(
+          children: [
+            Text('balance: '),
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ],
+        );
       case BalanceError():
-      return Text(
-        'Помилка: ${state.message}',
-        style: const TextStyle(color: Colors.redAccent),
-      );
+        return Text(
+          'Помилка: ${state.message}',
+          style: const TextStyle(color: Colors.redAccent),
+        );
       default:
-      return const Text('balance: ...');
+        return const Text('balance: ...');
     }
   }
 

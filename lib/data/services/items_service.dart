@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/api/models/bean.dart';
 import 'package:prro/data/api/models/drink_option.dart';
@@ -10,6 +11,8 @@ import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+@Environment('prod')
+@Singleton(as: ItemsServiceI)
 class ItemsService implements ItemsServiceI {
   ItemsService({
     required this._apiClient,
@@ -72,7 +75,7 @@ class ItemsService implements ItemsServiceI {
       '/retail-outlets/$outletId/products',
       queryParameters: {
         if (query.isNotEmpty) 'q': query,
-        'category_id': ?categoryId,
+        'category_id': categoryId,
       },
       cancelToken: cancelToken,
     );

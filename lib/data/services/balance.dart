@@ -1,11 +1,13 @@
+import 'package:injectable/injectable.dart';
 import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
 
-// TODO(me): backend balance endpoint is not implemented yet.
-// Once `/api/v1/.../balance` exists, replace this stub with a real call.
+@Environment('prod')
+@Singleton(as: BalanceServiceI)
 class BalanceService implements BalanceServiceI {
   BalanceService({required this._apiClient});
-  // ignore
+
+  /// Api client
   // ignore: unused_field
   final ApiClientI _apiClient;
 

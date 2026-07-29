@@ -2,12 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prro/data/mock/mock_backend.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
-import 'package:prro/data/repositories/balance/mock_balance_repo.dart';
+import 'package:prro/data/repositories/balance/balance_repository_mock.dart';
 import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
-import 'package:prro/data/repositories/items_repository/mock_items_repo.dart';
-import 'package:prro/data/repositories/orders_repository/mock_orders_repo.dart';
+import 'package:prro/data/repositories/items_repository/items_repository_mock.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
+import 'package:prro/data/repositories/orders_repository/orders_repository_mock.dart';
 import 'package:prro/features/auth/auth.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/seller/bloc/balance/balance_cubit.dart';
@@ -29,13 +30,13 @@ class MockSellerScreen extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<ItemsRepositoryI>(
-          create: (context) => MockItemsRepository(),
+          create: (context) => ItemsRepositoryMock(MockBackend.instance),
         ),
         RepositoryProvider<OrdersRepositoryI>(
-          create: (context) => MockOrdersRepository(),
+          create: (context) => OrdersRepositoryMock(MockBackend.instance),
         ),
         RepositoryProvider<BalanceRepositoryI>(
-          create: (context) => MockBalanceRepository(),
+          create: (context) => BalanceRepositoryMock(),
         ),
       ],
       child: MultiBlocProvider(

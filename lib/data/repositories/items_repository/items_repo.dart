@@ -1,13 +1,16 @@
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 import 'package:prro/data/api/models/bean.dart';
 import 'package:prro/data/api/models/drink_option.dart';
 import 'package:prro/data/api/models/ingredient.dart';
 import 'package:prro/data/api/models/measure_unit.dart';
 import 'package:prro/data/api/models/seller_item.dart';
-import 'package:prro/data/repositories/items_repository/items_repository.dart';
+import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 
+@Environment('prod')
+@Singleton(as: ItemsRepositoryI)
 class ItemsRepository implements ItemsRepositoryI {
-  ItemsRepository({required this._itemsService});
+  ItemsRepository(this._itemsService);
   final ItemsServiceI _itemsService;
 
   @override

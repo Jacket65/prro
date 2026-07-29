@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 import 'package:prro/data/api/models/bean.dart';
 import 'package:prro/data/api/models/drink_option.dart';
 import 'package:prro/data/api/models/ingredient.dart';
@@ -9,9 +10,10 @@ import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 
 /// Routes ItemsServiceI calls to the in-process [MockBackend] so the seller
 /// flow can be exercised without the real Go backend.
+@Environment('mock')
+@Singleton(as: ItemsServiceI)
 class MockItemsService implements ItemsServiceI {
-  MockItemsService({MockBackend? backend})
-    : _backend = backend ?? MockBackend.instance;
+  MockItemsService(this._backend);
   final MockBackend _backend;
 
   @override

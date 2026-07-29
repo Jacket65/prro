@@ -1,9 +1,9 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-
 import 'package:prro/data/api/models/seller_item.dart';
-import 'package:prro/data/repositories/items_repository/items_repository.dart';
+import 'package:prro/data/repositories/items_repository/items_repo.dart';
+import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 
 class MockItemsService extends Mock implements ItemsServiceI {}
 
@@ -13,7 +13,7 @@ void main() {
 
   setUp(() {
     service = MockItemsService();
-    repository = ItemsRepository(itemsService: service);
+    repository = ItemsRepository(service);
   });
 
   test('getCategories returns list from service', () async {

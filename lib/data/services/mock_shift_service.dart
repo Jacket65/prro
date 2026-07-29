@@ -1,6 +1,9 @@
+import 'package:injectable/injectable.dart';
 import 'package:prro/data/api/models/shift.dart';
 import 'package:prro/data/repositories/shift_repository/shift_repo_i.dart';
 
+@Environment('mock')
+@Singleton(as: ShiftServiceI)
 class MockShiftService implements ShiftServiceI {
   @override
   Future<ShiftResponse?> currentShift() async => const ShiftResponse(

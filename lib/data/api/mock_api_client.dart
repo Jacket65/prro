@@ -12,21 +12,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 class MockApiClient implements ApiClientI {
   MockApiClient({
     required this.prefs,
-  }) {
-    _initializeMockBackend();
-  }
+    required this.mockBackend,
+  });
 
   final SharedPreferences prefs;
+  final MockBackend mockBackend;
   final StreamController<void> _unauthorized =
       StreamController<void>.broadcast();
 
   @override
   Stream<void> get onUnauthorized => _unauthorized.stream;
-
-  void _initializeMockBackend() {
-    // MockBackend is a singleton, no initialization needed
-    log('[MOCK API] Initialized with MockBackend');
-  }
 
   @override
   Future<Response<dynamic>> get(
@@ -36,14 +31,14 @@ class MockApiClient implements ApiClientI {
   }) async {
     try {
       if (path.contains('/measure-units')) {
-        final units = await MockBackend.instance.getMeasureUnits();
+        final units = await mockBackend.getMeasureUnits();
         return Response<dynamic>(
           requestOptions: RequestOptions(path: path),
           data: {'data': units},
           statusCode: 200,
         );
       } else if (path.contains('/categories')) {
-        final categories = await MockBackend.instance.getCategories();
+        final categories = await mockBackend.getCategories();
         return Response<dynamic>(
           requestOptions: RequestOptions(path: path),
           data: {'data': categories},
@@ -53,7 +48,7 @@ class MockApiClient implements ApiClientI {
         // Extract categoryId from path if present
         final categoryId = _extractCategoryId(path);
         if (categoryId != null) {
-          final products = await MockBackend.instance.getProducts(categoryId);
+          final products = await mockBackend.getProducts(categoryId);
           return Response<dynamic>(
             requestOptions: RequestOptions(path: path),
             data: {'data': products},
@@ -63,7 +58,7 @@ class MockApiClient implements ApiClientI {
           // Search products
           final query = queryParameters?['q'] as String? ?? '';
           final categoryIdParam = queryParameters?['category_id'] as int?;
-          final products = await MockBackend.instance.searchProducts(
+          final products = await mockBackend.searchProducts(
             query: query,
             categoryId: categoryIdParam,
           );
@@ -77,7 +72,7 @@ class MockApiClient implements ApiClientI {
         // Get variants for a product
         final productId = _extractProductId(path);
         if (productId != null) {
-          final variants = await MockBackend.instance.getVariants(productId);
+          final variants = await mockBackend.getVariants(productId);
           return Response<dynamic>(
             requestOptions: RequestOptions(path: path),
             data: {'data': variants},
@@ -87,7 +82,7 @@ class MockApiClient implements ApiClientI {
         // Get options for a variant
         final variantId = _extractVariantId(path);
         if (variantId != null) {
-          final options = await MockBackend.instance.getVariantOptions(
+          final options = await mockBackend.getVariantOptions(
             variantId,
           );
           return Response<dynamic>(
@@ -98,7 +93,7 @@ class MockApiClient implements ApiClientI {
         }
       } else if (path.contains('/beans')) {
         // Mock beans endpoint
-        final popularBeans = await MockBackend.instance.getPopularBeans();
+        final popularBeans = await mockBackend.getPopularBeans();
         return Response<dynamic>(
           requestOptions: RequestOptions(path: path),
           data: {'data': popularBeans},
@@ -174,7 +169,7 @@ class MockApiClient implements ApiClientI {
           final tenderedKopecks =
               paymentData?['tendered'] as int? ?? 0;
 
-          final receipt = await MockBackend.instance.placeOrder(
+          final receipt = await mockBackend.placeOrder(
             items: items,
             payment: PaymentDto(
               method: paymentMethod == 'card'

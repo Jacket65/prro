@@ -1,4 +1,5 @@
 import 'package:decimal/decimal.dart';
+import 'package:injectable/injectable.dart';
 import 'package:prro/data/api/api_exception.dart';
 import 'package:prro/data/api/models/bean.dart';
 import 'package:prro/data/api/models/drink_option.dart';
@@ -8,9 +9,10 @@ import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/data/mock/mock_backend.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
 
-class MockOrdersRepository implements OrdersRepositoryI {
-  MockOrdersRepository({MockBackend? backend})
-    : _backend = backend ?? MockBackend.instance;
+@Environment('mock')
+@Singleton(as: OrdersRepositoryI)
+class OrdersRepositoryMock implements OrdersRepositoryI {
+  OrdersRepositoryMock(this._backend);
   final MockBackend _backend;
 
   final List<Product> _products = [];

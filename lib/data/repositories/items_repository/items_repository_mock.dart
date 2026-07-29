@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 import 'package:prro/data/api/models/bean.dart';
 import 'package:prro/data/api/models/drink_option.dart';
 import 'package:prro/data/api/models/ingredient.dart';
@@ -7,9 +8,10 @@ import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/data/mock/mock_backend.dart';
 import 'package:prro/data/repositories/items_repository/items_repository.dart';
 
-class MockItemsRepository implements ItemsRepositoryI {
-  MockItemsRepository({MockBackend? backend})
-    : _backend = backend ?? MockBackend.instance;
+@Environment('mock')
+@Singleton(as: ItemsRepositoryI)
+class ItemsRepositoryMock implements ItemsRepositoryI {
+  ItemsRepositoryMock(this._backend);
   final MockBackend _backend;
 
   @override
@@ -35,7 +37,13 @@ class MockItemsRepository implements ItemsRepositoryI {
     int? categoryId,
     CancelToken? cancelToken,
   }) async {
-    await _cancelTokenOrDelay(cancelToken);
+    if (cancelToken?.isCancelled == true) {
+      throw DioException(
+        requestOptions: RequestOptions(),
+        message: 'cancelled',
+        type: DioExceptionType.cancel,
+      );
+    }
     return _backend.searchProducts(query: query, categoryId: categoryId);
   }
 
@@ -61,14 +69,4 @@ class MockItemsRepository implements ItemsRepositoryI {
   @override
   Future<List<Item>> getVariants(int productId) =>
       _backend.getVariants(productId);
-
-  Future<void> _cancelTokenOrDelay(CancelToken? cancelToken) async {
-    if (cancelToken?.isCancelled == true) {
-      throw DioException(
-        requestOptions: RequestOptions(),
-        message: 'cancelled',
-        type: DioExceptionType.cancel,
-      );
-    }
-  }
 }

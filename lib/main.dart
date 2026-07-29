@@ -1,29 +1,12 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:prro/app.dart';
 import 'package:prro/config/backend_config.dart';
-import 'package:prro/data/api/api_client.dart';
-import 'package:prro/data/api/mock_api_client.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:talker/talker.dart';
-// import 'package:talker_bloc_logger/talker_bloc_logger_observer.dart';
-// import 'package:talker_bloc_logger/talker_bloc_logger_settings.dart';
+import 'package:prro/di/di.dart';
 
 void main() async {
-  // final talker = Talker();
-  // Bloc.observer = TalkerBlocObserver(
-  //   talker: talker,
-  //   settings: TalkerBlocLoggerSettings(),
-  // );
   WidgetsFlutterBinding.ensureInitialized();
-  final dio = Dio();
-  final prefs = await SharedPreferences.getInstance();
 
-  // Create the appropriate API client based on backend configuration
-  final apiClient = BackendConfig.useMock
-      ? MockApiClient(prefs: prefs)
-      : ApiClient(dio: dio, prefs: prefs);
+  await configureDependencies(useMock: BackendConfig.useMock);
 
-  runApp(MyApp(apiClient: apiClient, prefs: prefs));
+  runApp(const MyApp());
 }

@@ -1,10 +1,10 @@
 import 'package:injectable/injectable.dart';
 import 'package:prro/data/repositories/user_repository/user_repo_i.dart';
 
+@Environment('mock')
 @Singleton(as: UserRepositoryI)
-@Environment('prod')
-class UserRepositoryImpl implements UserRepositoryI {
-  UserRepositoryImpl({required this._userService});
+class UserRepositoryMock implements UserRepositoryI {
+  UserRepositoryMock(this._userService);
   final UserServiceI _userService;
 
   String? _usernameCache;

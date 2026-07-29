@@ -1,10 +1,10 @@
 import 'package:injectable/injectable.dart';
 import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
 
+@Environment('mock')
 @Singleton(as: LoginRepositoryI)
-@Environment('prod')
-class LoginRepositoryImpl implements LoginRepositoryI {
-  LoginRepositoryImpl({required this._loginService});
+class LoginRepositoryMock implements LoginRepositoryI {
+  LoginRepositoryMock(this._loginService);
   final LoginServiceI _loginService;
 
   @override

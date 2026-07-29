@@ -8,7 +8,7 @@ class Env {
 
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://pos.coffeebeans.space/api/v1',
+    defaultValue: 'https://pos.coffeebeans.space.test/api/v1',
   );
 
   /// Store name shown on the printed receipt. The order-create response does

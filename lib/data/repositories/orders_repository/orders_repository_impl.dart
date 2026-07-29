@@ -1,15 +1,18 @@
 import 'package:decimal/decimal.dart';
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 import 'package:prro/config/env.dart';
 import 'package:prro/core/money.dart';
 import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/api/api_exception.dart';
 import 'package:prro/data/api/models/models.dart';
-import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
+import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class OrdersRepository implements OrdersRepositoryI {
-  OrdersRepository({
+@Singleton(as: OrdersRepositoryI)
+@Environment('prod')
+class OrdersRepositoryImpl implements OrdersRepositoryI {
+  OrdersRepositoryImpl({
     required this._apiClient,
     required this._prefs,
   });
@@ -109,7 +112,6 @@ class OrdersRepository implements OrdersRepositoryI {
     if (outletId == null) {
       throw const ApiException('Точку продажу не визначено. Увійдіть знову.');
     }
-
     // Backend expects quantities/amounts as decimal STRINGS. The selected bean
     // is just another option, so it folds into the line's `options` array.
     final productsJson = _products.map((p) {

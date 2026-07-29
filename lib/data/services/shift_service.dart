@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/api/api_exception.dart';
 import 'package:prro/data/api/models/shift.dart';
@@ -14,6 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// The backend is the single source of truth for the shift state — we cache
 /// nothing in prefs here.
+@Environment('prod')
+@Singleton(as: ShiftServiceI)
 class ShiftService implements ShiftServiceI {
   ShiftService({
     required this._apiClient,
@@ -82,53 +83,6 @@ class ShiftService implements ShiftServiceI {
       );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
-    }
-  }
-}
-
-class ShiftRepository implements ShiftRepositoryI {
-  ShiftRepository({required this._shiftService});
-  final ShiftServiceI _shiftService;
-
-  @override
-  Future<ShiftResponse?> currentShift() {
-    try {
-      return _shiftService.currentShift();
-    } catch (e) {
-      log(e.toString());
-      rethrow;
-    }
-  }
-
-  @override
-  Future<ShiftResponse> openShift({
-    required String idempotencyKey,
-    String cashStart = '0.00',
-  }) {
-    try {
-      return _shiftService.openShift(
-        cashStart: cashStart,
-        idempotencyKey: idempotencyKey,
-      );
-    } catch (e) {
-      log(e.toString());
-      rethrow;
-    }
-  }
-
-  @override
-  Future<void> closeShift({
-    required String cashEnd,
-    required String idempotencyKey,
-  }) {
-    try {
-      return _shiftService.closeShift(
-        cashEnd: cashEnd,
-        idempotencyKey: idempotencyKey,
-      );
-    } catch (e) {
-      log(e.toString());
-      rethrow;
     }
   }
 }

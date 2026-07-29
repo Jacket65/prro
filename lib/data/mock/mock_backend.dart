@@ -15,8 +15,9 @@ import 'package:prro/data/api/models/seller_item.dart';
 ///
 /// Prices live here as `int` kopecks — the client never computes totals.
 class MockBackend {
-  MockBackend._();
-  static final MockBackend instance = MockBackend._();
+  MockBackend._internal();
+
+  static final MockBackend instance = MockBackend._internal();
 
   /// Flip to true (e.g. from a debug button) to make the next requests fail
   /// so error states can be exercised without touching code.
