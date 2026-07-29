@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:get_it/get_it.dart';
 import 'package:prro/core/json.dart';
 import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
+
+final GetIt getIt = GetIt.instance;
 
 /// Recipe editor for a single variant in the admin panel.
 /// Loads the recipe via `GET /variants/:id/recipe` and the available ingredient
@@ -25,16 +27,12 @@ class AdminRecipeDialog extends StatefulWidget {
     required String variantName,
     required int outletId,
   }) async {
-    final api = context.read<ApiService>();
     final saved = await showDialog<bool>(
       context: context,
-      builder: (_) => Provider<ApiService>.value(
-        value: api,
-        child: AdminRecipeDialog(
-          variantId: variantId,
-          variantName: variantName,
-          outletId: outletId,
-        ),
+      builder: (_) => AdminRecipeDialog(
+        variantId: variantId,
+        variantName: variantName,
+        outletId: outletId,
       ),
     );
     return saved ?? false;
@@ -70,7 +68,7 @@ class _AdminRecipeDialogState extends State<AdminRecipeDialog> {
   }
 
   Future<void> _load() async {
-    final api = context.read<ApiService>();
+    final api = getIt<ApiService>();
     // Kick off all three requests concurrently, then await.
     final ingredientsF = api.fetchIngredients(outletId: widget.outletId);
     final recipeF = api.fetchRecipe(variantId: widget.variantId);
@@ -145,7 +143,7 @@ class _AdminRecipeDialogState extends State<AdminRecipeDialog> {
   Future<void> _save() async {
     setState(() => _saving = true);
     try {
-      await context.read<ApiService>().replaceRecipe(
+      await getIt<ApiService>().replaceRecipe(
         variantId: widget.variantId,
         ingredients: _rows
             .map(

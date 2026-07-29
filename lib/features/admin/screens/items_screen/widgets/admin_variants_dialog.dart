@@ -1,11 +1,13 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get_it/get_it.dart';
 import 'package:prro/core/json.dart';
 import 'package:prro/features/admin/screens/items_screen/widgets/admin_dialogs.dart';
 import 'package:prro/features/admin/screens/items_screen/widgets/admin_recipe_dialog.dart';
 import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
+
+final GetIt getIt = GetIt.instance;
 
 /// Lists variants for a product. Admin can create, rename, change price,
 /// edit recipe, and delete each one.
@@ -26,16 +28,12 @@ class AdminVariantsDialog extends StatefulWidget {
     required String productName,
     required int outletId,
   }) {
-    final api = context.read<ApiService>();
     return showDialog<void>(
       context: context,
-      builder: (_) => Provider<ApiService>.value(
-        value: api,
-        child: AdminVariantsDialog(
-          productId: productId,
-          productName: productName,
-          outletId: outletId,
-        ),
+      builder: (_) => AdminVariantsDialog(
+        productId: productId,
+        productName: productName,
+        outletId: outletId,
       ),
     );
   }
@@ -54,7 +52,7 @@ class _AdminVariantsDialogState extends State<AdminVariantsDialog> {
   }
 
   Future<List<Map<String, dynamic>>> _load() {
-    return context.read<ApiService>().fetchVariants(
+    return getIt<ApiService>().fetchVariants(
       productId: widget.productId,
     );
   }
@@ -66,7 +64,7 @@ class _AdminVariantsDialogState extends State<AdminVariantsDialog> {
   }
 
   Future<void> _createVariant() async {
-    final api = context.read<ApiService>();
+    final api = getIt<ApiService>();
     final messenger = ScaffoldMessenger.of(context);
     final draft = await _showVariantForm(title: 'Нова варіація');
     if (draft == null) return;
@@ -87,7 +85,7 @@ class _AdminVariantsDialogState extends State<AdminVariantsDialog> {
   }
 
   Future<void> _editVariant(Map<String, dynamic> variant) async {
-    final api = context.read<ApiService>();
+    final api = getIt<ApiService>();
     final messenger = ScaffoldMessenger.of(context);
     final draft = await _showVariantForm(
       title: 'Редагувати варіацію',
@@ -112,7 +110,7 @@ class _AdminVariantsDialogState extends State<AdminVariantsDialog> {
   }
 
   Future<void> _deleteVariant(Map<String, dynamic> variant) async {
-    final api = context.read<ApiService>();
+    final api = getIt<ApiService>();
     final messenger = ScaffoldMessenger.of(context);
     final name = (variant['name'] ?? '').toString();
     final ok = await showAdminConfirm(

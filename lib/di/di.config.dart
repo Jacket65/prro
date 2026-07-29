@@ -58,6 +58,8 @@ import 'package:prro/data/services/mock_user_service.dart' as _i104;
 import 'package:prro/data/services/shift_service.dart' as _i819;
 import 'package:prro/data/services/user_service.dart' as _i169;
 import 'package:prro/di/app_module.dart' as _i745;
+import 'package:prro/features/admin/screens/main_screen/services/api_service.dart'
+    as _i545;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 const String _mock = 'mock';
@@ -75,6 +77,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => appModule.prefs,
       preResolve: true,
     );
+    gh.singleton<_i545.ApiService>(() => _i545.ApiService());
     gh.singleton<_i205.UserServiceI>(
       () => _i104.MockUserService(),
       registerFor: {_mock},

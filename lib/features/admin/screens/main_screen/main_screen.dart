@@ -2,13 +2,15 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get_it/get_it.dart';
 import 'package:prro/features/admin/screens/items_screen/items_screen.dart';
 import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
 import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
 import 'package:prro/features/admin/screens/main_screen/torgovi_tochki.dart';
 import 'package:prro/features/admin/screens/tellers_screen/teller.dart';
 import 'package:prro/features/auth/screens/login_screen.dart';
+
+final GetIt getIt = GetIt.instance;
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -43,7 +45,7 @@ class MainScreenState extends State<MainScreen> {
       tellerGroup = [];
     });
     try {
-      final data = await context.read<ApiService>().fetchRetailSeller(
+      final data = await getIt<ApiService>().fetchRetailSeller(
         retailOutlet: outletId,
       );
       final next = <List<String>>[];
@@ -72,7 +74,7 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _loadOutlets() async {
-    final api = context.read<ApiService>();
+    final api = getIt<ApiService>();
     if (!mounted) return;
     setState(() {
       loadingMeasures = true;
@@ -288,13 +290,8 @@ class MainScreenState extends State<MainScreen> {
       case 'Товари':
         return Expanded(
           // Outlet change → drop & rebuild the items subtree so it re-fetches.
-          child: MultiProvider(
+          child: Items(
             key: ValueKey('items-$retailOutletId'),
-            providers: [
-              Provider<int>.value(value: retailOutletId),
-              Provider<List<Measure>>.value(value: measures),
-            ],
-            child: const Items(),
           ),
         );
       default:
@@ -312,7 +309,7 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _loadMeasures() async {
-    final api = Provider.of<ApiService>(context, listen: false);
+    final api = getIt<ApiService>();
     if (!mounted) return;
     setState(() {
       loadingMeasures = true;

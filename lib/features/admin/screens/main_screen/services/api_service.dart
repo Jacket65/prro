@@ -3,9 +3,11 @@ import 'dart:developer';
 import 'dart:math' show Random;
 
 import 'package:http/http.dart' as http;
+import 'package:injectable/injectable.dart';
 import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+@singleton
 class ApiService {
   static const String _baseUrl = 'http://pos.coffeebeans.space.test/api/v1';
   static const Map<String, String> _defaultHeaders = {

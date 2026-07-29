@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
+import 'package:get_it/get_it.dart';
 // Assuming CategoryPickScreen is the actual widget name for
 // category_pick_screen.dart
 import 'package:prro/features/admin/screens/items_screen/widgets/admin_dialogs.dart';
@@ -11,6 +10,8 @@ import 'package:prro/features/admin/screens/items_screen/widgets/category_pick_s
 import 'package:prro/features/admin/screens/items_screen/widgets/custom_card.dart';
 import 'package:prro/features/admin/screens/items_screen/widgets/custom_search_field.dart';
 import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
+
+final GetIt getIt = GetIt.instance;
 
 class Category {
   Category(this.title, this.id);
@@ -27,8 +28,8 @@ class Items extends StatefulWidget {
 
 class _ItemsState extends State<Items> {
   final List<Category> _categories = [];
-  ApiService get _apiService => context.read<ApiService>();
-  int get _retailOutletId => context.read<int>();
+  ApiService get _apiService => getIt<ApiService>();
+  int get _retailOutletId => getIt<int>();
 
   final TextEditingController _searchController = TextEditingController();
   @override
@@ -314,18 +315,11 @@ class _ItemsState extends State<Items> {
           onPressed: () async {
             // Navigate to CategoryPick screen, passing the list
             // of category titles
-            final measures = Provider.of<List<Measure>>(context, listen: false);
             await Navigator.push(
               context,
               MaterialPageRoute<void>(
                 builder: (context) {
-                  return MultiProvider(
-                    providers: [
-                      Provider<List<Measure>>.value(value: measures),
-                      Provider<int>.value(value: _retailOutletId),
-                    ],
-                    child: CategoryPick(categoryList: _categories),
-                  );
+                  return CategoryPick(categoryList: _categories);
                 },
               ),
             );

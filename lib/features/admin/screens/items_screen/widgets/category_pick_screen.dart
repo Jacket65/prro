@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get_it/get_it.dart';
 // import 'package:prro/items_screen/widgets/inside_category_screen.dart';
 // import 'package:prro/items_screen/items_screen.dart';
 import 'package:prro/core/constants/settings.dart';
 import 'package:prro/features/admin/screens/items_screen/items_screen.dart';
 import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
 import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
+
+final GetIt getIt = GetIt.instance;
 
 class CategoryPick extends StatefulWidget {
   const CategoryPick({required this.categoryList, super.key});
@@ -24,9 +26,9 @@ class _CategoryPickState extends State<CategoryPick> {
   bool checkedBox = false;
   bool checkedPrice = false;
   bool checkedMass = false;
-  ApiService get api => Provider.of<ApiService>(context, listen: false);
-  int get retailOutletId => Provider.of<int>(context, listen: false);
-  List<Measure> get measures => context.read<List<Measure>>();
+  ApiService get api => getIt<ApiService>();
+  int get retailOutletId => getIt<int>();
+  List<Measure> get measures => getIt<List<Measure>>();
 
   @override
   Widget build(BuildContext context) {

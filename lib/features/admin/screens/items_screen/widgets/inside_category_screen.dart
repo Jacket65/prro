@@ -2,13 +2,15 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get_it/get_it.dart';
 import 'package:prro/features/admin/screens/items_screen/items_screen.dart';
-import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
+// import 'package:prro/features/admin/screens/items_screen/models/measure.dart';
 import 'package:prro/features/admin/screens/items_screen/widgets/admin_dialogs.dart';
 import 'package:prro/features/admin/screens/items_screen/widgets/admin_variants_dialog.dart';
 import 'package:prro/features/admin/screens/items_screen/widgets/category_pick_screen.dart';
 import 'package:prro/features/admin/screens/main_screen/services/api_service.dart';
+
+final GetIt getIt = GetIt.instance;
 
 const double kDefaultPaddingWidth = 25;
 
@@ -32,7 +34,7 @@ class _InsideCategoryState extends State<InsideCategory> {
   List<Map<String, dynamic>> products = [];
   bool loading = true;
   String? errorMessage;
-  int get outletId => Provider.of<int>(context, listen: false);
+  int get outletId => getIt<int>();
 
   @override
   void initState() {
@@ -42,7 +44,7 @@ class _InsideCategoryState extends State<InsideCategory> {
 
   Future<void> _loadProducts() async {
     try {
-      final api = Provider.of<ApiService>(context, listen: false);
+      final api = getIt<ApiService>();
       final data = await api.fetchProducts(categoryId: widget.cardInx);
       if (!mounted) return;
       setState(() {
@@ -61,7 +63,7 @@ class _InsideCategoryState extends State<InsideCategory> {
   }
 
   Future<void> _renameProduct(Map<String, dynamic> product) async {
-    final api = Provider.of<ApiService>(context, listen: false);
+    final api = getIt<ApiService>();
     final messenger = ScaffoldMessenger.of(context);
     final newName = await showAdminTextPrompt(
       context,
@@ -84,7 +86,7 @@ class _InsideCategoryState extends State<InsideCategory> {
   }
 
   Future<void> _deleteProduct(Map<String, dynamic> product) async {
-    final api = Provider.of<ApiService>(context, listen: false);
+    final api = getIt<ApiService>();
     final messenger = ScaffoldMessenger.of(context);
     final name = (product['name'] ?? '').toString();
     final ok = await showAdminConfirm(
@@ -201,16 +203,11 @@ class _InsideCategoryState extends State<InsideCategory> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       ),
       onPressed: () async {
-        final measures = Provider.of<List<Measure>>(context, listen: false);
         final result = await Navigator.push(
           context,
           MaterialPageRoute<bool>(
-            builder: (_) => MultiProvider(
-              providers: [
-                Provider<int>.value(value: outletId),
-                Provider<List<Measure>>.value(value: measures),
-              ],
-              child: CategoryPick(categoryList: widget.categoryList),
+            builder: (_) => CategoryPick(
+              categoryList: widget.categoryList,
             ),
           ),
         );
