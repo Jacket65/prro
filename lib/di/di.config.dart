@@ -40,6 +40,8 @@ import 'package:prro/data/repositories/orders_repository/orders_repository_mock.
     as _i499;
 import 'package:prro/data/repositories/shift_repository/shift_repo_i.dart'
     as _i957;
+import 'package:prro/data/repositories/shift_repository/shift_repository_impl.dart'
+    as _i302;
 import 'package:prro/data/repositories/shift_repository/shift_repository_mock.dart'
     as _i562;
 import 'package:prro/data/repositories/user_repository/user_repo.dart' as _i170;
@@ -192,6 +194,10 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i977.LoginRepositoryI>(
       () => _i427.LoginRepositoryImpl(loginService: gh<_i977.LoginServiceI>()),
+      registerFor: {_prod},
+    );
+    gh.singleton<_i957.ShiftRepositoryI>(
+      () => _i302.ShiftRepositoryImpl(gh<_i957.ShiftServiceI>()),
       registerFor: {_prod},
     );
     return this;

@@ -2,10 +2,10 @@ import 'package:injectable/injectable.dart';
 import 'package:prro/data/api/models/shift.dart';
 import 'package:prro/data/repositories/shift_repository/shift_repo_i.dart';
 
-@Environment('mock')
+@Environment('prod')
 @Singleton(as: ShiftRepositoryI)
-class ShiftRepositoryMock implements ShiftRepositoryI {
-  ShiftRepositoryMock(this._shiftService);
+class ShiftRepositoryImpl implements ShiftRepositoryI {
+  ShiftRepositoryImpl(this._shiftService);
   final ShiftServiceI _shiftService;
 
   @override
