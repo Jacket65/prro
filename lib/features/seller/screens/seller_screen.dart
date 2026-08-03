@@ -17,6 +17,7 @@ import 'package:prro/features/shift/bloc/bloc.dart';
 import 'package:prro/features/shift/widgets/close_shift_dialog.dart';
 import 'package:prro/features/shift/widgets/open_shift_dialog.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
+import 'package:prro/services/nfc_payment_service.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -47,7 +48,10 @@ class _SellerScreenState extends State<SellerScreen> {
                 ..add(ItemsTilesStarted()),
         ),
         BlocProvider(
-          create: (context) => OrdersBloc(getIt<OrdersRepositoryI>()),
+          create: (context) => OrdersBloc(
+            ordersRepository: getIt<OrdersRepositoryI>(),
+            nfcPaymentService: getIt<NfcPaymentServiceI>(),
+          ),
         ),
         BlocProvider(
           create: (context) => CatalogSearchCubit(getIt<ItemsRepositoryI>()),

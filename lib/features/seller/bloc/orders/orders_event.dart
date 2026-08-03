@@ -8,7 +8,6 @@ sealed class OrdersEvent extends Equatable {
 }
 
 final class AddProduct extends OrdersEvent {
-
   const AddProduct(this.product);
   final Product product;
 
@@ -17,7 +16,6 @@ final class AddProduct extends OrdersEvent {
 }
 
 final class RemoveProduct extends OrdersEvent {
-
   const RemoveProduct(this.product);
   final Product product;
 
@@ -41,7 +39,6 @@ final class ClearProducts extends OrdersEvent {
 /// [idempotencyKey] is generated when the dialog opens (NOT on each click),
 /// so accidental double taps replay the same key and get the same receipt.
 final class PayOrder extends OrdersEvent {
-
   const PayOrder({
     required this.method,
     required this.tenderedKopecks,
@@ -62,11 +59,33 @@ final class AcknowledgePayment extends OrdersEvent {
   List<Object> get props => [];
 }
 
+/// Triggered when the cashier selects NFC POS payment method.
+/// [idempotencyKey] is generated when the dialog opens.
+final class PayWithNfc extends OrdersEvent {
+  const PayWithNfc({
+    required this.idempotencyKey,
+    required this.amountKopecks,
+    required this.currency,
+    required this.description,
+  });
+  final String idempotencyKey;
+  final int amountKopecks;
+  final String currency;
+  final String description;
+
+  @override
+  List<Object> get props => [
+    idempotencyKey,
+    amountKopecks,
+    currency,
+    description,
+  ];
+}
+
 /// Replaces the selected options and bean of a cart line (identified by its
 /// current [lineId]). Changing them changes the line identity, so the
 /// repository may merge it into an identical existing line.
 final class UpdateOptions extends OrdersEvent {
-
   const UpdateOptions({
     required this.lineId,
     required this.options,

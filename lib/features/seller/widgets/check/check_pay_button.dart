@@ -100,6 +100,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
   int get _tenderedKopecks => switch (_method) {
     PaymentMethod.cash => kopecksFromString(_cashController.text),
     PaymentMethod.card => widget.totalKopecks,
+    PaymentMethod.nfc => widget.totalKopecks,
   };
 
   int get _changeKopecks {
@@ -112,6 +113,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
     return switch (_method) {
       PaymentMethod.cash => _tenderedKopecks >= widget.totalKopecks,
       PaymentMethod.card => true,
+      PaymentMethod.nfc => true,
     };
   }
 
@@ -122,11 +124,13 @@ class _PaymentDialogState extends State<PaymentDialog> {
       builder: (context, state) {
         final isLoading = state is OrdersLoading;
         final isSuccess = state is OrdersPaymentSuccess;
+        final isNfcPending = state is OrdersNfcPaymentPending;
 
         return PopScope(
           canPop:
               !isLoading &&
-              !isSuccess, // Запобігає випадковому закриттю жест/кнопкою "Назад"
+              !isSuccess &&
+              !isNfcPending, // Prevent closing during NFC payment flow
           child: Dialog(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -141,6 +145,11 @@ class _PaymentDialogState extends State<PaymentDialog> {
                 ),
                 child: isSuccess
                     ? _SuccessView(receipt: state.receipt)
+                    : isNfcPending
+                    ? _NfcPendingView(
+                        totalKopecks: widget.totalKopecks,
+                        onCancel: () => Navigator.of(context).pop(),
+                      )
                     : ValueListenableBuilder<TextEditingValue>(
                         valueListenable: _cashController,
                         builder: (context, _, _) {
@@ -169,13 +178,24 @@ class _PaymentDialogState extends State<PaymentDialog> {
   }
 
   void _onPay() {
-    context.read<OrdersBloc>().add(
-      PayOrder(
-        method: _method,
-        tenderedKopecks: _tenderedKopecks,
-        idempotencyKey: _idempotencyKey,
-      ),
-    );
+    if (_method == PaymentMethod.nfc) {
+      context.read<OrdersBloc>().add(
+        PayWithNfc(
+          idempotencyKey: _idempotencyKey,
+          amountKopecks: widget.totalKopecks,
+          currency: 'UAH',
+          description: 'Order payment',
+        ),
+      );
+    } else {
+      context.read<OrdersBloc>().add(
+        PayOrder(
+          method: _method,
+          tenderedKopecks: _tenderedKopecks,
+          idempotencyKey: _idempotencyKey,
+        ),
+      );
+    }
   }
 }
 
@@ -304,6 +324,11 @@ class _MethodSelector extends StatelessWidget {
           value: PaymentMethod.card,
           label: Text('Картка', style: TextStyle(fontSize: 16)),
           icon: Icon(Icons.credit_card),
+        ),
+        ButtonSegment(
+          value: PaymentMethod.nfc,
+          label: Text('NFC POS', style: TextStyle(fontSize: 16)),
+          icon: Icon(Icons.nfc),
         ),
       ],
       selected: {method},
@@ -456,6 +481,96 @@ class _ErrorBanner extends StatelessWidget {
   }
 }
 
+// ── NFC Pending View ───────────────────────────────────────────────────────
+
+class _NfcPendingView extends StatelessWidget {
+  const _NfcPendingView({
+    required this.totalKopecks,
+    required this.onCancel,
+  });
+
+  final int totalKopecks;
+  final VoidCallback onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'До оплати',
+              style: TextStyle(fontSize: 18, color: Colors.black54),
+            ),
+            Text(
+              formatUah(totalKopecks),
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.blue.shade200),
+          ),
+          child: const Column(
+            children: [
+              Icon(
+                Icons.nfc,
+                size: 64,
+                color: Colors.blue,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Очікування оплати...',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Клієнт має прикласти картку або телефон\n'
+                'до терміналу PrivatBank',
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24),
+              SizedBox(
+                width: 32,
+                height: 32,
+                child: CircularProgressIndicator(
+                  color: Colors.blue,
+                  strokeWidth: 3,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        OutlinedButton(
+          onPressed: onCancel,
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(56),
+            textStyle: const TextStyle(fontSize: 18),
+            foregroundColor: Colors.red,
+            side: const BorderSide(color: Colors.red),
+          ),
+          child: const Text('Скасувати оплату'),
+        ),
+      ],
+    );
+  }
+}
+
 // ── Success ────────────────────────────────────────────────────────────────
 
 class _SuccessView extends StatelessWidget {
@@ -543,6 +658,7 @@ class _ReceiptCard extends StatelessWidget {
   String get _methodLabel => switch (receipt.method) {
     PaymentMethod.cash => 'Готівка',
     PaymentMethod.card => 'Картка',
+    PaymentMethod.nfc => 'NFC POS',
   };
 
   @override

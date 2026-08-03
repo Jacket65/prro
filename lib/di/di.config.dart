@@ -38,6 +38,8 @@ import 'package:prro/data/repositories/orders_repository/orders_repository_impl.
     as _i307;
 import 'package:prro/data/repositories/orders_repository/orders_repository_mock.dart'
     as _i499;
+import 'package:prro/data/repositories/payment_repository/payment_repo_i.dart'
+    as _i844;
 import 'package:prro/data/repositories/shift_repository/shift_repo_i.dart'
     as _i957;
 import 'package:prro/data/repositories/shift_repository/shift_repository_impl.dart'
@@ -57,12 +59,17 @@ import 'package:prro/data/services/mock_items_service.dart' as _i649;
 import 'package:prro/data/services/mock_login_service.dart' as _i241;
 import 'package:prro/data/services/mock_shift_service.dart' as _i924;
 import 'package:prro/data/services/mock_user_service.dart' as _i104;
+import 'package:prro/data/services/payment_service.dart' as _i769;
 import 'package:prro/data/services/shift_service.dart' as _i819;
 import 'package:prro/data/services/user_service.dart' as _i169;
 import 'package:prro/di/app_module.dart' as _i745;
 import 'package:prro/features/admin/screens/main_screen/services/api_service.dart'
     as _i545;
+import 'package:prro/services/deep_link_service.dart' as _i866;
+import 'package:prro/services/nfc_payment_service.dart' as _i829;
+import 'package:prro/services/terminal_launcher.dart' as _i1024;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
+import 'package:talker/talker.dart' as _i993;
 
 const String _mock = 'mock';
 const String _prod = 'prod';
@@ -79,6 +86,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => appModule.prefs,
       preResolve: true,
     );
+    gh.singleton<_i993.Talker>(() => appModule.talker());
+    gh.singleton<_i1024.TerminalLauncherI>(() => appModule.terminalLauncher());
+    gh.singleton<_i866.DeepLinkServiceI>(() => appModule.deepLinkService());
     gh.singleton<_i545.ApiService>(() => _i545.ApiService());
     gh.singleton<_i205.UserServiceI>(
       () => _i104.MockUserService(),
@@ -102,6 +112,10 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i1038.MockBackend>(
       () => appModule.mockBackend(),
+      registerFor: {_mock},
+    );
+    gh.singleton<_i844.PaymentRepositoryI>(
+      () => appModule.paymentRepositoryMock(),
       registerFor: {_mock},
     );
     gh.singleton<_i977.LoginRepositoryI>(
@@ -155,10 +169,29 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i566.BalanceService(apiClient: gh<_i219.ApiClientI>()),
       registerFor: {_prod},
     );
+    gh.singleton<_i769.PaymentServiceI>(
+      () => appModule.paymentService(
+        gh<_i219.ApiClientI>(),
+        gh<_i460.SharedPreferences>(),
+      ),
+      registerFor: {_prod},
+    );
+    gh.singleton<_i844.PaymentRepositoryI>(
+      () => appModule.paymentRepository(gh<_i769.PaymentServiceI>()),
+      registerFor: {_prod},
+    );
     gh.singleton<_i296.BalanceRepositoryI>(
       () =>
           _i379.BalanceRepository(balanceService: gh<_i296.BalanceServiceI>()),
       registerFor: {_prod},
+    );
+    gh.singleton<_i829.NfcPaymentServiceI>(
+      () => appModule.nfcPaymentService(
+        gh<_i844.PaymentRepositoryI>(),
+        gh<_i1024.TerminalLauncherI>(),
+        gh<_i866.DeepLinkServiceI>(),
+        gh<_i993.Talker>(),
+      ),
     );
     gh.singleton<_i977.LoginServiceI>(
       () => _i422.LoginService(

@@ -395,6 +395,15 @@ class MockBackend {
           );
         }
         changeKopecks = 0;
+      case PaymentMethod.nfc:
+        // NFC payments are processed externally via PrivatBank Terminal
+        // The amount should match exactly
+        if (payment.tenderedKopecks != totalKopecks) {
+          throw const MockBackendException(
+            'Сума оплати NFC має точно дорівнювати сумі чека.',
+          );
+        }
+        changeKopecks = 0;
     }
 
     final receipt = OrderReceipt(

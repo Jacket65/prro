@@ -1,15 +1,23 @@
 import 'package:prro/core/money.dart';
 
 /// Payment method. Wire form is the lowercase string the backend expects
-/// (`"cash"` / `"card"`).
+/// (`"cash"` / `"card"` / `"nfc"`).
 enum PaymentMethod {
   cash,
-  card;
+  card,
+  nfc;
 
-  String get wire => this == PaymentMethod.cash ? 'cash' : 'card';
+  String get wire => switch (this) {
+    PaymentMethod.cash => 'cash',
+    PaymentMethod.card => 'card',
+    PaymentMethod.nfc => 'nfc',
+  };
 
-  static PaymentMethod fromWire(String? raw) =>
-      raw == 'card' ? PaymentMethod.card : PaymentMethod.cash;
+  static PaymentMethod fromWire(String? raw) => raw == 'card'
+      ? PaymentMethod.card
+      : raw == 'nfc'
+      ? PaymentMethod.nfc
+      : PaymentMethod.cash;
 }
 
 // ── Request DTOs (cart → backend) ────────────────────────────────────────────
