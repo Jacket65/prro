@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 /// Payment configuration constants.
 ///
 /// All values are configurable and should not be hardcoded in business logic.
@@ -17,7 +19,9 @@ class PaymentConfig {
   static const Duration paymentTimeout = Duration(seconds: 120);
 
   /// PrivatBank NFC POS Terminal URI scheme.
-  static const String terminalUriScheme = 'nfcterminal';
+  /// Change this to match your mock terminal app's scheme
+  /// (e.g., 'mocknfc', 'testterminal')
+  static const String terminalUriScheme = 'privatpay';
 
   /// Terminal pay action path.
   static const String terminalPayPath = 'pay';
@@ -26,12 +30,14 @@ class PaymentConfig {
   static String buildTerminalUri(String jwtToken) {
     final uri = Uri(
       scheme: terminalUriScheme,
-      path: terminalPayPath,
+      host: terminalPayPath,
       queryParameters: {
         'token': jwtToken,
         'callback': callbackUri,
       },
     );
-    return uri.toString();
+    final uriString = uri.toString();
+    log('[PaymentConfig] Built terminal URI: $uriString');
+    return uriString;
   }
 }

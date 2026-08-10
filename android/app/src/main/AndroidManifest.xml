@@ -37,6 +37,17 @@
                     android:scheme="prro"
                     android:host="payment"/>
             </intent-filter>
+            <!-- Receive prro://payment callback -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="prro"
+                    android:host="payment" />
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
@@ -53,6 +64,13 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+
+        <intent>
+        <action android:name="android.intent.action.VIEW" />
+        <data
+            android:scheme="privatpay"
+            android:host="pay" />
         </intent>
     </queries>
 </manifest>

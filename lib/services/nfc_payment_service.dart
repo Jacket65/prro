@@ -141,6 +141,14 @@ class TerminalLaunchFailedException implements Exception {
   String toString() => 'TerminalLaunchFailedException: $message';
 }
 
+/// Exception thrown when the terminal launch fails with details.
+class TerminalLaunchException implements Exception {
+  const TerminalLaunchException(this.message);
+  final String message;
+  @override
+  String toString() => 'TerminalLaunchException: $message';
+}
+
 /// Exception thrown when the payment callback times out.
 class PaymentCallbackTimeoutException implements Exception {
   const PaymentCallbackTimeoutException(this.message);
