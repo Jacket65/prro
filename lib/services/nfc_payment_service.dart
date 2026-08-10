@@ -49,7 +49,14 @@ class NfcPaymentService implements NfcPaymentServiceI {
       ..info('🟢 [NFC Payment] Token received', token.toString())
       // Step 2: Launch terminal
       ..info('🔵 [NFC Payment] Launching PrivatBank Terminal...');
-    final launched = await _terminalLauncher.launchTerminal(token.token);
+    final launched = await _terminalLauncher.launchTerminal(
+      jwtToken: token.token,
+      amount: request.amount,
+      currency: request.currency,
+      orderId:
+          request.orderId ?? 'order_${DateTime.now().millisecondsSinceEpoch}',
+      merchantId: request.metadata?['merchantId'] as String?,
+    );
     if (!launched) {
       _talker.error('🔴 [NFC Payment] Failed to launch terminal');
       throw const TerminalLaunchFailedException(

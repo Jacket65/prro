@@ -6,9 +6,15 @@ import 'package:url_launcher/url_launcher.dart';
 /// Service interface for launching the PrivatBank NFC POS Terminal.
 // ignore: one_member_abstracts
 abstract interface class TerminalLauncherI {
-  /// Launches the PrivatBank Terminal with the given JWT token.
+  /// Launches the PrivatBank Terminal with the given payment details.
   /// Returns true if the launch was successful, false otherwise.
-  Future<bool> launchTerminal(String jwtToken);
+  Future<bool> launchTerminal({
+    required String jwtToken,
+    required int amount,
+    required String currency,
+    required String orderId,
+    String? merchantId,
+  });
 }
 
 /// Production implementation of [TerminalLauncherI].
@@ -16,8 +22,20 @@ class TerminalLauncher implements TerminalLauncherI {
   TerminalLauncher();
 
   @override
-  Future<bool> launchTerminal(String jwtToken) async {
-    final uriString = PaymentConfig.buildTerminalUri(jwtToken);
+  Future<bool> launchTerminal({
+    required String jwtToken,
+    required int amount,
+    required String currency,
+    required String orderId,
+    String? merchantId,
+  }) async {
+    final uriString = PaymentConfig.buildTerminalUri(
+      jwtToken: jwtToken,
+      amount: amount,
+      currency: currency,
+      orderId: orderId,
+      merchantId: merchantId,
+    );
     final uri = Uri.parse(uriString);
 
     // Console log for debugging

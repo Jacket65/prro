@@ -26,14 +26,24 @@ class PaymentConfig {
   /// Terminal pay action path.
   static const String terminalPayPath = 'pay';
 
-  /// Builds the terminal launch URI with the given JWT token.
-  static String buildTerminalUri(String jwtToken) {
+  /// Builds the terminal launch URI with the given payment details.
+  static String buildTerminalUri({
+    required String jwtToken,
+    required int amount,
+    required String currency,
+    required String orderId,
+    String? merchantId,
+  }) {
     final uri = Uri(
       scheme: terminalUriScheme,
       host: terminalPayPath,
       queryParameters: {
         'token': jwtToken,
         'callback': callbackUri,
+        'amount': amount.toString(),
+        'currency': currency,
+        'orderId': orderId,
+        'merchantId': ?merchantId,
       },
     );
     final uriString = uri.toString();
