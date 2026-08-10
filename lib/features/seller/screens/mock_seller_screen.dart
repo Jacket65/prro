@@ -140,12 +140,7 @@ class _MockSellerScaffold extends StatelessWidget {
       ),
       body: BlocBuilder<MockShiftCubit, MockShiftState>(
         builder: (context, state) => switch (state) {
-          MockShiftOpen() => const Row(
-            children: [
-              CheckColumn(),
-              Expanded(child: ItemsTiles()),
-            ],
-          ),
+          MockShiftOpen() => const ResponsiveSellerLayout(),
           MockShiftInitial() => const SizedBox.shrink(),
         },
       ),

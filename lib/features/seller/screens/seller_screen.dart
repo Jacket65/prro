@@ -124,12 +124,7 @@ class _SellerScreenState extends State<SellerScreen> {
               ),
               body: BlocBuilder<ShiftCubit, ShiftState>(
                 builder: (context, state) => switch (state) {
-                  ShiftOpen() => const Row(
-                    children: [
-                      CheckColumn(),
-                      Expanded(child: ItemsTiles()),
-                    ],
-                  ),
+                  ShiftOpen() => const ResponsiveSellerLayout(),
                   ShiftNone() => const _OpenShiftGate(),
                   ShiftError(:final message) => _ShiftErrorView(
                     message: message,
