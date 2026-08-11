@@ -55,7 +55,9 @@ class _MyAppState extends State<MyApp> {
   void dispose() {
     unawaited(_authSub?.cancel());
     unawaited(_deepLinkSub?.cancel());
-    unawaited(getIt<DeepLinkServiceI>().dispose());
+    // The deep link service is a DI singleton shared with NfcPaymentService —
+    // closing its stream here would kill payment callbacks for the rest of the
+    // process lifetime. It lives as long as the app does.
     super.dispose();
   }
 

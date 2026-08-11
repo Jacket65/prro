@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:prro/data/mock/mock_backend.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
 import 'package:prro/data/repositories/balance/balance_repository_mock.dart';
@@ -54,11 +55,16 @@ class MockSellerScreen extends StatelessWidget {
           BlocProvider(
             create: (context) => OrdersBloc(
               ordersRepository: context.read<OrdersRepositoryI>(),
+              // The deep link service MUST be the singleton created in DI —
+              // it is the only instance whose init() was called in MyApp, so
+              // it is the only one that actually receives prro:// callbacks
+              // from the terminal. A fresh DeepLinkService() here would expose
+              // a stream that never emits and every payment would time out.
               nfcPaymentService: NfcPaymentService(
                 paymentRepository: PaymentRepositoryMock(),
-                terminalLauncher: TerminalLauncher(),
-                deepLinkService: DeepLinkService(),
-                talker: Talker(),
+                terminalLauncher: GetIt.instance<TerminalLauncherI>(),
+                deepLinkService: GetIt.instance<DeepLinkServiceI>(),
+                talker: GetIt.instance<Talker>(),
               ),
             ),
           ),
