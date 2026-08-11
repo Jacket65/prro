@@ -29,18 +29,22 @@ class DeepLinkService implements DeepLinkServiceI {
 
   @override
   Future<void> init() async {
-    // Handle initial link if app was launched via deep link
+    _subscription = _appLinks.uriLinkStream.listen(
+      (uri) {
+        if (_isPaymentCallback(uri)) {
+          _controller.add(uri);
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        // optionally log
+      },
+    );
+
     final initialUri = await _appLinks.getInitialLink();
+
     if (initialUri != null && _isPaymentCallback(initialUri)) {
       _controller.add(initialUri);
     }
-
-    // Listen for subsequent deep links
-    _subscription = _appLinks.uriLinkStream.listen((uri) {
-      if (_isPaymentCallback(uri)) {
-        _controller.add(uri);
-      }
-    });
   }
 
   @override

@@ -47,6 +47,7 @@ void main() {
         amount: 15000,
         currency: 'UAH',
         description: 'Test payment',
+        orderId: 'test_order',
       );
       final token = TerminalToken(
         token: 'test_jwt_token',
@@ -65,7 +66,15 @@ void main() {
       when(() => mockRepository.createPaymentToken(request)).thenAnswer(
         (_) async => token,
       );
-      when(() => mockTerminalLauncher.launchTerminal(token.token)).thenAnswer(
+      when(
+        () => mockTerminalLauncher.launchTerminal(
+          jwtToken: any<String>(named: 'jwtToken'),
+          amount: any<int>(named: 'amount'),
+          currency: any<String>(named: 'currency'),
+          orderId: any<String>(named: 'orderId'),
+          merchantId: any<String?>(named: 'merchantId'),
+        ),
+      ).thenAnswer(
         (_) async => true,
       );
       when(() => mockDeepLinkService.onDeepLink).thenAnswer(
@@ -83,7 +92,15 @@ void main() {
       expect(paymentResult.status, equals('SUCCESS'));
       expect(paymentResult.transactionId, equals('txn_12345'));
       verify(() => mockRepository.createPaymentToken(request)).called(1);
-      verify(() => mockTerminalLauncher.launchTerminal(token.token)).called(1);
+      verify(
+        () => mockTerminalLauncher.launchTerminal(
+          jwtToken: token.token,
+          amount: request.amount,
+          currency: request.currency,
+          orderId: request.orderId!,
+          merchantId: request.metadata?['merchantId'] as String?,
+        ),
+      ).called(1);
       verify(() => mockRepository.verifyPayment('txn_12345')).called(1);
     });
 
@@ -95,6 +112,7 @@ void main() {
           amount: 15000,
           currency: 'UAH',
           description: 'Test payment',
+          orderId: 'test_order',
         );
         final token = TerminalToken(
           token: 'test_jwt_token',
@@ -104,7 +122,18 @@ void main() {
         when(() => mockRepository.createPaymentToken(request)).thenAnswer(
           (_) async => token,
         );
-        when(() => mockTerminalLauncher.launchTerminal(token.token)).thenAnswer(
+        when(() => mockDeepLinkService.onDeepLink).thenAnswer(
+          (_) => const Stream.empty(),
+        );
+        when(
+          () => mockTerminalLauncher.launchTerminal(
+            jwtToken: any<String>(named: 'jwtToken'),
+            amount: any<int>(named: 'amount'),
+            currency: any<String>(named: 'currency'),
+            orderId: any<String>(named: 'orderId'),
+            merchantId: any<String?>(named: 'merchantId'),
+          ),
+        ).thenAnswer(
           (_) async => false,
         );
 
@@ -122,6 +151,7 @@ void main() {
           amount: 15000,
           currency: 'UAH',
           description: 'Test payment',
+          orderId: 'test_order',
         );
         final token = TerminalToken(
           token: 'test_jwt_token',
@@ -131,7 +161,15 @@ void main() {
         when(() => mockRepository.createPaymentToken(request)).thenAnswer(
           (_) async => token,
         );
-        when(() => mockTerminalLauncher.launchTerminal(token.token)).thenAnswer(
+        when(
+          () => mockTerminalLauncher.launchTerminal(
+            jwtToken: token.token,
+            amount: any<int>(named: 'amount'),
+            currency: any<String>(named: 'currency'),
+            orderId: any<String>(named: 'orderId'),
+            merchantId: any<String?>(named: 'merchantId'),
+          ),
+        ).thenAnswer(
           (_) async => true,
         );
         when(() => mockDeepLinkService.onDeepLink).thenAnswer(
@@ -162,6 +200,7 @@ void main() {
           amount: 15000,
           currency: 'UAH',
           description: 'Test payment',
+          orderId: 'test_order',
         );
         final token = TerminalToken(
           token: 'test_jwt_token',
@@ -171,7 +210,15 @@ void main() {
         when(() => mockRepository.createPaymentToken(request)).thenAnswer(
           (_) async => token,
         );
-        when(() => mockTerminalLauncher.launchTerminal(token.token)).thenAnswer(
+        when(
+          () => mockTerminalLauncher.launchTerminal(
+            jwtToken: token.token,
+            amount: any<int>(named: 'amount'),
+            currency: any<String>(named: 'currency'),
+            orderId: any<String>(named: 'orderId'),
+            merchantId: any<String?>(named: 'merchantId'),
+          ),
+        ).thenAnswer(
           (_) async => true,
         );
         when(() => mockDeepLinkService.onDeepLink).thenAnswer(
@@ -195,6 +242,7 @@ void main() {
           amount: 15000,
           currency: 'UAH',
           description: 'Test payment',
+          orderId: 'test_order',
         );
         final token = TerminalToken(
           token: 'test_jwt_token',
@@ -210,7 +258,15 @@ void main() {
         when(() => mockRepository.createPaymentToken(request)).thenAnswer(
           (_) async => token,
         );
-        when(() => mockTerminalLauncher.launchTerminal(token.token)).thenAnswer(
+        when(
+          () => mockTerminalLauncher.launchTerminal(
+            jwtToken: token.token,
+            amount: any<int>(named: 'amount'),
+            currency: any<String>(named: 'currency'),
+            orderId: any<String>(named: 'orderId'),
+            merchantId: any<String?>(named: 'merchantId'),
+          ),
+        ).thenAnswer(
           (_) async => true,
         );
         when(() => mockDeepLinkService.onDeepLink).thenAnswer(

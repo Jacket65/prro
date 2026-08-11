@@ -49,6 +49,7 @@ class NfcPaymentService implements NfcPaymentServiceI {
       ..info('🟢 [NFC Payment] Token received', token.toString())
       // Step 2: Launch terminal
       ..info('🔵 [NFC Payment] Launching PrivatBank Terminal...');
+    final callbackFuture = _waitForCallback();
     final launched = await _terminalLauncher.launchTerminal(
       jwtToken: token.token,
       amount: request.amount,
@@ -68,7 +69,7 @@ class NfcPaymentService implements NfcPaymentServiceI {
       ..info('🟢 [NFC Payment] Terminal launched successfully')
       // Step 3: Wait for callback with timeout
       ..info('🔵 [NFC Payment] Waiting for payment callback...');
-    final transactionId = await _waitForCallback();
+    final transactionId = await callbackFuture;
     _talker
       ..info(
         '🟢 [NFC Payment] Callback received',
