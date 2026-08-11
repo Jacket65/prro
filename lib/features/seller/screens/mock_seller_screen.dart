@@ -91,26 +91,16 @@ class _MockSellerScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        title: Row(
-          children: [
-            TextButton.icon(
-              onPressed: () => _logout(context),
-              icon: const Icon(
-                Icons.arrow_back_ios,
-                color: Colors.white,
-              ),
-              label: const Text(
-                'Logout',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+      appBar: ResponsiveSellerAppBar(
+        onLogout: () => _logout(context),
+        onCloseShift: () => _closeShift(context),
+        theme: theme,
+        shiftMenuBuilder: (context, {required isNarrow}) =>
             BlocBuilder<MockShiftCubit, MockShiftState>(
               builder: (context, state) {
                 if (state is! MockShiftOpen) return const SizedBox.shrink();
                 return CustomPopupMenu(
-                  name: 'Меню',
+                  name: isNarrow ? '' : 'Меню',
                   icon: Icons.menu,
                   widgets: [
                     PopupMenuItem<void>(
@@ -121,22 +111,6 @@ class _MockSellerScaffold extends StatelessWidget {
                 );
               },
             ),
-            CustomPopupMenu(
-              name: 'Каса',
-              icon: Icons.attach_money_sharp,
-              widgets: [
-                BlocBuilder<BalanceCubit, BalanceState>(
-                  bloc: context.read<BalanceCubit>(),
-                  builder: (blocContext, state) => _buildBalance(state),
-                ),
-              ],
-            ),
-            const Spacer(),
-            const SearchField(),
-            const CustomPopupMenu(name: '', icon: Icons.notifications),
-            _buildUsername(context),
-          ],
-        ),
       ),
       body: BlocBuilder<MockShiftCubit, MockShiftState>(
         builder: (context, state) => switch (state) {
@@ -145,47 +119,6 @@ class _MockSellerScaffold extends StatelessWidget {
         },
       ),
     );
-  }
-
-  Widget _buildUsername(BuildContext context) {
-    return BlocBuilder<UserBloc, UserState>(
-      builder: (_, state) {
-        return switch (state) {
-          UserLoaded(:final username) => CustomPopupMenu(
-            name: username,
-            icon: Icons.lock,
-          ),
-          UserLoading() => const CircularProgressIndicator(),
-          UserError() => const CustomPopupMenu(name: 'Error', icon: Icons.lock),
-          _ => const CustomPopupMenu(name: '...', icon: Icons.lock),
-        };
-      },
-    );
-  }
-
-  Widget _buildBalance(BalanceState state) {
-    switch (state) {
-      case BalanceLoaded(:final balance):
-        return Text('balance: ${balance.toStringAsFixed(2)}');
-      case BalanceLoading():
-        return const Row(
-          children: [
-            Text('balance: '),
-            SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          ],
-        );
-      case BalanceError(:final message):
-        return Text(
-          'Помилка: $message',
-          style: const TextStyle(color: Colors.redAccent),
-        );
-      default:
-        return const Text('balance: ...');
-    }
   }
 
   Future<void> _logout(BuildContext context) async {

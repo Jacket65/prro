@@ -16,6 +16,11 @@ class ResponsiveSellerLayout extends StatelessWidget {
           return Column(
             children: [
               const SizedBox(height: 8),
+              const Flexible(
+                flex: 2,
+                child: ItemsTiles(),
+              ),
+
               Flexible(
                 flex: 3,
                 child: ConstrainedBox(
@@ -24,11 +29,6 @@ class ResponsiveSellerLayout extends StatelessWidget {
                   ),
                   child: const CheckColumn(),
                 ),
-              ),
-              const SizedBox(height: 8),
-              const Flexible(
-                flex: 2,
-                child: ItemsTiles(),
               ),
             ],
           );

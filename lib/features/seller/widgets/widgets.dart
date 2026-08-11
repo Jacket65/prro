@@ -8,6 +8,7 @@ export 'custom_popup_menu.dart';
 export 'items_tiles.dart';
 export 'logout_confirmation_dialog.dart';
 export 'product_tiles.dart';
+export 'responsive_seller_app_bar.dart';
 export 'responsive_seller_layout.dart';
 export 'search_field.dart';
 export 'seller_list_item.dart';
