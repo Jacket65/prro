@@ -6,12 +6,9 @@ class BackendConfig {
   /// Type of backend to use: 'real' or 'mock'
   static const String backendType = String.fromEnvironment(
     'BACKEND_TYPE',
-    defaultValue: 'real',
+    defaultValue: 'mock',
   );
 
   /// Whether to use mock backend
   static bool get useMock => backendType == 'mock';
-
-  /// Whether to use real backend
-  static bool get useReal => backendType == 'real';
 }

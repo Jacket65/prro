@@ -2,14 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/data/mock/mock_backend.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
-import 'package:prro/data/repositories/balance/balance_repository_mock.dart';
 import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
-import 'package:prro/data/repositories/items_repository/items_repository_mock.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
-import 'package:prro/data/repositories/orders_repository/orders_repository_mock.dart';
-import 'package:prro/data/repositories/payment_repository/payment_repository_mock.dart';
+import 'package:prro/di/di.dart';
 import 'package:prro/features/auth/auth.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/seller/bloc/balance/balance_cubit.dart';
@@ -20,10 +16,7 @@ import 'package:prro/features/seller/widgets/widgets.dart';
 import 'package:prro/features/shift/bloc/mock_shift_cubit.dart';
 import 'package:prro/features/shift/widgets/close_shift_dialog.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
-import 'package:prro/services/deep_link_service.dart';
 import 'package:prro/services/nfc_payment_service.dart';
-import 'package:prro/services/terminal_launcher.dart';
-import 'package:talker/talker.dart';
 
 /// Seller screen that works with mock data without backend API calls.
 class MockSellerScreen extends StatelessWidget {
@@ -32,53 +25,35 @@ class MockSellerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return MultiRepositoryProvider(
+    return MultiBlocProvider(
       providers: [
-        RepositoryProvider<ItemsRepositoryI>(
-          create: (context) => ItemsRepositoryMock(MockBackend.instance),
+        BlocProvider(
+          create: (context) => ItemsTilesBloc(
+            itemsRepository: context.read<ItemsRepositoryI>(),
+          )..add(ItemsTilesStarted()),
         ),
-        RepositoryProvider<OrdersRepositoryI>(
-          create: (context) => OrdersRepositoryMock(MockBackend.instance),
+        BlocProvider(
+          create: (context) => OrdersBloc(
+            ordersRepository: context.read<OrdersRepositoryI>(),
+            nfcPaymentService: getIt<NfcPaymentServiceI>(),
+          ),
         ),
-        RepositoryProvider<BalanceRepositoryI>(
-          create: (context) => BalanceRepositoryMock(),
+        BlocProvider(
+          create: (context) =>
+              CatalogSearchCubit(context.read<ItemsRepositoryI>()),
+        ),
+        BlocProvider(
+          create: (context) {
+            final cubit = BalanceCubit(context.read<BalanceRepositoryI>());
+            unawaited(cubit.fetchBalance());
+            return cubit;
+          },
+        ),
+        BlocProvider(
+          create: (context) => MockShiftCubit()..loadMockShift(),
         ),
       ],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (context) => ItemsTilesBloc(
-              itemsRepository: context.read<ItemsRepositoryI>(),
-            )..add(ItemsTilesStarted()),
-          ),
-          BlocProvider(
-            create: (context) => OrdersBloc(
-              ordersRepository: context.read<OrdersRepositoryI>(),
-              nfcPaymentService: NfcPaymentService(
-                paymentRepository: PaymentRepositoryMock(),
-                terminalLauncher: TerminalLauncher(),
-                deepLinkService: DeepLinkService(),
-                talker: Talker(),
-              ),
-            ),
-          ),
-          BlocProvider(
-            create: (context) =>
-                CatalogSearchCubit(context.read<ItemsRepositoryI>()),
-          ),
-          BlocProvider(
-            create: (context) {
-              final cubit = BalanceCubit(context.read<BalanceRepositoryI>());
-              unawaited(cubit.fetchBalance());
-              return cubit;
-            },
-          ),
-          BlocProvider(
-            create: (context) => MockShiftCubit()..loadMockShift(),
-          ),
-        ],
-        child: _MockSellerScaffold(theme: theme),
-      ),
+      child: _MockSellerScaffold(theme: theme),
     );
   }
 }
