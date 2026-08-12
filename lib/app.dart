@@ -2,19 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 import 'package:prro/core/theme/theme.dart';
 import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
 import 'package:prro/data/repositories/shift_repository/shift_repo_i.dart';
 import 'package:prro/data/repositories/user_repository/user_repo_i.dart';
+import 'package:prro/di/di.dart';
 import 'package:prro/features/auth/auth.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/shift/bloc/bloc.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
 import 'package:prro/services/deep_link_service.dart';
-
-final GetIt getIt = GetIt.instance;
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});

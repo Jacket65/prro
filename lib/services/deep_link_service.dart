@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app_links/app_links.dart';
+import 'package:injectable/injectable.dart';
 import 'package:prro/config/payment_config.dart';
 
 /// Service interface for handling deep links
@@ -17,6 +18,7 @@ abstract interface class DeepLinkServiceI {
 }
 
 /// Production implementation of [DeepLinkServiceI] using app_links package.
+@LazySingleton(as: DeepLinkServiceI)
 class DeepLinkService implements DeepLinkServiceI {
   DeepLinkService();
 

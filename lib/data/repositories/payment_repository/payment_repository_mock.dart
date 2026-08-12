@@ -1,9 +1,14 @@
+import 'package:injectable/injectable.dart';
 import 'package:prro/data/api/models/payment/payment_request.dart';
 import 'package:prro/data/api/models/payment/payment_result.dart';
 import 'package:prro/data/api/models/payment/payment_token.dart';
 import 'package:prro/data/repositories/payment_repository/payment_repo_i.dart';
 
 /// Mock implementation of [PaymentRepositoryI] for testing.
+@LazySingleton(
+  as: PaymentRepositoryI,
+  env: [Environment.mock],
+)
 class PaymentRepositoryMock implements PaymentRepositoryI {
   PaymentRepositoryMock();
 

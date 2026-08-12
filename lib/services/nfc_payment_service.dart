@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:injectable/injectable.dart';
 import 'package:prro/config/payment_config.dart';
 import 'package:prro/data/api/models/payment/payment_request.dart';
 import 'package:prro/data/api/models/payment/payment_result.dart';
@@ -23,14 +24,14 @@ abstract interface class NfcPaymentServiceI {
 }
 
 /// Production implementation of [NfcPaymentServiceI].
+@LazySingleton(as: NfcPaymentServiceI)
 class NfcPaymentService implements NfcPaymentServiceI {
   NfcPaymentService({
     required this._paymentRepository,
     required this._terminalLauncher,
     required this._deepLinkService,
     required this._talker,
-    Duration? paymentTimeout,
-  }) : _paymentTimeout = paymentTimeout ?? PaymentConfig.paymentTimeout;
+  }) : _paymentTimeout = PaymentConfig.paymentTimeout;
 
   final PaymentRepositoryI _paymentRepository;
   final TerminalLauncherI _terminalLauncher;

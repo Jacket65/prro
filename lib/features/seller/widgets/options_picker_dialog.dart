@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/core/json.dart';
 import 'package:prro/data/api/models/models.dart';
 import 'package:prro/data/repositories/items_repository/items_repository.dart';
+import 'package:prro/di/di.dart';
 import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 import 'package:prro/features/seller/widgets/bean_picker_dialog.dart';
 import 'package:prro/features/seller/widgets/pos_quantity_formatter.dart';
@@ -67,7 +68,7 @@ Bean? _defaultBean(List<BeanGroup> beanGroups) {
 /// [openLineEditor]).
 Future<void> startAddToCart(BuildContext context, Product variant) async {
   final ordersBloc = context.read<OrdersBloc>();
-  final repo = context.read<ItemsRepositoryI>();
+  final repo = getIt<ItemsRepositoryI>();
 
   final variantId = int.tryParse(variant.id);
   var groups = const <OptionGroup>[];
@@ -96,19 +97,24 @@ Future<void> startAddToCart(BuildContext context, Product variant) async {
 /// quantity block always shows,
 /// so weight goods with no options are editable too.
 Future<void> openLineEditor(BuildContext context, Product line) async {
-  final repo = context.read<ItemsRepositoryI>();
+  final repo = getIt<ItemsRepositoryI>();
+
   final variantId = int.tryParse(line.id);
   var groups = const <OptionGroup>[];
   var beanGroups = const <BeanGroup>[];
+
   if (variantId != null) {
     final res = await Future.wait([
       repo.getVariantOptions(variantId),
       repo.getVariantBeans(variantId),
     ]);
+
     groups = res[0] as List<OptionGroup>;
     beanGroups = res[1] as List<BeanGroup>;
   }
+
   if (!context.mounted) return;
+
   await showDialog<void>(
     context: context,
     builder: (_) => BlocProvider.value(

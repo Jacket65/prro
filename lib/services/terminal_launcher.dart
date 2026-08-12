@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:injectable/injectable.dart';
 import 'package:prro/config/payment_config.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -18,6 +19,7 @@ abstract interface class TerminalLauncherI {
 }
 
 /// Production implementation of [TerminalLauncherI].
+@LazySingleton(as: TerminalLauncherI)
 class TerminalLauncher implements TerminalLauncherI {
   TerminalLauncher();
 

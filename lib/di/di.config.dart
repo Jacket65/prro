@@ -40,6 +40,10 @@ import 'package:prro/data/repositories/orders_repository/orders_repository_mock.
     as _i499;
 import 'package:prro/data/repositories/payment_repository/payment_repo_i.dart'
     as _i844;
+import 'package:prro/data/repositories/payment_repository/payment_repository_impl.dart'
+    as _i1057;
+import 'package:prro/data/repositories/payment_repository/payment_repository_mock.dart'
+    as _i835;
 import 'package:prro/data/repositories/shift_repository/shift_repo_i.dart'
     as _i957;
 import 'package:prro/data/repositories/shift_repository/shift_repository_impl.dart'
@@ -87,8 +91,6 @@ extension GetItInjectableX on _i174.GetIt {
       preResolve: true,
     );
     gh.singleton<_i993.Talker>(() => appModule.talker());
-    gh.singleton<_i1024.TerminalLauncherI>(() => appModule.terminalLauncher());
-    gh.singleton<_i866.DeepLinkServiceI>(() => appModule.deepLinkService());
     gh.singleton<_i545.ApiService>(() => _i545.ApiService());
     gh.singleton<_i205.UserServiceI>(
       () => _i104.MockUserService(),
@@ -98,6 +100,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i976.MockBalanceService(),
       registerFor: {_mock},
     );
+    gh.lazySingleton<_i866.DeepLinkServiceI>(() => _i866.DeepLinkService());
     gh.singleton<_i957.ShiftServiceI>(
       () => _i924.MockShiftService(),
       registerFor: {_mock},
@@ -106,16 +109,17 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i797.BalanceRepositoryMock(),
       registerFor: {_mock},
     );
+    gh.lazySingleton<_i1024.TerminalLauncherI>(() => _i1024.TerminalLauncher());
     gh.singleton<_i977.LoginServiceI>(
       () => _i241.MockLoginService(),
       registerFor: {_mock},
     );
-    gh.singleton<_i1038.MockBackend>(
-      () => appModule.mockBackend(),
+    gh.lazySingleton<_i844.PaymentRepositoryI>(
+      () => _i835.PaymentRepositoryMock(),
       registerFor: {_mock},
     );
-    gh.singleton<_i844.PaymentRepositoryI>(
-      () => appModule.paymentRepositoryMock(),
+    gh.singleton<_i1038.MockBackend>(
+      () => appModule.mockBackend(),
       registerFor: {_mock},
     );
     gh.singleton<_i977.LoginRepositoryI>(
@@ -176,22 +180,14 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       registerFor: {_prod},
     );
-    gh.singleton<_i844.PaymentRepositoryI>(
-      () => appModule.paymentRepository(gh<_i769.PaymentServiceI>()),
+    gh.lazySingleton<_i844.PaymentRepositoryI>(
+      () => _i1057.PaymentRepositoryImpl(gh<_i769.PaymentServiceI>()),
       registerFor: {_prod},
     );
     gh.singleton<_i296.BalanceRepositoryI>(
       () =>
           _i379.BalanceRepository(balanceService: gh<_i296.BalanceServiceI>()),
       registerFor: {_prod},
-    );
-    gh.singleton<_i829.NfcPaymentServiceI>(
-      () => appModule.nfcPaymentService(
-        gh<_i844.PaymentRepositoryI>(),
-        gh<_i1024.TerminalLauncherI>(),
-        gh<_i866.DeepLinkServiceI>(),
-        gh<_i993.Talker>(),
-      ),
     );
     gh.singleton<_i977.LoginServiceI>(
       () => _i422.LoginService(
@@ -206,6 +202,14 @@ extension GetItInjectableX on _i174.GetIt {
         prefs: gh<_i460.SharedPreferences>(),
       ),
       registerFor: {_prod},
+    );
+    gh.lazySingleton<_i829.NfcPaymentServiceI>(
+      () => _i829.NfcPaymentService(
+        paymentRepository: gh<_i844.PaymentRepositoryI>(),
+        terminalLauncher: gh<_i1024.TerminalLauncherI>(),
+        deepLinkService: gh<_i866.DeepLinkServiceI>(),
+        talker: gh<_i993.Talker>(),
+      ),
     );
     gh.singleton<_i957.ShiftServiceI>(
       () => _i819.ShiftService(

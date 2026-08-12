@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
 import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
+import 'package:prro/di/di.dart';
 import 'package:prro/features/auth/auth.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/seller/bloc/balance/balance_cubit.dart';
@@ -18,8 +18,6 @@ import 'package:prro/features/shift/widgets/close_shift_dialog.dart';
 import 'package:prro/features/shift/widgets/open_shift_dialog.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
 import 'package:prro/services/nfc_payment_service.dart';
-
-final GetIt getIt = GetIt.instance;
 
 class SellerScreen extends StatefulWidget {
   const SellerScreen({super.key});
