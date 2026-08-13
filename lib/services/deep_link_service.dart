@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:app_links/app_links.dart';
 import 'package:injectable/injectable.dart';
@@ -25,33 +26,62 @@ class DeepLinkService implements DeepLinkServiceI {
   final _appLinks = AppLinks();
   final _controller = StreamController<Uri>.broadcast();
   StreamSubscription<Uri>? _subscription;
+  bool _initialized = false;
 
   @override
   Stream<Uri> get onDeepLink => _controller.stream;
 
   @override
   Future<void> init() async {
+    // The service is a DI singleton: initializing twice would stack a second
+    // app_links subscription and emit every callback twice.
+    if (_initialized) {
+      log('[DeepLinkService] Already initialized, skipping');
+      return;
+    }
+    _initialized = true;
+
     _subscription = _appLinks.uriLinkStream.listen(
-      (uri) {
-        if (_isPaymentCallback(uri)) {
-          _controller.add(uri);
-        }
-      },
+      _handleUri,
       onError: (Object error, StackTrace stackTrace) {
-        // optionally log
+        log('[DeepLinkService] Link stream error: $error');
       },
     );
-
+    log('[DeepLinkService] Listening for ${PaymentConfig.callbackUri}');
     final initialUri = await _appLinks.getInitialLink();
 
-    if (initialUri != null && _isPaymentCallback(initialUri)) {
-      _controller.add(initialUri);
+    if (initialUri != null) {
+      log('[DeepLinkService] Initial link: $initialUri');
+      _handleUri(initialUri);
     }
+  }
+
+  void _handleUri(Uri uri) {
+    log('[DeepLinkService] Incoming link: $uri');
+    if (!_isPaymentCallback(uri)) {
+      log(
+        '[DeepLinkService] Ignored — expected '
+        '${PaymentConfig.callbackScheme}://${PaymentConfig.callbackHost}, '
+        'got ${uri.scheme}://${uri.host}',
+      );
+      return;
+    }
+    log('[DeepLinkService] Payment callback params: ${uri.queryParameters}');
+    if (_controller.isClosed) {
+      log('[DeepLinkService] Controller closed, callback dropped');
+      return;
+    }
+    if (!_controller.hasListener) {
+      log('[DeepLinkService] WARNING: no listener attached, callback dropped');
+    }
+    _controller.add(uri);
   }
 
   @override
   Future<void> dispose() async {
+    _initialized = false;
     await _subscription?.cancel();
+    _subscription = null;
     await _controller.close();
   }
 

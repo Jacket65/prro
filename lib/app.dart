@@ -12,7 +12,6 @@ import 'package:prro/features/auth/auth.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/shift/bloc/bloc.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
-import 'package:prro/services/deep_link_service.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -24,7 +23,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   StreamSubscription<void>? _authSub;
-  StreamSubscription<Uri>? _deepLinkSub;
 
   @override
   void initState() {
@@ -35,25 +33,11 @@ class _MyAppState extends State<MyApp> {
         (route) => false,
       );
     });
-
-    // Initialize deep link service for NFC POS payment callbacks
-    unawaited(_initDeepLinkService());
-  }
-
-  Future<void> _initDeepLinkService() async {
-    final deepLinkService = getIt<DeepLinkServiceI>();
-    await deepLinkService.init();
-    _deepLinkSub = deepLinkService.onDeepLink.listen((uri) {
-      // Deep link callbacks are handled by NfcPaymentService internally
-      // This is just to ensure the service is listening
-    });
   }
 
   @override
   void dispose() {
     unawaited(_authSub?.cancel());
-    unawaited(_deepLinkSub?.cancel());
-    unawaited(getIt<DeepLinkServiceI>().dispose());
     super.dispose();
   }
 
