@@ -72,7 +72,8 @@ class DeepLinkService implements DeepLinkServiceI {
       return;
     }
     if (!_controller.hasListener) {
-      log('[DeepLinkService] WARNING: no listener attached, callback dropped');
+      log('[DeepLinkService] No active payment listener; callback ignored');
+      return;
     }
     _controller.add(uri);
   }

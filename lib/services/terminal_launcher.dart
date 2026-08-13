@@ -8,8 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 // ignore: one_member_abstracts
 abstract interface class TerminalLauncherI {
   /// Launches the PrivatBank Terminal with the given payment details.
-  /// Returns true if the launch was successful, false otherwise.
-  Future<bool> launchTerminal({
+  /// Throws [TerminalLaunchException] if the launch fails.
+  Future<void> launchTerminal({
     required String jwtToken,
     required int amount,
     required String currency,
@@ -24,7 +24,7 @@ class TerminalLauncher implements TerminalLauncherI {
   TerminalLauncher();
 
   @override
-  Future<bool> launchTerminal({
+  Future<void> launchTerminal({
     required String jwtToken,
     required int amount,
     required String currency,
@@ -45,36 +45,31 @@ class TerminalLauncher implements TerminalLauncherI {
     log(
       '[TerminalLauncher] Terminal scheme: ${PaymentConfig.terminalUriScheme}',
     );
-
-    // Pre-check: verify the terminal app can be launched
-    final canLaunch = await canLaunchUrl(uri);
-    log('[TerminalLauncher] canLaunchUrl check: $canLaunch');
-    if (!canLaunch) {
-      log(
-        '[TerminalLauncher] ERROR: No app handles scheme '
-        '"${PaymentConfig.terminalUriScheme}"',
-      );
-      throw const TerminalLaunchException(
-        'PrivatBank Terminal app (scheme: ${PaymentConfig.terminalUriScheme}) '
-        'is not installed. Please install the mock terminal app.',
-      );
-    }
-
     try {
       final launched = await launchUrl(
         uri,
         mode: LaunchMode.externalApplication,
       );
-      log('[TerminalLauncher] Launch result: $launched');
-      return launched;
+
+      if (!launched) {
+        throw const TerminalLaunchException(
+          'Не вдалося відкрити PrivatBank Terminal. '
+          'Переконайтеся, що застосунок встановлено.',
+        );
+      }
+
+      log('[TerminalLauncher] Terminal launched successfully');
     } on TerminalLaunchException {
       rethrow;
-    } on Exception catch (e) {
-      // Console log for debugging
-      log('[TerminalLauncher] ERROR: $e');
-      // Log the specific error for debugging
+    } on Exception catch (e, st) {
+      log(
+        '[TerminalLauncher] Failed to launch terminal',
+        error: e,
+        stackTrace: st,
+      );
+
       throw TerminalLaunchException(
-        'Failed to launch PrivatBank Terminal: $e',
+        'Не вдалося відкрити PrivatBank Terminal: $e',
       );
     }
   }
