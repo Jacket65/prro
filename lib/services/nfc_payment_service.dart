@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:injectable/injectable.dart';
+import 'package:meta/meta.dart';
 import 'package:prro/config/payment_config.dart';
 import 'package:prro/data/api/models/payment/payment_request.dart';
 import 'package:prro/data/api/models/payment/payment_result.dart';
@@ -31,13 +32,20 @@ class NfcPaymentService implements NfcPaymentServiceI {
     required this._terminalLauncher,
     required this._deepLinkService,
     required this._talker,
-  }) : _paymentTimeout = PaymentConfig.paymentTimeout;
+  });
 
   final PaymentRepositoryI _paymentRepository;
   final TerminalLauncherI _terminalLauncher;
   final DeepLinkServiceI _deepLinkService;
   final Talker _talker;
-  final Duration _paymentTimeout;
+  Duration _paymentTimeout = PaymentConfig.paymentTimeout;
+
+  /// Callback timeout (defaults to [PaymentConfig.paymentTimeout]).
+  Duration get paymentTimeout => _paymentTimeout;
+
+  /// Overrides the callback timeout (used by tests).
+  @visibleForTesting
+  set paymentTimeout(Duration timeout) => _paymentTimeout = timeout;
 
   @override
   Future<PaymentResult> startPayment(CreatePaymentRequest request) async {
@@ -46,17 +54,18 @@ class NfcPaymentService implements NfcPaymentServiceI {
       // Step 1: Create payment token
       ..info('🔵 [NFC Payment] Creating payment token...');
     final token = await _paymentRepository.createPaymentToken(request);
-    _talker
-      ..info('🟢 [NFC Payment] Token received', token.toString())
-      // Step 2: Launch terminal
-      ..info('🔵 [NFC Payment] Launching PrivatBank Terminal...');
+    _talker.info('🟢 [NFC Payment] Token received', token.toString());
     final callbackFuture = _waitForCallback();
+
+    // Step 2: Launch terminal
+    final orderId =
+        request.orderId ?? 'order_${DateTime.now().millisecondsSinceEpoch}';
+    _talker.info('🔵 [NFC Payment] Launching PrivatBank Terminal...');
     final launched = await _terminalLauncher.launchTerminal(
       jwtToken: token.token,
       amount: request.amount,
       currency: request.currency,
-      orderId:
-          request.orderId ?? 'order_${DateTime.now().millisecondsSinceEpoch}',
+      orderId: orderId,
       merchantId: request.metadata?['merchantId'] as String?,
     );
     if (!launched) {
@@ -86,59 +95,44 @@ class NfcPaymentService implements NfcPaymentServiceI {
 
   /// Waits for the deep link callback with a timeout.
   Future<String> _waitForCallback() async {
-    final completer = Completer<String>();
-    late StreamSubscription<Uri> subscription;
-
-    // Set up timeout
-    final timeoutTimer = Timer(_paymentTimeout, () {
-      if (!completer.isCompleted) {
-        _talker.warning(
-          '🟡 [NFC Payment] Payment timeout after'
-          '${_paymentTimeout.inSeconds}s',
-        );
-        completer.completeError(
-          const PaymentCallbackTimeoutException(
-            'Час очікування оплати вийшов. Спробуйте ще раз.',
-          ),
-        );
-      }
-    });
-
-    // Listen for callback
-    subscription = _deepLinkService.onDeepLink.listen((uri) {
-      if (!completer.isCompleted) {
-        final transactionId = _extractTransactionId(uri);
-        if (transactionId != null) {
-          _talker.info(
-            '🟢 [NFC Payment] Extracted transactionId from callback',
-            transactionId,
-          );
-          completer.complete(transactionId);
-        } else {
-          _talker.warning(
-            '🟡 [NFC Payment] Callback received but no transactionId found',
-            uri.toString(),
-          );
-          completer.completeError(
-            InvalidCallbackException('Невірний формат callback: $uri'),
-          );
-        }
-      }
-    });
-
     try {
-      return await completer.future;
-    } finally {
-      timeoutTimer.cancel();
-      await subscription.cancel();
+      final uri = await _deepLinkService.onDeepLink
+          .firstWhere(
+            (uri) => _extractTransactionId(uri) != null,
+          )
+          .timeout(_paymentTimeout);
+
+      final transactionId = _extractTransactionId(uri)!;
+
+      _talker.info(
+        '🟢 [NFC Payment] Extracted transactionId',
+        transactionId,
+      );
+
+      return transactionId;
+    } on TimeoutException {
+      _talker.warning(
+        '🟡 [NFC Payment] Payment timeout after '
+        '${_paymentTimeout.inSeconds}s',
+      );
+
+      throw const PaymentCallbackTimeoutException(
+        'Час очікування оплати вийшов. Спробуйте ще раз.',
+      );
     }
   }
 
   /// Extracts transaction ID from the callback URI.
   String? _extractTransactionId(Uri uri) {
-    // Expected format: prro://payment?transaction_id=xxx&status=xxx
-    return uri.queryParameters['transaction_id'] ??
+    final transactionId =
+        uri.queryParameters['transaction_id'] ??
         uri.queryParameters['transactionId'];
+
+    if (transactionId == null || transactionId.isEmpty) {
+      return null;
+    }
+
+    return transactionId;
   }
 }
 

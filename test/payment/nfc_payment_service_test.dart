@@ -182,7 +182,7 @@ void main() {
           terminalLauncher: mockTerminalLauncher,
           deepLinkService: mockDeepLinkService,
           talker: mockTalker,
-        );
+        )..paymentTimeout = const Duration(milliseconds: 100);
 
         expect(
           () => testService.startPayment(request),
