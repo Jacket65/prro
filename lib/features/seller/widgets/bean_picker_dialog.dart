@@ -5,9 +5,9 @@ import 'package:prro/data/api/models/models.dart';
 /// catalogue stays manageable: type to filter across all groups, or browse by
 /// group when the search is empty. Returns the picked [Bean] (or null).
 class BeanPickerDialog extends StatefulWidget {
-
   const BeanPickerDialog({
-    required this.groups, super.key,
+    required this.groups,
+    super.key,
     this.selectedBeanId,
     this.popular = const [],
   });
@@ -168,9 +168,7 @@ class _BeanPickerDialogState extends State<BeanPickerDialog> {
       title: Text(b.name),
       subtitle: group == null ? null : Text(group),
       selected: selected,
-      trailing: selected
-          ? const Icon(Icons.check, color: Colors.green)
-          : null,
+      trailing: selected ? const Icon(Icons.check, color: Colors.green) : null,
       onTap: () => Navigator.of(context).pop(b),
     );
   }

@@ -8,7 +8,6 @@ import 'package:prro/core/json.dart';
 /// `cost_per_unit`, `quantity`, `min_stock_alert` arrive as decimal STRINGS
 /// (shopspring/decimal). Parse them via [parseDouble].
 class Ingredient extends Equatable {
-
   const Ingredient({
     required this.id,
     required this.name,

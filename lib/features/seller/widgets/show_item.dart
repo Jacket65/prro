@@ -6,7 +6,6 @@ import 'package:prro/features/seller/widgets/options_picker_dialog.dart';
 import 'package:prro/features/seller/widgets/variant_picker_dialog.dart';
 
 class ShowItem<T extends Item> extends StatelessWidget {
-
   factory ShowItem(T item) {
     return ShowItem._(item: item);
   }

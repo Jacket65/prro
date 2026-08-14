@@ -8,7 +8,6 @@ import 'package:prro/core/json.dart';
 /// `cashStart`/`cashEnd` are decimal **strings** (`shopspring/decimal`), kept
 /// verbatim so we never lose precision to a double.
 class ShiftResponse extends Equatable {
-
   const ShiftResponse({
     required this.id,
     required this.outletId,

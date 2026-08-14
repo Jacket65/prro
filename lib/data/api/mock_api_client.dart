@@ -164,10 +164,8 @@ class MockApiClient implements ApiClientI {
               <OrderLineDto>[];
 
           final paymentData = orderData['payment'] as Map<String, dynamic>?;
-          final paymentMethod =
-              paymentData?['method'] as String? ?? 'cash';
-          final tenderedKopecks =
-              paymentData?['tendered'] as int? ?? 0;
+          final paymentMethod = paymentData?['method'] as String? ?? 'cash';
+          final tenderedKopecks = paymentData?['tendered'] as int? ?? 0;
 
           final receipt = await mockBackend.placeOrder(
             items: items,

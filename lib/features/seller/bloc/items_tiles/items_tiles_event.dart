@@ -10,7 +10,6 @@ sealed class ItemsTilesEvent extends Equatable {
 class ItemsTilesStarted extends ItemsTilesEvent {}
 
 class ItemsTilesEnterCategory extends ItemsTilesEvent {
-
   const ItemsTilesEnterCategory(this.item);
   final Item item;
 

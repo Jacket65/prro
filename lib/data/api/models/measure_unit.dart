@@ -9,7 +9,6 @@ import 'package:prro/core/json.dart';
 /// fractional digits implied by it ("1" → 0, "0.001" → 3), used for display and
 /// rounding. A `null` unit elsewhere means piece semantics (step 1, scale 0).
 class MeasureUnit extends Equatable {
-
   const MeasureUnit({
     required this.id,
     required this.name,

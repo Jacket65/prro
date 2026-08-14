@@ -21,7 +21,6 @@ final class BalanceLoading extends BalanceState {
 }
 
 final class BalanceLoaded extends BalanceState {
-
   const BalanceLoaded(this.balance);
   final int balance;
 
@@ -30,7 +29,6 @@ final class BalanceLoaded extends BalanceState {
 }
 
 final class BalanceError extends BalanceState {
-
   const BalanceError(this.message);
   final String message;
 
