@@ -23,9 +23,11 @@ void main() {
 
       expect(token, isA<TerminalToken>());
       expect(token.token, isNotEmpty);
-      expect(token.token, startsWith('mock_jwt_token_'));
+      expect(token.token, startsWith('mock_jwt_'));
       expect(token.expiresAt.isAfter(DateTime.now()), isTrue);
-      expect(repository.lastRequest, equals(request));
+      // The mock mints a transaction id and exposes it for verification.
+      expect(repository.lastTransactionId, isNotNull);
+      expect(repository.lastTransactionId, startsWith('mock_txn_'));
     });
 
     test('verifyPayment returns a successful PaymentResult', () async {
@@ -36,19 +38,21 @@ void main() {
       );
       await repository.createPaymentToken(request);
 
-      final result = await repository.verifyPayment('txn_12345');
+      final result = await repository.verifyPayment(
+        repository.lastTransactionId!,
+      );
 
       expect(result, isA<PaymentResult>());
       expect(result.success, isTrue);
       expect(result.status, equals('SUCCESS'));
       expect(result.amount, equals(15000));
-      expect(result.transactionId, equals('txn_12345'));
+      expect(result.transactionId, equals(repository.lastTransactionId));
       expect(result.cardMask, equals('5168 **** **** 1234'));
       expect(result.authCode, equals('123456'));
       expect(repository.lastResult, equals(result));
     });
 
-    test('verifyPayment uses amount from last request', () async {
+    test('verifyPayment uses amount from the created transaction', () async {
       const request = CreatePaymentRequest(
         amount: 25000,
         currency: 'UAH',
@@ -56,10 +60,45 @@ void main() {
       );
       await repository.createPaymentToken(request);
 
-      final result = await repository.verifyPayment('txn_67890');
+      final result = await repository.verifyPayment(
+        repository.lastTransactionId!,
+      );
 
       expect(result.amount, equals(25000));
     });
+
+    test(
+      'verifyPayment throws PaymentUnknownTransactionException '
+      'for an unknown transaction id',
+      () async {
+        expect(
+          () => repository.verifyPayment('unknown_txn_123'),
+          throwsA(isA<PaymentUnknownTransactionException>()),
+        );
+      },
+    );
+
+    test(
+      'verifyPayment is idempotent: a second verify of the same id throws',
+      () async {
+        const request = CreatePaymentRequest(
+          amount: 15000,
+          currency: 'UAH',
+          description: 'Test payment',
+        );
+        await repository.createPaymentToken(request);
+        final transactionId = repository.lastTransactionId!;
+
+        final first = await repository.verifyPayment(transactionId);
+        expect(first.success, isTrue);
+
+        // The transaction is consumed on first verify, so a duplicate throws.
+        expect(
+          () => repository.verifyPayment(transactionId),
+          throwsA(isA<PaymentUnknownTransactionException>()),
+        );
+      },
+    );
 
     test('createPaymentToken simulates network delay', () async {
       const request = CreatePaymentRequest(
@@ -85,7 +124,7 @@ void main() {
       await repository.createPaymentToken(request);
 
       final stopwatch = Stopwatch()..start();
-      await repository.verifyPayment('txn_123');
+      await repository.verifyPayment(repository.lastTransactionId!);
       stopwatch.stop();
 
       expect(stopwatch.elapsedMilliseconds, greaterThanOrEqualTo(250));

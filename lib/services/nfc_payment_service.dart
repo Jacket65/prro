@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:injectable/injectable.dart';
 import 'package:meta/meta.dart';
 import 'package:prro/config/payment_config.dart';
+import 'package:prro/core/uuid.dart';
 import 'package:prro/data/api/models/payment/payment_request.dart';
 import 'package:prro/data/api/models/payment/payment_result.dart';
 import 'package:prro/data/repositories/payment_repository/payment_repo_i.dart';
@@ -38,6 +39,22 @@ class NfcPaymentService implements NfcPaymentServiceI {
   final TerminalLauncherI _terminalLauncher;
   final DeepLinkServiceI _deepLinkService;
   final Talker _talker;
+
+  /// Id of the currently active payment session, or `null` when no payment is
+  /// in progress.
+  ///
+  /// Set synchronously at the very top of [startPayment] (before the first
+  /// `await`) so a concurrent call observes a non-null guard and is rejected.
+  /// It is also used as the correlation id the terminal must echo in its
+  /// callback `orderId`; a mismatch is rejected as a stale/unknown callback.
+  /// Cleared in the `finally` block once the flow terminates.
+  String? _activeSessionId;
+
+  /// The id of the in-flight payment session, or `null` when idle.
+  /// Used as the single-active-session guard and by tests to correlate the
+  /// callback they emit with the launched session.
+  String? get activeSessionId => _activeSessionId;
+
   Duration _paymentTimeout = PaymentConfig.paymentTimeout;
 
   /// Callback timeout (defaults to [PaymentConfig.paymentTimeout]).
@@ -49,15 +66,25 @@ class NfcPaymentService implements NfcPaymentServiceI {
 
   @override
   Future<PaymentResult> startPayment(CreatePaymentRequest request) async {
+    if (_activeSessionId != null) {
+      throw const PaymentAlreadyInProgressException(
+        'A payment is already in progress. '
+        'Complete or cancel the current payment before starting a new one.',
+      );
+    }
+
+    // Fresh correlation id per session. The terminal must echo this back in its
+    // callback `orderId`; a mismatch (or a callback from a previous session) is
+    // rejected. Generated synchronously before the first `await` so a
+    // concurrent [startPayment] call observes a non-null guard and is
+    // rejected.
+    final sessionId = uuidV4();
+    _activeSessionId = sessionId;
+
     _talker
       ..info('🔵 [NFC Payment] Starting payment flow', request.toString())
       // Step 1: Create payment token
       ..info('🔵 [NFC Payment] Creating payment token...');
-    final token = await _paymentRepository.createPaymentToken(request);
-    _talker.info('🟢 [NFC Payment] Token received', token.toString());
-
-    final orderId =
-        request.orderId ?? 'order_${DateTime.now().millisecondsSinceEpoch}';
 
     // Subscribe before launching the terminal so we never miss an immediate
     // redirect. The subscription is owned locally and always torn down in the
@@ -65,40 +92,49 @@ class NfcPaymentService implements NfcPaymentServiceI {
     // launches successfully.
     final completer = Completer<String>();
     Timer? timer;
+    StreamSubscription<Uri>? subscription;
 
-    final subscription = _deepLinkService.onDeepLink.listen(
-      (uri) {
-        if (completer.isCompleted) return;
-
-        try {
-          final transactionId = _validateCallback(uri, orderId);
-          completer.complete(transactionId);
-        } on PaymentCancelledException catch (e, st) {
-          completer.completeError(e, st);
-        } on PaymentCallbackTimeoutException catch (e, st) {
-          completer.completeError(e, st);
-        } on PaymentTerminalFailureException catch (e, st) {
-          completer.completeError(e, st);
-        } on InvalidCallbackException catch (e) {
-          _talker.warning(
-            '🟡 [NFC Payment] Ignoring invalid callback: ${e.message}',
-          );
-        }
-      },
-      onError: (Object error, StackTrace stackTrace) {
-        if (!completer.isCompleted) {
-          completer.completeError(error, stackTrace);
-        }
-      },
-    );
     try {
-      // Step 2: Launch terminal
+      final token = await _paymentRepository.createPaymentToken(request);
+      _talker.info('🟢 [NFC Payment] Token received', token.toString());
+
+      subscription = _deepLinkService.onDeepLink.listen(
+        (uri) {
+          if (completer.isCompleted) return;
+
+          try {
+            final transactionId = _validateCallback(uri, sessionId);
+            completer.complete(transactionId);
+          } on PaymentCancelledException catch (e, st) {
+            completer.completeError(e, st);
+          } on PaymentCallbackTimeoutException catch (e, st) {
+            completer.completeError(e, st);
+          } on PaymentTerminalFailureException catch (e, st) {
+            completer.completeError(e, st);
+          } on InvalidCallbackException catch (e, st) {
+            // A malformed callback (including a non-matching echoed orderId) is
+            // untrusted/stale: fail the flow rather than silently wait for a
+            // callback that will never arrive.
+            if (!completer.isCompleted) {
+              completer.completeError(e, st);
+            }
+          }
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          if (!completer.isCompleted) {
+            completer.completeError(error, stackTrace);
+          }
+        },
+      );
+
+      // Step 2: Launch terminal with the session id as the orderId. The backend
+      // request still carries its own business `orderId` (unchanged).
       _talker.info('🔵 [NFC Payment] Launching PrivatBank Terminal...');
       await _terminalLauncher.launchTerminal(
         jwtToken: token.token,
         amount: request.amount,
         currency: request.currency,
-        orderId: orderId,
+        orderId: sessionId,
         merchantId: request.metadata?['merchantId']?.toString(),
       );
       _talker.info('🟢 [NFC Payment] Terminal launched successfully');
@@ -123,23 +159,27 @@ class NfcPaymentService implements NfcPaymentServiceI {
         )
         // Step 4: Verify payment
         ..info('🔵 [NFC Payment] Verifying payment...');
+
+      // The backend verification is the single source of truth: success is
+      // taken solely from the `verifyPayment` result, never from the callback
+      // status.
       final result = await _paymentRepository.verifyPayment(transactionId);
       _talker.info('🟢 [NFC Payment] Verification complete', result.toString());
 
       return result;
     } on TerminalLaunchException {
       _talker.error('🔴 [NFC Payment] Failed to launch terminal');
-      // throw const TerminalLaunchFailedException(
-      //   'Не вдалося відкрити термінал PrivatBank. '
-      //   'Переконайтеся, що застосунок встановлено.',
-      // );
-      rethrow;
+      throw const TerminalLaunchFailedException(
+        'Не вдалося відкрити термінал PrivatBank. '
+        'Переконайтеся, що застосунок встановлено.',
+      );
     } on PaymentCancelledException {
       _talker.warning('🟡 [NFC Payment] Payment cancelled by terminal/user');
       rethrow;
     } finally {
       timer?.cancel();
-      await subscription.cancel();
+      await subscription?.cancel();
+      _activeSessionId = null;
     }
   }
 
@@ -150,7 +190,7 @@ class NfcPaymentService implements NfcPaymentServiceI {
   /// - [PaymentTerminalFailureException] when the terminal reports a failure
   ///   without a usable transaction id.
   /// - [InvalidCallbackException] for any other malformed / untrusted callback.
-  String _validateCallback(Uri uri, String orderId) {
+  String _validateCallback(Uri uri, String sessionId) {
     if (!_isPaymentCallback(uri)) {
       throw const InvalidCallbackException(
         'Callback URI does not match the expected payment scheme/host.',
@@ -201,13 +241,15 @@ class NfcPaymentService implements NfcPaymentServiceI {
     }
 
     // Stricter cross-check: if the terminal echoes the order id, it must match
-    // the payment we initiated.
+    // the active session we initiated. A mismatch means the callback belongs to
+    // a previous or otherwise unknown session (stale/unknown) and is rejected.
     final callbackOrderId = params['orderId'] ?? params['order_id'];
     if (callbackOrderId != null &&
         callbackOrderId.isNotEmpty &&
-        callbackOrderId != orderId) {
+        callbackOrderId != sessionId) {
       throw const InvalidCallbackException(
-        'Callback orderId does not match the initiated payment.',
+        'Callback orderId does not match the active payment session '
+        '(stale/unknown).',
       );
     }
 
@@ -314,4 +356,15 @@ class PaymentCancelledException implements Exception {
   final String message;
   @override
   String toString() => 'PaymentCancelledException: $message';
+}
+
+/// Exception thrown when `startPayment` is called while another payment
+/// session is already active. Enforced by the single-active-session guard
+/// (`activeSessionId`) as the strongest defense against stale/duplicate
+/// callbacks from the global deep-link broadcast stream.
+class PaymentAlreadyInProgressException implements Exception {
+  const PaymentAlreadyInProgressException(this.message);
+  final String message;
+  @override
+  String toString() => 'PaymentAlreadyInProgressException: $message';
 }

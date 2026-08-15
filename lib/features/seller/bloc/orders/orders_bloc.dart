@@ -11,7 +11,6 @@ import 'package:prro/data/api/models/payment/payment_request.dart';
 import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
 import 'package:prro/services/nfc_payment_service.dart';
-import 'package:prro/services/terminal_launcher.dart';
 
 part 'orders_event.dart';
 part 'orders_state.dart';
@@ -153,7 +152,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           ),
         );
       }
-    } on TerminalLaunchException catch (e) {
+    } on TerminalLaunchFailedException catch (e) {
       emit(
         OrdersError(
           message: e.message,
@@ -178,6 +177,14 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         ),
       );
     } on PaymentCallbackTimeoutException catch (e) {
+      emit(
+        OrdersError(
+          message: e.message,
+          products: _ordersRepository.products,
+          total: _ordersRepository.totalPrice,
+        ),
+      );
+    } on InvalidCallbackException catch (e) {
       emit(
         OrdersError(
           message: e.message,

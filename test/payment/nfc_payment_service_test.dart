@@ -21,6 +21,12 @@ class MockDeepLinkService extends Mock implements DeepLinkServiceI {}
 class MockTalker extends Mock implements Talker {}
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(
+      const CreatePaymentRequest(amount: 0, currency: '', description: ''),
+    );
+  });
+
   group('NfcPaymentService', () {
     late MockPaymentRepository mockRepository;
     late MockTerminalLauncher mockTerminalLauncher;
@@ -77,16 +83,33 @@ void main() {
       ).thenAnswer(
         (_) async => true,
       );
+
+      // Use a StreamController so the correlated callback can be emitted only
+      // after the session is established.
+      final controller = StreamController<Uri>();
       when(() => mockDeepLinkService.onDeepLink).thenAnswer(
-        (_) => Stream.fromIterable([
-          Uri.parse('prro://payment?transaction_id=txn_12345&status=SUCCESS'),
-        ]),
+        (_) => controller.stream,
       );
       when(() => mockRepository.verifyPayment('txn_12345')).thenAnswer(
         (_) async => result,
       );
 
-      final paymentResult = await service.startPayment(request);
+      final paymentFuture = service.startPayment(request);
+
+      // Let the session establish (session id set, token created, subscription
+      // ready) before emitting the correlated callback.
+      await Future<void>.delayed(Duration.zero);
+      final sessionId = service.activeSessionId;
+      expect(sessionId, isNotNull);
+
+      controller.add(
+        Uri.parse(
+          'prro://payment?transaction_id=txn_12345&status=SUCCESS'
+          '&orderId=$sessionId',
+        ),
+      );
+
+      final paymentResult = await paymentFuture;
 
       expect(paymentResult.success, isTrue);
       expect(paymentResult.status, equals('SUCCESS'));
@@ -97,7 +120,7 @@ void main() {
           jwtToken: token.token,
           amount: request.amount,
           currency: request.currency,
-          orderId: request.orderId!,
+          orderId: any<String>(named: 'orderId'),
           merchantId: request.metadata?['merchantId']?.toString(),
         ),
       ).called(1);
@@ -133,8 +156,8 @@ void main() {
             orderId: any<String>(named: 'orderId'),
             merchantId: any<String?>(named: 'merchantId'),
           ),
-        ).thenAnswer(
-          (_) async => false,
+        ).thenThrow(
+          const TerminalLaunchException('Terminal not available'),
         );
 
         expect(
@@ -163,7 +186,7 @@ void main() {
         );
         when(
           () => mockTerminalLauncher.launchTerminal(
-            jwtToken: token.token,
+            jwtToken: any<String>(named: 'jwtToken'),
             amount: any<int>(named: 'amount'),
             currency: any<String>(named: 'currency'),
             orderId: any<String>(named: 'orderId'),
@@ -211,7 +234,7 @@ void main() {
         );
         when(
           () => mockTerminalLauncher.launchTerminal(
-            jwtToken: token.token,
+            jwtToken: any<String>(named: 'jwtToken'),
             amount: any<int>(named: 'amount'),
             currency: any<String>(named: 'currency'),
             orderId: any<String>(named: 'orderId'),
@@ -253,7 +276,7 @@ void main() {
         );
         when(
           () => mockTerminalLauncher.launchTerminal(
-            jwtToken: token.token,
+            jwtToken: any<String>(named: 'jwtToken'),
             amount: any<int>(named: 'amount'),
             currency: any<String>(named: 'currency'),
             orderId: any<String>(named: 'orderId'),
@@ -295,7 +318,7 @@ void main() {
         );
         when(
           () => mockTerminalLauncher.launchTerminal(
-            jwtToken: token.token,
+            jwtToken: any<String>(named: 'jwtToken'),
             amount: any<int>(named: 'amount'),
             currency: any<String>(named: 'currency'),
             orderId: any<String>(named: 'orderId'),
@@ -337,7 +360,7 @@ void main() {
         );
         when(
           () => mockTerminalLauncher.launchTerminal(
-            jwtToken: token.token,
+            jwtToken: any<String>(named: 'jwtToken'),
             amount: any<int>(named: 'amount'),
             currency: any<String>(named: 'currency'),
             orderId: any<String>(named: 'orderId'),
@@ -381,7 +404,7 @@ void main() {
         );
         when(
           () => mockTerminalLauncher.launchTerminal(
-            jwtToken: token.token,
+            jwtToken: any<String>(named: 'jwtToken'),
             amount: any<int>(named: 'amount'),
             currency: any<String>(named: 'currency'),
             orderId: any<String>(named: 'orderId'),
@@ -423,7 +446,7 @@ void main() {
         );
         when(
           () => mockTerminalLauncher.launchTerminal(
-            jwtToken: token.token,
+            jwtToken: any<String>(named: 'jwtToken'),
             amount: any<int>(named: 'amount'),
             currency: any<String>(named: 'currency'),
             orderId: any<String>(named: 'orderId'),
@@ -444,6 +467,129 @@ void main() {
           () => service.startPayment(request),
           throwsA(isA<InvalidCallbackException>()),
         );
+      },
+    );
+
+    test(
+      'startPayment throws InvalidCallbackException '
+      'when callback orderId does not match the active session',
+      () async {
+        const request = CreatePaymentRequest(
+          amount: 15000,
+          currency: 'UAH',
+          description: 'Test payment',
+          orderId: 'test_order',
+        );
+        final token = TerminalToken(
+          token: 'test_jwt_token',
+          expiresAt: DateTime.now().add(const Duration(minutes: 10)),
+        );
+        const result = PaymentResult(
+          success: true,
+          status: 'SUCCESS',
+          rrn: '123456789012',
+          amount: 15000,
+          transactionId: 'txn_12345',
+          cardMask: '5168 **** **** 1234',
+          authCode: '123456',
+        );
+
+        when(() => mockRepository.createPaymentToken(request)).thenAnswer(
+          (_) async => token,
+        );
+        when(
+          () => mockTerminalLauncher.launchTerminal(
+            jwtToken: any<String>(named: 'jwtToken'),
+            amount: any<int>(named: 'amount'),
+            currency: any<String>(named: 'currency'),
+            orderId: any<String>(named: 'orderId'),
+            merchantId: any<String?>(named: 'merchantId'),
+          ),
+        ).thenAnswer(
+          (_) async => true,
+        );
+
+        final controller = StreamController<Uri>();
+        when(() => mockDeepLinkService.onDeepLink).thenAnswer(
+          (_) => controller.stream,
+        );
+        when(() => mockRepository.verifyPayment(any<String>())).thenAnswer(
+          (_) async => result,
+        );
+
+        final paymentFuture = service.startPayment(request);
+        await Future<void>.delayed(Duration.zero);
+        final sessionId = service.activeSessionId;
+        expect(sessionId, isNotNull);
+
+        // A callback echoing a different (stale) orderId must be rejected.
+        controller.add(
+          Uri.parse(
+            'prro://payment?transaction_id=txn_12345&status=SUCCESS'
+            '&orderId=stale_session_id',
+          ),
+        );
+
+        expect(
+          paymentFuture,
+          throwsA(isA<InvalidCallbackException>()),
+        );
+      },
+    );
+
+    test(
+      'startPayment throws PaymentAlreadyInProgressException '
+      'when called while another session is active',
+      () async {
+        const request = CreatePaymentRequest(
+          amount: 15000,
+          currency: 'UAH',
+          description: 'Test payment',
+          orderId: 'test_order',
+        );
+        final token = TerminalToken(
+          token: 'test_jwt_token',
+          expiresAt: DateTime.now().add(const Duration(minutes: 10)),
+        );
+
+        // Keep the first call active by never resolving its token creation.
+        final tokenCompleter = Completer<TerminalToken>();
+        when(() => mockRepository.createPaymentToken(any())).thenAnswer(
+          (_) => tokenCompleter.future,
+        );
+        when(
+          () => mockTerminalLauncher.launchTerminal(
+            jwtToken: any<String>(named: 'jwtToken'),
+            amount: any<int>(named: 'amount'),
+            currency: any<String>(named: 'currency'),
+            orderId: any<String>(named: 'orderId'),
+            merchantId: any<String?>(named: 'merchantId'),
+          ),
+        ).thenAnswer(
+          (_) async => true,
+        );
+        when(() => mockDeepLinkService.onDeepLink).thenAnswer(
+          (_) => const Stream.empty(),
+        );
+
+        // A short timeout lets the (released) first call terminate quickly.
+        service.paymentTimeout = const Duration(milliseconds: 100);
+        final first = service.startPayment(request);
+        await Future<void>.delayed(Duration.zero);
+        expect(service.activeSessionId, isNotNull);
+
+        // The second concurrent call must be rejected by the guard.
+        expect(
+          () => service.startPayment(request),
+          throwsA(isA<PaymentAlreadyInProgressException>()),
+        );
+
+        // Release the first call and let it time out so nothing leaks.
+        tokenCompleter.complete(token);
+        await expectLater(
+          first,
+          throwsA(isA<PaymentCallbackTimeoutException>()),
+        ).timeout(const Duration(seconds: 2));
       },
     );
   });
