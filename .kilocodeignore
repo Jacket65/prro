@@ -44,5 +44,8 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Agent skill files are installed from skills-lock.json
-.agents/skills/
+.dart_tool/
+build/
+.gradle/
+android/.gradle/
+ios/Pods/
