@@ -34,9 +34,8 @@ Layered, BLoC-based. Data flows **Screen/Widget → Bloc/Cubit → Repository (i
 - **`lib/data/services/`** — concrete services hold `ApiClientI` + `SharedPreferences`, make the calls, unwrap the backend's `{ "data": ... }` envelope (see `_extractList`), and map JSON → models.
 - **`lib/features/<feature>/`** — `auth`, `seller`, `admin`, `shift`, `user`. Each typically has `bloc/`, `screens/`, `widgets/`. Blocs that take events use `Bloc` (e.g. `LoginBloc`, `OrdersBloc`, `ItemsTilesBloc`); simpler ones use `Cubit` (e.g. `ShiftCubit`, `BalanceCubit`).
 
-### Two HTTP access patterns coexist (gotcha)
-- **seller / auth / shift / user** features go through the injected `ApiClientI` (Dio) + repository/service abstraction described above.
-- The **admin** feature instead uses a **separate, self-contained `ApiService`** at `lib/features/admin/screens/main_screen/services/api_service.dart`, built on the `http` package with its **own base URL (`http://localhost:8080/api/v1`)** and its own token + idempotency handling. It's provided via `RepositoryProvider.value(value: api)` and called directly from admin screens (full CRUD for categories/products/variants/recipes/ingredients). These two stacks have not been unified — changing API behavior may mean editing both.
+### One HTTP access pattern (unified)
+- All features — **seller / auth / shift / user / admin** — go through the injected `ApiClientI` (Dio) + repository/service abstraction. The admin feature previously used a separate `ApiService` built on the `http` package with its own base URL and token/idempotency handling; that was deleted. Admin now uses the same `ApiClient` via `AdminOutletRepositoryI`, `AdminUserRepositoryI`, and `AdminCatalogRepositoryI` (each with a prod + mock implementation, both backed by `ApiClientI`). Changing API behavior means editing one stack.
 
 ### Money & decimals from the backend (gotcha)
 - The backend marshals `shopspring/decimal.Decimal` as a **JSON string** (`"45.50"`). Casting `(json['price'] ?? 0) as num` will throw at runtime. **Always** parse prices / quantities / costs / recipe quantities via `parseDouble` / `parseInt` from `lib/core/json.dart` — they accept `num`, `String`, or `null` and fall back to a default. Affects: variants, products, recipes (`ingredient_id`, `quantity`), `IngredientResponse` (`cost_per_unit`, `quantity`, `min_stock_alert`).
@@ -47,7 +46,7 @@ Layered, BLoC-based. Data flows **Screen/Widget → Bloc/Cubit → Repository (i
 - **Session = SharedPreferences.** Keys: `auth_token`, `username`, `isLogged`, `user_role`, `user_id`, `outlet_id`, `shift_opened`. There is no in-memory session object.
 - **Login** (`LoginService.login`) posts to `/auth/login`, reads the JWT from the **`Authorization` response header** (not the body), then persists token/username/role/id. Because `/auth/me` doesn't yet return an outlet, it resolves `outlet_id` by taking the **first entry of `GET /retail-outlets/`** and caching it; services read `outlet_id` from prefs to build outlet-scoped URLs.
 - **Auto-login** fires on startup (`LoginBloc..add(LoginCheckAutoLogin())`); logout clears the prefs above.
-- **Navigation is imperative** (`Navigator.pushReplacement`), no router package. Flow: `LoginScreen` → cashier path goes to `Shift` (open shift) → `SellerScreen`; admin button jumps straight to `MainScreen`.
+- **Navigation is imperative** (`Navigator.pushReplacement`), no router package. Flow: `LoginScreen` → cashier path goes to `Shift` (open shift) → `SellerScreen`; the "Я адміністратор" button jumps straight to `AdminShell` (the tabbed outlets/tellers/items admin screen).
 
 ### Catalog → cart business logic (the core seller flow)
 - `ItemsTilesBloc` does **two-level navigation** via an internal stack: depth 0 = categories, depth 1 = products of the selected category. Variants are shown in a modal dialog off a `ProductGroup` tile, so they're never pushed onto the stack.
@@ -68,7 +67,7 @@ Layered, BLoC-based. Data flows **Screen/Widget → Bloc/Cubit → Repository (i
 Several backend routes are still stubs on the server, so their client counterparts are **deliberately faked** (don't treat them as broken):
 - **`ShiftService.openShift`/`closeShift`** return success without any network call; shift state is only persisted in `shared_preferences` (`shift_opened`).
 - **Orders** are placed against an in-process `MockBackend` (`lib/data/mock/mock_backend.dart`) instead of `POST /orders` (which the server doesn't expose yet). `OrdersRepository.placeOrder({method, tenderedKopecks, idempotencyKey})` calls `MockBackend.placeOrder()` and returns an `OrderReceipt` containing the authoritative total/change and a snapshot of line items. The mock looks up variant prices it served itself, validates payment per the rules above, dedupes by `idempotencyKey`, and ~300 ms latency is simulated. `MockBackend.simulateError = true` makes the next call fail. (`MockItemsService` next to it can also swap out the real catalog for an offline coffee-shop dataset — currently unwired, kept as a fallback.)
-- **Measure units** are a static list in `ApiService` matching the seeder, pending `GET /api/v1/measure-units`.
+- **Measure units** (`MeasureUnit`) are model-backed (from `data/api/models/measure_unit.dart`), matching the seeder, pending `GET /api/v1/measure-units`.
 
 ## Conventions
 - Interfaces are suffixed `I` (`ApiClientI`, `ItemsRepositoryI`, `ShiftServiceI`). Each resource exposes a barrel file; import the barrel, not the impl.

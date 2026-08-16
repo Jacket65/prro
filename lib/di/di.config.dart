@@ -93,8 +93,6 @@ import 'package:prro/data/services/payment_service.dart' as _i769;
 import 'package:prro/data/services/shift_service.dart' as _i819;
 import 'package:prro/data/services/user_service.dart' as _i169;
 import 'package:prro/di/app_module.dart' as _i745;
-import 'package:prro/features/admin/screens/main_screen/services/api_service.dart'
-    as _i545;
 import 'package:prro/services/deep_link_service.dart' as _i866;
 import 'package:prro/services/nfc_payment_service.dart' as _i829;
 import 'package:prro/services/terminal_launcher.dart' as _i1024;
@@ -117,7 +115,6 @@ extension GetItInjectableX on _i174.GetIt {
       preResolve: true,
     );
     gh.singleton<_i993.Talker>(() => appModule.talker());
-    gh.singleton<_i545.ApiService>(() => _i545.ApiService());
     gh.singleton<_i205.UserServiceI>(
       () => _i104.MockUserService(),
       registerFor: {_mock},
