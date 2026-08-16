@@ -12,6 +12,7 @@ import 'package:prro/features/seller/bloc/balance/balance_cubit.dart';
 import 'package:prro/features/seller/bloc/items_tiles/items_tiles_bloc.dart';
 import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 import 'package:prro/features/seller/bloc/search/catalog_search_cubit.dart';
+import 'package:prro/features/seller/screens/order_history/shifts_history_screen.dart';
 import 'package:prro/features/seller/widgets/widgets.dart';
 import 'package:prro/features/shift/bloc/bloc.dart';
 import 'package:prro/features/shift/widgets/close_shift_dialog.dart';
@@ -85,6 +86,26 @@ class _SellerScreenState extends State<SellerScreen> {
                           name: isNarrow ? '' : 'Меню',
                           icon: Icons.menu,
                           widgets: [
+                            PopupMenuItem<void>(
+                              child: const Text('Історія замовлень'),
+                              onTap: () {
+                                WidgetsBinding.instance.addPostFrameCallback((
+                                  _,
+                                ) {
+                                  if (context.mounted) {
+                                    unawaited(
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute<void>(
+                                          builder: (_) =>
+                                              const ShiftsHistoryScreen(),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                });
+                              },
+                            ),
                             PopupMenuItem<void>(
                               child: const Text('Закрити зміну'),
                               onTap: () => _closeShift(context),

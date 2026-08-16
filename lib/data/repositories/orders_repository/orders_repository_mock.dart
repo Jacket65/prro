@@ -8,12 +8,15 @@ import 'package:prro/data/api/models/order.dart';
 import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/data/mock/mock_backend.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
+import 'package:prro/data/services/order_history_service.dart';
+import 'package:prro/data/services/order_history_service_mock.dart';
 
 @Environment('mock')
 @Singleton(as: OrdersRepositoryI)
 class OrdersRepositoryMock implements OrdersRepositoryI {
-  OrdersRepositoryMock(this._backend);
+  OrdersRepositoryMock(this._backend, this._historyService);
   final MockBackend _backend;
+  final OrderHistoryServiceI _historyService;
 
   final List<Product> _products = [];
 
@@ -95,7 +98,7 @@ class OrdersRepositoryMock implements OrdersRepositoryI {
     required String idempotencyKey,
   }) async {
     try {
-      return _backend.placeOrder(
+      final receipt = await _backend.placeOrder(
         items: _products.map((p) {
           return OrderLineDto(
             productId: p.id,
@@ -115,6 +118,11 @@ class OrdersRepositoryMock implements OrdersRepositoryI {
         payment: PaymentDto(method: method, tenderedKopecks: tenderedKopecks),
         idempotencyKey: idempotencyKey,
       );
+      final hs = _historyService;
+      if (hs is OrderHistoryServiceMock) {
+        hs.addMockOrder(receipt);
+      }
+      return receipt;
     } on MockBackendException catch (e) {
       throw ApiException(e.message);
     }

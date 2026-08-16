@@ -121,28 +121,13 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       final result = await _nfcPaymentService.startPayment(request);
 
       if (result.success) {
-        // Create a mock receipt for NFC payment
-        // since the backend doesn't return a full receipt
-        // The actual receipt would come from the backend's order creation
-        _ordersRepository.clearProducts();
-        emit(
-          OrdersPaymentSuccess(
-            OrderReceipt(
-              orderId:
-                  result.transactionId ??
-                  'NFC-${DateTime.now().millisecondsSinceEpoch}',
-              lines: [],
-              totalKopecks: result.amount ?? event.amountKopecks,
-              tenderedKopecks: result.amount ?? event.amountKopecks,
-              changeKopecks: 0,
-              method: PaymentMethod.card,
-              status: 'completed',
-              issuedAt: DateTime.now(),
-              storeName: 'Prro',
-              cashierName: '',
-            ),
-          ),
+        final receipt = await _ordersRepository.placeOrder(
+          method: PaymentMethod.nfc,
+          tenderedKopecks: event.amountKopecks,
+          idempotencyKey: event.idempotencyKey,
         );
+        _ordersRepository.clearProducts();
+        emit(OrdersPaymentSuccess(receipt));
       } else {
         emit(
           OrdersError(

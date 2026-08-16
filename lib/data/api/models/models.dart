@@ -3,6 +3,7 @@ export 'drink_option.dart';
 export 'ingredient.dart';
 export 'measure_unit.dart';
 export 'order.dart';
+export 'order_history.dart';
 export 'payment/payment_request.dart';
 export 'payment/payment_result.dart';
 export 'payment/payment_token.dart';
