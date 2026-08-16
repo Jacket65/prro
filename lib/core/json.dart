@@ -50,3 +50,10 @@ int parseInt(dynamic v, {int fallback = 0}) {
   }
   return fallback;
 }
+
+/// Tolerant string parse: null/empty → [fallback]. Trims surrounding spaces.
+String parseString(dynamic v, {String fallback = ''}) {
+  if (v == null) return fallback;
+  final s = v.toString().trim();
+  return s.isEmpty ? fallback : s;
+}

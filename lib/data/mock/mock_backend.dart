@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:decimal/decimal.dart';
 import 'package:prro/core/money.dart';
+import 'package:prro/data/api/models/admin/admin_models.dart';
 import 'package:prro/data/api/models/bean.dart';
 import 'package:prro/data/api/models/drink_option.dart';
 import 'package:prro/data/api/models/measure_unit.dart';
@@ -439,6 +440,338 @@ class MockBackend {
     return null;
   }
 
+  // ──────────────────────────────────────────────────────────────────────────
+  // Admin panel — outlets / users / catalog (offline stand-in for the admin
+  // REST endpoints used by the admin repositories in `mock` environment).
+  // ──────────────────────────────────────────────────────────────────────────
+
+  late final List<RetailOutlet> _adminOutlets = _seedAdminOutlets();
+  late final Map<int, List<AdminUser>> _adminUsersByOutlet = _seedAdminUsers();
+  late final List<_AdminCategory> _adminCatalog = _seedAdminCatalog();
+  late final List<AdminIngredient> _adminIngredients = _seedAdminIngredients();
+
+  Future<List<RetailOutlet>> getAdminOutlets() async {
+    await _network();
+    return _adminOutlets;
+  }
+
+  Future<List<AdminUser>> getAdminUsers(int outletId) async {
+    await _network();
+    return [...?_adminUsersByOutlet[outletId]];
+  }
+
+  // ── Categories (scoped by outlet) ──
+
+  Future<List<AdminCategory>> getAdminCategories(int outletId) async {
+    await _network();
+    return _adminCatalog
+        .where((c) => c.outletId == outletId)
+        .map((c) => AdminCategory(id: c.id, name: c.name))
+        .toList();
+  }
+
+  Future<AdminCategory> createAdminCategory({
+    required int outletId,
+    required String name,
+  }) async {
+    await _network();
+    final id = _nextAdminCategoryId++;
+    _adminCatalog.add(
+      _AdminCategory(
+        id: id,
+        outletId: outletId,
+        name: name,
+        products: const [],
+      ),
+    );
+    return AdminCategory(id: id, name: name);
+  }
+
+  Future<AdminCategory> updateAdminCategory({
+    required int id,
+    required String name,
+  }) async {
+    await _network();
+    final cat = _adminCatalog.firstWhere(
+      (c) => c.id == id,
+      orElse: () => throw const MockBackendException('Категорію не знайдено.'),
+    );
+    _adminCatalog[_adminCatalog.indexOf(cat)] = _AdminCategory(
+      id: cat.id,
+      outletId: cat.outletId,
+      name: name,
+      products: cat.products,
+    );
+    return AdminCategory(id: cat.id, name: name);
+  }
+
+  Future<void> deleteAdminCategory({required int id}) async {
+    await _network();
+    _adminCatalog.removeWhere((c) => c.id == id);
+  }
+
+  // ── Products (scoped by category) ──
+
+  Future<AdminProduct> createAdminProduct({
+    required int categoryId,
+    required String name,
+  }) async {
+    await _network();
+    final id = _nextAdminProductId++;
+    final cat = _adminCatalog.firstWhere(
+      (c) => c.id == categoryId,
+      orElse: () => throw const MockBackendException('Категорію не знайдено.'),
+    );
+    final product = _AdminProduct(id: id, name: name, variants: const []);
+    final updated = _AdminCategory(
+      id: cat.id,
+      outletId: cat.outletId,
+      name: cat.name,
+      products: [...cat.products, product],
+    );
+    _adminCatalog[_adminCatalog.indexOf(cat)] = updated;
+    return AdminProduct(id: id, name: name, categoryId: categoryId);
+  }
+
+  Future<AdminProduct> updateAdminProduct({
+    required int id,
+    required String name,
+  }) async {
+    await _network();
+    final cat = _findAdminProduct(id).$1;
+    final product = _findAdminProduct(id).$2;
+    final newProduct = _AdminProduct(
+      id: product.id,
+      name: name,
+      variants: product.variants,
+    );
+    final newProducts = [
+      for (final p in cat.products)
+        if (p.id == id) newProduct else p,
+    ];
+    _adminCatalog[_adminCatalog.indexOf(cat)] = _AdminCategory(
+      id: cat.id,
+      outletId: cat.outletId,
+      name: cat.name,
+      products: newProducts,
+    );
+    return AdminProduct(id: id, name: name, categoryId: cat.id);
+  }
+
+  Future<void> deleteAdminProduct({required int id}) async {
+    await _network();
+    final cat = _findAdminProduct(id).$1;
+    _adminCatalog[_adminCatalog.indexOf(cat)] = _AdminCategory(
+      id: cat.id,
+      outletId: cat.outletId,
+      name: cat.name,
+      products: cat.products.where((p) => p.id != id).toList(),
+    );
+  }
+
+  // ── Variants (scoped by product) ──
+
+  Future<List<AdminVariant>> getAdminVariants(int productId) async {
+    await _network();
+    final product = _findAdminProduct(productId).$2;
+    return product.variants
+        .map(
+          (v) => AdminVariant(
+            id: v.id,
+            name: v.name,
+            priceKopecks: v.priceKopecks,
+            productId: productId,
+          ),
+        )
+        .toList();
+  }
+
+  Future<AdminVariant> createAdminVariant({
+    required int productId,
+    required String name,
+    required int priceKopecks,
+    required List<RecipeIngredient> ingredients,
+  }) async {
+    await _network();
+    final id = _nextAdminVariantId++;
+    final cat = _findAdminProduct(productId).$1;
+    final product = _findAdminProduct(productId).$2;
+    final variant = _AdminVariant(
+      id: id,
+      name: name,
+      priceKopecks: priceKopecks,
+      recipe: ingredients,
+    );
+    final newProduct = _AdminProduct(
+      id: product.id,
+      name: product.name,
+      variants: [...product.variants, variant],
+    );
+    final newProducts = [
+      for (final p in cat.products)
+        if (p.id == productId) newProduct else p,
+    ];
+    _adminCatalog[_adminCatalog.indexOf(cat)] = _AdminCategory(
+      id: cat.id,
+      outletId: cat.outletId,
+      name: cat.name,
+      products: newProducts,
+    );
+    return AdminVariant(
+      id: id,
+      name: name,
+      priceKopecks: priceKopecks,
+      productId: productId,
+    );
+  }
+
+  Future<AdminVariant> updateAdminVariant({
+    required int id,
+    required String name,
+    required int priceKopecks,
+  }) async {
+    await _network();
+    final found = _findAdminVariant(id);
+    final cat = found.$1;
+    final product = found.$2;
+    final variant = found.$3;
+    final newVariant = _AdminVariant(
+      id: variant.id,
+      name: name,
+      priceKopecks: priceKopecks,
+      recipe: variant.recipe,
+    );
+    final newProducts = [
+      for (final p in cat.products)
+        if (p.id == product.id)
+          _AdminProduct(
+            id: p.id,
+            name: p.name,
+            variants: [
+              for (final v in p.variants)
+                if (v.id == id) newVariant else v,
+            ],
+          )
+        else
+          p,
+    ];
+    _adminCatalog[_adminCatalog.indexOf(cat)] = _AdminCategory(
+      id: cat.id,
+      outletId: cat.outletId,
+      name: cat.name,
+      products: newProducts,
+    );
+    return AdminVariant(
+      id: id,
+      name: name,
+      priceKopecks: priceKopecks,
+      productId: product.id,
+    );
+  }
+
+  Future<void> deleteAdminVariant({required int id}) async {
+    await _network();
+    final found = _findAdminVariant(id);
+    final cat = found.$1;
+    final product = found.$2;
+    _adminCatalog[_adminCatalog.indexOf(cat)] = _AdminCategory(
+      id: cat.id,
+      outletId: cat.outletId,
+      name: cat.name,
+      products: [
+        for (final p in cat.products)
+          if (p.id == product.id)
+            _AdminProduct(
+              id: p.id,
+              name: p.name,
+              variants: p.variants.where((v) => v.id != id).toList(),
+            )
+          else
+            p,
+      ],
+    );
+  }
+
+  // ── Recipe (scoped by variant) ──
+
+  Future<List<RecipeIngredient>> getAdminRecipe(int variantId) async {
+    await _network();
+    final variant = _findAdminVariant(variantId).$3;
+    return variant.recipe;
+  }
+
+  Future<void> replaceAdminRecipe({
+    required int variantId,
+    required List<RecipeIngredient> ingredients,
+  }) async {
+    await _network();
+    final found = _findAdminVariant(variantId);
+    final cat = found.$1;
+    final product = found.$2;
+    final variant = found.$3;
+    final newVariant = _AdminVariant(
+      id: variant.id,
+      name: variant.name,
+      priceKopecks: variant.priceKopecks,
+      recipe: ingredients,
+    );
+    final newProducts = [
+      for (final p in cat.products)
+        if (p.id == product.id)
+          _AdminProduct(
+            id: p.id,
+            name: p.name,
+            variants: [
+              for (final v in p.variants)
+                if (v.id == variantId) newVariant else v,
+            ],
+          )
+        else
+          p,
+    ];
+    _adminCatalog[_adminCatalog.indexOf(cat)] = _AdminCategory(
+      id: cat.id,
+      outletId: cat.outletId,
+      name: cat.name,
+      products: newProducts,
+    );
+  }
+
+  // ── Ingredients (global, per outlet) ──
+
+  Future<List<AdminIngredient>> getAdminIngredients(int outletId) async {
+    await _network();
+    return _adminIngredients
+        .where((i) => i.unitId == null || i.unitId == outletId)
+        .toList();
+  }
+
+  int _nextAdminCategoryId = 10001;
+  int _nextAdminProductId = 20001;
+  int _nextAdminVariantId = 30001;
+
+  (_AdminCategory, _AdminProduct) _findAdminProduct(int productId) {
+    for (final cat in _adminCatalog) {
+      for (final p in cat.products) {
+        if (p.id == productId) return (cat, p);
+      }
+    }
+    throw const MockBackendException('Продукт не знайдено.');
+  }
+
+  (_AdminCategory, _AdminProduct, _AdminVariant) _findAdminVariant(
+    int variantId,
+  ) {
+    for (final cat in _adminCatalog) {
+      for (final p in cat.products) {
+        for (final v in p.variants) {
+          if (v.id == variantId) return (cat, p, v);
+        }
+      }
+    }
+    throw const MockBackendException('Варіант не знайдено.');
+  }
+
   Future<void> _network() async {
     await Future<void>.delayed(latency);
     if (simulateError) {
@@ -617,6 +950,112 @@ class MockBackend {
       ),
     ];
   }
+
+  // ── Admin seed data ──
+
+  List<RetailOutlet> _seedAdminOutlets() => [
+    const RetailOutlet(
+      id: 1,
+      name: "Кав'ярня Grains World — Центр",
+      city: 'Київ',
+    ),
+    const RetailOutlet(
+      id: 2,
+      name: "Кав'ярня Grains World — Лівий берег",
+      city: 'Київ',
+    ),
+    const RetailOutlet(
+      id: 3,
+      name: "Кав'ярня Grains World — Одеса",
+      city: 'Одеса',
+    ),
+  ];
+
+  Map<int, List<AdminUser>> _seedAdminUsers() => {
+    1: [
+      const AdminUser(
+        id: 1,
+        name: 'Олена Касир',
+        phone: '+380501112233',
+        status: DpsStatus.active,
+        role: 'cashier',
+      ),
+      const AdminUser(
+        id: 2,
+        name: 'Іван Продавець',
+        phone: '+380504445566',
+        status: DpsStatus.registered,
+        role: 'cashier',
+      ),
+    ],
+    2: [
+      const AdminUser(
+        id: 3,
+        name: 'Марія Касир',
+        phone: '+380507778899',
+        status: DpsStatus.active,
+        role: 'cashier',
+      ),
+    ],
+    3: const [],
+  };
+
+  List<_AdminCategory> _seedAdminCatalog() => [
+    _AdminCategory(
+      id: 1,
+      outletId: 1,
+      name: 'Кава',
+      products: [
+        _AdminProduct(
+          id: 101,
+          name: 'Еспресо',
+          variants: [
+            _AdminVariant(
+              id: 1,
+              name: 'Одинарне',
+              priceKopecks: uahToKopecks(35),
+            ),
+          ],
+        ),
+        _AdminProduct(
+          id: 102,
+          name: 'Американо',
+          variants: [
+            _AdminVariant(
+              id: 2,
+              name: '250 мл',
+              priceKopecks: uahToKopecks(45),
+            ),
+          ],
+        ),
+      ],
+    ),
+    _AdminCategory(
+      id: 2,
+      outletId: 1,
+      name: 'Чай',
+      products: [
+        _AdminProduct(
+          id: 201,
+          name: 'Чорний',
+          variants: [
+            _AdminVariant(
+              id: 3,
+              name: '400 мл',
+              priceKopecks: uahToKopecks(40),
+            ),
+          ],
+        ),
+      ],
+    ),
+  ];
+
+  List<AdminIngredient> _seedAdminIngredients() => [
+    const AdminIngredient(id: 1, name: 'Кава зернова'),
+    const AdminIngredient(id: 2, name: 'Молоко'),
+    const AdminIngredient(id: 3, name: 'Цукор'),
+    const AdminIngredient(id: 4, name: 'Сироп ваніль'),
+  ];
 }
 
 // ── DTOs / receipt types now live in `models/order.dart` (shared with the real
@@ -698,4 +1137,43 @@ class _VariantInfo {
   const _VariantInfo({required this.name, required this.priceKopecks});
   final String name;
   final int priceKopecks;
+}
+
+// ── Internal admin catalog model (private; not exposed to the rest of the app)
+
+class _AdminCategory {
+  _AdminCategory({
+    required this.id,
+    required this.outletId,
+    required this.name,
+    required this.products,
+  });
+  final int id;
+  final int outletId;
+  final String name;
+  final List<_AdminProduct> products;
+}
+
+class _AdminProduct {
+  _AdminProduct({
+    required this.id,
+    required this.name,
+    required this.variants,
+  });
+  final int id;
+  final String name;
+  final List<_AdminVariant> variants;
+}
+
+class _AdminVariant {
+  _AdminVariant({
+    required this.id,
+    required this.name,
+    required this.priceKopecks,
+    this.recipe = const [],
+  });
+  final int id;
+  final String name;
+  final int priceKopecks;
+  final List<RecipeIngredient> recipe;
 }

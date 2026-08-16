@@ -28,4 +28,19 @@ abstract interface class ApiClientI {
     dynamic data,
     String? idempotencyKey,
   });
+
+  /// PUT. Same idempotency rules as [post].
+  Future<Response<dynamic>> put(
+    String path, {
+    dynamic data,
+    String? idempotencyKey,
+  });
+
+  /// DELETE. [data] is rarely sent, but allowed (some backends read a body).
+  /// State-changing deletes may pass an [idempotencyKey].
+  Future<Response<dynamic>> delete(
+    String path, {
+    dynamic data,
+    String? idempotencyKey,
+  });
 }

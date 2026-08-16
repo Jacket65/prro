@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:prro/core/json.dart';
+import 'package:prro/core/money.dart';
 import 'package:prro/data/api/api_client_i.dart';
+import 'package:prro/data/api/models/admin/admin_models.dart';
 import 'package:prro/data/api/models/order.dart';
 import 'package:prro/data/mock/mock_backend.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,6 +33,40 @@ class MockApiClient implements ApiClientI {
     CancelToken? cancelToken,
   }) async {
     try {
+      // ── Admin panel endpoints (outlet-scoped) ──
+      if (path.contains('/retail-outlets')) {
+        final outletId = _extractOutletId(path);
+        if (path.contains('/users') && outletId != null) {
+          final users = await mockBackend.getAdminUsers(outletId);
+          return Response<dynamic>(
+            requestOptions: RequestOptions(path: path),
+            data: {'data': users},
+            statusCode: 200,
+          );
+        } else if (path.contains('/categories') && outletId != null) {
+          final categories = await mockBackend.getAdminCategories(outletId);
+          return Response<dynamic>(
+            requestOptions: RequestOptions(path: path),
+            data: {'data': categories},
+            statusCode: 200,
+          );
+        } else if (path.contains('/ingredients') && outletId != null) {
+          final ingredients = await mockBackend.getAdminIngredients(outletId);
+          return Response<dynamic>(
+            requestOptions: RequestOptions(path: path),
+            data: {'data': ingredients},
+            statusCode: 200,
+          );
+        }
+        // Bare `/retail-outlets/` → all outlets.
+        final outlets = await mockBackend.getAdminOutlets();
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          data: {'data': outlets},
+          statusCode: 200,
+        );
+      }
+
       if (path.contains('/measure-units')) {
         final units = await mockBackend.getMeasureUnits();
         return Response<dynamic>(
@@ -243,6 +280,48 @@ class MockApiClient implements ApiClientI {
           }),
           statusCode: 204,
         );
+      } else if (path.contains('/retail-outlets') &&
+          path.contains('/categories')) {
+        final outletId = _extractOutletId(path);
+        final name = _nameOf(data);
+        final category = await mockBackend.createAdminCategory(
+          outletId: outletId!,
+          name: name,
+        );
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          data: {'data': category},
+          statusCode: 201,
+        );
+      } else if (path.contains('/categories') &&
+          path.contains('/products')) {
+        final categoryId = _extractIdAfter(path, 'categories');
+        final product = await mockBackend.createAdminProduct(
+          categoryId: categoryId!,
+          name: _nameOf(data),
+        );
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          data: {'data': product},
+          statusCode: 201,
+        );
+      } else if (path.contains('/products') &&
+          path.contains('/variants')) {
+        final productId = _extractIdAfter(path, 'products');
+        final map = data as Map<String, dynamic>?;
+        final priceKopecks = _priceKopecks(map?['price']);
+        final ingredients = _ingredientsOf(map?['ingredients']);
+        final variant = await mockBackend.createAdminVariant(
+          productId: productId!,
+          name: _nameOf(data),
+          priceKopecks: priceKopecks,
+          ingredients: ingredients,
+        );
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          data: {'data': variant},
+          statusCode: 201,
+        );
       }
 
       log('[MOCK API] Unhandled POST path: $path');
@@ -267,6 +346,42 @@ class MockApiClient implements ApiClientI {
     String? idempotencyKey,
   }) async {
     try {
+      if (path.contains('/categories/')) {
+        final id = _extractIdAfter(path, 'categories');
+        final category = await mockBackend.updateAdminCategory(
+          id: id!,
+          name: _nameOf(data),
+        );
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          data: {'data': category},
+          statusCode: 200,
+        );
+      } else if (path.contains('/products/')) {
+        final id = _extractIdAfter(path, 'products');
+        final product = await mockBackend.updateAdminProduct(
+          id: id!,
+          name: _nameOf(data),
+        );
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          data: {'data': product},
+          statusCode: 200,
+        );
+      } else if (path.contains('/variants/')) {
+        final id = _extractIdAfter(path, 'variants');
+        final map = data as Map<String, dynamic>?;
+        final variant = await mockBackend.updateAdminVariant(
+          id: id!,
+          name: _nameOf(data),
+          priceKopecks: _priceKopecks(map?['price']),
+        );
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          data: {'data': variant},
+          statusCode: 200,
+        );
+      }
       log('[MOCK API] PATCH $path with data: $data');
       return Response<dynamic>(
         requestOptions: RequestOptions(path: path),
@@ -282,12 +397,116 @@ class MockApiClient implements ApiClientI {
     }
   }
 
+  @override
+  Future<Response<dynamic>> put(
+    String path, {
+    dynamic data,
+    String? idempotencyKey,
+  }) async {
+    try {
+      if (path.contains('/variants') && path.contains('/recipe')) {
+        final variantId = _extractIdAfter(path, 'variants');
+        final map = data as Map<String, dynamic>?;
+        final ingredients = _ingredientsOf(map?['ingredients']);
+        await mockBackend.replaceAdminRecipe(
+          variantId: variantId!,
+          ingredients: ingredients,
+        );
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          data: {'data': ingredients},
+          statusCode: 200,
+        );
+      }
+      log('[MOCK API] PUT $path with data: $data');
+      return Response<dynamic>(
+        requestOptions: RequestOptions(path: path),
+        data: data ?? <String, dynamic>{},
+        statusCode: 200,
+      );
+    } catch (e) {
+      log('[MOCK API] Error in PUT $path: $e');
+      throw DioException(
+        requestOptions: RequestOptions(path: path),
+        message: e.toString(),
+      );
+    }
+  }
+
+  @override
+  Future<Response<dynamic>> delete(
+    String path, {
+    dynamic data,
+    String? idempotencyKey,
+  }) async {
+    try {
+      if (path.contains('/categories/')) {
+        final id = _extractIdAfter(path, 'categories');
+        await mockBackend.deleteAdminCategory(id: id!);
+      } else if (path.contains('/products/')) {
+        final id = _extractIdAfter(path, 'products');
+        await mockBackend.deleteAdminProduct(id: id!);
+      } else if (path.contains('/variants/')) {
+        final id = _extractIdAfter(path, 'variants');
+        await mockBackend.deleteAdminVariant(id: id!);
+      }
+      log('[MOCK API] DELETE $path');
+      return Response<dynamic>(
+        requestOptions: RequestOptions(path: path),
+        statusCode: 204,
+      );
+    } catch (e) {
+      log('[MOCK API] Error in DELETE $path: $e');
+      throw DioException(
+        requestOptions: RequestOptions(path: path),
+        message: e.toString(),
+      );
+    }
+  }
+
   int? _extractCategoryId(String path) {
     final match = RegExp(r'/categories/(\d+)/products').firstMatch(path);
     if (match != null) {
       return int.parse(match.group(1)!);
     }
     return null;
+  }
+
+  int? _extractOutletId(String path) {
+    final match = RegExp(r'/retail-outlets/(\d+)').firstMatch(path);
+    return match == null ? null : int.parse(match.group(1)!);
+  }
+
+  /// Extracts the `{id}` that immediately follows `/<segment>/` in a path, e.g.
+  /// `/categories/12` → `12`, `/products/7/variants` → `7`.
+  int? _extractIdAfter(String path, String segment) {
+    final match = RegExp('/$segment/(\\d+)').firstMatch(path);
+    return match == null ? null : int.parse(match.group(1)!);
+  }
+
+  String _nameOf(dynamic data) =>
+      (data as Map<String, dynamic>?)?['name']?.toString().trim() ?? '';
+
+  int _priceKopecks(dynamic raw) => raw == null
+      ? 0
+      : uahToKopecks(
+          raw is num
+              ? raw.toDouble()
+              : double.tryParse(raw.toString()) ?? 0,
+        );
+
+  List<RecipeIngredient> _ingredientsOf(dynamic raw) {
+    final list = raw;
+    if (list is! List) return const [];
+    return [
+      for (final e in list)
+        if (e is Map<String, dynamic>)
+          RecipeIngredient(
+            ingredientId: parseInt(e['ingredient_id']),
+            name: parseString(e['name']),
+            quantity: parseDouble(e['quantity']),
+          ),
+    ];
   }
 
   int? _extractProductId(String path) {

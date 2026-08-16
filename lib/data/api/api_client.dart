@@ -184,6 +184,32 @@ class ApiClient implements ApiClientI {
     );
   }
 
+  @override
+  Future<Response<dynamic>> put(
+    String path, {
+    dynamic data,
+    String? idempotencyKey,
+  }) {
+    return _dio.put(
+      path,
+      data: data,
+      options: _idempotentOptions(idempotencyKey),
+    );
+  }
+
+  @override
+  Future<Response<dynamic>> delete(
+    String path, {
+    dynamic data,
+    String? idempotencyKey,
+  }) {
+    return _dio.delete(
+      path,
+      data: data,
+      options: _idempotentOptions(idempotencyKey),
+    );
+  }
+
   Options? _idempotentOptions(String? key) =>
       key == null ? null : Options(headers: {'Idempotency-Key': key});
 }
