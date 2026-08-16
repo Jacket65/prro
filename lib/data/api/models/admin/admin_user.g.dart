@@ -9,10 +9,10 @@ part of 'admin_user.dart';
 _AdminUser _$AdminUserFromJson(Map<String, dynamic> json) => _AdminUser(
   id: parseInt(json['id']),
   name: _nameFromJson(json, 'name') as String,
-  phone: _nullableStringFromJson(json['phone']),
-  email: _nullableStringFromJson(json['email']),
+  phone: parseNullableString(json['phone']),
+  email: parseNullableString(json['email']),
   status: _statusFromJson(json['status']),
-  role: _nullableStringFromJson(json['role']),
+  role: parseNullableString(json['role']),
 );
 
 Map<String, dynamic> _$AdminUserToJson(_AdminUser instance) =>

@@ -1,9 +1,17 @@
-import 'dart:developer';
-
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:prro/features/admin/screens/main_screen/main_screen.dart';
+import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
+import 'package:prro/di/di.dart';
+import 'package:prro/features/admin/screens/main_screen/main_screen.dart'
+    hide getIt;
 
+/// Admin authentication screen.
+///
+/// Reuses the app's shared [LoginRepositoryI] (and therefore the shared
+/// `ApiClient`/`LoginService` token storage, refresh and `onUnauthorized`
+/// handling) instead of the old hardcoded-credentials `ApiService` path. The
+/// token is returned in the `Authorization` response header and stored by the
+/// shared login service, so the `ApiClient` interceptor attaches it for every
+/// subsequent admin request.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -12,12 +20,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _phoneController = TextEditingController(
-    text: 'admin',
-  );
-  final TextEditingController _passwordController = TextEditingController(
-    text: 'admin123',
-  );
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -33,15 +37,24 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final token = await _authenticateUser(
-        _phoneController.text,
-        _passwordController.text,
+      final success = await getIt<LoginRepositoryI>().login(
+        username: _phoneController.text.trim(),
+        password: _passwordController.text,
       );
 
-      if (token != null && mounted) {
+      if (success && mounted) {
         await Navigator.pushReplacement(
           context,
           MaterialPageRoute<void>(builder: (context) => const MainScreen()),
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Невірний логін або пароль',
+              textAlign: TextAlign.center,
+            ),
+          ),
         );
       }
     } finally {
@@ -70,22 +83,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _phoneController,
                   cursorWidth: 1,
                   cursorColor: Colors.grey,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Телефон',
-                    hintStyle: const TextStyle(color: Colors.grey),
+                    hintStyle: TextStyle(color: Colors.grey),
                     isDense: true,
-                    contentPadding: const EdgeInsets.all(10),
+                    contentPadding: EdgeInsets.all(10),
                     fillColor: Colors.white,
                     focusColor: Colors.white,
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
                     ),
                     border: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Colors.white,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(5),
+                      borderSide: BorderSide(color: Colors.white, width: 2),
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
                     ),
                   ),
                 ),
@@ -100,22 +110,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: true,
                   cursorWidth: 1,
                   cursorColor: Colors.grey,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Пароль',
-                    hintStyle: const TextStyle(color: Colors.grey),
+                    hintStyle: TextStyle(color: Colors.grey),
                     isDense: true,
-                    contentPadding: const EdgeInsets.all(10),
+                    contentPadding: EdgeInsets.all(10),
                     fillColor: Colors.white,
                     focusColor: Colors.white,
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
                     ),
                     border: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Colors.white,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(5),
+                      borderSide: BorderSide(color: Colors.white, width: 2),
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
                     ),
                   ),
                 ),
@@ -154,31 +161,5 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
-
-  Future<String?> _authenticateUser(String login, String password) async {
-    final dio = Dio(
-      BaseOptions(baseUrl: 'http://pos.coffeebeans.space.test/api/v1'),
-    );
-
-    try {
-      final response = await dio.post<Map<dynamic, dynamic>>(
-        '/auth/login',
-        data: {'login': login, 'password': password},
-      );
-
-      log('Response status: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        final authHeader = response.headers['authorization']?.first;
-        if (authHeader != null &&
-            authHeader.toLowerCase().startsWith('bearer ')) {
-          return authHeader.substring(7).trim();
-        }
-      }
-    } on Object catch (e) {
-      log('Authentication error: $e');
-    }
-    return null;
   }
 }

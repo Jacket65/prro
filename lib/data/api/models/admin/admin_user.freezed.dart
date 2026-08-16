@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AdminUser {
 
-@JsonKey(fromJson: parseInt) int get id;@JsonKey(readValue: _nameFromJson) String get name;@JsonKey(fromJson: _nullableStringFromJson) String? get phone;@JsonKey(fromJson: _nullableStringFromJson) String? get email;@JsonKey(fromJson: _statusFromJson) DpsStatus? get status;@JsonKey(fromJson: _nullableStringFromJson) String? get role;
+@JsonKey(fromJson: parseInt) int get id;@JsonKey(readValue: _nameFromJson) String get name;@JsonKey(fromJson: parseNullableString) String? get phone;@JsonKey(fromJson: parseNullableString) String? get email;@JsonKey(fromJson: _statusFromJson) DpsStatus? get status;@JsonKey(fromJson: parseNullableString) String? get role;
 /// Create a copy of AdminUser
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $AdminUserCopyWith<$Res>  {
   factory $AdminUserCopyWith(AdminUser value, $Res Function(AdminUser) _then) = _$AdminUserCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(fromJson: parseInt) int id,@JsonKey(readValue: _nameFromJson) String name,@JsonKey(fromJson: _nullableStringFromJson) String? phone,@JsonKey(fromJson: _nullableStringFromJson) String? email,@JsonKey(fromJson: _statusFromJson) DpsStatus? status,@JsonKey(fromJson: _nullableStringFromJson) String? role
+@JsonKey(fromJson: parseInt) int id,@JsonKey(readValue: _nameFromJson) String name,@JsonKey(fromJson: parseNullableString) String? phone,@JsonKey(fromJson: parseNullableString) String? email,@JsonKey(fromJson: _statusFromJson) DpsStatus? status,@JsonKey(fromJson: parseNullableString) String? role
 });
 
 
@@ -158,7 +158,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(readValue: _nameFromJson)  String name, @JsonKey(fromJson: _nullableStringFromJson)  String? phone, @JsonKey(fromJson: _nullableStringFromJson)  String? email, @JsonKey(fromJson: _statusFromJson)  DpsStatus? status, @JsonKey(fromJson: _nullableStringFromJson)  String? role)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(readValue: _nameFromJson)  String name, @JsonKey(fromJson: parseNullableString)  String? phone, @JsonKey(fromJson: parseNullableString)  String? email, @JsonKey(fromJson: _statusFromJson)  DpsStatus? status, @JsonKey(fromJson: parseNullableString)  String? role)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AdminUser() when $default != null:
 return $default(_that.id,_that.name,_that.phone,_that.email,_that.status,_that.role);case _:
@@ -179,7 +179,7 @@ return $default(_that.id,_that.name,_that.phone,_that.email,_that.status,_that.r
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(readValue: _nameFromJson)  String name, @JsonKey(fromJson: _nullableStringFromJson)  String? phone, @JsonKey(fromJson: _nullableStringFromJson)  String? email, @JsonKey(fromJson: _statusFromJson)  DpsStatus? status, @JsonKey(fromJson: _nullableStringFromJson)  String? role)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(readValue: _nameFromJson)  String name, @JsonKey(fromJson: parseNullableString)  String? phone, @JsonKey(fromJson: parseNullableString)  String? email, @JsonKey(fromJson: _statusFromJson)  DpsStatus? status, @JsonKey(fromJson: parseNullableString)  String? role)  $default,) {final _that = this;
 switch (_that) {
 case _AdminUser():
 return $default(_that.id,_that.name,_that.phone,_that.email,_that.status,_that.role);case _:
@@ -199,7 +199,7 @@ return $default(_that.id,_that.name,_that.phone,_that.email,_that.status,_that.r
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(readValue: _nameFromJson)  String name, @JsonKey(fromJson: _nullableStringFromJson)  String? phone, @JsonKey(fromJson: _nullableStringFromJson)  String? email, @JsonKey(fromJson: _statusFromJson)  DpsStatus? status, @JsonKey(fromJson: _nullableStringFromJson)  String? role)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(readValue: _nameFromJson)  String name, @JsonKey(fromJson: parseNullableString)  String? phone, @JsonKey(fromJson: parseNullableString)  String? email, @JsonKey(fromJson: _statusFromJson)  DpsStatus? status, @JsonKey(fromJson: parseNullableString)  String? role)?  $default,) {final _that = this;
 switch (_that) {
 case _AdminUser() when $default != null:
 return $default(_that.id,_that.name,_that.phone,_that.email,_that.status,_that.role);case _:
@@ -214,15 +214,15 @@ return $default(_that.id,_that.name,_that.phone,_that.email,_that.status,_that.r
 @JsonSerializable()
 
 class _AdminUser implements AdminUser {
-  const _AdminUser({@JsonKey(fromJson: parseInt) required this.id, @JsonKey(readValue: _nameFromJson) required this.name, @JsonKey(fromJson: _nullableStringFromJson) this.phone, @JsonKey(fromJson: _nullableStringFromJson) this.email, @JsonKey(fromJson: _statusFromJson) this.status, @JsonKey(fromJson: _nullableStringFromJson) this.role});
+  const _AdminUser({@JsonKey(fromJson: parseInt) required this.id, @JsonKey(readValue: _nameFromJson) required this.name, @JsonKey(fromJson: parseNullableString) this.phone, @JsonKey(fromJson: parseNullableString) this.email, @JsonKey(fromJson: _statusFromJson) this.status, @JsonKey(fromJson: parseNullableString) this.role});
   factory _AdminUser.fromJson(Map<String, dynamic> json) => _$AdminUserFromJson(json);
 
 @override@JsonKey(fromJson: parseInt) final  int id;
 @override@JsonKey(readValue: _nameFromJson) final  String name;
-@override@JsonKey(fromJson: _nullableStringFromJson) final  String? phone;
-@override@JsonKey(fromJson: _nullableStringFromJson) final  String? email;
+@override@JsonKey(fromJson: parseNullableString) final  String? phone;
+@override@JsonKey(fromJson: parseNullableString) final  String? email;
 @override@JsonKey(fromJson: _statusFromJson) final  DpsStatus? status;
-@override@JsonKey(fromJson: _nullableStringFromJson) final  String? role;
+@override@JsonKey(fromJson: parseNullableString) final  String? role;
 
 /// Create a copy of AdminUser
 /// with the given fields replaced by the non-null parameter values.
@@ -257,7 +257,7 @@ abstract mixin class _$AdminUserCopyWith<$Res> implements $AdminUserCopyWith<$Re
   factory _$AdminUserCopyWith(_AdminUser value, $Res Function(_AdminUser) _then) = __$AdminUserCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(fromJson: parseInt) int id,@JsonKey(readValue: _nameFromJson) String name,@JsonKey(fromJson: _nullableStringFromJson) String? phone,@JsonKey(fromJson: _nullableStringFromJson) String? email,@JsonKey(fromJson: _statusFromJson) DpsStatus? status,@JsonKey(fromJson: _nullableStringFromJson) String? role
+@JsonKey(fromJson: parseInt) int id,@JsonKey(readValue: _nameFromJson) String name,@JsonKey(fromJson: parseNullableString) String? phone,@JsonKey(fromJson: parseNullableString) String? email,@JsonKey(fromJson: _statusFromJson) DpsStatus? status,@JsonKey(fromJson: parseNullableString) String? role
 });
 
 

@@ -16,7 +16,7 @@ _AdminProduct _$AdminProductFromJson(Map<String, dynamic> json) =>
     _AdminProduct(
       id: parseInt(json['id']),
       name: parseString(json['name']),
-      categoryId: _nullableIntFromJson(json['category_id']),
+      categoryId: parseNullableInt(json['category_id']),
     );
 
 Map<String, dynamic> _$AdminProductToJson(_AdminProduct instance) =>
@@ -31,7 +31,7 @@ _AdminVariant _$AdminVariantFromJson(Map<String, dynamic> json) =>
       id: parseInt(json['id']),
       name: parseString(json['name']),
       priceKopecks: _priceToKopecks(json['price']),
-      productId: _nullableIntFromJson(json['product_id']),
+      productId: parseNullableInt(json['product_id']),
     );
 
 Map<String, dynamic> _$AdminVariantToJson(_AdminVariant instance) =>
@@ -60,7 +60,7 @@ _AdminIngredient _$AdminIngredientFromJson(Map<String, dynamic> json) =>
     _AdminIngredient(
       id: parseInt(json['id']),
       name: parseString(json['name']),
-      unitId: _nullableIntFromJson(json['unit_id']),
+      unitId: parseNullableInt(json['unit_id']),
     );
 
 Map<String, dynamic> _$AdminIngredientToJson(_AdminIngredient instance) =>

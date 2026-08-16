@@ -281,7 +281,7 @@ as String,
 /// @nodoc
 mixin _$AdminProduct {
 
-@JsonKey(fromJson: parseInt) int get id;@JsonKey(fromJson: parseString) String get name;@JsonKey(name: 'category_id', fromJson: _nullableIntFromJson) int? get categoryId;
+@JsonKey(fromJson: parseInt) int get id;@JsonKey(fromJson: parseString) String get name;@JsonKey(name: 'category_id', fromJson: parseNullableInt) int? get categoryId;
 /// Create a copy of AdminProduct
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -314,7 +314,7 @@ abstract mixin class $AdminProductCopyWith<$Res>  {
   factory $AdminProductCopyWith(AdminProduct value, $Res Function(AdminProduct) _then) = _$AdminProductCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'category_id', fromJson: _nullableIntFromJson) int? categoryId
+@JsonKey(fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'category_id', fromJson: parseNullableInt) int? categoryId
 });
 
 
@@ -421,7 +421,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'category_id', fromJson: _nullableIntFromJson)  int? categoryId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'category_id', fromJson: parseNullableInt)  int? categoryId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AdminProduct() when $default != null:
 return $default(_that.id,_that.name,_that.categoryId);case _:
@@ -442,7 +442,7 @@ return $default(_that.id,_that.name,_that.categoryId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'category_id', fromJson: _nullableIntFromJson)  int? categoryId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'category_id', fromJson: parseNullableInt)  int? categoryId)  $default,) {final _that = this;
 switch (_that) {
 case _AdminProduct():
 return $default(_that.id,_that.name,_that.categoryId);case _:
@@ -462,7 +462,7 @@ return $default(_that.id,_that.name,_that.categoryId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'category_id', fromJson: _nullableIntFromJson)  int? categoryId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'category_id', fromJson: parseNullableInt)  int? categoryId)?  $default,) {final _that = this;
 switch (_that) {
 case _AdminProduct() when $default != null:
 return $default(_that.id,_that.name,_that.categoryId);case _:
@@ -477,12 +477,12 @@ return $default(_that.id,_that.name,_that.categoryId);case _:
 @JsonSerializable()
 
 class _AdminProduct implements AdminProduct {
-  const _AdminProduct({@JsonKey(fromJson: parseInt) required this.id, @JsonKey(fromJson: parseString) required this.name, @JsonKey(name: 'category_id', fromJson: _nullableIntFromJson) this.categoryId});
+  const _AdminProduct({@JsonKey(fromJson: parseInt) required this.id, @JsonKey(fromJson: parseString) required this.name, @JsonKey(name: 'category_id', fromJson: parseNullableInt) this.categoryId});
   factory _AdminProduct.fromJson(Map<String, dynamic> json) => _$AdminProductFromJson(json);
 
 @override@JsonKey(fromJson: parseInt) final  int id;
 @override@JsonKey(fromJson: parseString) final  String name;
-@override@JsonKey(name: 'category_id', fromJson: _nullableIntFromJson) final  int? categoryId;
+@override@JsonKey(name: 'category_id', fromJson: parseNullableInt) final  int? categoryId;
 
 /// Create a copy of AdminProduct
 /// with the given fields replaced by the non-null parameter values.
@@ -517,7 +517,7 @@ abstract mixin class _$AdminProductCopyWith<$Res> implements $AdminProductCopyWi
   factory _$AdminProductCopyWith(_AdminProduct value, $Res Function(_AdminProduct) _then) = __$AdminProductCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'category_id', fromJson: _nullableIntFromJson) int? categoryId
+@JsonKey(fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'category_id', fromJson: parseNullableInt) int? categoryId
 });
 
 
@@ -550,7 +550,7 @@ as int?,
 /// @nodoc
 mixin _$AdminVariant {
 
-@JsonKey(fromJson: parseInt) int get id;@JsonKey(fromJson: parseString) String get name;@JsonKey(name: 'price', fromJson: _priceToKopecks) int get priceKopecks;@JsonKey(name: 'product_id', fromJson: _nullableIntFromJson) int? get productId;
+@JsonKey(fromJson: parseInt) int get id;@JsonKey(fromJson: parseString) String get name;@JsonKey(name: 'price', fromJson: _priceToKopecks) int get priceKopecks;@JsonKey(name: 'product_id', fromJson: parseNullableInt) int? get productId;
 /// Create a copy of AdminVariant
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -583,7 +583,7 @@ abstract mixin class $AdminVariantCopyWith<$Res>  {
   factory $AdminVariantCopyWith(AdminVariant value, $Res Function(AdminVariant) _then) = _$AdminVariantCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'price', fromJson: _priceToKopecks) int priceKopecks,@JsonKey(name: 'product_id', fromJson: _nullableIntFromJson) int? productId
+@JsonKey(fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'price', fromJson: _priceToKopecks) int priceKopecks,@JsonKey(name: 'product_id', fromJson: parseNullableInt) int? productId
 });
 
 
@@ -691,7 +691,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'price', fromJson: _priceToKopecks)  int priceKopecks, @JsonKey(name: 'product_id', fromJson: _nullableIntFromJson)  int? productId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'price', fromJson: _priceToKopecks)  int priceKopecks, @JsonKey(name: 'product_id', fromJson: parseNullableInt)  int? productId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AdminVariant() when $default != null:
 return $default(_that.id,_that.name,_that.priceKopecks,_that.productId);case _:
@@ -712,7 +712,7 @@ return $default(_that.id,_that.name,_that.priceKopecks,_that.productId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'price', fromJson: _priceToKopecks)  int priceKopecks, @JsonKey(name: 'product_id', fromJson: _nullableIntFromJson)  int? productId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'price', fromJson: _priceToKopecks)  int priceKopecks, @JsonKey(name: 'product_id', fromJson: parseNullableInt)  int? productId)  $default,) {final _that = this;
 switch (_that) {
 case _AdminVariant():
 return $default(_that.id,_that.name,_that.priceKopecks,_that.productId);case _:
@@ -732,7 +732,7 @@ return $default(_that.id,_that.name,_that.priceKopecks,_that.productId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'price', fromJson: _priceToKopecks)  int priceKopecks, @JsonKey(name: 'product_id', fromJson: _nullableIntFromJson)  int? productId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'price', fromJson: _priceToKopecks)  int priceKopecks, @JsonKey(name: 'product_id', fromJson: parseNullableInt)  int? productId)?  $default,) {final _that = this;
 switch (_that) {
 case _AdminVariant() when $default != null:
 return $default(_that.id,_that.name,_that.priceKopecks,_that.productId);case _:
@@ -747,13 +747,13 @@ return $default(_that.id,_that.name,_that.priceKopecks,_that.productId);case _:
 @JsonSerializable()
 
 class _AdminVariant implements AdminVariant {
-  const _AdminVariant({@JsonKey(fromJson: parseInt) required this.id, @JsonKey(fromJson: parseString) required this.name, @JsonKey(name: 'price', fromJson: _priceToKopecks) required this.priceKopecks, @JsonKey(name: 'product_id', fromJson: _nullableIntFromJson) this.productId});
+  const _AdminVariant({@JsonKey(fromJson: parseInt) required this.id, @JsonKey(fromJson: parseString) required this.name, @JsonKey(name: 'price', fromJson: _priceToKopecks) required this.priceKopecks, @JsonKey(name: 'product_id', fromJson: parseNullableInt) this.productId});
   factory _AdminVariant.fromJson(Map<String, dynamic> json) => _$AdminVariantFromJson(json);
 
 @override@JsonKey(fromJson: parseInt) final  int id;
 @override@JsonKey(fromJson: parseString) final  String name;
 @override@JsonKey(name: 'price', fromJson: _priceToKopecks) final  int priceKopecks;
-@override@JsonKey(name: 'product_id', fromJson: _nullableIntFromJson) final  int? productId;
+@override@JsonKey(name: 'product_id', fromJson: parseNullableInt) final  int? productId;
 
 /// Create a copy of AdminVariant
 /// with the given fields replaced by the non-null parameter values.
@@ -788,7 +788,7 @@ abstract mixin class _$AdminVariantCopyWith<$Res> implements $AdminVariantCopyWi
   factory _$AdminVariantCopyWith(_AdminVariant value, $Res Function(_AdminVariant) _then) = __$AdminVariantCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'price', fromJson: _priceToKopecks) int priceKopecks,@JsonKey(name: 'product_id', fromJson: _nullableIntFromJson) int? productId
+@JsonKey(fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'price', fromJson: _priceToKopecks) int priceKopecks,@JsonKey(name: 'product_id', fromJson: parseNullableInt) int? productId
 });
 
 
@@ -1091,7 +1091,7 @@ as double,
 /// @nodoc
 mixin _$AdminIngredient {
 
-@JsonKey(fromJson: parseInt) int get id;@JsonKey(fromJson: parseString) String get name;@JsonKey(name: 'unit_id', fromJson: _nullableIntFromJson) int? get unitId;
+@JsonKey(fromJson: parseInt) int get id;@JsonKey(fromJson: parseString) String get name;@JsonKey(name: 'unit_id', fromJson: parseNullableInt) int? get unitId;
 /// Create a copy of AdminIngredient
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1124,7 +1124,7 @@ abstract mixin class $AdminIngredientCopyWith<$Res>  {
   factory $AdminIngredientCopyWith(AdminIngredient value, $Res Function(AdminIngredient) _then) = _$AdminIngredientCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'unit_id', fromJson: _nullableIntFromJson) int? unitId
+@JsonKey(fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'unit_id', fromJson: parseNullableInt) int? unitId
 });
 
 
@@ -1231,7 +1231,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'unit_id', fromJson: _nullableIntFromJson)  int? unitId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'unit_id', fromJson: parseNullableInt)  int? unitId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AdminIngredient() when $default != null:
 return $default(_that.id,_that.name,_that.unitId);case _:
@@ -1252,7 +1252,7 @@ return $default(_that.id,_that.name,_that.unitId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'unit_id', fromJson: _nullableIntFromJson)  int? unitId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'unit_id', fromJson: parseNullableInt)  int? unitId)  $default,) {final _that = this;
 switch (_that) {
 case _AdminIngredient():
 return $default(_that.id,_that.name,_that.unitId);case _:
@@ -1272,7 +1272,7 @@ return $default(_that.id,_that.name,_that.unitId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'unit_id', fromJson: _nullableIntFromJson)  int? unitId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'unit_id', fromJson: parseNullableInt)  int? unitId)?  $default,) {final _that = this;
 switch (_that) {
 case _AdminIngredient() when $default != null:
 return $default(_that.id,_that.name,_that.unitId);case _:
@@ -1287,12 +1287,12 @@ return $default(_that.id,_that.name,_that.unitId);case _:
 @JsonSerializable()
 
 class _AdminIngredient implements AdminIngredient {
-  const _AdminIngredient({@JsonKey(fromJson: parseInt) required this.id, @JsonKey(fromJson: parseString) required this.name, @JsonKey(name: 'unit_id', fromJson: _nullableIntFromJson) this.unitId});
+  const _AdminIngredient({@JsonKey(fromJson: parseInt) required this.id, @JsonKey(fromJson: parseString) required this.name, @JsonKey(name: 'unit_id', fromJson: parseNullableInt) this.unitId});
   factory _AdminIngredient.fromJson(Map<String, dynamic> json) => _$AdminIngredientFromJson(json);
 
 @override@JsonKey(fromJson: parseInt) final  int id;
 @override@JsonKey(fromJson: parseString) final  String name;
-@override@JsonKey(name: 'unit_id', fromJson: _nullableIntFromJson) final  int? unitId;
+@override@JsonKey(name: 'unit_id', fromJson: parseNullableInt) final  int? unitId;
 
 /// Create a copy of AdminIngredient
 /// with the given fields replaced by the non-null parameter values.
@@ -1327,7 +1327,7 @@ abstract mixin class _$AdminIngredientCopyWith<$Res> implements $AdminIngredient
   factory _$AdminIngredientCopyWith(_AdminIngredient value, $Res Function(_AdminIngredient) _then) = __$AdminIngredientCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'unit_id', fromJson: _nullableIntFromJson) int? unitId
+@JsonKey(fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'unit_id', fromJson: parseNullableInt) int? unitId
 });
 
 

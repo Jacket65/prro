@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/features/admin/screens/main_screen/main_screen.dart';
+import 'package:prro/features/admin/screens/login_screen/screens/login_screen.dart'
+    as admin_login;
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/seller/screens/screens.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
@@ -90,7 +91,8 @@ class LoginScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 18),
                     ElevatedButton(
-                      onPressed: () => _navigateTo(context, const MainScreen()),
+                      onPressed: () =>
+                          _navigateTo(context, const admin_login.LoginScreen()),
                       child: const Text('Я адміністратор'),
                     ),
                   ],
