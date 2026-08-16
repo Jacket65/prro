@@ -14,11 +14,6 @@ int _priceToKopecks(Object? value) {
   return uahToKopecks(d);
 }
 
-int? _nullableIntFromJson(Object? value) {
-  if (value == null) return null;
-  return parseInt(value);
-}
-
 /// A product category within a retail outlet.
 ///
 /// `GET /retail-outlets/{id}/categories` → `{ "data": [ {id, name}, … ] }`.
@@ -40,9 +35,10 @@ abstract class AdminCategory with _$AdminCategory {
 abstract class AdminProduct with _$AdminProduct {
   const factory AdminProduct({
     @JsonKey(fromJson: parseInt) required int id,
+
     @JsonKey(fromJson: parseString) required String name,
-    @JsonKey(name: 'category_id', fromJson: _nullableIntFromJson)
-    int? categoryId,
+
+    @JsonKey(name: 'category_id', fromJson: parseNullableInt) int? categoryId,
   }) = _AdminProduct;
 
   factory AdminProduct.fromJson(Map<String, dynamic> json) =>
@@ -57,10 +53,13 @@ abstract class AdminProduct with _$AdminProduct {
 abstract class AdminVariant with _$AdminVariant {
   const factory AdminVariant({
     @JsonKey(fromJson: parseInt) required int id,
+
     @JsonKey(fromJson: parseString) required String name,
+
     @JsonKey(name: 'price', fromJson: _priceToKopecks)
     required int priceKopecks,
-    @JsonKey(name: 'product_id', fromJson: _nullableIntFromJson) int? productId,
+
+    @JsonKey(name: 'product_id', fromJson: parseNullableInt) int? productId,
   }) = _AdminVariant;
 
   factory AdminVariant.fromJson(Map<String, dynamic> json) =>
@@ -91,7 +90,7 @@ abstract class AdminIngredient with _$AdminIngredient {
   const factory AdminIngredient({
     @JsonKey(fromJson: parseInt) required int id,
     @JsonKey(fromJson: parseString) required String name,
-    @JsonKey(name: 'unit_id', fromJson: _nullableIntFromJson) int? unitId,
+    @JsonKey(name: 'unit_id', fromJson: parseNullableInt) int? unitId,
   }) = _AdminIngredient;
 
   factory AdminIngredient.fromJson(Map<String, dynamic> json) =>

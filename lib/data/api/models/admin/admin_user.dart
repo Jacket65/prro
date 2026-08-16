@@ -53,20 +53,15 @@ abstract class AdminUser with _$AdminUser {
 
     @JsonKey(readValue: _nameFromJson) required String name,
 
-    @JsonKey(fromJson: _nullableStringFromJson) String? phone,
+    @JsonKey(fromJson: parseNullableString) String? phone,
 
-    @JsonKey(fromJson: _nullableStringFromJson) String? email,
+    @JsonKey(fromJson: parseNullableString) String? email,
 
     @JsonKey(fromJson: _statusFromJson) DpsStatus? status,
 
-    @JsonKey(fromJson: _nullableStringFromJson) String? role,
+    @JsonKey(fromJson: parseNullableString) String? role,
   }) = _AdminUser;
 
   factory AdminUser.fromJson(Map<String, dynamic> json) =>
       _$AdminUserFromJson(json);
-}
-
-String? _nullableStringFromJson(Object? value) {
-  if (value == null) return null;
-  return parseString(value);
 }
