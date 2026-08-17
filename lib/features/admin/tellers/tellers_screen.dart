@@ -17,13 +17,12 @@ class TellersScreen extends StatelessWidget {
     create: (_) =>
         TellersCubit(getIt<AdminUserRepositoryI>())
           ..loadUsers(outletId: outletId),
-    child: _TellersView(outletId: outletId),
+    child: const _TellersView(),
   );
 }
 
 class _TellersView extends StatelessWidget {
-  const _TellersView({required this.outletId});
-  final int outletId;
+  const _TellersView();
 
   @override
   Widget build(BuildContext context) {
