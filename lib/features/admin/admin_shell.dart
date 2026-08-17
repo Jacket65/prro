@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/data/repositories/admin_outlet_repository/admin_outlet_repository.dart';
 import 'package:prro/di/di.dart';
 import 'package:prro/features/admin/items/items_screen.dart';
+import 'package:prro/features/admin/orders/orders_screen.dart';
 import 'package:prro/features/admin/outlets/outlets_cubit.dart';
 import 'package:prro/features/admin/outlets/outlets_screen.dart';
 import 'package:prro/features/admin/tellers/tellers_screen.dart';
@@ -34,7 +35,7 @@ class _AdminShellView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Адміністрування')),
       body: DefaultTabController(
-        length: 3,
+        length: 4,
         child: Column(
           children: [
             const TabBar(
@@ -42,6 +43,7 @@ class _AdminShellView extends StatelessWidget {
                 Tab(text: 'Точки'),
                 Tab(text: 'Продавці'),
                 Tab(text: 'Товари'),
+                Tab(text: 'Замовлення'),
               ],
             ),
             Expanded(
@@ -55,6 +57,10 @@ class _AdminShellView extends StatelessWidget {
                   _outletScoped(
                     selectedOutletId,
                     (id) => ItemsScreen(outletId: id, key: ValueKey(id)),
+                  ),
+                  _outletScoped(
+                    selectedOutletId,
+                    (id) => OrdersScreen(outletId: id, key: ValueKey(id)),
                   ),
                 ],
               ),

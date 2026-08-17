@@ -80,6 +80,7 @@ class OrderHistoryServiceMock implements OrderHistoryServiceI {
     int page = 1,
     String sort = 'opened_at',
     String order = 'desc',
+    int? outletId,
   }) async {
     final all = List<ShiftSummary>.from(_getShifts())
       ..sort((a, b) {

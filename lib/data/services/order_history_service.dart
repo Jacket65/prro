@@ -7,10 +7,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 abstract interface class OrderHistoryServiceI {
   /// `GET /retail-outlets/{outlet_id}/shifts?page&sort&order`.
+  ///
+  /// When [outletId] is null the seller's default outlet (from
+  /// `SharedPreferences`) is used; admin passes an explicit outlet.
   Future<Page<ShiftSummary>> getShifts({
     int page = 1,
     String sort = 'opened_at',
     String order = 'desc',
+    int? outletId,
   });
 
   /// `GET /shifts/{shift_id}/orders?page&sort&order`.
@@ -43,10 +47,11 @@ class OrderHistoryService implements OrderHistoryServiceI {
     int page = 1,
     String sort = 'opened_at',
     String order = 'desc',
+    int? outletId,
   }) async {
     try {
       final response = await _apiClient.get(
-        '/retail-outlets/${_outletId()}/shifts',
+        '/retail-outlets/${outletId ?? _outletId()}/shifts',
         queryParameters: {'page': page, 'sort': sort, 'order': order},
       );
       return Page<ShiftSummary>.fromJson(

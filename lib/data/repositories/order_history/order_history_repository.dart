@@ -14,8 +14,14 @@ class OrderHistoryRepositoryImpl implements OrderHistoryRepositoryI {
     int page = 1,
     String sort = 'opened_at',
     String order = 'desc',
+    int? outletId,
   }) =>
-      _service.getShifts(page: page, sort: sort, order: order);
+      _service.getShifts(
+        page: page,
+        sort: sort,
+        order: order,
+        outletId: outletId,
+      );
 
   @override
   Future<Page<OrderListItem>> getShiftOrders(
