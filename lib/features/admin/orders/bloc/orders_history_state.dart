@@ -50,16 +50,15 @@ final class OrdersHistoryLoaded extends OrdersHistoryState {
     String? order,
     bool? isLoadingMore,
     bool? loadMoreError,
-  }) =>
-      OrdersHistoryLoaded(
-        items: items ?? this.items,
-        hasNext: hasNext ?? this.hasNext,
-        page: page ?? this.page,
-        sort: sort ?? this.sort,
-        order: order ?? this.order,
-        isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-        loadMoreError: loadMoreError ?? this.loadMoreError,
-      );
+  }) => OrdersHistoryLoaded(
+    items: items ?? this.items,
+    hasNext: hasNext ?? this.hasNext,
+    page: page ?? this.page,
+    sort: sort ?? this.sort,
+    order: order ?? this.order,
+    isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    loadMoreError: loadMoreError ?? this.loadMoreError,
+  );
 
   @override
   List<Object?> get props => [

@@ -293,8 +293,7 @@ class MockApiClient implements ApiClientI {
           data: {'data': category},
           statusCode: 201,
         );
-      } else if (path.contains('/categories') &&
-          path.contains('/products')) {
+      } else if (path.contains('/categories') && path.contains('/products')) {
         final categoryId = _extractIdAfter(path, 'categories');
         final product = await mockBackend.createAdminProduct(
           categoryId: categoryId!,
@@ -305,8 +304,7 @@ class MockApiClient implements ApiClientI {
           data: {'data': product},
           statusCode: 201,
         );
-      } else if (path.contains('/products') &&
-          path.contains('/variants')) {
+      } else if (path.contains('/products') && path.contains('/variants')) {
         final productId = _extractIdAfter(path, 'products');
         final map = data as Map<String, dynamic>?;
         final priceKopecks = _priceKopecks(map?['price']);
@@ -490,9 +488,7 @@ class MockApiClient implements ApiClientI {
   int _priceKopecks(dynamic raw) => raw == null
       ? 0
       : uahToKopecks(
-          raw is num
-              ? raw.toDouble()
-              : double.tryParse(raw.toString()) ?? 0,
+          raw is num ? raw.toDouble() : double.tryParse(raw.toString()) ?? 0,
         );
 
   List<RecipeIngredient> _ingredientsOf(dynamic raw) {

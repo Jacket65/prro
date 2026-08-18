@@ -1,12 +1,14 @@
 import 'dart:async';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:prro/data/api/models/order_history.dart';
 import 'package:prro/features/admin/orders/bloc/shifts_history_cubit.dart';
-import 'package:prro/features/admin/orders/screens/orders_history_screen.dart';
+import 'package:prro/router/app_router.gr.dart';
 
+@RoutePage(name: 'AdminShiftsHistoryRoute')
 class ShiftsHistoryScreen extends StatelessWidget {
   const ShiftsHistoryScreen({super.key});
 
@@ -83,7 +85,7 @@ class _ShiftTile extends StatelessWidget {
     final range = shift.closedAt == null
         ? '${dateFormat.format(shift.openedAt)} — …'
         : '${dateFormat.format(shift.openedAt)} — '
-            '${dateFormat.format(shift.closedAt!)}';
+              '${dateFormat.format(shift.closedAt!)}';
     return ListTile(
       leading: const Icon(Icons.event_note),
       title: Text('Зміна №${shift.id}'),
@@ -95,11 +97,8 @@ class _ShiftTile extends StatelessWidget {
         ),
         backgroundColor: shift.isOpen ? Colors.green : Colors.grey,
       ),
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute<void>(
-          builder: (_) => OrdersHistoryScreen(shiftId: shift.id),
-        ),
+      onTap: () => context.router.push(
+        AdminOrdersHistoryRoute(shiftId: shift.id),
       ),
     );
   }

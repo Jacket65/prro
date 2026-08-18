@@ -96,7 +96,9 @@ class OrderHistoryServiceMock implements OrderHistoryServiceI {
   @override
   Future<Page<OrderListItem>> getShiftOrders(
     int shiftId, {
-    required String sort, required String order, int page = 1,
+    required String sort,
+    required String order,
+    int page = 1,
   }) async {
     final all = List<OrderListItem>.from(_getOrders(shiftId))
       ..sort((a, b) {
@@ -147,9 +149,7 @@ class OrderHistoryServiceMock implements OrderHistoryServiceI {
         ),
       );
     }
-    final method = idx.isEven
-        ? PaymentMethod.cash
-        : PaymentMethod.card;
+    final method = idx.isEven ? PaymentMethod.cash : PaymentMethod.card;
     final tendered = method == PaymentMethod.cash ? total + 1000 : total;
     return OrderDetail(
       orderId: orderId,

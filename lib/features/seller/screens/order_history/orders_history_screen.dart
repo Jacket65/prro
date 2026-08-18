@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -8,8 +9,9 @@ import 'package:prro/data/api/models/order_history.dart';
 import 'package:prro/data/repositories/order_history/order_history.dart';
 import 'package:prro/di/di.dart';
 import 'package:prro/features/seller/bloc/order_history/orders_history_cubit.dart';
-import 'package:prro/features/seller/screens/order_history/order_detail_screen.dart';
+import 'package:prro/router/app_router.gr.dart';
 
+@RoutePage(name: 'SellerOrdersHistoryRoute')
 class OrdersHistoryScreen extends StatelessWidget {
   const OrdersHistoryScreen({required this.shiftId, super.key});
   final int shiftId;
@@ -59,8 +61,7 @@ class _OrdersHistoryView extends StatelessWidget {
                     return const Center(child: Text('Немає замовлень'));
                   }
                   return ListView.builder(
-                    itemCount:
-                        state.items.length + (state.hasNext ? 1 : 0),
+                    itemCount: state.items.length + (state.hasNext ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index >= state.items.length) {
                         if (state.loadMoreError) {
@@ -110,10 +111,8 @@ class _SortControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<OrdersHistoryCubit, OrdersHistoryState>(
       builder: (context, state) {
-        final sort =
-            state is OrdersHistoryLoaded ? state.sort : cubit.sort;
-        final order =
-            state is OrdersHistoryLoaded ? state.order : cubit.order;
+        final sort = state is OrdersHistoryLoaded ? state.sort : cubit.sort;
+        final order = state is OrdersHistoryLoaded ? state.order : cubit.order;
         return Padding(
           padding: const EdgeInsets.all(8),
           child: Row(
@@ -131,10 +130,9 @@ class _SortControls extends StatelessWidget {
               ),
               const Spacer(),
               IconButton(
-                icon:
-                    order == 'asc'
-                        ? const Icon(Icons.arrow_upward)
-                        : const Icon(Icons.arrow_downward),
+                icon: order == 'asc'
+                    ? const Icon(Icons.arrow_upward)
+                    : const Icon(Icons.arrow_downward),
                 tooltip: order == 'asc' ? 'За зростанням' : 'За спаданням',
                 onPressed: () =>
                     unawaited(cubit.setOrder(order == 'asc' ? 'desc' : 'asc')),
@@ -162,11 +160,8 @@ class _OrderTile extends StatelessWidget {
         formatUah(order.totalKopecks),
         style: const TextStyle(fontWeight: FontWeight.w600),
       ),
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute<void>(
-          builder: (_) => OrderDetailScreen(orderId: order.orderId),
-        ),
+      onTap: () => context.router.push(
+        SellerOrderDetailRoute(orderId: order.orderId),
       ),
     );
   }

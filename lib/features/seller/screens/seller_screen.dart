@@ -1,25 +1,26 @@
 import 'dart:async';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
 import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
 import 'package:prro/di/di.dart';
-import 'package:prro/features/auth/auth.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/seller/bloc/balance/balance_cubit.dart';
 import 'package:prro/features/seller/bloc/items_tiles/items_tiles_bloc.dart';
 import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 import 'package:prro/features/seller/bloc/search/catalog_search_cubit.dart';
-import 'package:prro/features/seller/screens/order_history/shifts_history_screen.dart';
 import 'package:prro/features/seller/widgets/widgets.dart';
 import 'package:prro/features/shift/bloc/bloc.dart';
 import 'package:prro/features/shift/widgets/close_shift_dialog.dart';
 import 'package:prro/features/shift/widgets/open_shift_dialog.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
+import 'package:prro/router/app_router.gr.dart';
 import 'package:prro/services/nfc_payment_service.dart';
 
+@RoutePage(name: 'SellerRoute')
 class SellerScreen extends StatefulWidget {
   const SellerScreen({super.key});
 
@@ -94,12 +95,8 @@ class _SellerScreenState extends State<SellerScreen> {
                                 ) {
                                   if (context.mounted) {
                                     unawaited(
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute<void>(
-                                          builder: (_) =>
-                                              const ShiftsHistoryScreen(),
-                                        ),
+                                      context.router.push(
+                                        const SellerShiftsHistoryRoute(),
                                       ),
                                     );
                                   }
@@ -138,10 +135,9 @@ class _SellerScreenState extends State<SellerScreen> {
       context.read<LoginBloc>().add(const LoginGetInitial());
       context.read<UserBloc>().add(ClearUser());
       context.read<OrdersBloc>().add(const ClearProducts());
-      await Navigator.pushReplacement(
-        context,
-        MaterialPageRoute<void>(builder: (_) => LoginScreen()),
-      );
+      if (context.mounted) {
+        await context.router.replace(LoginRoute());
+      }
     }
   }
 

@@ -40,7 +40,8 @@ Future<(String name, int priceKopecks)?> showVariantDialog(
         ElevatedButton(
           onPressed: () {
             final name = nameController.text.trim();
-            final price = double.tryParse(
+            final price =
+                double.tryParse(
                   priceController.text.trim().replaceAll(',', '.'),
                 ) ??
                 0;

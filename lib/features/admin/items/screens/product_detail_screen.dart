@@ -1,13 +1,17 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:prro/core/uuid.dart';
 import 'package:prro/data/api/models/admin/catalog.dart';
 import 'package:prro/data/repositories/admin_catalog_repository/admin_catalog_repository.dart';
 import 'package:prro/di/di.dart';
-import 'package:prro/features/admin/items/screens/variant_detail_screen.dart';
+import 'package:prro/features/admin/items/screens/variant_detail_screen.dart'
+    show VariantDetailScreen;
 import 'package:prro/features/admin/items/widgets/variant_dialog.dart';
+import 'package:prro/router/app_router.gr.dart';
 
 /// Lists variants of a product, allows adding one, and drills into
 /// [VariantDetailScreen] for recipe editing.
+@RoutePage(name: 'AdminProductDetailRoute')
 class ProductDetailScreen extends StatefulWidget {
   const ProductDetailScreen({
     required this.outletId,
@@ -96,16 +100,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     '${(variant.priceKopecks / 100).toStringAsFixed(2)} грн',
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (context) => VariantDetailScreen(
-                        outletId: widget.outletId,
-                        categoryId: widget.categoryId,
-                        productId: widget.productId,
-                        variantId: variant.id,
-                        variantName: variant.name,
-                      ),
+                  onTap: () => context.router.push(
+                    AdminVariantDetailRoute(
+                      outletId: widget.outletId,
+                      categoryId: widget.categoryId,
+                      productId: widget.productId,
+                      variantId: variant.id,
+                      variantName: variant.name,
                     ),
                   ),
                 );

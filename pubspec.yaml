@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   app_links: ^6.3.0
+  auto_route: ^11.1.0
   cupertino_icons: ^1.0.9
   decimal: ^3.2.4
   dio: ^5.10.0
@@ -31,6 +32,7 @@ dependencies:
   url_launcher: ^6.3.0
 
 dev_dependencies:
+  auto_route_generator: ^10.5.0
   bloc_test: ^10.0.0
   build_runner: ^2.15.1
   flutter_lints: ^6.0.0

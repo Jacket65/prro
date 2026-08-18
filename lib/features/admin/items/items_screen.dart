@@ -1,11 +1,14 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/data/api/models/admin/catalog.dart';
 import 'package:prro/data/repositories/admin_catalog_repository/admin_catalog_repository.dart';
 import 'package:prro/di/di.dart';
 import 'package:prro/features/admin/items/categories_cubit.dart';
-import 'package:prro/features/admin/items/screens/category_detail_screen.dart';
+import 'package:prro/features/admin/items/screens/category_detail_screen.dart'
+    show CategoryDetailScreen;
 import 'package:prro/features/admin/items/widgets/category_dialog.dart';
+import 'package:prro/router/app_router.gr.dart';
 
 /// Items tab: outlet-scoped categories grid with create / rename / delete,
 /// driven by [CategoriesCubit]. Selecting a category drills into
@@ -104,14 +107,11 @@ class _ItemsView extends StatelessWidget {
                 final category = state.categories[index];
                 return Card(
                   child: InkWell(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (context) => CategoryDetailScreen(
-                          outletId: outletId,
-                          categoryId: category.id,
-                          categoryName: category.name,
-                        ),
+                    onTap: () => context.router.push(
+                      AdminCategoryDetailRoute(
+                        outletId: outletId,
+                        categoryId: category.id,
+                        categoryName: category.name,
                       ),
                     ),
                     child: Padding(

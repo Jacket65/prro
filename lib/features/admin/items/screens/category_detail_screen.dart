@@ -1,13 +1,17 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:prro/core/uuid.dart';
 import 'package:prro/data/api/models/admin/catalog.dart';
 import 'package:prro/data/repositories/admin_catalog_repository/admin_catalog_repository.dart';
 import 'package:prro/di/di.dart';
-import 'package:prro/features/admin/items/screens/product_detail_screen.dart';
+import 'package:prro/features/admin/items/screens/product_detail_screen.dart'
+    show ProductDetailScreen;
 import 'package:prro/features/admin/items/widgets/name_dialog.dart';
+import 'package:prro/router/app_router.gr.dart';
 
 /// Lists products in a category and allows adding one. Tapping a product
 /// drills into [ProductDetailScreen].
+@RoutePage(name: 'AdminCategoryDetailRoute')
 class CategoryDetailScreen extends StatefulWidget {
   const CategoryDetailScreen({
     required this.outletId,
@@ -92,15 +96,12 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                 return ListTile(
                   title: Text(product.name),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (context) => ProductDetailScreen(
-                        outletId: widget.outletId,
-                        categoryId: widget.categoryId,
-                        productId: product.id,
-                        productName: product.name,
-                      ),
+                  onTap: () => context.router.push(
+                    AdminProductDetailRoute(
+                      outletId: widget.outletId,
+                      categoryId: widget.categoryId,
+                      productId: product.id,
+                      productName: product.name,
                     ),
                   ),
                 );

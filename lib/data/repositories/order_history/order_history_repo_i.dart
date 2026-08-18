@@ -15,7 +15,9 @@ abstract interface class OrderHistoryRepositoryI {
   /// `GET /shifts/{shift_id}/orders?page&sort&order`.
   Future<Page<OrderListItem>> getShiftOrders(
     int shiftId, {
-    required String sort, required String order, int page = 1,
+    required String sort,
+    required String order,
+    int page = 1,
   });
 
   /// `GET /orders/{order_id}` — the full receipt.

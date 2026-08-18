@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
 import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
 import 'package:prro/di/di.dart';
-import 'package:prro/features/auth/auth.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/seller/bloc/balance/balance_cubit.dart';
 import 'package:prro/features/seller/bloc/items_tiles/items_tiles_bloc.dart';
@@ -16,9 +16,11 @@ import 'package:prro/features/seller/widgets/widgets.dart';
 import 'package:prro/features/shift/bloc/mock_shift_cubit.dart';
 import 'package:prro/features/shift/widgets/close_shift_dialog.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
+import 'package:prro/router/app_router.gr.dart';
 import 'package:prro/services/nfc_payment_service.dart';
 
 /// Seller screen that works with mock data without backend API calls.
+@RoutePage(name: 'MockSellerRoute')
 class MockSellerScreen extends StatelessWidget {
   const MockSellerScreen({super.key});
 
@@ -103,10 +105,7 @@ class _MockSellerScaffold extends StatelessWidget {
       context.read<UserBloc>().add(ClearUser());
       context.read<OrdersBloc>().add(const ClearProducts());
       if (context.mounted) {
-        await Navigator.pushReplacement(
-          context,
-          MaterialPageRoute<void>(builder: (_) => LoginScreen()),
-        );
+        await context.router.replace(LoginRoute());
       }
     }
   }

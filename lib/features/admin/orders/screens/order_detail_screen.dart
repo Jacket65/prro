@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,7 @@ import 'package:prro/data/repositories/order_history/order_history.dart';
 import 'package:prro/di/di.dart';
 import 'package:prro/features/admin/orders/bloc/order_detail_cubit.dart';
 
+@RoutePage(name: 'AdminOrderDetailRoute')
 class OrderDetailScreen extends StatelessWidget {
   const OrderDetailScreen({required this.orderId, super.key});
   final int orderId;
@@ -171,16 +173,12 @@ class _TotalRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: bold
-                  ? const TextStyle(fontWeight: FontWeight.w700)
-                  : null,
+              style: bold ? const TextStyle(fontWeight: FontWeight.w700) : null,
             ),
           ),
           Text(
             value,
-            style: bold
-                ? const TextStyle(fontWeight: FontWeight.w700)
-                : null,
+            style: bold ? const TextStyle(fontWeight: FontWeight.w700) : null,
           ),
         ],
       ),

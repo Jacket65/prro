@@ -8,30 +8,29 @@ import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
 import 'package:prro/data/repositories/shift_repository/shift_repo_i.dart';
 import 'package:prro/data/repositories/user_repository/user_repo_i.dart';
 import 'package:prro/di/di.dart';
-import 'package:prro/features/auth/auth.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/shift/bloc/bloc.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
+import 'package:prro/router/app_router.dart';
+import 'package:prro/router/app_router.gr.dart';
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  const MyApp({required this.router, super.key});
+
+  final AppRouter router;
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   StreamSubscription<void>? _authSub;
 
   @override
   void initState() {
     super.initState();
-    _authSub = getIt<ApiClientI>().onUnauthorized.listen((_) async {
-      await _navigatorKey.currentState?.pushAndRemoveUntil(
-        MaterialPageRoute<void>(builder: (_) => LoginScreen()),
-        (route) => false,
-      );
+    _authSub = getIt<ApiClientI>().onUnauthorized.listen((_) {
+      unawaited(widget.router.replaceAll([LoginRoute()]));
     });
   }
 
@@ -58,12 +57,11 @@ class _MyAppState extends State<MyApp> {
           create: (context) => ShiftCubit(getIt<ShiftRepositoryI>()),
         ),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
+        routerConfig: widget.router.config(),
         title: 'Prro beta',
-        navigatorKey: _navigatorKey,
         theme: lightTheme,
         debugShowCheckedModeBanner: false,
-        home: LoginScreen(),
       ),
     );
   }

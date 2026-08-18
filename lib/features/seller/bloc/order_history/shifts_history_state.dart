@@ -44,14 +44,13 @@ final class ShiftsHistoryLoaded extends ShiftsHistoryState {
     int? page,
     bool? isLoadingMore,
     bool? loadMoreError,
-  }) =>
-      ShiftsHistoryLoaded(
-        items: items ?? this.items,
-        hasNext: hasNext ?? this.hasNext,
-        page: page ?? this.page,
-        isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-        loadMoreError: loadMoreError ?? this.loadMoreError,
-      );
+  }) => ShiftsHistoryLoaded(
+    items: items ?? this.items,
+    hasNext: hasNext ?? this.hasNext,
+    page: page ?? this.page,
+    isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    loadMoreError: loadMoreError ?? this.loadMoreError,
+  );
 
   @override
   List<Object?> get props => [

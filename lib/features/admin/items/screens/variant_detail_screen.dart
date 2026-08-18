@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:prro/data/api/models/admin/catalog.dart';
 import 'package:prro/data/repositories/admin_catalog_repository/admin_catalog_repository.dart';
@@ -5,6 +6,7 @@ import 'package:prro/di/di.dart';
 import 'package:prro/features/admin/items/widgets/recipe_dialog.dart';
 
 /// Shows a variant's recipe and lets the admin edit it via [showRecipeDialog].
+@RoutePage(name: 'AdminVariantDetailRoute')
 class VariantDetailScreen extends StatefulWidget {
   const VariantDetailScreen({
     required this.outletId,

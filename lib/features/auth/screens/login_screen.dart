@@ -1,12 +1,13 @@
 import 'dart:async';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/features/admin/admin.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
-import 'package:prro/features/seller/screens/screens.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
+import 'package:prro/router/app_router.gr.dart';
 
+@RoutePage(name: 'LoginRoute')
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
@@ -74,23 +75,19 @@ class LoginScreen extends StatelessWidget {
                     const SizedBox(height: 18),
                     ElevatedButton(
                       onPressed: () {
-                        final nav = Navigator.of(context);
                         context.read<UserBloc>().add(
                           LoadUser(username: 'cashier1'),
                         );
                         unawaited(
-                          nav.pushReplacement(
-                            MaterialPageRoute<void>(
-                              builder: (context) => const MockSellerScreen(),
-                            ),
-                          ),
+                          context.router.replace(const MockSellerRoute()),
                         );
                       },
                       child: const Text('seller (cashier1) - Mock'),
                     ),
                     const SizedBox(height: 18),
                     ElevatedButton(
-                      onPressed: () => _navigateTo(context, const AdminShell()),
+                      onPressed: () =>
+                          context.router.replace(const AdminRoute()),
                       child: const Text('Я адміністратор'),
                     ),
                   ],
@@ -108,7 +105,7 @@ class LoginScreen extends StatelessWidget {
       case LoginSuccess():
         _showSnackBar(context, 'Вітаємо вас на роботі!');
         context.read<UserBloc>().add(LoadUser(username: state.username));
-        _navigateTo(context, const SellerScreen());
+        context.router.replace(const SellerRoute());
       case LoginFailure():
         _showSnackBar(context, 'Сталася помилка ${state.error}');
       case LoginLoading():
@@ -161,15 +158,6 @@ class LoginScreen extends StatelessWidget {
         obscureText: obscureText,
         textInputAction: TextInputAction.next,
         decoration: InputDecoration(labelText: label),
-      ),
-    );
-  }
-
-  void _navigateTo(BuildContext context, Widget route) {
-    unawaited(
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute<void>(builder: (context) => route),
       ),
     );
   }
