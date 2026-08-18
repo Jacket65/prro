@@ -25,6 +25,11 @@ class ApiClient implements ApiClientI {
   /// await one refresh instead of each firing its own.
   Future<bool>? _refreshFuture;
 
+  /// Synchronous guard so concurrent 401s collapse to a single session-clear +
+  /// one `onUnauthorized` event. Set on the first failure and reset when a
+  /// session is re-established (see `_doRefresh`).
+  bool _sessionFailureHandled = false;
+
   final StreamController<void> _unauthorized =
       StreamController<void>.broadcast();
 
@@ -120,6 +125,7 @@ class ApiClient implements ApiClientI {
         final token = authHeader.substring(7).trim();
         if (token.isNotEmpty) {
           await _prefs.setString('auth_token', token);
+          _sessionFailureHandled = false;
           log('[AUTH] access token refreshed');
           return true;
         }
@@ -134,10 +140,16 @@ class ApiClient implements ApiClientI {
   /// Clears the session and notifies listeners once
   /// (concurrent 401s collapse to a single logout/redirect).
   Future<void> _onAuthFailure() async {
+    if (_sessionFailureHandled) return;
     final hadSession =
         (_prefs.getString('auth_token') ?? '').isNotEmpty ||
         (_prefs.getString('refresh_token') ?? '').isNotEmpty;
     if (!hadSession) return;
+    // Synchronous guard: under concurrent 401s the `hadSession` read above is
+    // racy (all callers can observe the token before any `remove` resolves),
+    // so a sticky flag — checked and set with no `await` in between — ensures
+    // only the first caller clears the session and emits the event.
+    _sessionFailureHandled = true;
     await _prefs.remove('auth_token');
     await _prefs.remove('refresh_token');
     await _prefs.setBool('isLogged', false);

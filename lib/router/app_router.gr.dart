@@ -9,40 +9,39 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i14;
-import 'package:flutter/material.dart' as _i15;
+import 'package:auto_route/auto_route.dart' as _i13;
+import 'package:flutter/material.dart' as _i14;
 import 'package:prro/features/admin/admin_shell.dart' as _i1;
 import 'package:prro/features/admin/items/screens/category_detail_screen.dart'
     as _i2;
 import 'package:prro/features/admin/items/screens/product_detail_screen.dart'
-    as _i9;
-import 'package:prro/features/admin/items/screens/variant_detail_screen.dart'
-    as _i13;
-import 'package:prro/features/admin/orders/screens/order_detail_screen.dart'
-    as _i5;
-import 'package:prro/features/admin/orders/screens/orders_history_screen.dart'
-    as _i7;
-import 'package:prro/features/admin/orders/screens/shifts_history_screen.dart'
-    as _i11;
-import 'package:prro/features/auth/screens/login_screen.dart' as _i3;
-import 'package:prro/features/seller/screens/mock_seller_screen.dart' as _i4;
-import 'package:prro/features/seller/screens/order_history/order_detail_screen.dart'
-    as _i6;
-import 'package:prro/features/seller/screens/order_history/orders_history_screen.dart'
     as _i8;
-import 'package:prro/features/seller/screens/order_history/shifts_history_screen.dart'
+import 'package:prro/features/admin/items/screens/variant_detail_screen.dart'
     as _i12;
-import 'package:prro/features/seller/screens/seller_screen.dart' as _i10;
+import 'package:prro/features/admin/orders/screens/order_detail_screen.dart'
+    as _i4;
+import 'package:prro/features/admin/orders/screens/orders_history_screen.dart'
+    as _i6;
+import 'package:prro/features/admin/orders/screens/shifts_history_screen.dart'
+    as _i10;
+import 'package:prro/features/auth/screens/login_screen.dart' as _i3;
+import 'package:prro/features/seller/screens/order_history/order_detail_screen.dart'
+    as _i5;
+import 'package:prro/features/seller/screens/order_history/orders_history_screen.dart'
+    as _i7;
+import 'package:prro/features/seller/screens/order_history/shifts_history_screen.dart'
+    as _i11;
+import 'package:prro/features/seller/screens/seller_screen.dart' as _i9;
 
 /// generated route for
 /// [_i1.AdminShell]
-class AdminRoute extends _i14.PageRouteInfo<void> {
-  const AdminRoute({List<_i14.PageRouteInfo>? children})
+class AdminRoute extends _i13.PageRouteInfo<void> {
+  const AdminRoute({List<_i13.PageRouteInfo>? children})
     : super(AdminRoute.name, initialChildren: children);
 
   static const String name = 'AdminRoute';
 
-  static _i14.PageInfo page = _i14.PageInfo(
+  static _i13.PageInfo page = _i13.PageInfo(
     name,
     builder: (data) {
       return const _i1.AdminShell();
@@ -53,13 +52,13 @@ class AdminRoute extends _i14.PageRouteInfo<void> {
 /// generated route for
 /// [_i2.CategoryDetailScreen]
 class AdminCategoryDetailRoute
-    extends _i14.PageRouteInfo<AdminCategoryDetailRouteArgs> {
+    extends _i13.PageRouteInfo<AdminCategoryDetailRouteArgs> {
   AdminCategoryDetailRoute({
     required int outletId,
     required int categoryId,
     required String categoryName,
-    _i15.Key? key,
-    List<_i14.PageRouteInfo>? children,
+    _i14.Key? key,
+    List<_i13.PageRouteInfo>? children,
   }) : super(
          AdminCategoryDetailRoute.name,
          args: AdminCategoryDetailRouteArgs(
@@ -73,7 +72,7 @@ class AdminCategoryDetailRoute
 
   static const String name = 'AdminCategoryDetailRoute';
 
-  static _i14.PageInfo page = _i14.PageInfo(
+  static _i13.PageInfo page = _i13.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<AdminCategoryDetailRouteArgs>();
@@ -101,7 +100,7 @@ class AdminCategoryDetailRouteArgs {
 
   final String categoryName;
 
-  final _i15.Key? key;
+  final _i14.Key? key;
 
   @override
   String toString() {
@@ -128,72 +127,28 @@ class AdminCategoryDetailRouteArgs {
 
 /// generated route for
 /// [_i3.LoginScreen]
-class LoginRoute extends _i14.PageRouteInfo<LoginRouteArgs> {
-  LoginRoute({_i15.Key? key, List<_i14.PageRouteInfo>? children})
-    : super(
-        LoginRoute.name,
-        args: LoginRouteArgs(key: key),
-        initialChildren: children,
-      );
+class LoginRoute extends _i13.PageRouteInfo<void> {
+  const LoginRoute({List<_i13.PageRouteInfo>? children})
+    : super(LoginRoute.name, initialChildren: children);
 
   static const String name = 'LoginRoute';
 
-  static _i14.PageInfo page = _i14.PageInfo(
+  static _i13.PageInfo page = _i13.PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<LoginRouteArgs>(
-        orElse: () => const LoginRouteArgs(),
-      );
-      return _i3.LoginScreen(key: args.key);
-    },
-  );
-}
-
-class LoginRouteArgs {
-  const LoginRouteArgs({this.key});
-
-  final _i15.Key? key;
-
-  @override
-  String toString() {
-    return 'LoginRouteArgs{key: $key}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! LoginRouteArgs) return false;
-    return key == other.key;
-  }
-
-  @override
-  int get hashCode => key.hashCode;
-}
-
-/// generated route for
-/// [_i4.MockSellerScreen]
-class MockSellerRoute extends _i14.PageRouteInfo<void> {
-  const MockSellerRoute({List<_i14.PageRouteInfo>? children})
-    : super(MockSellerRoute.name, initialChildren: children);
-
-  static const String name = 'MockSellerRoute';
-
-  static _i14.PageInfo page = _i14.PageInfo(
-    name,
-    builder: (data) {
-      return const _i4.MockSellerScreen();
+      return const _i3.LoginScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i5.OrderDetailScreen]
+/// [_i4.OrderDetailScreen]
 class AdminOrderDetailRoute
-    extends _i14.PageRouteInfo<AdminOrderDetailRouteArgs> {
+    extends _i13.PageRouteInfo<AdminOrderDetailRouteArgs> {
   AdminOrderDetailRoute({
     required int orderId,
-    _i15.Key? key,
-    List<_i14.PageRouteInfo>? children,
+    _i14.Key? key,
+    List<_i13.PageRouteInfo>? children,
   }) : super(
          AdminOrderDetailRoute.name,
          args: AdminOrderDetailRouteArgs(orderId: orderId, key: key),
@@ -202,11 +157,11 @@ class AdminOrderDetailRoute
 
   static const String name = 'AdminOrderDetailRoute';
 
-  static _i14.PageInfo page = _i14.PageInfo(
+  static _i13.PageInfo page = _i13.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<AdminOrderDetailRouteArgs>();
-      return _i5.OrderDetailScreen(orderId: args.orderId, key: args.key);
+      return _i4.OrderDetailScreen(orderId: args.orderId, key: args.key);
     },
   );
 }
@@ -216,7 +171,7 @@ class AdminOrderDetailRouteArgs {
 
   final int orderId;
 
-  final _i15.Key? key;
+  final _i14.Key? key;
 
   @override
   String toString() {
@@ -235,13 +190,13 @@ class AdminOrderDetailRouteArgs {
 }
 
 /// generated route for
-/// [_i6.OrderDetailScreen]
+/// [_i5.OrderDetailScreen]
 class SellerOrderDetailRoute
-    extends _i14.PageRouteInfo<SellerOrderDetailRouteArgs> {
+    extends _i13.PageRouteInfo<SellerOrderDetailRouteArgs> {
   SellerOrderDetailRoute({
     required int orderId,
-    _i15.Key? key,
-    List<_i14.PageRouteInfo>? children,
+    _i14.Key? key,
+    List<_i13.PageRouteInfo>? children,
   }) : super(
          SellerOrderDetailRoute.name,
          args: SellerOrderDetailRouteArgs(orderId: orderId, key: key),
@@ -250,11 +205,11 @@ class SellerOrderDetailRoute
 
   static const String name = 'SellerOrderDetailRoute';
 
-  static _i14.PageInfo page = _i14.PageInfo(
+  static _i13.PageInfo page = _i13.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<SellerOrderDetailRouteArgs>();
-      return _i6.OrderDetailScreen(orderId: args.orderId, key: args.key);
+      return _i5.OrderDetailScreen(orderId: args.orderId, key: args.key);
     },
   );
 }
@@ -264,7 +219,7 @@ class SellerOrderDetailRouteArgs {
 
   final int orderId;
 
-  final _i15.Key? key;
+  final _i14.Key? key;
 
   @override
   String toString() {
@@ -283,13 +238,13 @@ class SellerOrderDetailRouteArgs {
 }
 
 /// generated route for
-/// [_i7.OrdersHistoryScreen]
+/// [_i6.OrdersHistoryScreen]
 class AdminOrdersHistoryRoute
-    extends _i14.PageRouteInfo<AdminOrdersHistoryRouteArgs> {
+    extends _i13.PageRouteInfo<AdminOrdersHistoryRouteArgs> {
   AdminOrdersHistoryRoute({
     required int shiftId,
-    _i15.Key? key,
-    List<_i14.PageRouteInfo>? children,
+    _i14.Key? key,
+    List<_i13.PageRouteInfo>? children,
   }) : super(
          AdminOrdersHistoryRoute.name,
          args: AdminOrdersHistoryRouteArgs(shiftId: shiftId, key: key),
@@ -298,11 +253,11 @@ class AdminOrdersHistoryRoute
 
   static const String name = 'AdminOrdersHistoryRoute';
 
-  static _i14.PageInfo page = _i14.PageInfo(
+  static _i13.PageInfo page = _i13.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<AdminOrdersHistoryRouteArgs>();
-      return _i7.OrdersHistoryScreen(shiftId: args.shiftId, key: args.key);
+      return _i6.OrdersHistoryScreen(shiftId: args.shiftId, key: args.key);
     },
   );
 }
@@ -312,7 +267,7 @@ class AdminOrdersHistoryRouteArgs {
 
   final int shiftId;
 
-  final _i15.Key? key;
+  final _i14.Key? key;
 
   @override
   String toString() {
@@ -331,13 +286,13 @@ class AdminOrdersHistoryRouteArgs {
 }
 
 /// generated route for
-/// [_i8.OrdersHistoryScreen]
+/// [_i7.OrdersHistoryScreen]
 class SellerOrdersHistoryRoute
-    extends _i14.PageRouteInfo<SellerOrdersHistoryRouteArgs> {
+    extends _i13.PageRouteInfo<SellerOrdersHistoryRouteArgs> {
   SellerOrdersHistoryRoute({
     required int shiftId,
-    _i15.Key? key,
-    List<_i14.PageRouteInfo>? children,
+    _i14.Key? key,
+    List<_i13.PageRouteInfo>? children,
   }) : super(
          SellerOrdersHistoryRoute.name,
          args: SellerOrdersHistoryRouteArgs(shiftId: shiftId, key: key),
@@ -346,11 +301,11 @@ class SellerOrdersHistoryRoute
 
   static const String name = 'SellerOrdersHistoryRoute';
 
-  static _i14.PageInfo page = _i14.PageInfo(
+  static _i13.PageInfo page = _i13.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<SellerOrdersHistoryRouteArgs>();
-      return _i8.OrdersHistoryScreen(shiftId: args.shiftId, key: args.key);
+      return _i7.OrdersHistoryScreen(shiftId: args.shiftId, key: args.key);
     },
   );
 }
@@ -360,7 +315,7 @@ class SellerOrdersHistoryRouteArgs {
 
   final int shiftId;
 
-  final _i15.Key? key;
+  final _i14.Key? key;
 
   @override
   String toString() {
@@ -379,16 +334,16 @@ class SellerOrdersHistoryRouteArgs {
 }
 
 /// generated route for
-/// [_i9.ProductDetailScreen]
+/// [_i8.ProductDetailScreen]
 class AdminProductDetailRoute
-    extends _i14.PageRouteInfo<AdminProductDetailRouteArgs> {
+    extends _i13.PageRouteInfo<AdminProductDetailRouteArgs> {
   AdminProductDetailRoute({
     required int outletId,
     required int categoryId,
     required int productId,
     required String productName,
-    _i15.Key? key,
-    List<_i14.PageRouteInfo>? children,
+    _i14.Key? key,
+    List<_i13.PageRouteInfo>? children,
   }) : super(
          AdminProductDetailRoute.name,
          args: AdminProductDetailRouteArgs(
@@ -403,11 +358,11 @@ class AdminProductDetailRoute
 
   static const String name = 'AdminProductDetailRoute';
 
-  static _i14.PageInfo page = _i14.PageInfo(
+  static _i13.PageInfo page = _i13.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<AdminProductDetailRouteArgs>();
-      return _i9.ProductDetailScreen(
+      return _i8.ProductDetailScreen(
         outletId: args.outletId,
         categoryId: args.categoryId,
         productId: args.productId,
@@ -435,7 +390,7 @@ class AdminProductDetailRouteArgs {
 
   final String productName;
 
-  final _i15.Key? key;
+  final _i14.Key? key;
 
   @override
   String toString() {
@@ -463,30 +418,46 @@ class AdminProductDetailRouteArgs {
 }
 
 /// generated route for
-/// [_i10.SellerScreen]
-class SellerRoute extends _i14.PageRouteInfo<void> {
-  const SellerRoute({List<_i14.PageRouteInfo>? children})
+/// [_i9.SellerScreen]
+class SellerRoute extends _i13.PageRouteInfo<void> {
+  const SellerRoute({List<_i13.PageRouteInfo>? children})
     : super(SellerRoute.name, initialChildren: children);
 
   static const String name = 'SellerRoute';
 
-  static _i14.PageInfo page = _i14.PageInfo(
+  static _i13.PageInfo page = _i13.PageInfo(
     name,
     builder: (data) {
-      return const _i10.SellerScreen();
+      return const _i9.SellerScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [_i10.ShiftsHistoryScreen]
+class AdminShiftsHistoryRoute extends _i13.PageRouteInfo<void> {
+  const AdminShiftsHistoryRoute({List<_i13.PageRouteInfo>? children})
+    : super(AdminShiftsHistoryRoute.name, initialChildren: children);
+
+  static const String name = 'AdminShiftsHistoryRoute';
+
+  static _i13.PageInfo page = _i13.PageInfo(
+    name,
+    builder: (data) {
+      return const _i10.ShiftsHistoryScreen();
     },
   );
 }
 
 /// generated route for
 /// [_i11.ShiftsHistoryScreen]
-class AdminShiftsHistoryRoute extends _i14.PageRouteInfo<void> {
-  const AdminShiftsHistoryRoute({List<_i14.PageRouteInfo>? children})
-    : super(AdminShiftsHistoryRoute.name, initialChildren: children);
+class SellerShiftsHistoryRoute extends _i13.PageRouteInfo<void> {
+  const SellerShiftsHistoryRoute({List<_i13.PageRouteInfo>? children})
+    : super(SellerShiftsHistoryRoute.name, initialChildren: children);
 
-  static const String name = 'AdminShiftsHistoryRoute';
+  static const String name = 'SellerShiftsHistoryRoute';
 
-  static _i14.PageInfo page = _i14.PageInfo(
+  static _i13.PageInfo page = _i13.PageInfo(
     name,
     builder: (data) {
       return const _i11.ShiftsHistoryScreen();
@@ -495,33 +466,17 @@ class AdminShiftsHistoryRoute extends _i14.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i12.ShiftsHistoryScreen]
-class SellerShiftsHistoryRoute extends _i14.PageRouteInfo<void> {
-  const SellerShiftsHistoryRoute({List<_i14.PageRouteInfo>? children})
-    : super(SellerShiftsHistoryRoute.name, initialChildren: children);
-
-  static const String name = 'SellerShiftsHistoryRoute';
-
-  static _i14.PageInfo page = _i14.PageInfo(
-    name,
-    builder: (data) {
-      return const _i12.ShiftsHistoryScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [_i13.VariantDetailScreen]
+/// [_i12.VariantDetailScreen]
 class AdminVariantDetailRoute
-    extends _i14.PageRouteInfo<AdminVariantDetailRouteArgs> {
+    extends _i13.PageRouteInfo<AdminVariantDetailRouteArgs> {
   AdminVariantDetailRoute({
     required int outletId,
     required int categoryId,
     required int productId,
     required int variantId,
     required String variantName,
-    _i15.Key? key,
-    List<_i14.PageRouteInfo>? children,
+    _i14.Key? key,
+    List<_i13.PageRouteInfo>? children,
   }) : super(
          AdminVariantDetailRoute.name,
          args: AdminVariantDetailRouteArgs(
@@ -537,11 +492,11 @@ class AdminVariantDetailRoute
 
   static const String name = 'AdminVariantDetailRoute';
 
-  static _i14.PageInfo page = _i14.PageInfo(
+  static _i13.PageInfo page = _i13.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<AdminVariantDetailRouteArgs>();
-      return _i13.VariantDetailScreen(
+      return _i12.VariantDetailScreen(
         outletId: args.outletId,
         categoryId: args.categoryId,
         productId: args.productId,
@@ -573,7 +528,7 @@ class AdminVariantDetailRouteArgs {
 
   final String variantName;
 
-  final _i15.Key? key;
+  final _i14.Key? key;
 
   @override
   String toString() {

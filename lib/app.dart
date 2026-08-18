@@ -30,7 +30,9 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _authSub = getIt<ApiClientI>().onUnauthorized.listen((_) {
-      unawaited(widget.router.replaceAll([LoginRoute()]));
+      if (!mounted) return;
+      if (widget.router.current.name == LoginRoute.name) return;
+      unawaited(widget.router.replaceAll([const LoginRoute()]));
     });
   }
 

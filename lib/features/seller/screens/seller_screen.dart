@@ -136,7 +136,7 @@ class _SellerScreenState extends State<SellerScreen> {
       context.read<UserBloc>().add(ClearUser());
       context.read<OrdersBloc>().add(const ClearProducts());
       if (context.mounted) {
-        await context.router.replace(LoginRoute());
+        await context.router.replace(const LoginRoute());
       }
     }
   }
