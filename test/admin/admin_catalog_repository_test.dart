@@ -86,9 +86,9 @@ void main() {
     test('createCategory POSTs with idempotency key', () async {
       when(
         () => apiClient.post(
-          any(),
-          data: any(named: 'data'),
-          idempotencyKey: any(named: 'idempotencyKey'),
+          any<String>(),
+          data: any<Map<String, dynamic>>(named: 'data'),
+          idempotencyKey: any<String>(named: 'idempotencyKey'),
         ),
       ).thenAnswer(
         (_) async => _json({
@@ -115,9 +115,9 @@ void main() {
     test('createVariant sends price as decimal string + ingredients', () async {
       when(
         () => apiClient.post(
-          any(),
-          data: any(named: 'data'),
-          idempotencyKey: any(named: 'idempotencyKey'),
+          any<String>(),
+          data: any<Map<String, dynamic>>(named: 'data'),
+          idempotencyKey: any<String>(named: 'idempotencyKey'),
         ),
       ).thenAnswer(
         (_) async => _json({
@@ -139,7 +139,7 @@ void main() {
           verify(
                 () => apiClient.post(
                   '/products/101/variants',
-                  data: captureAny(named: 'data'),
+                  data: captureAny<Map<String, dynamic>>(named: 'data'),
                   idempotencyKey: 'v-key',
                 ),
               ).captured.single
@@ -151,8 +151,11 @@ void main() {
 
     test('replaceRecipe PUTs with ingredients body', () async {
       when(
-        () => apiClient.put(any(), data: any(named: 'data')),
-      ).thenAnswer((_) async => _json({'data': []}));
+        () => apiClient.put(
+          any<String>(),
+          data: any<Map<String, dynamic>>(named: 'data'),
+        ),
+      ).thenAnswer((_) async => _json({'data': <dynamic>[]}));
 
       await repository.replaceRecipe(
         variantId: 5,
@@ -165,7 +168,7 @@ void main() {
           verify(
                 () => apiClient.put(
                   '/variants/5/recipe',
-                  data: captureAny(named: 'data'),
+                  data: captureAny<Map<String, dynamic>>(named: 'data'),
                 ),
               ).captured.single
               as Map<String, dynamic>;

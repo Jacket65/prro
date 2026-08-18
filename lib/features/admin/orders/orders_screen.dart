@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/data/repositories/order_history/order_history.dart';
@@ -14,9 +16,14 @@ class OrdersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider<ShiftsHistoryCubit>(
-    create: (_) =>
-        ShiftsHistoryCubit(getIt<OrderHistoryRepositoryI>(), outletId)
-          ..loadFirst(),
+    create: (_) {
+      final cubit = ShiftsHistoryCubit(
+        getIt<OrderHistoryRepositoryI>(),
+        outletId,
+      );
+      unawaited(cubit.loadFirst());
+      return cubit;
+    },
     child: const ShiftsHistoryScreen(),
   );
 }

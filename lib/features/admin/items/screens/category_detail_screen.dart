@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:prro/core/uuid.dart';
@@ -37,7 +39,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _load();
+    unawaited(_load());
   }
 
   Future<void> _load() async {

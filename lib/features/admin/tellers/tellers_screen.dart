@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/data/repositories/admin_user_repository/admin_user_repository.dart';
@@ -14,9 +16,11 @@ class TellersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider<TellersCubit>(
-    create: (_) =>
-        TellersCubit(getIt<AdminUserRepositoryI>())
-          ..loadUsers(outletId: outletId),
+    create: (_) {
+      final cubit = TellersCubit(getIt<AdminUserRepositoryI>());
+      unawaited(cubit.loadUsers(outletId: outletId));
+      return cubit;
+    },
     child: const _TellersView(),
   );
 }

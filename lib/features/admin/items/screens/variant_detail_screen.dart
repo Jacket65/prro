@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:prro/data/api/models/admin/catalog.dart';
@@ -37,7 +39,7 @@ class _VariantDetailScreenState extends State<VariantDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _load();
+    unawaited(_load());
   }
 
   Future<void> _load() async {

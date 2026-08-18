@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,9 +22,11 @@ class ItemsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider<CategoriesCubit>(
-    create: (_) =>
-        CategoriesCubit(getIt<AdminCatalogRepositoryI>())
-          ..loadCategories(outletId: outletId),
+    create: (_) {
+      final cubit = CategoriesCubit(getIt<AdminCatalogRepositoryI>());
+      unawaited(cubit.loadCategories(outletId: outletId));
+      return cubit;
+    },
     child: _ItemsView(outletId: outletId),
   );
 }
@@ -33,6 +37,7 @@ class _ItemsView extends StatelessWidget {
 
   Future<void> _add(BuildContext context) async {
     final name = await showCategoryDialog(context);
+    if (!context.mounted) return;
     if (name == null) return;
     await context.read<CategoriesCubit>().createCategory(
       outletId: outletId,
@@ -42,6 +47,7 @@ class _ItemsView extends StatelessWidget {
 
   Future<void> _rename(BuildContext context, AdminCategory category) async {
     final name = await showCategoryDialog(context, initialName: category.name);
+    if (!context.mounted) return;
     if (name == null || name == category.name) return;
     await context.read<CategoriesCubit>().renameCategory(
       id: category.id,
@@ -67,6 +73,7 @@ class _ItemsView extends StatelessWidget {
         ],
       ),
     );
+    if (!context.mounted) return;
     if (ok == true) {
       await context.read<CategoriesCubit>().deleteCategory(id: category.id);
     }
@@ -131,8 +138,12 @@ class _ItemsView extends StatelessWidget {
                               ),
                             ],
                             onSelected: (value) {
-                              if (value == 'rename') _rename(context, category);
-                              if (value == 'delete') _delete(context, category);
+                              if (value == 'rename') {
+                                unawaited(_rename(context, category));
+                              }
+                              if (value == 'delete') {
+                                unawaited(_delete(context, category));
+                              }
                             },
                           ),
                         ],

@@ -105,7 +105,7 @@ class LoginScreen extends StatelessWidget {
       case LoginSuccess():
         _showSnackBar(context, 'Вітаємо вас на роботі!');
         context.read<UserBloc>().add(LoadUser(username: state.username));
-        context.router.replace(const SellerRoute());
+        unawaited(context.router.replace(const SellerRoute()));
       case LoginFailure():
         _showSnackBar(context, 'Сталася помилка ${state.error}');
       case LoginLoading():
