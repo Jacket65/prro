@@ -10,6 +10,7 @@ import 'package:prro/data/api/models/order.dart';
 import 'package:prro/data/api/models/payment/payment_request.dart';
 import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
+import 'package:prro/di/di.dart';
 import 'package:prro/services/nfc_payment_service.dart';
 
 part 'orders_event.dart';
@@ -18,7 +19,6 @@ part 'orders_state.dart';
 class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   OrdersBloc({
     required this._ordersRepository,
-    required this._nfcPaymentService,
   }) : super(OrdersInitial()) {
     on<AddProduct>(_onAddProduct);
     on<RemoveProduct>(_onRemoveProduct);
@@ -30,7 +30,6 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     on<UpdateOptions>(_onUpdateOptions);
   }
   final OrdersRepositoryI _ordersRepository;
-  final NfcPaymentServiceI _nfcPaymentService;
 
   void _onUpdateOptions(UpdateOptions event, Emitter<OrdersState> emit) {
     _ordersRepository.updateOptions(
@@ -118,7 +117,8 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         currency: event.currency,
         description: event.description,
       );
-      final result = await _nfcPaymentService.startPayment(request);
+      final nfcPaymentService = getIt<NfcPaymentServiceI>();
+      final result = await nfcPaymentService.startPayment(request);
 
       if (result.success) {
         final receipt = await _ordersRepository.placeOrder(

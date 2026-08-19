@@ -123,7 +123,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i976.MockBalanceService(),
       registerFor: {_mock},
     );
-    gh.lazySingleton<_i866.DeepLinkServiceI>(() => _i866.DeepLinkService());
+    gh.factory<_i866.DeepLinkServiceI>(() => _i866.DeepLinkService());
     gh.singleton<_i772.OrderHistoryServiceI>(
       () => _i422.OrderHistoryServiceMock(),
       registerFor: {_mock},
@@ -268,7 +268,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i93.AdminUserRepositoryImpl(gh<_i219.ApiClientI>()),
       registerFor: {_prod},
     );
-    gh.lazySingleton<_i829.NfcPaymentServiceI>(
+    gh.factory<_i829.NfcPaymentServiceI>(
       () => _i829.NfcPaymentService(
         paymentRepository: gh<_i844.PaymentRepositoryI>(),
         terminalLauncher: gh<_i1024.TerminalLauncherI>(),

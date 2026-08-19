@@ -25,8 +25,8 @@ abstract interface class NfcPaymentServiceI {
   Future<PaymentResult> startPayment(CreatePaymentRequest request);
 }
 
-/// Production implementation of [NfcPaymentServiceI].
-@LazySingleton(as: NfcPaymentServiceI)
+/// Implementation of [NfcPaymentServiceI].
+@Injectable(as: NfcPaymentServiceI)
 class NfcPaymentService implements NfcPaymentServiceI {
   NfcPaymentService({
     required this._paymentRepository,
@@ -97,6 +97,8 @@ class NfcPaymentService implements NfcPaymentServiceI {
     try {
       final token = await _paymentRepository.createPaymentToken(request);
       _talker.info('🟢 [NFC Payment] Token received', token.toString());
+
+      await _deepLinkService.init();
 
       subscription = _deepLinkService.onDeepLink.listen(
         (uri) {
@@ -179,6 +181,7 @@ class NfcPaymentService implements NfcPaymentServiceI {
     } finally {
       timer?.cancel();
       await subscription?.cancel();
+      await _deepLinkService.dispose();
       _activeSessionId = null;
     }
   }

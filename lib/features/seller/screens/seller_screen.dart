@@ -18,7 +18,6 @@ import 'package:prro/features/shift/widgets/close_shift_dialog.dart';
 import 'package:prro/features/shift/widgets/open_shift_dialog.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
 import 'package:prro/router/app_router.gr.dart';
-import 'package:prro/services/nfc_payment_service.dart';
 
 @RoutePage(name: 'SellerRoute')
 class SellerScreen extends StatefulWidget {
@@ -50,7 +49,6 @@ class _SellerScreenState extends State<SellerScreen> {
         BlocProvider(
           create: (context) => OrdersBloc(
             ordersRepository: getIt<OrdersRepositoryI>(),
-            nfcPaymentService: getIt<NfcPaymentServiceI>(),
           ),
         ),
         BlocProvider(

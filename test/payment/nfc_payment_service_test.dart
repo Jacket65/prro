@@ -40,6 +40,9 @@ void main() {
       mockDeepLinkService = MockDeepLinkService();
       mockTalker = MockTalker();
 
+      when(() => mockDeepLinkService.dispose()).thenAnswer((_) async {});
+      when(() => mockDeepLinkService.init()).thenAnswer((_) async {});
+
       service = NfcPaymentService(
         paymentRepository: mockRepository,
         terminalLauncher: mockTerminalLauncher,
@@ -534,6 +537,71 @@ void main() {
           paymentFuture,
           throwsA(isA<InvalidCallbackException>()),
         );
+      },
+    );
+
+    test(
+      'startPayment disposes the DeepLinkService when the payment ends',
+      () async {
+        const request = CreatePaymentRequest(
+          amount: 15000,
+          currency: 'UAH',
+          description: 'Test payment',
+          orderId: 'test_order',
+        );
+        final token = TerminalToken(
+          token: 'test_jwt_token',
+          expiresAt: DateTime.now().add(const Duration(minutes: 10)),
+        );
+        const result = PaymentResult(
+          success: true,
+          status: 'SUCCESS',
+          rrn: '123456789012',
+          amount: 15000,
+          transactionId: 'txn_12345',
+          cardMask: '5168 **** **** 1234',
+          authCode: '123456',
+        );
+
+        when(() => mockRepository.createPaymentToken(request)).thenAnswer(
+          (_) async => token,
+        );
+        when(
+          () => mockTerminalLauncher.launchTerminal(
+            jwtToken: any<String>(named: 'jwtToken'),
+            amount: any<int>(named: 'amount'),
+            currency: any<String>(named: 'currency'),
+            orderId: any<String>(named: 'orderId'),
+            merchantId: any<String?>(named: 'merchantId'),
+          ),
+        ).thenAnswer(
+          (_) async => true,
+        );
+
+        final controller = StreamController<Uri>();
+        when(() => mockDeepLinkService.onDeepLink).thenAnswer(
+          (_) => controller.stream,
+        );
+        when(() => mockRepository.verifyPayment('txn_12345')).thenAnswer(
+          (_) async => result,
+        );
+
+        final paymentFuture = service.startPayment(request);
+        await Future<void>.delayed(Duration.zero);
+        final sessionId = service.activeSessionId;
+        expect(sessionId, isNotNull);
+
+        controller.add(
+          Uri.parse(
+            'prro://payment?transaction_id=txn_12345&status=SUCCESS'
+            '&orderId=$sessionId',
+          ),
+        );
+
+        await paymentFuture;
+
+        verify(() => mockDeepLinkService.dispose()).called(1);
+        expect(service.activeSessionId, isNull);
       },
     );
 

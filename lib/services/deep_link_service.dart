@@ -19,7 +19,7 @@ abstract interface class DeepLinkServiceI {
 }
 
 /// Production implementation of [DeepLinkServiceI] using app_links package.
-@LazySingleton(as: DeepLinkServiceI)
+@Injectable(as: DeepLinkServiceI)
 class DeepLinkService implements DeepLinkServiceI {
   DeepLinkService();
 
