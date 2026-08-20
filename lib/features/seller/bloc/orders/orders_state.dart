@@ -34,14 +34,15 @@ final class OrdersPaymentSuccess extends OrdersState {
   List<Object> get props => [receipt];
 }
 
-/// NFC payment in progress — terminal launched, waiting for customer.
-final class OrdersNfcPaymentPending extends OrdersState {
-  const OrdersNfcPaymentPending({required this.products, required this.total});
-  final List<Product> products;
+/// A payment is being processed for the current cart (any method). The dialog
+/// renders a method-specific view from [method] + [total].
+final class OrdersPaymentProcessing extends OrdersState {
+  const OrdersPaymentProcessing({required this.method, required this.total});
+  final PaymentMethod method;
   final double total;
 
   @override
-  List<Object> get props => [products, total];
+  List<Object> get props => [method, total];
 }
 
 final class OrdersError extends OrdersState {

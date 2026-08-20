@@ -122,15 +122,12 @@ class _PaymentDialogState extends State<PaymentDialog> {
     return BlocConsumer<OrdersBloc, OrdersState>(
       listener: (context, state) {},
       builder: (context, state) {
-        final isLoading = state is OrdersLoading;
+        final isProcessing = state is OrdersPaymentProcessing;
         final isSuccess = state is OrdersPaymentSuccess;
-        final isNfcPending = state is OrdersNfcPaymentPending;
 
         return PopScope(
           canPop:
-              !isLoading &&
-              !isSuccess &&
-              !isNfcPending, // Prevent closing during NFC payment flow
+              !isProcessing && !isSuccess, // Block dismissal while processing
           child: Dialog(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -145,30 +142,35 @@ class _PaymentDialogState extends State<PaymentDialog> {
                 ),
                 child: isSuccess
                     ? _SuccessView(receipt: state.receipt)
-                    : isNfcPending
-                    ? _NfcPendingView(
-                        totalKopecks: widget.totalKopecks,
-                        onCancel: () => Navigator.of(context).pop(),
-                      )
-                    : ValueListenableBuilder<TextEditingValue>(
-                        valueListenable: _cashController,
-                        builder: (context, _, _) {
-                          return _FormView(
+                    : isProcessing
+                        ? _ProcessingView(
+                            method: state.method,
                             totalKopecks: widget.totalKopecks,
-                            method: _method,
-                            onMethodChanged: (m) => setState(() => _method = m),
-                            cashController: _cashController,
-                            changeKopecks: _changeKopecks,
-                            canPay: _canPay,
-                            isLoading: isLoading,
-                            errorMessage: state is OrdersError
-                                ? state.message
+                            onCancel: state.method == PaymentMethod.nfc
+                                ? () => context
+                                    .read<OrdersBloc>()
+                                    .add(const CancelPayment())
                                 : null,
-                            onCancel: () => Navigator.of(context).pop(),
-                            onPay: _onPay,
-                          );
-                        },
-                      ),
+                          )
+                        : ValueListenableBuilder<TextEditingValue>(
+                            valueListenable: _cashController,
+                            builder: (context, _, _) {
+                              return _FormView(
+                                totalKopecks: widget.totalKopecks,
+                                method: _method,
+                                onMethodChanged: (m) =>
+                                    setState(() => _method = m),
+                                cashController: _cashController,
+                                changeKopecks: _changeKopecks,
+                                canPay: _canPay,
+                                errorMessage: state is OrdersError
+                                    ? state.message
+                                    : null,
+                                onCancel: () => Navigator.of(context).pop(),
+                                onPay: _onPay,
+                              );
+                            },
+                          ),
               ),
             ),
           ),
@@ -178,24 +180,13 @@ class _PaymentDialogState extends State<PaymentDialog> {
   }
 
   void _onPay() {
-    if (_method == PaymentMethod.nfc) {
-      context.read<OrdersBloc>().add(
-        PayWithNfc(
-          idempotencyKey: _idempotencyKey,
-          amountKopecks: widget.totalKopecks,
-          currency: 'UAH',
-          description: 'Order payment',
-        ),
-      );
-    } else {
-      context.read<OrdersBloc>().add(
-        PayOrder(
-          method: _method,
-          tenderedKopecks: _tenderedKopecks,
-          idempotencyKey: _idempotencyKey,
-        ),
-      );
-    }
+    context.read<OrdersBloc>().add(
+          PayOrder(
+            method: _method,
+            tenderedKopecks: _tenderedKopecks,
+            idempotencyKey: _idempotencyKey,
+          ),
+        );
   }
 }
 
@@ -209,7 +200,6 @@ class _FormView extends StatelessWidget {
     required this.cashController,
     required this.changeKopecks,
     required this.canPay,
-    required this.isLoading,
     required this.errorMessage,
     required this.onCancel,
     required this.onPay,
@@ -221,7 +211,6 @@ class _FormView extends StatelessWidget {
   final TextEditingController cashController;
   final int changeKopecks;
   final bool canPay;
-  final bool isLoading;
   final String? errorMessage;
   final VoidCallback onCancel;
   final VoidCallback onPay;
@@ -265,7 +254,7 @@ class _FormView extends StatelessWidget {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: isLoading ? null : onCancel,
+                onPressed: onCancel,
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(64),
                   textStyle: const TextStyle(fontSize: 18),
@@ -277,7 +266,7 @@ class _FormView extends StatelessWidget {
             Expanded(
               flex: 2,
               child: FilledButton(
-                onPressed: (canPay && !isLoading) ? onPay : null,
+                onPressed: canPay ? onPay : null,
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.green,
                   minimumSize: const Size.fromHeight(64),
@@ -286,16 +275,7 @@ class _FormView extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                child: isLoading
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 3,
-                        ),
-                      )
-                    : Text('Оплатити ${formatUah(totalKopecks)}'),
+                child: Text('Оплатити ${formatUah(totalKopecks)}'),
               ),
             ),
           ],
@@ -477,6 +457,72 @@ class _ErrorBanner extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Processing View ───────────────────────────────────────────────────────
+
+/// Shown while any payment method is being processed. Renders the NFC-graphic
+/// view for NFC (with a cancel control) and a generic spinner otherwise.
+class _ProcessingView extends StatelessWidget {
+  const _ProcessingView({
+    required this.method,
+    required this.totalKopecks,
+    this.onCancel,
+  });
+
+  final PaymentMethod method;
+  final int totalKopecks;
+  final VoidCallback? onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    return method == PaymentMethod.nfc
+        ? _NfcPendingView(
+            totalKopecks: totalKopecks,
+            onCancel: onCancel ?? () {},
+          )
+        : _GenericProcessingView(totalKopecks: totalKopecks);
+  }
+}
+
+class _GenericProcessingView extends StatelessWidget {
+  const _GenericProcessingView({required this.totalKopecks});
+
+  final int totalKopecks;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'До оплати',
+              style: TextStyle(fontSize: 18, color: Colors.black54),
+            ),
+            Text(
+              formatUah(totalKopecks),
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        const Center(
+          child: CircularProgressIndicator(strokeWidth: 3),
+        ),
+        const SizedBox(height: 24),
+        const Center(
+          child: Text(
+            'Оплата...',
+            style: TextStyle(fontSize: 18, color: Colors.black54),
+          ),
+        ),
+      ],
     );
   }
 }

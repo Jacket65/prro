@@ -11,6 +11,7 @@ import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/seller/bloc/balance/balance_cubit.dart';
 import 'package:prro/features/seller/bloc/items_tiles/items_tiles_bloc.dart';
 import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
+import 'package:prro/features/seller/bloc/orders/payment/pay_order_use_case.dart';
 import 'package:prro/features/seller/bloc/search/catalog_search_cubit.dart';
 import 'package:prro/features/seller/widgets/widgets.dart';
 import 'package:prro/features/shift/bloc/bloc.dart';
@@ -49,6 +50,7 @@ class _SellerScreenState extends State<SellerScreen> {
         BlocProvider(
           create: (context) => OrdersBloc(
             ordersRepository: getIt<OrdersRepositoryI>(),
+            payOrder: getIt<PayOrderUseCase>(),
           ),
         ),
         BlocProvider(

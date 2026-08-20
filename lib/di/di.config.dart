@@ -93,6 +93,14 @@ import 'package:prro/data/services/payment_service.dart' as _i769;
 import 'package:prro/data/services/shift_service.dart' as _i819;
 import 'package:prro/data/services/user_service.dart' as _i169;
 import 'package:prro/di/app_module.dart' as _i745;
+import 'package:prro/features/seller/bloc/orders/payment/handlers/card_payment_handler.dart'
+    as _i685;
+import 'package:prro/features/seller/bloc/orders/payment/handlers/cash_payment_handler.dart'
+    as _i502;
+import 'package:prro/features/seller/bloc/orders/payment/handlers/nfc_payment_handler.dart'
+    as _i544;
+import 'package:prro/features/seller/bloc/orders/payment/pay_order_use_case.dart'
+    as _i132;
 import 'package:prro/services/deep_link_service.dart' as _i866;
 import 'package:prro/services/nfc_payment_service.dart' as _i829;
 import 'package:prro/services/terminal_launcher.dart' as _i1024;
@@ -114,6 +122,8 @@ extension GetItInjectableX on _i174.GetIt {
       () => appModule.prefs,
       preResolve: true,
     );
+    gh.factory<_i685.CardPaymentHandler>(() => _i685.CardPaymentHandler());
+    gh.factory<_i502.CashPaymentHandler>(() => _i502.CashPaymentHandler());
     gh.singleton<_i993.Talker>(() => appModule.talker());
     gh.singleton<_i205.UserServiceI>(
       () => _i104.MockUserService(),
@@ -305,6 +315,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i957.ShiftRepositoryI>(
       () => _i302.ShiftRepositoryImpl(gh<_i957.ShiftServiceI>()),
       registerFor: {_prod},
+    );
+    gh.factory<_i544.NfcPaymentHandler>(
+      () => _i544.NfcPaymentHandler(gh<_i829.NfcPaymentServiceI>()),
+    );
+    gh.factory<_i132.PayOrderUseCase>(
+      () => _i132.PayOrderUseCase(
+        ordersRepository: gh<_i232.OrdersRepositoryI>(),
+        cash: gh<_i502.CashPaymentHandler>(),
+        card: gh<_i685.CardPaymentHandler>(),
+        nfc: gh<_i544.NfcPaymentHandler>(),
+      ),
     );
     return this;
   }

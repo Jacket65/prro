@@ -7,11 +7,11 @@ import 'package:prro/data/api/api_exception.dart';
 import 'package:prro/data/api/models/bean.dart';
 import 'package:prro/data/api/models/drink_option.dart';
 import 'package:prro/data/api/models/order.dart';
-import 'package:prro/data/api/models/payment/payment_request.dart';
 import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
-import 'package:prro/di/di.dart';
-import 'package:prro/services/nfc_payment_service.dart';
+import 'package:prro/features/seller/bloc/orders/payment/pay_order_request.dart';
+import 'package:prro/features/seller/bloc/orders/payment/pay_order_use_case.dart';
+import 'package:prro/features/seller/bloc/orders/payment/payment_exceptions.dart';
 
 part 'orders_event.dart';
 part 'orders_state.dart';
@@ -19,17 +19,19 @@ part 'orders_state.dart';
 class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   OrdersBloc({
     required this._ordersRepository,
+    required this._payOrder,
   }) : super(OrdersInitial()) {
     on<AddProduct>(_onAddProduct);
     on<RemoveProduct>(_onRemoveProduct);
     on<DeleteProductLine>(_onDeleteProductLine);
     on<ClearProducts>(_onClearProducts);
     on<PayOrder>(_onPayOrder);
-    on<PayWithNfc>(_onPayWithNfc);
+    on<CancelPayment>(_onCancelPayment);
     on<AcknowledgePayment>(_onAcknowledgePayment);
     on<UpdateOptions>(_onUpdateOptions);
   }
   final OrdersRepositoryI _ordersRepository;
+  final PayOrderUseCase _payOrder;
 
   void _onUpdateOptions(UpdateOptions event, Emitter<OrdersState> emit) {
     _ordersRepository.updateOptions(
@@ -73,15 +75,32 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   }
 
   Future<void> _onPayOrder(PayOrder event, Emitter<OrdersState> emit) async {
-    emit(OrdersLoading(products: _ordersRepository.products));
-    try {
-      final receipt = await _ordersRepository.placeOrder(
+    emit(
+      OrdersPaymentProcessing(
         method: event.method,
-        tenderedKopecks: event.tenderedKopecks,
-        idempotencyKey: event.idempotencyKey,
+        total: _ordersRepository.totalPrice,
+      ),
+    );
+    try {
+      final receipt = await _payOrder(
+        PayOrderRequest(
+          method: event.method,
+          tenderedKopecks: event.tenderedKopecks,
+          idempotencyKey: event.idempotencyKey,
+        ),
       );
       _ordersRepository.clearProducts();
       emit(OrdersPaymentSuccess(receipt));
+    } on PaymentCancelledException {
+      emit(_buildUpdatedState());
+    } on PaymentException catch (e) {
+      emit(
+        OrdersError(
+          message: e.message,
+          products: _ordersRepository.products,
+          total: _ordersRepository.totalPrice,
+        ),
+      );
     } on ApiException catch (e) {
       emit(
         OrdersError(
@@ -101,92 +120,11 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     }
   }
 
-  Future<void> _onPayWithNfc(
-    PayWithNfc event,
-    Emitter<OrdersState> emit,
-  ) async {
-    emit(
-      OrdersNfcPaymentPending(
-        products: _ordersRepository.products,
-        total: _ordersRepository.totalPrice,
-      ),
-    );
-    try {
-      final request = CreatePaymentRequest(
-        amount: event.amountKopecks,
-        currency: event.currency,
-        description: event.description,
-      );
-      final nfcPaymentService = getIt<NfcPaymentServiceI>();
-      final result = await nfcPaymentService.startPayment(request);
-
-      if (result.success) {
-        final receipt = await _ordersRepository.placeOrder(
-          method: PaymentMethod.nfc,
-          tenderedKopecks: event.amountKopecks,
-          idempotencyKey: event.idempotencyKey,
-        );
-        _ordersRepository.clearProducts();
-        emit(OrdersPaymentSuccess(receipt));
-      } else {
-        emit(
-          OrdersError(
-            message: 'Оплата не пройшла: ${result.status}',
-            products: _ordersRepository.products,
-            total: _ordersRepository.totalPrice,
-          ),
-        );
-      }
-    } on TerminalLaunchFailedException catch (e) {
-      emit(
-        OrdersError(
-          message: e.message,
-          products: _ordersRepository.products,
-          total: _ordersRepository.totalPrice,
-        ),
-      );
-    } on PaymentTerminalFailureException catch (e) {
-      emit(
-        OrdersError(
-          message: e.message,
-          products: _ordersRepository.products,
-          total: _ordersRepository.totalPrice,
-        ),
-      );
-    } on PaymentCancelledException catch (e) {
-      emit(
-        OrdersError(
-          message: e.message,
-          products: _ordersRepository.products,
-          total: _ordersRepository.totalPrice,
-        ),
-      );
-    } on PaymentCallbackTimeoutException catch (e) {
-      emit(
-        OrdersError(
-          message: e.message,
-          products: _ordersRepository.products,
-          total: _ordersRepository.totalPrice,
-        ),
-      );
-    } on InvalidCallbackException catch (e) {
-      emit(
-        OrdersError(
-          message: e.message,
-          products: _ordersRepository.products,
-          total: _ordersRepository.totalPrice,
-        ),
-      );
-    } on Object catch (e) {
-      emit(
-        OrdersError(
-          message: 'Не вдалося оплатити: $e',
-          products: _ordersRepository.products,
-          total: _ordersRepository.totalPrice,
-        ),
-      );
-    }
-  }
+  Future<void> _onCancelPayment(
+    CancelPayment _,
+    Emitter<OrdersState> _,
+  ) async =>
+      _payOrder.cancel();
 
   void _onAcknowledgePayment(
     AcknowledgePayment event,

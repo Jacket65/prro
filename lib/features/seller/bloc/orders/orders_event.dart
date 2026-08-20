@@ -59,28 +59,15 @@ final class AcknowledgePayment extends OrdersEvent {
   List<Object> get props => [];
 }
 
-/// Triggered when the cashier selects NFC POS payment method.
-/// [idempotencyKey] is generated when the dialog opens.
-final class PayWithNfc extends OrdersEvent {
-  const PayWithNfc({
-    required this.idempotencyKey,
-    required this.amountKopecks,
-    required this.currency,
-    required this.description,
-  });
-  final String idempotencyKey;
-  final int amountKopecks;
-  final String currency;
-  final String description;
+/// Aborts an in-flight payment (e.g. the cashier taps "Скасувати оплату" while
+/// the NFC terminal is waiting). Delegates to [PayOrderUseCase.cancel].
+final class CancelPayment extends OrdersEvent {
+  const CancelPayment();
 
   @override
-  List<Object> get props => [
-    idempotencyKey,
-    amountKopecks,
-    currency,
-    description,
-  ];
+  List<Object> get props => [];
 }
+
 
 /// Replaces the selected options and bean of a cart line (identified by its
 /// current [lineId]). Changing them changes the line identity, so the
