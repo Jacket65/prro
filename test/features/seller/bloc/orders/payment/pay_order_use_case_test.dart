@@ -120,7 +120,8 @@ void main() {
     });
 
     test(
-      'placeOrder throwing propagates and clears the active handler',
+      'placeOrder throwing is translated to PaymentException and clears the '
+      'active handler (strict boundary)',
       () async {
         when(
           () => repo.placeOrder(
@@ -131,7 +132,13 @@ void main() {
         ).thenThrow(const ApiException('store closed'));
         await expectLater(
           () => useCase(req(PaymentMethod.cash)),
-          throwsA(isA<ApiException>()),
+          throwsA(
+            isA<PaymentException>().having(
+              (e) => e.reason,
+              'reason',
+              PaymentFailureReason.verificationFailed,
+            ),
+          ),
         );
         useCase.cancel();
         verifyNever(() => cash.cancel());

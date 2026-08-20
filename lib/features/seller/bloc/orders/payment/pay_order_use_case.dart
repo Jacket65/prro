@@ -16,6 +16,11 @@ import 'package:prro/features/seller/bloc/orders/payment/payment_method_handler.
 /// Owns the single `_activeHandler` so an in-flight payment can be cancelled
 /// through [cancel]. The handler is always cleared in a `try/finally` so a
 /// stale cancel can never reach a completed (or future) payment session.
+///
+/// This use case is the final boundary before the UI/bloc: any failure from
+/// `placeOrder` (the actual charge for cash/card, and the order record for
+/// NFC) is translated into [PaymentException] so the bloc only ever sees
+/// [PaymentException] or [PaymentCancelledException].
 @injectable
 class PayOrderUseCase {
   PayOrderUseCase({
@@ -34,7 +39,9 @@ class PayOrderUseCase {
   Future<OrderReceipt> call(PayOrderRequest request) async {
     final handler = _handlers.firstWhere(
       (h) => h.method == request.method,
-      orElse: () => throw const PaymentException('Невідомий спосіб оплати.'),
+      orElse: () => throw const PaymentException(
+        'Невідомий спосіб оплати.',
+      ),
     );
 
     _activeHandler = handler;
@@ -46,11 +53,24 @@ class PayOrderUseCase {
           currency: 'UAH',
         ),
       );
-      return await _ordersRepository.placeOrder(
-        method: request.method,
-        tenderedKopecks: request.tenderedKopecks,
-        idempotencyKey: request.idempotencyKey,
-      );
+      try {
+        return await _ordersRepository.placeOrder(
+          method: request.method,
+          tenderedKopecks: request.tenderedKopecks,
+          idempotencyKey: request.idempotencyKey,
+        );
+      } on PaymentCancelledException {
+        rethrow;
+      } on PaymentException {
+        rethrow;
+      } on Object catch (e, st) {
+        throw PaymentException(
+          'Не вдалося оформити замовлення.',
+          reason: PaymentFailureReason.verificationFailed,
+          cause: e,
+          stackTrace: st,
+        );
+      }
     } finally {
       _activeHandler = null;
     }

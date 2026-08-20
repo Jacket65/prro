@@ -83,8 +83,14 @@ class _PaymentDialogState extends State<PaymentDialog> {
   @override
   void initState() {
     super.initState();
-    // One key per payment action (generated when the modal opens), reused for
-    // every retry — including the auto-retry after a token refresh.
+    // One key per dialog instance (generated when the modal opens) and reused
+    // for every retry. This is intentional and safe: the backend treats the
+    // key as "one logical order placement". Reusing it makes `placeOrder`
+    // idempotent — a retried placement (e.g. after a transient network error)
+    // returns the same order instead of creating a duplicate, and if the first
+    // attempt actually succeeded server-side but the client saw a failure, the
+    // retry safely returns that existing order rather than charging twice.
+    // The key is NOT regenerated between retries for this reason.
     _idempotencyKey = uuidV4();
     _cashController = TextEditingController(
       text: formatAmount(widget.totalKopecks),
@@ -143,34 +149,33 @@ class _PaymentDialogState extends State<PaymentDialog> {
                 child: isSuccess
                     ? _SuccessView(receipt: state.receipt)
                     : isProcessing
-                        ? _ProcessingView(
-                            method: state.method,
+                    ? _ProcessingView(
+                        method: state.method,
+                        totalKopecks: widget.totalKopecks,
+                        onCancel: state.method == PaymentMethod.nfc
+                            ? () => context.read<OrdersBloc>().add(
+                                const CancelPayment(),
+                              )
+                            : null,
+                      )
+                    : ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _cashController,
+                        builder: (context, _, _) {
+                          return _FormView(
                             totalKopecks: widget.totalKopecks,
-                            onCancel: state.method == PaymentMethod.nfc
-                                ? () => context
-                                    .read<OrdersBloc>()
-                                    .add(const CancelPayment())
+                            method: _method,
+                            onMethodChanged: (m) => setState(() => _method = m),
+                            cashController: _cashController,
+                            changeKopecks: _changeKopecks,
+                            canPay: _canPay,
+                            errorMessage: state is OrdersError
+                                ? state.message
                                 : null,
-                          )
-                        : ValueListenableBuilder<TextEditingValue>(
-                            valueListenable: _cashController,
-                            builder: (context, _, _) {
-                              return _FormView(
-                                totalKopecks: widget.totalKopecks,
-                                method: _method,
-                                onMethodChanged: (m) =>
-                                    setState(() => _method = m),
-                                cashController: _cashController,
-                                changeKopecks: _changeKopecks,
-                                canPay: _canPay,
-                                errorMessage: state is OrdersError
-                                    ? state.message
-                                    : null,
-                                onCancel: () => Navigator.of(context).pop(),
-                                onPay: _onPay,
-                              );
-                            },
-                          ),
+                            onCancel: () => Navigator.of(context).pop(),
+                            onPay: _onPay,
+                          );
+                        },
+                      ),
               ),
             ),
           ),
@@ -181,12 +186,12 @@ class _PaymentDialogState extends State<PaymentDialog> {
 
   void _onPay() {
     context.read<OrdersBloc>().add(
-          PayOrder(
-            method: _method,
-            tenderedKopecks: _tenderedKopecks,
-            idempotencyKey: _idempotencyKey,
-          ),
-        );
+      PayOrder(
+        method: _method,
+        tenderedKopecks: _tenderedKopecks,
+        idempotencyKey: _idempotencyKey,
+      ),
+    );
   }
 }
 
@@ -661,10 +666,12 @@ class _SuccessView extends StatelessWidget {
           FilledButton(
             onPressed: () async {
               context.read<OrdersBloc>().add(const AcknowledgePayment());
+
               await context.read<BalanceCubit>().fetchBalance();
-              if (context.mounted) {
-                Navigator.of(context).pop();
-              }
+
+              if (!context.mounted) return;
+
+              Navigator.of(context).pop();
             },
             style: FilledButton.styleFrom(
               backgroundColor: Colors.green,

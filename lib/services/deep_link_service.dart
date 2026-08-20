@@ -24,7 +24,7 @@ class DeepLinkService implements DeepLinkServiceI {
   DeepLinkService();
 
   final _appLinks = AppLinks();
-  final _controller = StreamController<Uri>.broadcast();
+  StreamController<Uri> _controller = StreamController<Uri>.broadcast();
   StreamSubscription<Uri>? _subscription;
   bool _initialized = false;
 
@@ -40,6 +40,13 @@ class DeepLinkService implements DeepLinkServiceI {
       return;
     }
     _initialized = true;
+
+    // The controller is a long-lived broadcast stream. It is recreated here if
+    // a previous [dispose] left it closed so that every subsequent payment can
+    // still receive its callback.
+    if (_controller.isClosed) {
+      _controller = StreamController<Uri>.broadcast();
+    }
 
     _subscription = _appLinks.uriLinkStream.listen(
       _handleUri,
@@ -80,10 +87,15 @@ class DeepLinkService implements DeepLinkServiceI {
 
   @override
   Future<void> dispose() async {
+    // Tear down only the app_links subscription. We deliberately do NOT close
+    // the broadcast [_controller]: this service is a long-lived singleton and
+    // [NfcPaymentService] calls init()/dispose() once per payment. Closing the
+    // controller would permanently break every subsequent payment's callback
+    // delivery, so the controller persists for the app lifetime and is
+    // recreated lazily in [init] only if it was somehow closed.
     _initialized = false;
     await _subscription?.cancel();
     _subscription = null;
-    await _controller.close();
   }
 
   /// Checks if the URI is a payment callback (matches our configured scheme/host).

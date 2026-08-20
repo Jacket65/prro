@@ -7,9 +7,12 @@ import 'package:prro/services/nfc_payment_service.dart' as nfc;
 /// NFC POS payment: launches the PrivatBank terminal and waits for the customer
 /// to pay there.
 ///
-/// Every NFC-specific exception is translated into one of the two app-level
-/// boundary types ([PaymentException] for failures, [PaymentCancelledException]
-/// for cancels) so callers never depend on terminal internals.
+/// This handler is the **strict exception boundary**: every NFC-specific
+/// exception is translated into one of the two app-level boundary types
+/// ([PaymentException] for failures, [PaymentCancelledException] for cancels)
+/// so callers never depend on terminal internals. A catch-all guarantees that
+/// even an unexpected error becomes a [PaymentException] rather than leaking a
+/// raw implementation exception past the boundary.
 @injectable
 class NfcPaymentHandler implements PaymentMethodHandler {
   NfcPaymentHandler(this._nfcPaymentService);
@@ -30,20 +33,35 @@ class NfcPaymentHandler implements PaymentMethodHandler {
         ),
       );
       if (!result.success) {
-        throw PaymentException('Оплата не пройшла: ${result.status}');
+        throw PaymentException(
+          'Оплата не пройшла: ${result.status}',
+          reason: PaymentFailureReason.verificationFailed,
+        );
       }
     } on nfc.PaymentCancelledException {
+      // Terminal/cashier cancellation stays a cancellation.
       throw const PaymentCancelledException();
-    } on nfc.TerminalLaunchFailedException catch (e) {
-      throw PaymentException(e.message);
-    } on nfc.PaymentTerminalFailureException catch (e) {
-      throw PaymentException(e.message);
-    } on nfc.PaymentCallbackTimeoutException catch (e) {
-      throw PaymentException(e.message);
-    } on nfc.InvalidCallbackException catch (e) {
-      throw PaymentException(e.message);
-    } on nfc.PaymentAlreadyInProgressException catch (e) {
-      throw PaymentException(e.message);
+    } on nfc.NfcPaymentException catch (e, st) {
+      // All well-defined terminal/callback/repository failures map to a single
+      // boundary type, preserving the machine-readable reason and the original
+      // cause + stack trace for diagnostics.
+      throw PaymentException(
+        e.message,
+        reason: e.reason,
+        cause: e,
+        stackTrace: st,
+      );
+    } on PaymentException {
+      // Already a boundary type (e.g. a translated failure from a deeper
+      // layer); forward unchanged.
+      rethrow;
+    } on Object catch (e, st) {
+      // Defense in depth: never let an unexpected error escape the boundary.
+      throw PaymentException(
+        'Не вдалося оплатити.',
+        cause: e,
+        stackTrace: st,
+      );
     }
   }
 

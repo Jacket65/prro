@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:decimal/decimal.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prro/core/uuid.dart';
 import 'package:prro/data/api/api_exception.dart';
 import 'package:prro/data/api/models/bean.dart';
 import 'package:prro/data/api/models/drink_option.dart';
@@ -74,7 +75,25 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     emit(OrdersInitial());
   }
 
+  /// Id of the payment attempt currently being processed, or `null` when idle.
+  ///
+  /// Used to (a) serialize payments — a second [PayOrder] while one is in
+  /// flight is dropped rather than starting a concurrent charge, and (b) reject
+  /// a stale async result: only the outcome that matches the active
+  /// `paymentId` is allowed to change state. Assigning it synchronously before
+  /// the first `await` makes the guard race-free on the single Dart isolate.
+  String? _currentPaymentId;
+
   Future<void> _onPayOrder(PayOrder event, Emitter<OrdersState> emit) async {
+    // Serialize: ignore a second payment attempt while one is active. This is
+    // stronger than the `state is OrdersPaymentProcessing` check and prevents
+    // any concurrent charge even if two events arrive back-to-back.
+    if (_currentPaymentId != null) {
+      return;
+    }
+    final paymentId = uuidV4();
+    _currentPaymentId = paymentId;
+
     emit(
       OrdersPaymentProcessing(
         method: event.method,
@@ -89,11 +108,17 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           idempotencyKey: event.idempotencyKey,
         ),
       );
+      // Stale guard: a newer payment (or a cancelled/closed bloc) may have
+      // superseded this attempt by the time the future resolves.
+      if (_currentPaymentId != paymentId) return;
       _ordersRepository.clearProducts();
       emit(OrdersPaymentSuccess(receipt));
     } on PaymentCancelledException {
+      if (_currentPaymentId != paymentId) return;
+      // Cancellation returns to the editable form without clearing the order.
       emit(_buildUpdatedState());
     } on PaymentException catch (e) {
+      if (_currentPaymentId != paymentId) return;
       emit(
         OrdersError(
           message: e.message,
@@ -102,6 +127,10 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         ),
       );
     } on ApiException catch (e) {
+      // Defense in depth: most failures are already translated to
+      // PaymentException by the payment boundary, but a repository exception
+      // that escaped is still surfaced safely.
+      if (_currentPaymentId != paymentId) return;
       emit(
         OrdersError(
           message: e.message,
@@ -109,22 +138,28 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           total: _ordersRepository.totalPrice,
         ),
       );
-    } on Object catch (e) {
+    } on Object {
+      if (_currentPaymentId != paymentId) return;
       emit(
         OrdersError(
-          message: 'Не вдалося оплатити: $e',
+          message: 'Не вдалося оплатити. Спробуйте ще раз.',
           products: _ordersRepository.products,
           total: _ordersRepository.totalPrice,
         ),
       );
+    } finally {
+      // Only reset our own attempt so a newer, in-flight payment is never
+      // clobbered.
+      if (_currentPaymentId == paymentId) {
+        _currentPaymentId = null;
+      }
     }
   }
 
   Future<void> _onCancelPayment(
     CancelPayment _,
     Emitter<OrdersState> _,
-  ) async =>
-      _payOrder.cancel();
+  ) async => _payOrder.cancel();
 
   void _onAcknowledgePayment(
     AcknowledgePayment event,
