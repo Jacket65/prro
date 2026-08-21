@@ -60,4 +60,18 @@ void main() {
       expect(group.variants.length, 2);
     },
   );
+
+  test(
+    'searchProducts finds items by product name case-insensitively',
+    () async {
+      final results = await backend.searchProducts(query: 'еСпРеСо');
+      expect(results.length, 1);
+      expect((results.first as Product).name, contains('Еспресо'));
+    },
+  );
+
+  test('searchProducts returns empty for empty/whitespace query', () async {
+    expect(await backend.searchProducts(query: ''), isEmpty);
+    expect(await backend.searchProducts(query: '   '), isEmpty);
+  });
 }

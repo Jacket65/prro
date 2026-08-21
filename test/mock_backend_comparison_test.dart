@@ -53,43 +53,6 @@ void main() {
       });
     });
 
-    group('Catalog - searchProducts', () {
-      test('returns empty for empty/whitespace query', () async {
-        final emptyResult = await backend.searchProducts(query: '');
-        expect(emptyResult, isEmpty);
-
-        final whitespaceResult = await backend.searchProducts(query: '   ');
-        expect(whitespaceResult, isEmpty);
-      });
-
-      test('finds by product name case-insensitively', () async {
-        final results = await backend.searchProducts(query: 'еСпРеСо');
-        expect(results.length, 1);
-        expect((results.first as Product).name, contains('Еспресо'));
-      });
-
-      test('finds by variant name', () async {
-        final results = await backend.searchProducts(query: '300 мл');
-        final hasLatte = results.any(
-          (r) => r is ProductGroup && r.name == 'Латте',
-        );
-        expect(hasLatte, isTrue);
-      });
-
-      test('filters by categoryId when provided', () async {
-        final coffeeResults = await backend.searchProducts(
-          query: 'Зелений',
-          categoryId: 1,
-        );
-        final teaResults = await backend.searchProducts(
-          query: 'Зелений',
-          categoryId: 2,
-        );
-        expect(coffeeResults, isEmpty);
-        expect(teaResults, isNotEmpty);
-      });
-    });
-
     group('Orders - placeOrder bean handling', () {
       test('accepts bean in options array and tracks usage', () async {
         final americano = await backend
