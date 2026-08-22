@@ -147,7 +147,7 @@ class _RecipeEditDialogState extends State<_RecipeEditDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Скасувати'),
         ),
-        ElevatedButton(
+        FilledButton(
           onPressed: () => Navigator.of(context).pop(_lines),
           child: const Text('Зберегти'),
         ),

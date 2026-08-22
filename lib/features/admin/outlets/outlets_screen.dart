@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/features/admin/outlets/outlets_cubit.dart';
@@ -6,6 +7,7 @@ import 'package:prro/features/admin/outlets/widgets/outlets_table.dart';
 /// Outlets tab. Renders the outlet list from a [OutletsCubit] provided above
 /// (the admin shell provides it so selection can drive the Tellers/Items tabs).
 /// Loading is triggered by the shell's `..loadOutlets()` call.
+@RoutePage(name: 'AdminOutletsTabRoute')
 class OutletsScreen extends StatelessWidget {
   const OutletsScreen({super.key});
 

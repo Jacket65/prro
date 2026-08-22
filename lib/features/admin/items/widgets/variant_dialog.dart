@@ -37,7 +37,7 @@ Future<(String name, int priceKopecks)?> showVariantDialog(
           onPressed: () => Navigator.of(ctx).pop(),
           child: const Text('Скасувати'),
         ),
-        ElevatedButton(
+        FilledButton(
           onPressed: () {
             final name = nameController.text.trim();
             final price =

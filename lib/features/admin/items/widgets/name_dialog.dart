@@ -23,7 +23,7 @@ Future<String?> showNameDialog(
           onPressed: () => Navigator.of(ctx).pop(),
           child: const Text('Скасувати'),
         ),
-        ElevatedButton(
+        FilledButton(
           onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
           child: const Text('Зберегти'),
         ),

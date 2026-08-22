@@ -5,17 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/data/repositories/admin_outlet_repository/admin_outlet_repository.dart';
 import 'package:prro/di/di.dart';
-import 'package:prro/features/admin/items/items_screen.dart';
-import 'package:prro/features/admin/orders/orders_screen.dart';
 import 'package:prro/features/admin/outlets/outlets_cubit.dart';
-import 'package:prro/features/admin/outlets/outlets_screen.dart';
-import 'package:prro/features/admin/tellers/tellers_screen.dart';
+import 'package:prro/router/app_router.gr.dart';
 
-/// Top-level admin screen: a tabbed router over the three admin resources.
+/// Top-level admin screen: a router-driven tabbed shell over the four admin
+/// resources.
 ///
 /// A single [OutletsCubit] is provided here so outlet selection (made in the
-/// Outlets tab) is available to the Tellers and Items tabs. Those tabs rebuild
-/// their internal cubits whenever the selected outlet changes.
+/// Outlets tab) is available to the Tellers, Items and Orders tabs. Those tabs
+/// rebuild their internal cubits whenever the selected outlet changes.
 @RoutePage(name: 'AdminRoute')
 class AdminShell extends StatelessWidget {
   const AdminShell({super.key});
@@ -34,56 +32,64 @@ class AdminShell extends StatelessWidget {
 class _AdminShellView extends StatelessWidget {
   const _AdminShellView();
 
+  static const List<String> _tabs = [
+    'Точки',
+    'Продавці',
+    'Товари',
+    'Замовлення',
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<OutletsCubit>().state;
-    final selectedOutletId = state is OutletsLoaded
-        ? state.selectedOutletId
-        : null;
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Адміністрування')),
-      body: DefaultTabController(
-        length: 4,
-        child: Column(
-          children: [
-            const TabBar(
-              tabs: [
-                Tab(text: 'Точки'),
-                Tab(text: 'Продавці'),
-                Tab(text: 'Товари'),
-                Tab(text: 'Замовлення'),
-              ],
-            ),
-            Expanded(
-              child: TabBarView(
+    return AutoTabsRouter.tabBar(
+      routes: const [
+        AdminOutletsTabRoute(),
+        AdminTellersTabRoute(),
+        AdminItemsTabRoute(),
+        AdminOrdersTabRoute(),
+      ],
+      builder: (context, child, tabController) {
+        final tabsRouter = AutoTabsRouter.of(context);
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final isNarrow = constraints.maxWidth < 600;
+            if (isNarrow) {
+              return Scaffold(
+                appBar: AppBar(
+                  title: const Text('Адміністрування'),
+                  bottom: TabBar(
+                    controller: tabController,
+                    tabs: [
+                      for (final label in _tabs) Tab(text: label),
+                    ],
+                  ),
+                ),
+                body: child,
+              );
+            }
+            return Scaffold(
+              appBar: AppBar(title: const Text('Адміністрування')),
+              body: Row(
                 children: [
-                  const OutletsScreen(),
-                  _outletScoped(
-                    selectedOutletId,
-                    (id) => TellersScreen(outletId: id, key: ValueKey(id)),
+                  NavigationRail(
+                    selectedIndex: tabsRouter.activeIndex,
+                    onDestinationSelected: tabsRouter.setActiveIndex,
+                    labelType: NavigationRailLabelType.all,
+                    destinations: [
+                      for (final label in _tabs)
+                        NavigationRailDestination(
+                          icon: const Icon(Icons.circle_outlined),
+                          label: Text(label),
+                        ),
+                    ],
                   ),
-                  _outletScoped(
-                    selectedOutletId,
-                    (id) => ItemsScreen(outletId: id, key: ValueKey(id)),
-                  ),
-                  _outletScoped(
-                    selectedOutletId,
-                    (id) => OrdersScreen(outletId: id, key: ValueKey(id)),
-                  ),
+                  Expanded(child: child),
                 ],
               ),
-            ),
-          ],
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
-  }
-
-  Widget _outletScoped(int? outletId, Widget Function(int) builder) {
-    if (outletId == null) {
-      return const Center(child: Text('Оберіть торговельну точку'));
-    }
-    return builder(outletId);
   }
 }

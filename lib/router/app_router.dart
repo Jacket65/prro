@@ -35,7 +35,16 @@ class AppRouter extends RootStackRouter {
     // them is blocked in prod unless authenticated (H2). In mock mode
     // `MockLoginService.getLoginState()` returns true, so admin remains a
     // reachable demo feature.
-    AutoRoute(page: AdminRoute.page, guards: [adminGuard]),
+    AutoRoute(
+      page: AdminRoute.page,
+      guards: [adminGuard],
+      children: [
+        AutoRoute(page: AdminOutletsTabRoute.page, initial: true),
+        AutoRoute(page: AdminTellersTabRoute.page),
+        AutoRoute(page: AdminItemsTabRoute.page),
+        AutoRoute(page: AdminOrdersTabRoute.page),
+      ],
+    ),
     AutoRoute(page: AdminCategoryDetailRoute.page, guards: [adminGuard]),
     AutoRoute(page: AdminProductDetailRoute.page, guards: [adminGuard]),
     AutoRoute(page: AdminVariantDetailRoute.page, guards: [adminGuard]),
