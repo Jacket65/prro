@@ -6,24 +6,45 @@ import 'package:prro/core/money.dart';
 Future<(String name, int priceKopecks)?> showVariantDialog(
   BuildContext context,
 ) async {
-  final nameController = TextEditingController();
-  final priceController = TextEditingController();
-
-  final result = await showDialog<(String, int)>(
+  return showDialog<(String, int)>(
     context: context,
-    builder: (ctx) => AlertDialog(
+    builder: (ctx) => const _VariantDialogContent(),
+  );
+}
+
+class _VariantDialogContent extends StatefulWidget {
+  const _VariantDialogContent();
+
+  @override
+  State<_VariantDialogContent> createState() => _VariantDialogContentState();
+}
+
+class _VariantDialogContentState extends State<_VariantDialogContent> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _priceController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
       title: const Text('Новий варіант'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             autofocus: true,
-            controller: nameController,
+            controller: _nameController,
             decoration: const InputDecoration(hintText: 'Назва варіанта'),
           ),
           const SizedBox(height: 12),
           TextField(
-            controller: priceController,
+            controller: _priceController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: const InputDecoration(
               hintText: 'Ціна, грн',
@@ -34,27 +55,23 @@ Future<(String name, int priceKopecks)?> showVariantDialog(
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(ctx).pop(),
+          onPressed: () => Navigator.of(context).pop(),
           child: const Text('Скасувати'),
         ),
         FilledButton(
           onPressed: () {
-            final name = nameController.text.trim();
+            final name = _nameController.text.trim();
             final price =
                 double.tryParse(
-                  priceController.text.trim().replaceAll(',', '.'),
+                  _priceController.text.trim().replaceAll(',', '.'),
                 ) ??
                 0;
             if (name.isEmpty) return;
-            Navigator.of(ctx).pop((name, uahToKopecks(price)));
+            Navigator.of(context).pop((name, uahToKopecks(price)));
           },
           child: const Text('Зберегти'),
         ),
       ],
-    ),
-  );
-
-  nameController.dispose();
-  priceController.dispose();
-  return result;
+    );
+  }
 }
