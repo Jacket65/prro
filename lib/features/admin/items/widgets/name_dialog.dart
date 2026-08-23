@@ -36,8 +36,9 @@ class _NameDialogContent extends StatefulWidget {
 }
 
 class _NameDialogContentState extends State<_NameDialogContent> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.initialName);
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initialName,
+  );
 
   @override
   void dispose() {

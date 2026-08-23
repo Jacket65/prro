@@ -68,7 +68,6 @@ final class CancelPayment extends OrdersEvent {
   List<Object> get props => [];
 }
 
-
 /// Replaces the selected options and bean of a cart line (identified by its
 /// current [lineId]). Changing them changes the line identity, so the
 /// repository may merge it into an identical existing line.

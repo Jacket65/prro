@@ -19,15 +19,14 @@ class ConfirmDialog extends StatelessWidget {
     required String title,
     required String message,
     String confirmLabel = 'Видалити',
-  }) =>
-      showDialog<bool>(
-        context: context,
-        builder: (_) => ConfirmDialog(
-          title: title,
-          message: message,
-          confirmLabel: confirmLabel,
-        ),
-      );
+  }) => showDialog<bool>(
+    context: context,
+    builder: (_) => ConfirmDialog(
+      title: title,
+      message: message,
+      confirmLabel: confirmLabel,
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {

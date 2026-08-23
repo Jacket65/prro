@@ -174,8 +174,7 @@ class NfcPaymentService implements NfcPaymentServiceI {
       // skip launching the terminal entirely; if a cancellation already
       // completed it, the `await` below re-throws and we never verify.
       if (!completer.isCompleted) {
-        _talker
-            .info('🔵 [NFC Payment] Launching PrivatBank Terminal...');
+        _talker.info('🔵 [NFC Payment] Launching PrivatBank Terminal...');
         await _terminalLauncher.launchTerminal(
           jwtToken: token.token,
           amount: request.amount,
@@ -183,8 +182,7 @@ class NfcPaymentService implements NfcPaymentServiceI {
           orderId: sessionId,
           merchantId: request.metadata?['merchantId']?.toString(),
         );
-        _talker
-            .info('🟢 [NFC Payment] Terminal launched successfully');
+        _talker.info('🟢 [NFC Payment] Terminal launched successfully');
 
         // Only arm the callback timeout if the payment is still unresolved
         // (a cancellation that arrived during `launchTerminal` would otherwise
@@ -221,8 +219,7 @@ class NfcPaymentService implements NfcPaymentServiceI {
       // taken solely from the `verifyPayment` result, never from the callback
       // status.
       final result = await _paymentRepository.verifyPayment(transactionId);
-      _talker
-          .info('🟢 [NFC Payment] Verification complete', result.toString());
+      _talker.info('🟢 [NFC Payment] Verification complete', result.toString());
 
       return result;
     } on TerminalLaunchException catch (e) {
@@ -465,8 +462,7 @@ class PaymentAlreadyInProgressException implements NfcPaymentException {
   @override
   final String message;
   @override
-  PaymentFailureReason get reason =>
-      PaymentFailureReason.alreadyInProgress;
+  PaymentFailureReason get reason => PaymentFailureReason.alreadyInProgress;
   @override
   String toString() => 'PaymentAlreadyInProgressException: $message';
 }

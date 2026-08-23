@@ -18,8 +18,9 @@ class VariantDetailCubit extends Cubit<VariantDetailState> {
     emit(const VariantDetailLoading());
     try {
       final recipe = await _repository.fetchRecipe(variantId: variantId);
-      final ingredients =
-          await _repository.fetchIngredients(outletId: outletId);
+      final ingredients = await _repository.fetchIngredients(
+        outletId: outletId,
+      );
       emit(VariantDetailLoaded(recipe, ingredients));
     } on Object catch (e) {
       emit(VariantDetailError(e.toString()));
@@ -51,6 +52,5 @@ class VariantDetailCubit extends Cubit<VariantDetailState> {
   void restore(
     List<RecipeIngredient> recipe,
     List<AdminIngredient> ingredients,
-  ) =>
-      emit(VariantDetailLoaded(recipe, ingredients));
+  ) => emit(VariantDetailLoaded(recipe, ingredients));
 }

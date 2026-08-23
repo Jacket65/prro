@@ -11,6 +11,7 @@ import 'package:prro/features/admin/items/category_detail_cubit.dart';
 import 'package:prro/features/admin/items/screens/product_detail_screen.dart'
     show ProductDetailScreen;
 import 'package:prro/features/admin/items/widgets/name_dialog.dart';
+import 'package:prro/features/admin/widgets/admin_back_button.dart';
 import 'package:prro/router/app_router.gr.dart';
 
 /// Lists products in a category and allows adding one. Tapping a product
@@ -84,7 +85,11 @@ class _CategoryDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(categoryName)),
+      appBar: AppBar(
+        leading: const AdminBackButton(),
+
+        title: Text(categoryName),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _add(context),
         child: const Icon(Icons.add),

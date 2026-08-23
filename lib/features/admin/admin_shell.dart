@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/data/repositories/admin_outlet_repository/admin_outlet_repository.dart';
 import 'package:prro/di/di.dart';
 import 'package:prro/features/admin/outlets/outlets_cubit.dart';
+import 'package:prro/features/admin/widgets/admin_back_button.dart';
 import 'package:prro/router/app_router.gr.dart';
 
 /// Top-level admin screen: a router-driven tabbed shell over the four admin
@@ -56,9 +57,18 @@ class _AdminShellView extends StatelessWidget {
             if (isNarrow) {
               return Scaffold(
                 appBar: AppBar(
-                  title: const Text('Адміністрування'),
+                  actionsPadding: EdgeInsets.zero,
+                  leadingWidth: 0,
+                  title: const Row(
+                    children: [
+                      AdminMainMenuButton(),
+                      Text('Адміністрування'),
+                    ],
+                  ),
                   bottom: TabBar(
                     controller: tabController,
+                    labelColor: const Color(0xFFFFFFFF),
+                    unselectedLabelColor: const Color(0xFFE0E0E0),
                     tabs: [
                       for (final label in _tabs) Tab(text: label),
                     ],
@@ -68,20 +78,39 @@ class _AdminShellView extends StatelessWidget {
               );
             }
             return Scaffold(
-              appBar: AppBar(title: const Text('Адміністрування')),
+              appBar: AppBar(
+                leading: const AdminMainMenuButton(),
+                title: const Text('Адміністрування'),
+              ),
               body: Row(
                 children: [
-                  NavigationRail(
-                    selectedIndex: tabsRouter.activeIndex,
-                    onDestinationSelected: tabsRouter.setActiveIndex,
-                    labelType: NavigationRailLabelType.all,
-                    destinations: [
-                      for (final label in _tabs)
-                        NavigationRailDestination(
-                          icon: const Icon(Icons.circle_outlined),
-                          label: Text(label),
-                        ),
-                    ],
+                  NavigationRailTheme(
+                    data: NavigationRailThemeData(
+                      selectedLabelTextStyle: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      unselectedLabelTextStyle: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      selectedIconTheme: IconThemeData(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      unselectedIconTheme: IconThemeData(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    child: NavigationRail(
+                      selectedIndex: tabsRouter.activeIndex,
+                      onDestinationSelected: tabsRouter.setActiveIndex,
+                      labelType: NavigationRailLabelType.all,
+                      destinations: [
+                        for (final label in _tabs)
+                          NavigationRailDestination(
+                            icon: const Icon(Icons.circle_outlined),
+                            label: Text(label),
+                          ),
+                      ],
+                    ),
                   ),
                   Expanded(child: child),
                 ],

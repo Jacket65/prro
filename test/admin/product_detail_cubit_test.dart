@@ -34,8 +34,7 @@ void main() {
       act: (cubit) => cubit.loadVariants(productId: 1),
       expect: () => [
         isA<ProductDetailLoading>(),
-        isA<ProductDetailLoaded>()
-            .having((s) => s.variants.length, 'count', 2),
+        isA<ProductDetailLoaded>().having((s) => s.variants.length, 'count', 2),
       ],
     );
 

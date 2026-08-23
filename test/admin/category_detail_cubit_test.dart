@@ -34,8 +34,11 @@ void main() {
       act: (cubit) => cubit.loadProducts(categoryId: 1),
       expect: () => [
         isA<CategoryDetailLoading>(),
-        isA<CategoryDetailLoaded>()
-            .having((s) => s.products.length, 'count', 2),
+        isA<CategoryDetailLoaded>().having(
+          (s) => s.products.length,
+          'count',
+          2,
+        ),
       ],
     );
 

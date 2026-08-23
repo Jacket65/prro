@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:prro/core/theme/theme.dart';
 import 'package:prro/data/api/models/order_history.dart';
 import 'package:prro/features/admin/orders/bloc/shifts_history_cubit.dart';
 import 'package:prro/router/app_router.gr.dart';
@@ -93,9 +94,15 @@ class _ShiftTile extends StatelessWidget {
       trailing: Chip(
         label: Text(
           shift.isOpen ? 'Відкрита' : 'Закрита',
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: shift.isOpen
+                ? Theme.of(context).extension<AppStatusColors>()!.onSuccess
+                : Theme.of(context).extension<AppStatusColors>()!.onNeutral,
+          ),
         ),
-        backgroundColor: shift.isOpen ? Colors.green : Colors.grey,
+        backgroundColor: shift.isOpen
+            ? Theme.of(context).extension<AppStatusColors>()!.success
+            : Theme.of(context).extension<AppStatusColors>()!.neutral,
       ),
       onTap: () => context.router.push(
         AdminOrdersHistoryRoute(shiftId: shift.id),
@@ -115,7 +122,11 @@ class _ErrorView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.error_outline, size: 56, color: Colors.redAccent),
+          Icon(
+            Icons.error_outline,
+            size: 56,
+            color: Theme.of(context).colorScheme.error,
+          ),
           const SizedBox(height: 16),
           Text(message, textAlign: TextAlign.center),
           const SizedBox(height: 24),

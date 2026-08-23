@@ -7,6 +7,7 @@ import 'package:prro/data/repositories/admin_catalog_repository/admin_catalog_re
 import 'package:prro/di/di.dart';
 import 'package:prro/features/admin/items/variant_detail_cubit.dart';
 import 'package:prro/features/admin/items/widgets/recipe_dialog.dart';
+import 'package:prro/features/admin/widgets/admin_back_button.dart';
 
 /// Shows a variant's recipe and lets the admin edit it via [showRecipeDialog].
 @RoutePage(name: 'AdminVariantDetailRoute')
@@ -79,7 +80,11 @@ class _VariantDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(variantName)),
+      appBar: AppBar(
+        leading: const AdminBackButton(),
+
+        title: Text(variantName),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _edit(context),
         child: const Icon(Icons.edit),
@@ -99,9 +104,10 @@ class _VariantDetailView extends StatelessWidget {
                   FilledButton.icon(
                     icon: const Icon(Icons.refresh),
                     label: const Text('Спробувати ще раз'),
-                    onPressed: () => context
-                        .read<VariantDetailCubit>()
-                        .load(variantId: variantId, outletId: outletId),
+                    onPressed: () => context.read<VariantDetailCubit>().load(
+                      variantId: variantId,
+                      outletId: outletId,
+                    ),
                   ),
                 ],
               ),

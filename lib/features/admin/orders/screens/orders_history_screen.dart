@@ -9,6 +9,7 @@ import 'package:prro/data/api/models/order_history.dart';
 import 'package:prro/data/repositories/order_history/order_history.dart';
 import 'package:prro/di/di.dart';
 import 'package:prro/features/admin/orders/bloc/orders_history_cubit.dart';
+import 'package:prro/features/admin/widgets/admin_back_button.dart';
 import 'package:prro/router/app_router.gr.dart';
 
 @RoutePage(name: 'AdminOrdersHistoryRoute')
@@ -39,7 +40,11 @@ class _OrdersHistoryView extends StatelessWidget {
   Widget build(BuildContext context) {
     final cubit = context.read<OrdersHistoryCubit>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Замовлення зміни')),
+      appBar: AppBar(
+        leading: const AdminBackButton(),
+
+        title: const Text('Замовлення зміни'),
+      ),
       body: Column(
         children: [
           _SortControls(cubit: cubit),
@@ -178,7 +183,11 @@ class _ErrorView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.error_outline, size: 56, color: Colors.redAccent),
+          Icon(
+            Icons.error_outline,
+            size: 56,
+            color: Theme.of(context).colorScheme.error,
+          ),
           const SizedBox(height: 16),
           Text(message, textAlign: TextAlign.center),
           const SizedBox(height: 24),

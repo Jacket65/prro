@@ -12,6 +12,7 @@ import 'package:prro/features/admin/items/product_detail_cubit.dart';
 import 'package:prro/features/admin/items/screens/variant_detail_screen.dart'
     show VariantDetailScreen;
 import 'package:prro/features/admin/items/widgets/variant_dialog.dart';
+import 'package:prro/features/admin/widgets/admin_back_button.dart';
 import 'package:prro/router/app_router.gr.dart';
 
 /// Lists variants of a product, allows adding one, and drills into
@@ -88,7 +89,11 @@ class _ProductDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(productName)),
+      appBar: AppBar(
+        leading: const AdminBackButton(),
+
+        title: Text(productName),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _add(context),
         child: const Icon(Icons.add),

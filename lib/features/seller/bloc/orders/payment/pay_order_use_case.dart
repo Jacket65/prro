@@ -28,7 +28,7 @@ class PayOrderUseCase {
     required CashPaymentHandler cash,
     required CardPaymentHandler card,
     required NfcPaymentHandler nfc,
-  })  : _handlers = [cash, card, nfc];
+  }) : _handlers = [cash, card, nfc];
 
   final OrdersRepositoryI _ordersRepository;
   final List<PaymentMethodHandler> _handlers;

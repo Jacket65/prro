@@ -10,6 +10,7 @@ import 'package:prro/data/api/models/order_history.dart';
 import 'package:prro/data/repositories/order_history/order_history.dart';
 import 'package:prro/di/di.dart';
 import 'package:prro/features/admin/orders/bloc/order_detail_cubit.dart';
+import 'package:prro/features/admin/widgets/admin_back_button.dart';
 
 @RoutePage(name: 'AdminOrderDetailRoute')
 class OrderDetailScreen extends StatelessWidget {
@@ -25,7 +26,11 @@ class OrderDetailScreen extends StatelessWidget {
         return cubit;
       },
       child: Scaffold(
-        appBar: AppBar(title: Text('Чек №$orderId')),
+        appBar: AppBar(
+          leading: const AdminBackButton(),
+
+          title: Text('Чек №$orderId'),
+        ),
         body: BlocBuilder<OrderDetailCubit, OrderDetailState>(
           builder: (context, state) {
             if (state is OrderDetailLoading) {
@@ -36,10 +41,10 @@ class OrderDetailScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.error_outline,
                       size: 56,
-                      color: Colors.redAccent,
+                      color: Theme.of(context).colorScheme.error,
                     ),
                     const SizedBox(height: 16),
                     Text(state.message, textAlign: TextAlign.center),
@@ -87,7 +92,9 @@ class _OrderDetailView extends StatelessWidget {
             Expanded(
               child: Text(
                 timeFormat.format(detail.createdAt),
-                style: const TextStyle(color: Colors.grey),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ],
@@ -139,14 +146,20 @@ class _ItemRow extends StatelessWidget {
         ),
         Text(
           '${item.quantity} × ${formatUah(item.unitPriceKopecks)}',
-          style: const TextStyle(color: Colors.grey, fontSize: 13),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 13,
+          ),
         ),
         for (final option in item.options)
           Padding(
             padding: const EdgeInsets.only(left: 12),
             child: Text(
               '• ${option.name} (+${formatUah(option.priceDeltaKopecks)})',
-              style: const TextStyle(color: Colors.grey, fontSize: 13),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 13,
+              ),
             ),
           ),
       ],
