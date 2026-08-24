@@ -8,17 +8,15 @@ import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/api/models/admin/admin_models.dart';
 import 'package:prro/data/api/models/order.dart';
 import 'package:prro/data/mock/mock_backend.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Mock implementation of ApiClientI that uses the in-memory MockBackend
 /// instead of making real HTTP requests.
+///
+/// This class is a transport only — it returns tokens in responses but never
+/// persists them. The repository owns session persistence.
 class MockApiClient implements ApiClientI {
-  MockApiClient({
-    required this.prefs,
-    required this.mockBackend,
-  });
+  MockApiClient({required this.mockBackend});
 
-  final SharedPreferences prefs;
   final MockBackend mockBackend;
   final StreamController<void> _unauthorized =
       StreamController<void>.broadcast();
@@ -31,6 +29,7 @@ class MockApiClient implements ApiClientI {
     String path, {
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
   }) async {
     try {
       // ── Admin panel endpoints (outlet-scoped) ──
@@ -82,7 +81,6 @@ class MockApiClient implements ApiClientI {
           statusCode: 200,
         );
       } else if (path.contains('/products')) {
-        // Extract categoryId from path if present
         final categoryId = _extractCategoryId(path);
         if (categoryId != null) {
           final products = await mockBackend.getProducts(categoryId);
@@ -92,7 +90,6 @@ class MockApiClient implements ApiClientI {
             statusCode: 200,
           );
         } else {
-          // Search products
           final query = queryParameters?['q'] as String? ?? '';
           final categoryIdParam = queryParameters?['category_id'] as int?;
           final products = await mockBackend.searchProducts(
@@ -106,7 +103,6 @@ class MockApiClient implements ApiClientI {
           );
         }
       } else if (path.contains('/variants')) {
-        // Get variants for a product
         final productId = _extractProductId(path);
         if (productId != null) {
           final variants = await mockBackend.getVariants(productId);
@@ -116,12 +112,9 @@ class MockApiClient implements ApiClientI {
             statusCode: 200,
           );
         }
-        // Get options for a variant
         final variantId = _extractVariantId(path);
         if (variantId != null) {
-          final options = await mockBackend.getVariantOptions(
-            variantId,
-          );
+          final options = await mockBackend.getVariantOptions(variantId);
           return Response<dynamic>(
             requestOptions: RequestOptions(path: path),
             data: {'data': options},
@@ -129,7 +122,6 @@ class MockApiClient implements ApiClientI {
           );
         }
       } else if (path.contains('/beans')) {
-        // Mock beans endpoint
         final popularBeans = await mockBackend.getPopularBeans();
         return Response<dynamic>(
           requestOptions: RequestOptions(path: path),
@@ -137,14 +129,12 @@ class MockApiClient implements ApiClientI {
           statusCode: 200,
         );
       } else if (path.contains('/ingredients')) {
-        // Return empty list for ingredients in mock mode
         return Response<dynamic>(
           requestOptions: RequestOptions(path: path),
           data: {'data': const <List<dynamic>>[]},
           statusCode: 200,
         );
       } else if (path.contains('/retail-outlets')) {
-        // Mock retail outlets endpoints
         return Response<dynamic>(
           requestOptions: RequestOptions(path: path),
           data: {'data': const <List<dynamic>>[]},
@@ -152,7 +142,6 @@ class MockApiClient implements ApiClientI {
         );
       }
 
-      // Default fallback
       log('[MOCK API] Unhandled GET path: $path');
       return Response<dynamic>(
         requestOptions: RequestOptions(path: path),
@@ -173,6 +162,7 @@ class MockApiClient implements ApiClientI {
     String path, {
     dynamic data,
     String? idempotencyKey,
+    Map<String, dynamic>? headers,
   }) async {
     try {
       if (path.contains('/orders')) {
@@ -243,35 +233,36 @@ class MockApiClient implements ApiClientI {
           );
         }
       } else if (path.contains('/auth/login')) {
-        // Mock login - always successful
         final loginData = data as Map<String, dynamic>?;
-        log('[MOCK API] Login attempt with: ${loginData?['username']}');
+        log('[MOCK API] Login attempt with: ${loginData?['login']}');
 
-        // Store mock tokens
-        await prefs.setString(
-          'auth_token',
-          'mock_token_${DateTime.now().millisecondsSinceEpoch}',
-        );
-        await prefs.setString('refresh_token', 'mock_refresh_token');
-        await prefs.setBool('isLogged', true);
-        await prefs.setInt('outlet_id', 1); // Set a default outlet for mock
+        final accessToken =
+            'mock_token_${DateTime.now().millisecondsSinceEpoch}';
+        const refreshToken = 'mock_refresh_token';
 
         return Response(
           requestOptions: RequestOptions(path: path),
+          headers: Headers.fromMap({
+            'authorization': ['Bearer $accessToken'],
+          }),
           data: {
-            'access_token': prefs.getString('auth_token'),
-            'refresh_token': prefs.getString('refresh_token'),
+            'access_token': accessToken,
+            'refresh_token': refreshToken,
           },
           statusCode: 200,
         );
       } else if (path.contains('/auth/refresh')) {
-        // Mock token refresh
         log('[MOCK API] Token refresh');
 
-        // Generate new mock token
+        if (MockBackend.forceRefreshFailure) {
+          return Response(
+            requestOptions: RequestOptions(path: path),
+            statusCode: 401,
+          );
+        }
+
         final newToken =
             'mock_token_refreshed_${DateTime.now().millisecondsSinceEpoch}';
-        await prefs.setString('auth_token', newToken);
 
         return Response(
           requestOptions: RequestOptions(path: path),
@@ -342,6 +333,7 @@ class MockApiClient implements ApiClientI {
     String path, {
     dynamic data,
     String? idempotencyKey,
+    Map<String, dynamic>? headers,
   }) async {
     try {
       if (path.contains('/categories/')) {
@@ -400,6 +392,7 @@ class MockApiClient implements ApiClientI {
     String path, {
     dynamic data,
     String? idempotencyKey,
+    Map<String, dynamic>? headers,
   }) async {
     try {
       if (path.contains('/variants') && path.contains('/recipe')) {
@@ -436,6 +429,7 @@ class MockApiClient implements ApiClientI {
     String path, {
     dynamic data,
     String? idempotencyKey,
+    Map<String, dynamic>? headers,
   }) async {
     try {
       if (path.contains('/categories/')) {
@@ -475,8 +469,6 @@ class MockApiClient implements ApiClientI {
     return match == null ? null : int.parse(match.group(1)!);
   }
 
-  /// Extracts the `{id}` that immediately follows `/<segment>/` in a path, e.g.
-  /// `/categories/12` → `12`, `/products/7/variants` → `7`.
   int? _extractIdAfter(String path, String segment) {
     final match = RegExp('/$segment/(\\d+)').firstMatch(path);
     return match == null ? null : int.parse(match.group(1)!);

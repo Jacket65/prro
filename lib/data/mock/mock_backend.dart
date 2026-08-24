@@ -24,6 +24,11 @@ class MockBackend {
   /// so error states can be exercised without touching code.
   static bool simulateError = false;
 
+  /// When true, `/auth/refresh` returns a 401 (or 204 with no Authorization
+  /// header) to simulate an expired/invalid refresh token. Used to test the
+  /// refresh-failure → clear → onUnauthorized → redirect path.
+  static bool forceRefreshFailure = false;
+
   /// Fake network latency.
   static Duration latency = const Duration(milliseconds: 300);
 

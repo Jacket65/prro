@@ -5,21 +5,22 @@ abstract interface class ApiClientI {
   /// app should clear state and return to the login screen.
   Stream<void> get onUnauthorized;
 
-  /// GET with optional query parameters and a [cancelToken] (so an in-flight
-  /// request can be aborted, e.g. superseded search input).
+  /// GET with optional query parameters, cancel token, and per-request headers.
   Future<Response<dynamic>> get(
     String path, {
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
   });
 
   /// POST. State-changing POSTs require an `Idempotency-Key`; pass
-  /// [idempotencyKey] to use a stable one (e.g. generated when a payment modal
-  /// opens). If omitted, the client auto-generates one per request.
+  /// [idempotencyKey] to use a stable one. Per-request [headers] are merged
+  /// into the request options and override default headers.
   Future<Response<dynamic>> post(
     String path, {
     dynamic data,
     String? idempotencyKey,
+    Map<String, dynamic>? headers,
   });
 
   /// PATCH. Same idempotency rules as [post].
@@ -27,6 +28,7 @@ abstract interface class ApiClientI {
     String path, {
     dynamic data,
     String? idempotencyKey,
+    Map<String, dynamic>? headers,
   });
 
   /// PUT. Same idempotency rules as [post].
@@ -34,6 +36,7 @@ abstract interface class ApiClientI {
     String path, {
     dynamic data,
     String? idempotencyKey,
+    Map<String, dynamic>? headers,
   });
 
   /// DELETE. [data] is rarely sent, but allowed (some backends read a body).
@@ -42,5 +45,6 @@ abstract interface class ApiClientI {
     String path, {
     dynamic data,
     String? idempotencyKey,
+    Map<String, dynamic>? headers,
   });
 }

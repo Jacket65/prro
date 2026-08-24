@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/config/backend_config.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
 import 'package:prro/router/app_router.gr.dart';
@@ -74,33 +73,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       child: const Text('Я продавець'),
                     ),
-                    if (BackendConfig.useMock) ...[
-                      const SizedBox(height: 18),
-                      ElevatedButton(
-                        onPressed: () {
-                          context.read<LoginBloc>().add(
-                            const LoginSubmitted(
-                              username: 'cashier1',
-                              password: 'cashier123',
-                            ),
-                          );
-                          _clearTextFields();
-                        },
-                        child: const Text('seller (cashier1) - API'),
-                      ),
-                      const SizedBox(height: 18),
-                      ElevatedButton(
-                        onPressed: () {
-                          context.read<UserBloc>().add(
-                            LoadUser(username: 'cashier2'),
-                          );
-                          unawaited(
-                            context.router.replace(const SellerRoute()),
-                          );
-                        },
-                        child: const Text('seller (cashier1) - Mock'),
-                      ),
-                    ],
                     const SizedBox(height: 18),
                     ElevatedButton(
                       onPressed: () =>

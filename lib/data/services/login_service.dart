@@ -1,17 +1,16 @@
 import 'package:injectable/injectable.dart';
 import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:prro/data/repositories/login_repository/login_result.dart';
 
 @Environment('prod')
 @Singleton(as: LoginServiceI)
 class LoginService implements LoginServiceI {
-  LoginService({required this.prefs, required this.apiClient});
-  final SharedPreferences prefs;
+  LoginService({required this.apiClient});
   final ApiClientI apiClient;
 
   @override
-  Future<bool> login({
+  Future<LoginResult> login({
     required String username,
     required String password,
   }) async {
@@ -21,102 +20,65 @@ class LoginService implements LoginServiceI {
     );
 
     if (response.statusCode != 200) {
-      return false;
+      return const LoginResult(accessToken: '');
     }
 
     final authHeader = response.headers.value('Authorization');
     if (authHeader == null || !authHeader.toLowerCase().startsWith('bearer ')) {
-      return false;
+      return const LoginResult(accessToken: '');
     }
     final token = authHeader.substring(7).trim();
     if (token.isEmpty) {
-      return false;
+      return const LoginResult(accessToken: '');
     }
 
-    await prefs.setString('auth_token', token);
-    await prefs.setString('username', username);
-    await prefs.setBool('isLogged', true);
+    String? refreshToken;
+    String? role;
+    int? userId;
 
     final responseData = response.data;
-
     final data = responseData is Map<String, dynamic>
         ? responseData['data']
         : null;
     if (data is Map<String, dynamic>) {
-      final role = data['role'];
-      if (role is String) {
-        await prefs.setString('user_role', role);
-      }
-      final userId = data['id'];
-      if (userId is int) {
-        await prefs.setInt('user_id', userId);
-      }
-      // The access token lives 15 min; the refresh token (in the body) is used
-      // by the Dio interceptor to silently renew it on a 401.
+      final r = data['role'];
+      if (r is String) role = r;
+      final id = data['id'];
+      if (id is int) userId = id;
       final refresh = data['refresh_token'];
       if (refresh is String && refresh.isNotEmpty) {
-        await prefs.setString('refresh_token', refresh);
+        refreshToken = refresh;
       }
     }
 
-    await _resolveOutletId();
-    return true;
+    final outletId = await _resolveOutletId(token);
+    return LoginResult(
+      accessToken: token,
+      refreshToken: refreshToken,
+      role: role,
+      userId: userId,
+      outletId: outletId,
+    );
   }
 
-  // Picks the first outlet the authenticated user has access to and stores it.
-  // The /auth/me endpoint does not return outlet_id yet, so we use the list as the source of truth.
-  Future<void> _resolveOutletId() async {
+  Future<int?> _resolveOutletId(String accessToken) async {
     try {
-      final response = await apiClient.get('/retail-outlets/');
-      if (response.statusCode != 200) return;
+      final response = await apiClient.get(
+        '/retail-outlets/',
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode != 200) return null;
       final body = response.data;
       final list = body is Map ? body['data'] : null;
       if (list is List && list.isNotEmpty) {
         final first = list.first;
         if (first is Map && first['id'] is int) {
-          await prefs.setInt('outlet_id', first['id'] as int);
+          return first['id'] as int;
         }
       }
     } on Object catch (_) {
-      // optional, ignore — UI surfaces will fail later with clearer errors
+      return null;
     }
-  }
-
-  @override
-  Future<void> saveLoginState({required bool state}) async {
-    await prefs.setBool('isLogged', state);
-  }
-
-  @override
-  bool getLoginState() {
-    return prefs.getBool('isLogged') ?? false;
-  }
-
-  @override
-  String getSavedUsername() {
-    return prefs.getString('username') ?? 'Error';
-  }
-
-  @override
-  Future<void> logout() async {
-    await prefs.remove('auth_token');
-    await prefs.remove('refresh_token');
-    await prefs.setBool('isLogged', false);
-    await prefs.remove('username');
-    await prefs.remove('user_role');
-    await prefs.remove('user_id');
-    await prefs.remove('outlet_id');
-  }
-
-  @override
-  Future<bool> tryAutoLogin() async {
-    final token = prefs.getString('auth_token');
-    final isLogged = prefs.getBool('isLogged') ?? false;
-
-    if (isLogged && token != null) {
-      return true;
-    }
-
-    return false;
+    return null;
   }
 }

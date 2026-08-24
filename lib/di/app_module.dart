@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/security/token_storage_i.dart';
 import 'package:prro/data/api/api_client.dart';
 import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/api/mock_api_client.dart';
@@ -19,13 +20,13 @@ abstract class AppModule {
 
   @singleton
   @Environment('prod')
-  ApiClientI apiClient(Dio dio, SharedPreferences prefs) =>
-      ApiClient(dio: dio, prefs: prefs);
+  ApiClientI apiClient(Dio dio, TokenStorageI tokenStorage) =>
+      ApiClient(dio: dio, tokenStorage: tokenStorage);
 
   @singleton
   @Environment('mock')
-  ApiClientI mockApiClient(SharedPreferences prefs, MockBackend mockBackend) =>
-      MockApiClient(prefs: prefs, mockBackend: mockBackend);
+  ApiClientI mockApiClient(MockBackend mockBackend) =>
+      MockApiClient(mockBackend: mockBackend);
 
   @singleton
   @Environment('mock')
