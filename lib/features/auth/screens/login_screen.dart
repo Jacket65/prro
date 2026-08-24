@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
@@ -85,15 +86,52 @@ class _LoginScreenState extends State<LoginScreen> {
                               if (bloc.isAuthenticated) {
                                 bloc.add(const LoginAdminRequested());
                               } else if (_formKey.currentState!.validate()) {
-                                bloc.add(LoginAdminRequested(
-                                  username: _usernameController.text,
-                                  password: _passwordController.text,
-                                ));
+                                bloc.add(
+                                  LoginAdminRequested(
+                                    username: _usernameController.text,
+                                    password: _passwordController.text,
+                                  ),
+                                );
                                 _clearTextFields();
                               }
                             },
                       child: const Text('Я адміністратор'),
                     ),
+                    const SizedBox(height: 18),
+                    if (kDebugMode) ...[
+                      const SizedBox(height: 24),
+                      OutlinedButton.icon(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                context.read<LoginBloc>().add(
+                                  const LoginSubmitted(
+                                    username: 'cashier',
+                                    password: '1',
+                                  ),
+                                );
+                                _clearTextFields();
+                              },
+                        icon: const Icon(Icons.flash_on, size: 16),
+                        label: const Text('Debug: Cashier'),
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                context.read<LoginBloc>().add(
+                                  const LoginAdminRequested(
+                                    username: 'admin',
+                                    password: '1',
+                                  ),
+                                );
+                                _clearTextFields();
+                              },
+                        icon: const Icon(Icons.flash_on, size: 16),
+                        label: const Text('Debug: Admin'),
+                      ),
+                    ],
                   ],
                 ),
               ),
