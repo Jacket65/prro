@@ -21,6 +21,45 @@ class MockApiClient implements ApiClientI {
   final StreamController<void> _unauthorized =
       StreamController<void>.broadcast();
 
+  Map<String, dynamic>? _lastUser;
+
+  static const _users = <Map<String, dynamic>>[
+    {
+      'first_name': 'Олена',
+      'id': 1,
+      'last_name': 'Касір',
+      'login': 'cashier',
+      'outlet_id': 1,
+      'role': 'cashier',
+    },
+    {
+      'first_name': 'Іван',
+      'id': 2,
+      'last_name': 'Адмін',
+      'login': 'admin',
+      'outlet_id': 1,
+      'role': 'admin',
+    },
+    {
+      'first_name': 'Марія',
+      'id': 3,
+      'last_name': 'Менеджер',
+      'login': 'manager',
+      'outlet_id': 1,
+      'role': 'manager',
+    },
+  ];
+
+  Map<String, dynamic>? _matchUser(String login, String password) {
+    const passwords = <String, String>{
+      'cashier': '1',
+      'admin': 'admin123',
+      'manager': 'manager123',
+    };
+    if (passwords[login] != password) return null;
+    return _users.firstWhere((u) => u['login'] == login);
+  }
+
   @override
   Stream<void> get onUnauthorized => _unauthorized.stream;
 
@@ -30,8 +69,26 @@ class MockApiClient implements ApiClientI {
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
-  }) async {
+  }  ) async {
     try {
+      if (path.contains('/auth/me')) {
+        if (_lastUser != null) {
+          return Response<dynamic>(
+            requestOptions: RequestOptions(path: path),
+            data: {'data': _lastUser},
+            statusCode: 200,
+          );
+        }
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          data: {
+            'code': 'UNAUTHORIZED',
+            'message': 'Немає або недійсний токен',
+          },
+          statusCode: 401,
+        );
+      }
+
       // ── Admin panel endpoints (outlet-scoped) ──
       if (path.contains('/retail-outlets')) {
         final outletId = _extractOutletId(path);
@@ -234,11 +291,37 @@ class MockApiClient implements ApiClientI {
         }
       } else if (path.contains('/auth/login')) {
         final loginData = data as Map<String, dynamic>?;
-        log('[MOCK API] Login attempt with: ${loginData?['login']}');
+        final login = loginData?['login'] as String? ?? '';
+        final password = loginData?['password'] as String? ?? '';
+        log('[MOCK API] Login attempt with: $login');
+
+        if (login.isEmpty || password.isEmpty) {
+          return Response(
+            requestOptions: RequestOptions(path: path),
+            data: {
+              'code': 'INVALID_REQUEST',
+              'message': "Логін і пароль обов'язкові",
+            },
+            statusCode: 400,
+          );
+        }
+
+        final user = _matchUser(login, password);
+        if (user == null) {
+          return Response(
+            requestOptions: RequestOptions(path: path),
+            data: {
+              'code': 'UNAUTHORIZED',
+              'message': 'Невірний логін або пароль',
+            },
+            statusCode: 401,
+          );
+        }
 
         final accessToken =
             'mock_token_${DateTime.now().millisecondsSinceEpoch}';
         const refreshToken = 'mock_refresh_token';
+        _lastUser = user;
 
         return Response(
           requestOptions: RequestOptions(path: path),
@@ -246,10 +329,24 @@ class MockApiClient implements ApiClientI {
             'authorization': ['Bearer $accessToken'],
           }),
           data: {
-            'access_token': accessToken,
-            'refresh_token': refreshToken,
+            'data': {
+              'first_name': user['first_name'],
+              'id': user['id'],
+              'last_name': user['last_name'],
+              'login': user['login'],
+              'outlet_id': user['outlet_id'],
+              'refresh_token': refreshToken,
+              'role': user['role'],
+            },
           },
           statusCode: 200,
+        );
+      } else if (path.contains('/auth/logout')) {
+        log('[MOCK API] Logout');
+        _lastUser = null;
+        return Response(
+          requestOptions: RequestOptions(path: path),
+          statusCode: 204,
         );
       } else if (path.contains('/auth/refresh')) {
         log('[MOCK API] Token refresh');

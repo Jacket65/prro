@@ -76,6 +76,9 @@ class LoginRepositoryMock implements LoginRepositoryI {
   String getSavedUsername() => prefs.getString('username') ?? 'Error';
 
   @override
+  Future<String?> getRole() async => prefs.getString('user_role');
+
+  @override
   Future<void> saveLoginState({required bool state}) async {
     _isAuthenticated = state;
   }

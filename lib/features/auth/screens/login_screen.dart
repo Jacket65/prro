@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
+import 'package:prro/di/di.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
 import 'package:prro/router/app_router.gr.dart';
@@ -18,9 +20,13 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController(
+    text: 'cashier',
+  );
 
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController(
+    text: '1',
+  );
 
   @override
   void dispose() {
@@ -75,8 +81,30 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 18),
                     ElevatedButton(
-                      onPressed: () =>
-                          context.router.replace(const AdminRoute()),
+                      onPressed: () async {
+                        if (!getIt<LoginRepositoryI>().getLoginState()) {
+                          _showSnackBar(
+                            context,
+                            'Спочатку увійдіть у систему',
+                          );
+                          return;
+                        }
+                        final messenger = ScaffoldMessenger.of(context);
+                        final router = context.router;
+                        final role = await getIt<LoginRepositoryI>().getRole();
+                        if (role == 'admin' || role == 'manager') {
+                          unawaited(router.replace(const AdminRoute()));
+                        } else {
+                          messenger.showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Потрібна роль admin або manager',
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          );
+                        }
+                      },
                       child: const Text('Я адміністратор'),
                     ),
                   ],

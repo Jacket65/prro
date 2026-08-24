@@ -23,5 +23,7 @@ abstract interface class LoginRepositoryI {
 
   String getSavedUsername();
 
+  Future<String?> getRole();
+
   Future<void> saveLoginState({required bool state});
 }
