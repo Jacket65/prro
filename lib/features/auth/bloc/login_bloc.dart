@@ -10,8 +10,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<LoginSubmitted>(_onLoginSubmitted);
     on<LoginGetInitial>(_getInitial);
     on<LoginCheckAutoLogin>(_onCheckAutoLogin);
+    on<LoginAdminRequested>(_onLoginAdminRequested);
   }
   final LoginRepositoryI _loginRepository;
+
+  bool get isAuthenticated => _loginRepository.getLoginState();
 
   Future<void> _onLoginSubmitted(
     LoginSubmitted event,
@@ -55,5 +58,47 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     emit(LoginInitial());
 
     await _loginRepository.logout();
+  }
+
+  Future<void> _onLoginAdminRequested(
+    LoginAdminRequested event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(LoginAdminLoading());
+
+    try {
+      final hasUsername = event.username != null;
+      final hasPassword = event.password != null;
+
+      if (hasUsername != hasPassword) {
+        emit(const LoginFailure('Некоректні дані для входу'));
+        return;
+      }
+
+      if (hasUsername && hasPassword) {
+        final success = await _loginRepository.login(
+          username: event.username!,
+          password: event.password!,
+        );
+
+        if (!success) {
+          emit(const LoginFailure("Невірне ім'я користувача або пароль"));
+          return;
+        }
+      }
+
+      final role = await _loginRepository.getRole();
+
+      if (role == 'admin' || role == 'manager') {
+        emit(LoginAdminSuccess(_loginRepository.getSavedUsername()));
+        return;
+      }
+
+      emit(const LoginFailure('Потрібна роль admin або manager'));
+    } on Object catch (_) {
+      emit(const LoginFailure(
+        'Сталася помилка при перевірці прав доступу',
+      ));
+    }
   }
 }

@@ -29,3 +29,15 @@ class LoginCheckAutoLogin extends LoginEvent {
   @override
   List<Object> get props => [];
 }
+
+class LoginAdminRequested extends LoginEvent {
+  const LoginAdminRequested({this.username, this.password});
+  final String? username;
+  final String? password;
+
+  @override
+  List<Object> get props => [
+        ?username,
+        ?password,
+      ];
+}

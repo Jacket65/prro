@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
-import 'package:prro/di/di.dart';
 import 'package:prro/features/auth/bloc/login_bloc.dart';
 import 'package:prro/features/user/bloc/user_bloc.dart';
 import 'package:prro/router/app_router.gr.dart';
@@ -43,6 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
           _checkState(state, context);
         },
         builder: (context, state) {
+          final isLoading = _isLoading(state);
           return Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -66,45 +65,37 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 18),
                     ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          context.read<LoginBloc>().add(
-                            LoginSubmitted(
-                              username: _usernameController.text,
-                              password: _passwordController.text,
-                            ),
-                          );
-                          _clearTextFields();
-                        }
-                      },
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                              if (_formKey.currentState!.validate()) {
+                                context.read<LoginBloc>().add(
+                                  LoginSubmitted(
+                                    username: _usernameController.text,
+                                    password: _passwordController.text,
+                                  ),
+                                );
+                                _clearTextFields();
+                              }
+                            },
                       child: const Text('Я продавець'),
                     ),
                     const SizedBox(height: 18),
                     ElevatedButton(
-                      onPressed: () async {
-                        if (!getIt<LoginRepositoryI>().getLoginState()) {
-                          _showSnackBar(
-                            context,
-                            'Спочатку увійдіть у систему',
-                          );
-                          return;
-                        }
-                        final messenger = ScaffoldMessenger.of(context);
-                        final router = context.router;
-                        final role = await getIt<LoginRepositoryI>().getRole();
-                        if (role == 'admin' || role == 'manager') {
-                          unawaited(router.replace(const AdminRoute()));
-                        } else {
-                          messenger.showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Потрібна роль admin або manager',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          );
-                        }
-                      },
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                              final bloc = context.read<LoginBloc>();
+                              if (bloc.isAuthenticated) {
+                                bloc.add(const LoginAdminRequested());
+                              } else if (_formKey.currentState!.validate()) {
+                                bloc.add(LoginAdminRequested(
+                                  username: _usernameController.text,
+                                  password: _passwordController.text,
+                                ));
+                                _clearTextFields();
+                              }
+                            },
                       child: const Text('Я адміністратор'),
                     ),
                   ],
@@ -123,9 +114,13 @@ class _LoginScreenState extends State<LoginScreen> {
         _showSnackBar(context, 'Вітаємо вас на роботі!');
         context.read<UserBloc>().add(LoadUser(username: state.username));
         unawaited(context.router.replace(const SellerRoute()));
+      case LoginAdminSuccess():
+        context.read<UserBloc>().add(LoadUser(username: state.username));
+        unawaited(context.router.replace(const AdminRoute()));
       case LoginFailure():
         _showSnackBar(context, 'Сталася помилка ${state.error}');
       case LoginLoading():
+      case LoginAdminLoading():
       case LoginInitial():
     }
   }
@@ -141,9 +136,14 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordController.clear();
   }
 
+  bool _isLoading(LoginState state) =>
+      state is LoginLoading || state is LoginAdminLoading;
+
   Widget _buildStateMessage(LoginState state) {
     return switch (state) {
       LoginSuccess() => Text('Logged in as ${state.username}'),
+      LoginAdminSuccess() => Text('Admin: ${state.username}'),
+      LoginAdminLoading() => const Text('Перевірка прав доступу...'),
       LoginFailure() => Text(
         state.error,
         style: const TextStyle(

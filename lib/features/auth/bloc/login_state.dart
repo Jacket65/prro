@@ -24,3 +24,12 @@ final class LoginFailure extends LoginState {
   @override
   List<Object> get props => [error];
 }
+
+final class LoginAdminLoading extends LoginState {}
+
+final class LoginAdminSuccess extends LoginState {
+  const LoginAdminSuccess(this.username);
+  final String username;
+  @override
+  List<Object> get props => [username];
+}
