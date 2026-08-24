@@ -51,13 +51,11 @@ class MockApiClient implements ApiClientI {
   ];
 
   Map<String, dynamic>? _matchUser(String login, String password) {
-    const passwords = <String, String>{
-      'cashier': '1',
-      'admin': 'admin123',
-      'manager': 'manager123',
-    };
-    if (passwords[login] != password) return null;
-    return _users.firstWhere((u) => u['login'] == login);
+    if (password.isEmpty) return null;
+    for (final u in _users) {
+      if (u['login'] == login) return u;
+    }
+    return null;
   }
 
   @override

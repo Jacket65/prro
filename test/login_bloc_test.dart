@@ -120,4 +120,165 @@ void main() {
       },
     );
   });
+
+  group('LoginAdminRequested', () {
+    blocTest<LoginBloc, LoginState>(
+      'emits [LoginAdminLoading, LoginAdminSuccess] '
+      'when authenticated and role is admin',
+      build: () {
+        when(() => repository.getLoginState()).thenReturn(true);
+        when(() => repository.getRole()).thenAnswer((_) async => 'admin');
+        when(() => repository.getSavedUsername()).thenReturn('admin');
+        return loginBloc;
+      },
+      act: (bloc) => bloc.add(const LoginAdminRequested()),
+      expect: () => [
+        LoginAdminLoading(),
+        const LoginAdminSuccess('admin'),
+      ],
+      verify: (_) {
+        verify(() => repository.getRole()).called(1);
+        verify(() => repository.getSavedUsername()).called(1);
+        verifyNever(
+          () => repository.login(
+            username: any(named: 'username'),
+            password: any(named: 'password'),
+          ),
+        );
+      },
+    );
+
+    blocTest<LoginBloc, LoginState>(
+      'emits [LoginAdminLoading, LoginAdminSuccess] '
+      'when authenticated and role is manager',
+      build: () {
+        when(() => repository.getLoginState()).thenReturn(true);
+        when(() => repository.getRole()).thenAnswer((_) async => 'manager');
+        when(() => repository.getSavedUsername()).thenReturn('manager');
+        return loginBloc;
+      },
+      act: (bloc) => bloc.add(const LoginAdminRequested()),
+      expect: () => [
+        LoginAdminLoading(),
+        const LoginAdminSuccess('manager'),
+      ],
+    );
+
+    blocTest<LoginBloc, LoginState>(
+      'emits [LoginAdminLoading, LoginAdminSuccess] '
+      'with credentials when not authenticated',
+      build: () {
+        when(() => repository.getLoginState()).thenReturn(false);
+        when(
+          () => repository.login(
+            username: any(named: 'username'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => true);
+        when(() => repository.getRole()).thenAnswer((_) async => 'admin');
+        when(() => repository.getSavedUsername()).thenReturn('admin');
+        return loginBloc;
+      },
+      act: (bloc) => bloc.add(
+        const LoginAdminRequested(username: 'admin', password: '1234'),
+      ),
+      expect: () => [
+        LoginAdminLoading(),
+        const LoginAdminSuccess('admin'),
+      ],
+      verify: (_) {
+        verify(() => repository.login(username: 'admin', password: '1234'))
+            .called(1);
+        verify(() => repository.getRole()).called(1);
+      },
+    );
+
+    blocTest<LoginBloc, LoginState>(
+      'emits [LoginAdminLoading, LoginFailure] when role is cashier',
+      build: () {
+        when(() => repository.getLoginState()).thenReturn(true);
+        when(() => repository.getRole()).thenAnswer((_) async => 'cashier');
+        return loginBloc;
+      },
+      act: (bloc) => bloc.add(const LoginAdminRequested()),
+      expect: () => [
+        LoginAdminLoading(),
+        const LoginFailure('Потрібна роль admin або manager'),
+      ],
+    );
+
+    blocTest<LoginBloc, LoginState>(
+      'emits [LoginAdminLoading, LoginFailure] '
+      'when login fails with credentials',
+      build: () {
+        when(() => repository.getLoginState()).thenReturn(false);
+        when(
+          () => repository.login(
+            username: any(named: 'username'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => false);
+        return loginBloc;
+      },
+      act: (bloc) => bloc.add(
+        const LoginAdminRequested(username: 'admin', password: 'wrong'),
+      ),
+      expect: () => [
+        LoginAdminLoading(),
+        const LoginFailure("Невірне ім'я користувача або пароль"),
+      ],
+    );
+
+    blocTest<LoginBloc, LoginState>(
+      'emits [LoginAdminLoading, LoginFailure] '
+      'when credentials are malformed (one null)',
+      build: () {
+        when(() => repository.getLoginState()).thenReturn(false);
+        return loginBloc;
+      },
+      act: (bloc) => bloc.add(
+        const LoginAdminRequested(username: 'admin'),
+      ),
+      expect: () => [
+        LoginAdminLoading(),
+        const LoginFailure('Некоректні дані для входу'),
+      ],
+      verify: (_) {
+        verifyNever(
+          () => repository.login(
+            username: any(named: 'username'),
+            password: any(named: 'password'),
+          ),
+        );
+      },
+    );
+
+    blocTest<LoginBloc, LoginState>(
+      'emits [LoginAdminLoading, LoginFailure] when repository throws',
+      build: () {
+        when(() => repository.getLoginState()).thenReturn(true);
+        when(() => repository.getRole()).thenThrow(Exception('network error'));
+        return loginBloc;
+      },
+      act: (bloc) => bloc.add(const LoginAdminRequested()),
+      expect: () => [
+        LoginAdminLoading(),
+        const LoginFailure('Сталася помилка при перевірці прав доступу'),
+      ],
+    );
+
+    blocTest<LoginBloc, LoginState>(
+      'emits [LoginAdminLoading, LoginFailure] when role is null',
+      build: () {
+        when(() => repository.getLoginState()).thenReturn(true);
+        when(() => repository.getRole()).thenAnswer((_) async => null);
+        return loginBloc;
+      },
+      act: (bloc) => bloc.add(const LoginAdminRequested()),
+      expect: () => [
+        LoginAdminLoading(),
+        const LoginFailure('Потрібна роль admin або manager'),
+      ],
+    );
+  });
 }
