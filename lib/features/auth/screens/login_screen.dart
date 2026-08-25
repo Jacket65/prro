@@ -4,9 +4,22 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/features/auth/bloc/login_bloc.dart';
-import 'package:prro/features/user/bloc/user_bloc.dart';
+import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
+import 'package:prro/features/auth/bloc/auth_bloc.dart';
+import 'package:prro/features/auth/bloc/auth_event.dart';
+import 'package:prro/features/auth/bloc/auth_state.dart';
+import 'package:prro/features/auth/model/auth_user.dart';
 import 'package:prro/router/app_router.gr.dart';
+
+String _localizedError(AuthErrorCode code) {
+  return switch (code) {
+    AuthErrorCode.invalidCredentials => "Невірне ім'я користувача або пароль",
+    AuthErrorCode.networkError => 'Помилка мережі',
+    AuthErrorCode.insufficientRole => 'Потрібна роль admin або manager',
+    AuthErrorCode.sessionRestoreFailed => 'Не вдалося відновити сесію',
+    AuthErrorCode.unknown => 'Сталася помилка',
+  };
+}
 
 @RoutePage(name: 'LoginRoute')
 class LoginScreen extends StatefulWidget {
@@ -33,12 +46,12 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocConsumer<LoginBloc, LoginState>(
+      body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           _checkState(state, context);
         },
         builder: (context, state) {
-          final isLoading = _isLoading(state);
+          final isLoading = state is AuthLoading;
           return Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -66,12 +79,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           ? null
                           : () {
                               if (_formKey.currentState!.validate()) {
-                                context.read<LoginBloc>().add(
-                                  LoginSubmitted(
-                                    username: _usernameController.text,
-                                    password: _passwordController.text,
-                                  ),
-                                );
+                                context.read<AuthBloc>().add(
+                                      AuthLoginRequested(
+                                        username: _usernameController.text,
+                                        password: _passwordController.text,
+                                      ),
+                                    );
                                 _clearTextFields();
                               }
                             },
@@ -82,12 +95,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: isLoading
                           ? null
                           : () {
-                              final bloc = context.read<LoginBloc>();
-                              if (bloc.isAuthenticated) {
-                                bloc.add(const LoginAdminRequested());
+                              final bloc = context.read<AuthBloc>();
+                              final isAuthenticated =
+                                  bloc.state is AuthAuthenticated;
+                              if (isAuthenticated) {
+                                bloc.add(const AuthAdminLoginRequested());
                               } else if (_formKey.currentState!.validate()) {
                                 bloc.add(
-                                  LoginAdminRequested(
+                                  AuthAdminLoginRequested(
                                     username: _usernameController.text,
                                     password: _passwordController.text,
                                   ),
@@ -104,12 +119,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: isLoading
                             ? null
                             : () {
-                                context.read<LoginBloc>().add(
-                                  const LoginSubmitted(
-                                    username: 'cashier',
-                                    password: '1',
-                                  ),
-                                );
+                                context.read<AuthBloc>().add(
+                                      const AuthLoginRequested(
+                                        username: 'cashier',
+                                        password: '1',
+                                      ),
+                                    );
                                 _clearTextFields();
                               },
                         icon: const Icon(Icons.flash_on, size: 16),
@@ -120,12 +135,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: isLoading
                             ? null
                             : () {
-                                context.read<LoginBloc>().add(
-                                  const LoginAdminRequested(
-                                    username: 'admin',
-                                    password: '1',
-                                  ),
-                                );
+                                context.read<AuthBloc>().add(
+                                      const AuthAdminLoginRequested(
+                                        username: 'admin',
+                                        password: '1',
+                                      ),
+                                    );
                                 _clearTextFields();
                               },
                         icon: const Icon(Icons.flash_on, size: 16),
@@ -142,20 +157,23 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _checkState(LoginState state, BuildContext context) {
+  void _checkState(AuthState state, BuildContext context) {
     switch (state) {
-      case LoginSuccess():
+      case AuthAuthenticated(:final user):
         _showSnackBar(context, 'Вітаємо вас на роботі!');
-        context.read<UserBloc>().add(LoadUser(username: state.username));
-        unawaited(context.router.replace(const SellerRoute()));
-      case LoginAdminSuccess():
-        context.read<UserBloc>().add(LoadUser(username: state.username));
-        unawaited(context.router.replace(const AdminRoute()));
-      case LoginFailure():
-        _showSnackBar(context, 'Сталася помилка ${state.error}');
-      case LoginLoading():
-      case LoginAdminLoading():
-      case LoginInitial():
+        if (user.role == UserRole.seller) {
+          unawaited(context.router.replace(const SellerRoute()));
+        } else {
+          unawaited(context.router.replace(const AdminRoute()));
+        }
+      case AuthFailure(:final error):
+        _showSnackBar(
+          context,
+          'Сталася помилка: ${_localizedError(error.code)}',
+        );
+      case AuthInitial():
+      case AuthLoading():
+      case AuthUnauthenticated():
     }
   }
 
@@ -170,23 +188,22 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordController.clear();
   }
 
-  bool _isLoading(LoginState state) =>
-      state is LoginLoading || state is LoginAdminLoading;
-
-  Widget _buildStateMessage(LoginState state) {
+  Widget _buildStateMessage(AuthState state) {
     return switch (state) {
-      LoginSuccess() => Text('Logged in as ${state.username}'),
-      LoginAdminSuccess() => Text('Admin: ${state.username}'),
-      LoginAdminLoading() => const Text('Перевірка прав доступу...'),
-      LoginFailure() => Text(
-        state.error,
+      AuthAuthenticated(:final user) => Text('Logged in as ${user.username}'),
+      AuthLoading(:final operation) => switch (operation) {
+        AuthOperation.adminLogin => const Text('Перевірка прав доступу...'),
+        AuthOperation.login => const Text('Logging in...'),
+        _ => const Text('Loading...'),
+      },
+      AuthFailure(:final error) => Text(
+        _localizedError(error.code),
         style: const TextStyle(
           color: Colors.red,
           fontSize: 12,
           fontWeight: FontWeight.bold,
         ),
       ),
-      LoginLoading() => const Text('Logging in...'),
       _ => const Text('Введіть дані для входу'),
     };
   }
