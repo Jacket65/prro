@@ -9,6 +9,7 @@ environment:
 dependencies:
   app_links: ^6.3.0
   auto_route: ^11.1.0
+  bloc_concurrency: ^0.3.0
   cupertino_icons: ^1.0.9
   decimal: ^3.2.4
   dio: ^5.10.0
