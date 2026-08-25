@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
 import 'package:prro/data/api/api_client_i.dart';
-import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
 import 'package:prro/data/repositories/login_repository/login_result.dart';
+import 'package:prro/data/services/login_service_i.dart';
 
 @Environment('prod')
 @Singleton(as: LoginServiceI)
