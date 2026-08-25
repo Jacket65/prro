@@ -7,7 +7,8 @@ import 'package:prro/data/repositories/balance/balance_i.dart';
 import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
 import 'package:prro/di/di.dart';
-import 'package:prro/features/auth/bloc/login_bloc.dart';
+import 'package:prro/features/auth/bloc/auth_bloc.dart';
+import 'package:prro/features/auth/bloc/auth_event.dart';
 import 'package:prro/features/seller/bloc/balance/balance_cubit.dart';
 import 'package:prro/features/seller/bloc/items_tiles/items_tiles_bloc.dart';
 import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
@@ -17,7 +18,6 @@ import 'package:prro/features/seller/widgets/widgets.dart';
 import 'package:prro/features/shift/bloc/bloc.dart';
 import 'package:prro/features/shift/widgets/close_shift_dialog.dart';
 import 'package:prro/features/shift/widgets/open_shift_dialog.dart';
-import 'package:prro/features/user/bloc/user_bloc.dart';
 import 'package:prro/router/app_router.gr.dart';
 
 @RoutePage(name: 'SellerRoute')
@@ -132,11 +132,9 @@ class _SellerScreenState extends State<SellerScreen> {
   Future<void> _logout(BuildContext context) async {
     final confirmed = await LogoutConfirmationDialog.show(context);
     if (confirmed == true && context.mounted) {
-      context.read<LoginBloc>().add(const LoginGetInitial());
-      context.read<UserBloc>().add(ClearUser());
       context.read<OrdersBloc>().add(const ClearProducts());
       if (context.mounted) {
-        await context.router.replace(const LoginRoute());
+        context.read<AuthBloc>().add(const AuthLogoutRequested());
       }
     }
   }

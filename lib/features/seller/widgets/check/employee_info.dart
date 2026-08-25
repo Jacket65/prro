@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/features/user/bloc/user_bloc.dart';
+import 'package:prro/features/auth/bloc/auth_bloc.dart';
+import 'package:prro/features/auth/bloc/auth_state.dart';
 
 class EmployeeInfo extends StatelessWidget {
   const EmployeeInfo({
@@ -9,21 +10,16 @@ class EmployeeInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, UserState>(
+    return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        switch (state) {
-          case UserLoaded(:final username):
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [Text('Працівник: $username')],
-            );
-          case UserLoading():
-            return const CircularProgressIndicator();
-          case UserError():
-            return const Text('Працівник: не вказано');
-          default:
-            return const Text('Працівник: ...');
-        }
+        return switch (state) {
+          AuthAuthenticated(: final user) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [Text('Працівник: ${user.username}')],
+          ),
+          AuthLoading() => const CircularProgressIndicator(),
+          _ => const Text('Працівник: ...'),
+        };
       },
     );
   }

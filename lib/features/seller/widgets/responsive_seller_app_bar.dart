@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prro/features/auth/bloc/auth_bloc.dart';
+import 'package:prro/features/auth/bloc/auth_state.dart';
 import 'package:prro/features/seller/bloc/balance/balance_cubit.dart';
 import 'package:prro/features/seller/widgets/custom_popup_menu.dart';
 import 'package:prro/features/seller/widgets/search_field.dart';
-import 'package:prro/features/user/bloc/user_bloc.dart';
 
 class ResponsiveSellerAppBar extends StatefulWidget
     implements PreferredSizeWidget {
@@ -134,24 +135,20 @@ class _ResponsiveSellerAppBarState extends State<ResponsiveSellerAppBar> {
   }
 
   Widget _buildUsername(BuildContext context) {
-    return BlocBuilder<UserBloc, UserState>(
+    return BlocBuilder<AuthBloc, AuthState>(
       builder: (_, state) {
         return switch (state) {
-          UserLoaded(:final username) => CustomPopupMenu(
-            name: _isNarrow ? '' : username,
+          AuthAuthenticated(: final user) => CustomPopupMenu(
+            name: _isNarrow ? '' : user.username,
             icon: Icons.lock,
           ),
-          UserLoading() => const SizedBox(
+          AuthLoading() => const SizedBox(
             width: 20,
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
               color: Colors.white,
             ),
-          ),
-          UserError() => CustomPopupMenu(
-            name: _isNarrow ? '' : 'Error',
-            icon: Icons.lock,
           ),
           _ => CustomPopupMenu(name: _isNarrow ? '' : '...', icon: Icons.lock),
         };
