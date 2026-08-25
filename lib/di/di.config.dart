@@ -35,6 +35,11 @@ import 'package:prro/data/repositories/admin_user_repository/admin_user_reposito
     as _i93;
 import 'package:prro/data/repositories/admin_user_repository/admin_user_repository_mock.dart'
     as _i461;
+import 'package:prro/data/repositories/auth_repository/auth_repo.dart' as _i58;
+import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart'
+    as _i577;
+import 'package:prro/data/repositories/auth_repository/auth_repository_mock.dart'
+    as _i339;
 import 'package:prro/data/repositories/balance/balance.dart' as _i379;
 import 'package:prro/data/repositories/balance/balance_i.dart' as _i296;
 import 'package:prro/data/repositories/balance/balance_repository_mock.dart'
@@ -47,12 +52,6 @@ import 'package:prro/data/repositories/items_repository/items_repository.dart'
     as _i369;
 import 'package:prro/data/repositories/items_repository/items_repository_mock.dart'
     as _i971;
-import 'package:prro/data/repositories/login_repository/login_repo.dart'
-    as _i427;
-import 'package:prro/data/repositories/login_repository/login_repo_i.dart'
-    as _i977;
-import 'package:prro/data/repositories/login_repository/login_repository_mock.dart'
-    as _i580;
 import 'package:prro/data/repositories/order_history/order_history_repo_i.dart'
     as _i923;
 import 'package:prro/data/repositories/order_history/order_history_repository.dart'
@@ -77,24 +76,18 @@ import 'package:prro/data/repositories/shift_repository/shift_repository_impl.da
     as _i302;
 import 'package:prro/data/repositories/shift_repository/shift_repository_mock.dart'
     as _i562;
-import 'package:prro/data/repositories/user_repository/user_repo.dart' as _i170;
-import 'package:prro/data/repositories/user_repository/user_repo_i.dart'
-    as _i205;
-import 'package:prro/data/repositories/user_repository/user_repository_mock.dart'
-    as _i817;
 import 'package:prro/data/services/balance.dart' as _i566;
 import 'package:prro/data/services/items_service.dart' as _i639;
 import 'package:prro/data/services/login_service.dart' as _i422;
+import 'package:prro/data/services/login_service_i.dart' as _i946;
 import 'package:prro/data/services/mock_balance_service.dart' as _i976;
 import 'package:prro/data/services/mock_items_service.dart' as _i649;
 import 'package:prro/data/services/mock_login_service.dart' as _i241;
 import 'package:prro/data/services/mock_shift_service.dart' as _i924;
-import 'package:prro/data/services/mock_user_service.dart' as _i104;
 import 'package:prro/data/services/order_history_service.dart' as _i772;
 import 'package:prro/data/services/order_history_service_mock.dart' as _i422;
 import 'package:prro/data/services/payment_service.dart' as _i769;
 import 'package:prro/data/services/shift_service.dart' as _i819;
-import 'package:prro/data/services/user_service.dart' as _i169;
 import 'package:prro/di/app_module.dart' as _i745;
 import 'package:prro/features/seller/bloc/orders/payment/handlers/card_payment_handler.dart'
     as _i685;
@@ -128,10 +121,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i685.CardPaymentHandler>(() => _i685.CardPaymentHandler());
     gh.factory<_i502.CashPaymentHandler>(() => _i502.CashPaymentHandler());
     gh.singleton<_i993.Talker>(() => appModule.talker());
-    gh.singleton<_i205.UserServiceI>(
-      () => _i104.MockUserService(),
-      registerFor: {_mock},
-    );
     gh.singleton<_i296.BalanceServiceI>(
       () => _i976.MockBalanceService(),
       registerFor: {_mock},
@@ -187,10 +176,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i461.AdminUserRepositoryMock(gh<_i1038.MockBackend>()),
       registerFor: {_mock},
     );
-    gh.singleton<_i205.UserRepositoryI>(
-      () => _i817.UserRepositoryMock(gh<_i205.UserServiceI>()),
-      registerFor: {_mock},
-    );
     gh.singleton<_i668.ItemsServiceI>(
       () => _i649.MockItemsService(gh<_i1038.MockBackend>()),
       registerFor: {_mock},
@@ -225,23 +210,12 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       registerFor: {_prod},
     );
-    gh.singleton<_i205.UserServiceI>(
-      () => _i169.UserService(
-        prefs: gh<_i460.SharedPreferences>(),
-        apiClient: gh<_i219.ApiClientI>(),
-      ),
-      registerFor: {_prod},
-    );
-    gh.singleton<_i205.UserRepositoryI>(
-      () => _i170.UserRepositoryImpl(userService: gh<_i205.UserServiceI>()),
+    gh.singleton<_i946.LoginServiceI>(
+      () => _i422.LoginService(apiClient: gh<_i219.ApiClientI>()),
       registerFor: {_prod},
     );
     gh.singleton<_i296.BalanceServiceI>(
       () => _i566.BalanceService(apiClient: gh<_i219.ApiClientI>()),
-      registerFor: {_prod},
-    );
-    gh.singleton<_i977.LoginServiceI>(
-      () => _i422.LoginService(apiClient: gh<_i219.ApiClientI>()),
       registerFor: {_prod},
     );
     gh.singleton<_i769.PaymentServiceI>(
@@ -264,18 +238,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i608.AdminCatalogRepositoryImpl(gh<_i219.ApiClientI>()),
       registerFor: {_prod},
     );
-    gh.singleton<_i977.LoginRepositoryI>(
-      () => _i427.LoginRepositoryImpl(
-        loginService: gh<_i977.LoginServiceI>(),
-        tokenStorage: gh<_i330.TokenStorageI>(),
-        prefs: gh<_i460.SharedPreferences>(),
-      ),
-      registerFor: {_prod},
-    );
-    gh.singleton<_i977.LoginServiceI>(
-      () => _i241.MockLoginService(apiClient: gh<_i219.ApiClientI>()),
-      registerFor: {_mock},
-    );
     gh.singleton<_i668.ItemsServiceI>(
       () => _i639.ItemsService(
         apiClient: gh<_i219.ApiClientI>(),
@@ -285,6 +247,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i75.AdminUserRepositoryI>(
       () => _i93.AdminUserRepositoryImpl(gh<_i219.ApiClientI>()),
+      registerFor: {_prod},
+    );
+    gh.singleton<_i577.AuthRepositoryI>(
+      () => _i58.AuthRepositoryImpl(
+        loginService: gh<_i946.LoginServiceI>(),
+        tokenStorage: gh<_i330.TokenStorageI>(),
+        prefs: gh<_i460.SharedPreferences>(),
+      ),
       registerFor: {_prod},
     );
     gh.factory<_i829.NfcPaymentServiceI>(
@@ -313,13 +283,17 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i260.OrderHistoryRepositoryImpl(gh<_i772.OrderHistoryServiceI>()),
       registerFor: {_prod},
     );
+    gh.singleton<_i946.LoginServiceI>(
+      () => _i241.MockLoginService(apiClient: gh<_i219.ApiClientI>()),
+      registerFor: {_mock},
+    );
     gh.singleton<_i668.ItemsRepositoryI>(
       () => _i244.ItemsRepository(gh<_i668.ItemsServiceI>()),
       registerFor: {_prod},
     );
-    gh.singleton<_i977.LoginRepositoryI>(
-      () => _i580.LoginRepositoryMock(
-        loginService: gh<_i977.LoginServiceI>(),
+    gh.singleton<_i577.AuthRepositoryI>(
+      () => _i339.AuthRepositoryMock(
+        loginService: gh<_i946.LoginServiceI>(),
         tokenStorage: gh<_i330.TokenStorageI>(),
         prefs: gh<_i460.SharedPreferences>(),
       ),
