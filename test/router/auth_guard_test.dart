@@ -1,10 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:prro/data/repositories/login_repository/login_repo_i.dart';
+import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
+import 'package:prro/features/auth/bloc/auth_bloc.dart';
+import 'package:prro/features/auth/bloc/auth_state.dart';
+import 'package:prro/features/auth/model/auth_user.dart';
 import 'package:prro/router/app_router.dart';
 
-class MockLoginRepository extends Mock implements LoginRepositoryI {}
+class MockAuthBloc extends Mock implements AuthBloc {}
 
 class MockNavigationResolver extends Mock implements NavigationResolver {}
 
@@ -14,21 +17,26 @@ void main() {
   setUpAll(() {
     registerFallbackValue(const PageRouteInfo('fallback'));
   });
+
   late AuthGuard guard;
-  late MockLoginRepository repository;
+  late MockAuthBloc bloc;
   late MockNavigationResolver resolver;
   late MockStackRouter router;
 
   setUp(() {
-    repository = MockLoginRepository();
+    bloc = MockAuthBloc();
     resolver = MockNavigationResolver();
     router = MockStackRouter();
-    guard = AuthGuard(repository);
+    guard = AuthGuard(authBloc: bloc);
   });
 
   group('AuthGuard.onNavigation', () {
-    test('continues navigation when the session is authenticated', () {
-      when(() => repository.getLoginState()).thenReturn(true);
+    test('continues navigation when authenticated', () {
+      when(() => bloc.state).thenReturn(
+        const AuthAuthenticated(
+          user: AuthUser(username: 'admin', role: UserRole.admin),
+        ),
+      );
 
       guard.onNavigation(resolver, router);
 
@@ -39,9 +47,50 @@ void main() {
     });
 
     test('redirects to LoginRoute (replace) when unauthenticated', () {
-      when(() => repository.getLoginState()).thenReturn(false);
+      when(() => bloc.state).thenReturn(
+        const AuthUnauthenticated(reason: AuthUnauthenticatedReason.noSession),
+      );
 
       guard.onNavigation(resolver, router);
+
+      verify(
+        () => resolver.redirectUntil(any(), replace: true),
+      ).called(1);
+      verifyNever(() => resolver.next(any()));
+    });
+
+    test('redirects to LoginRoute when auth is loading', () {
+      when(() => bloc.state).thenReturn(
+        const AuthLoading(operation: AuthOperation.login),
+      );
+
+      guard.onNavigation(resolver, router);
+
+      verify(
+        () => resolver.redirectUntil(any(), replace: true),
+      ).called(1);
+      verifyNever(() => resolver.next(any()));
+    });
+
+    test('redirects to LoginRoute when auth failed', () {
+      when(() => bloc.state).thenReturn(
+        const AuthFailure(
+          operation: AuthOperation.login,
+          previousStatus: AuthStatus.initial,
+          error: AuthException(AuthErrorCode.invalidCredentials),
+        ),
+      );
+
+      guard.onNavigation(resolver, router);
+
+      verify(
+        () => resolver.redirectUntil(any(), replace: true),
+      ).called(1);
+      verifyNever(() => resolver.next(any()));
+    });
+
+    test('redirects to LoginRoute when bloc is null', () {
+      final _ = AuthGuard()..onNavigation(resolver, router);
 
       verify(
         () => resolver.redirectUntil(any(), replace: true),
