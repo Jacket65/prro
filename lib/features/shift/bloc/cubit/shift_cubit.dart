@@ -55,4 +55,8 @@ class ShiftCubit extends Cubit<ShiftState> {
       emit(ShiftError(e.toString()));
     }
   }
+
+  void reset() {
+    emit(const ShiftNone());
+  }
 }
