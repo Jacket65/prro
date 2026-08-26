@@ -29,11 +29,11 @@ class ApiClient implements ApiClientI {
   /// and let multiple callers through).
   bool _teardownInProgress = false;
 
-  final StreamController<void> _unauthorized =
-      StreamController<void>.broadcast();
+  final StreamController<String?> _unauthorized =
+      StreamController<String?>.broadcast();
 
   @override
-  Stream<void> get onUnauthorized => _unauthorized.stream;
+  Stream<String?> get onUnauthorized => _unauthorized.stream;
 
   void _initializeInterceptors() {
     dio.interceptors.clear();
@@ -146,7 +146,7 @@ class ApiClient implements ApiClientI {
     }
     await tokenStorage.clear();
     log('[AUTH] session cleared — redirecting to login');
-    if (!_unauthorized.isClosed) _unauthorized.add(null);
+    if (!_unauthorized.isClosed) _unauthorized.add(accessToken);
   }
 
   @override

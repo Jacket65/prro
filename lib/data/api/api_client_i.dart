@@ -3,7 +3,11 @@ import 'package:dio/dio.dart';
 abstract interface class ApiClientI {
   /// Emits when the session can no longer be recovered (refresh failed): the
   /// app should clear state and return to the login screen.
-  Stream<void> get onUnauthorized;
+  ///
+  /// The emitted value is the access token that failed to refresh (or `null`
+  /// if it was already cleared). Consumers can use this to correlate the
+  /// expiry with a specific session and avoid clobbering a newer one.
+  Stream<String?> get onUnauthorized;
 
   /// GET with optional query parameters, cancel token, and per-request headers.
   Future<Response<dynamic>> get(

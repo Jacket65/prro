@@ -39,5 +39,9 @@ class AuthLogoutRequested extends AuthEvent {
 }
 
 class AuthSessionExpired extends AuthEvent {
-  const AuthSessionExpired();
+  const AuthSessionExpired({this.failedToken});
+  final String? failedToken;
+
+  @override
+  List<Object?> get props => [failedToken];
 }

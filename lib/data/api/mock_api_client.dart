@@ -18,8 +18,8 @@ class MockApiClient implements ApiClientI {
   MockApiClient({required this.mockBackend});
 
   final MockBackend mockBackend;
-  final StreamController<void> _unauthorized =
-      StreamController<void>.broadcast();
+  final StreamController<String?> _unauthorized =
+      StreamController<String?>.broadcast();
 
   Map<String, dynamic>? _lastUser;
 
@@ -59,7 +59,7 @@ class MockApiClient implements ApiClientI {
   }
 
   @override
-  Stream<void> get onUnauthorized => _unauthorized.stream;
+  Stream<String?> get onUnauthorized => _unauthorized.stream;
 
   @override
   Future<Response<dynamic>> get(

@@ -1,6 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:prro/core/security/token_storage_i.dart';
 import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
 import 'package:prro/features/auth/bloc/auth_bloc.dart';
 import 'package:prro/features/auth/bloc/auth_event.dart';
@@ -9,13 +10,21 @@ import 'package:prro/features/auth/model/auth_user.dart';
 
 class MockAuthRepository extends Mock implements AuthRepositoryI {}
 
+class MockTokenStorage extends Mock implements TokenStorageI {}
+
 void main() {
   late AuthBloc authBloc;
   late MockAuthRepository repository;
+  late MockTokenStorage tokenStorage;
 
   setUp(() {
     repository = MockAuthRepository();
-    authBloc = AuthBloc(authRepository: repository);
+    tokenStorage = MockTokenStorage();
+    when(() => tokenStorage.getAccessToken()).thenAnswer((_) async => null);
+    authBloc = AuthBloc(
+      authRepository: repository,
+      tokenStorage: tokenStorage,
+    );
   });
 
   group('AuthStarted', () {
@@ -391,6 +400,52 @@ void main() {
           ..add(const AuthSessionExpired())
           ..add(const AuthSessionExpired());
       },
+      expect: () => [
+        const AuthLoading(operation: AuthOperation.sessionExpiry),
+        const AuthUnauthenticated(
+          reason: AuthUnauthenticatedReason.sessionExpired,
+        ),
+      ],
+      verify: (_) {
+        verify(() => repository.logout()).called(1);
+      },
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'skips teardown when failedToken differs from current access token',
+      build: () {
+        when(() => tokenStorage.getAccessToken()).thenAnswer(
+          (_) async => 'newer-access-token',
+        );
+        return authBloc;
+      },
+      seed: () => const AuthAuthenticated(
+        user: AuthUser(username: 'test', role: UserRole.seller),
+      ),
+      act: (bloc) => bloc.add(
+        const AuthSessionExpired(failedToken: 'stale-access-token'),
+      ),
+      expect: () => <AuthState>[],
+      verify: (_) {
+        verifyNever(() => repository.logout());
+      },
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'runs teardown when failedToken matches current access token',
+      build: () {
+        when(() => tokenStorage.getAccessToken()).thenAnswer(
+          (_) async => 'current-access-token',
+        );
+        when(() => repository.logout()).thenAnswer((_) async {});
+        return authBloc;
+      },
+      seed: () => const AuthAuthenticated(
+        user: AuthUser(username: 'test', role: UserRole.seller),
+      ),
+      act: (bloc) => bloc.add(
+        const AuthSessionExpired(failedToken: 'current-access-token'),
+      ),
       expect: () => [
         const AuthLoading(operation: AuthOperation.sessionExpiry),
         const AuthUnauthenticated(

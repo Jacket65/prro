@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prro/core/security/token_storage_i.dart';
 import 'package:prro/core/theme/theme.dart';
 import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
@@ -24,15 +25,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  StreamSubscription<void>? _authSub;
+  StreamSubscription<String?>? _authSub;
 
   @override
   void initState() {
     super.initState();
-    _authSub = getIt<ApiClientI>().onUnauthorized.listen((_) {
+    _authSub = getIt<ApiClientI>().onUnauthorized.listen((failedToken) {
       final bloc = widget.router.adminGuard.authBloc;
       if (bloc != null) {
-        bloc.add(const AuthSessionExpired());
+        bloc.add(AuthSessionExpired(failedToken: failedToken));
       }
     });
   }
@@ -47,8 +48,10 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) {
-        final bloc = AuthBloc(authRepository: getIt<AuthRepositoryI>())
-          ..add(const AuthStarted());
+        final bloc = AuthBloc(
+          authRepository: getIt<AuthRepositoryI>(),
+          tokenStorage: getIt<TokenStorageI>(),
+        )..add(const AuthStarted());
         widget.router.adminGuard.authBloc = bloc;
         return bloc;
       },

@@ -1,11 +1,15 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prro/core/security/token_storage_i.dart';
 import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
 import 'package:prro/features/auth/bloc/auth_event.dart';
 import 'package:prro/features/auth/bloc/auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc({required this.authRepository}) : super(const AuthInitial()) {
+  AuthBloc({
+    required this.authRepository,
+    required this.tokenStorage,
+  }) : super(const AuthInitial()) {
     on<AuthStarted>(_onAuthStarted, transformer: droppable());
     on<AuthLoginRequested>(_onLoginRequested, transformer: droppable());
     on<AuthAdminLoginRequested>(
@@ -17,6 +21,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   final AuthRepositoryI authRepository;
+  final TokenStorageI tokenStorage;
 
   int _generation = 0;
 
@@ -172,6 +177,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     if (state is AuthUnauthenticated) return;
+
+    if (event.failedToken != null) {
+      final current = await tokenStorage.getAccessToken();
+      if (current != null &&
+          current.isNotEmpty &&
+          current != event.failedToken) {
+        return;
+      }
+    }
 
     final gen = _nextGeneration();
     emit(const AuthLoading(operation: AuthOperation.sessionExpiry));
