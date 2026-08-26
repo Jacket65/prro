@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/security/token_storage_i.dart';
 import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/api/api_exception.dart';
+import 'package:prro/data/repositories/admin_unwrap.dart';
 import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
-import 'package:prro/data/services/login_service_i.dart';
 import 'package:prro/features/auth/model/auth_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,16 +21,13 @@ UserRole? _parseRole(String? roleStr) {
 }
 
 @Singleton(as: AuthRepositoryI)
-@Environment('prod')
 class AuthRepositoryImpl implements AuthRepositoryI {
   AuthRepositoryImpl({
-    required this.loginService,
     required this.tokenStorage,
     required this.apiClient,
     required this.prefs,
   });
 
-  final LoginServiceI loginService;
   final TokenStorageI tokenStorage;
   final ApiClientI apiClient;
   final SharedPreferences prefs;
@@ -101,37 +99,84 @@ class AuthRepositoryImpl implements AuthRepositoryI {
     required String password,
   }) async {
     try {
-      final result = await loginService
-          .login(username: username, password: password)
-          .timeout(const Duration(seconds: 15));
+      final Response<dynamic> response;
+      try {
+        response = await apiClient
+            .post(
+              '/auth/login',
+              data: {'login': username, 'password': password},
+            )
+            .timeout(const Duration(seconds: 15));
+      } on DioException catch (e) {
+        throw ApiException.fromDio(e);
+      }
 
-      if (result.accessToken.isEmpty) {
+      if (response.statusCode != 200) {
+        throw const ApiException(
+          "Невірне ім'я користувача або пароль",
+          code: 'INVALID_CREDENTIALS',
+          statusCode: 401,
+        );
+      }
+
+      final authHeader = response.headers.value('Authorization');
+      if (authHeader == null ||
+          !authHeader.toLowerCase().startsWith('bearer ')) {
+        throw const ApiException(
+          'Сервер повернув неочікувану відповідь.',
+          code: 'MISSING_ACCESS_TOKEN',
+          statusCode: 200,
+        );
+      }
+      final token = authHeader.substring(7).trim();
+      if (token.isEmpty) {
+        throw const ApiException(
+          'Сервер повернув неочікувану відповідь.',
+          code: 'MISSING_ACCESS_TOKEN',
+          statusCode: 200,
+        );
+      }
+
+      final data = unwrapObject<Map<String, dynamic>>(response.data, (m) => m);
+      if (data == null) {
+        throw const ApiException(
+          'Сервер повернув неочікувану відповідь.',
+          code: 'INVALID_PAYLOAD',
+          statusCode: 200,
+        );
+      }
+
+      final role = data['role'] is String ? data['role'] as String : null;
+      final userId = data['id'] is int ? data['id'] as int : null;
+      final refresh = data['refresh_token'];
+      final refreshToken =
+          refresh is String && refresh.isNotEmpty ? refresh : null;
+      final outletId =
+          data['outlet_id'] is int ? data['outlet_id'] as int : null;
+
+      if (outletId == null || outletId == 0) {
         throw const AuthException(AuthErrorCode.invalidCredentials);
       }
 
-      if (result.outletId == null || result.outletId == 0) {
-        throw const AuthException(AuthErrorCode.invalidCredentials);
-      }
-
-      final role = _parseRole(result.role);
-      if (role == null) {
+      final parsedRole = _parseRole(role);
+      if (parsedRole == null) {
         throw const AuthException(AuthErrorCode.invalidCredentials);
       }
 
       await tokenStorage.saveSession(
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
+        accessToken: token,
+        refreshToken: refreshToken,
       );
       await prefs.setString('username', username);
-      await prefs.setInt('outlet_id', result.outletId!);
-      if (result.role != null) {
-        await prefs.setString('user_role', result.role!);
+      await prefs.setInt('outlet_id', outletId);
+      if (role != null) {
+        await prefs.setString('user_role', role);
       }
-      if (result.userId != null) {
-        await prefs.setInt('user_id', result.userId!);
+      if (userId != null) {
+        await prefs.setInt('user_id', userId);
       }
 
-      return AuthUser(username: username, role: role);
+      return AuthUser(username: username, role: parsedRole);
     } on AuthException {
       rethrow;
     } on ApiException catch (e) {

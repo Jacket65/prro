@@ -5,18 +5,30 @@ import 'package:prro/core/security/token_storage_i.dart';
 import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/repositories/auth_repository/auth_repo.dart';
 import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
-import 'package:prro/data/repositories/login_repository/login_result.dart';
-import 'package:prro/data/services/login_service_i.dart';
 import 'package:prro/features/auth/model/auth_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockApiClient extends Mock implements ApiClientI {}
 
-class MockLoginService extends Mock implements LoginServiceI {}
-
 class MockTokenStorage extends Mock implements TokenStorageI {}
 
 class _FakeRequestOptions extends Fake implements RequestOptions {}
+
+Response<dynamic> _resp({
+  int status = 200,
+  Map<String, dynamic>? body,
+  String? bearer,
+}) {
+  final headers = Headers.fromMap({
+    if (bearer != null) 'authorization': [bearer],
+  });
+  return Response<dynamic>(
+    requestOptions: RequestOptions(path: '/auth/login'),
+    statusCode: status,
+    data: body,
+    headers: headers,
+  );
+}
 
 void main() {
   setUpAll(() {
@@ -25,14 +37,12 @@ void main() {
   });
 
   late MockApiClient apiClient;
-  late MockLoginService loginService;
   late MockTokenStorage tokenStorage;
   late SharedPreferences prefs;
   late AuthRepositoryImpl repo;
 
   setUp(() async {
     apiClient = MockApiClient();
-    loginService = MockLoginService();
     tokenStorage = MockTokenStorage();
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
@@ -44,27 +54,31 @@ void main() {
     when(() => tokenStorage.clear()).thenAnswer((_) async {});
 
     repo = AuthRepositoryImpl(
-      loginService: loginService,
       tokenStorage: tokenStorage,
       apiClient: apiClient,
       prefs: prefs,
     );
   });
 
+  void stubLogin(Response<dynamic> response) {
+    when(
+      () => apiClient.post(any<String>(), data: any<dynamic>(named: 'data')),
+    ).thenAnswer((_) async => response);
+  }
+
   group('F9: role parsing', () {
     test('maps cashier to seller', () async {
-      when(
-        () => loginService.login(
-          username: any(named: 'username'),
-          password: any(named: 'password'),
-        ),
-      ).thenAnswer(
-        (_) async => const LoginResult(
-          accessToken: 'tok',
-          refreshToken: 'r',
-          role: 'cashier',
-          userId: 1,
-          outletId: 1,
+      stubLogin(
+        _resp(
+          bearer: 'Bearer tok',
+          body: {
+            'data': {
+              'id': 1,
+              'role': 'cashier',
+              'outlet_id': 1,
+              'refresh_token': 'r',
+            },
+          },
         ),
       );
       final user = await repo.login(username: 'cashier', password: 'p');
@@ -72,17 +86,16 @@ void main() {
     });
 
     test('maps admin to admin', () async {
-      when(
-        () => loginService.login(
-          username: any(named: 'username'),
-          password: any(named: 'password'),
-        ),
-      ).thenAnswer(
-        (_) async => const LoginResult(
-          accessToken: 'tok',
-          role: 'admin',
-          userId: 1,
-          outletId: 1,
+      stubLogin(
+        _resp(
+          bearer: 'Bearer tok',
+          body: {
+            'data': {
+              'id': 1,
+              'role': 'admin',
+              'outlet_id': 1,
+            },
+          },
         ),
       );
       final user = await repo.login(username: 'a', password: 'p');
@@ -90,17 +103,16 @@ void main() {
     });
 
     test('F9: throws invalidCredentials on unknown role', () async {
-      when(
-        () => loginService.login(
-          username: any(named: 'username'),
-          password: any(named: 'password'),
-        ),
-      ).thenAnswer(
-        (_) async => const LoginResult(
-          accessToken: 'tok',
-          role: 'supervisor',
-          userId: 1,
-          outletId: 1,
+      stubLogin(
+        _resp(
+          bearer: 'Bearer tok',
+          body: {
+            'data': {
+              'id': 1,
+              'role': 'supervisor',
+              'outlet_id': 1,
+            },
+          },
         ),
       );
       expect(
@@ -118,16 +130,15 @@ void main() {
 
   group('F5: outlet validation', () {
     test('treats missing outlet as invalid credentials', () async {
-      when(
-        () => loginService.login(
-          username: any(named: 'username'),
-          password: any(named: 'password'),
-        ),
-      ).thenAnswer(
-        (_) async => const LoginResult(
-          accessToken: 'tok',
-          role: 'cashier',
-          userId: 1,
+      stubLogin(
+        _resp(
+          bearer: 'Bearer tok',
+          body: {
+            'data': {
+              'id': 1,
+              'role': 'cashier',
+            },
+          },
         ),
       );
       expect(
@@ -143,21 +154,126 @@ void main() {
     });
 
     test('treats zero outlet as invalid credentials', () async {
-      when(
-        () => loginService.login(
-          username: any(named: 'username'),
-          password: any(named: 'password'),
-        ),
-      ).thenAnswer(
-        (_) async => const LoginResult(
-          accessToken: 'tok',
-          role: 'cashier',
-          userId: 1,
-          outletId: 0,
+      stubLogin(
+        _resp(
+          bearer: 'Bearer tok',
+          body: {
+            'data': {
+              'id': 1,
+              'role': 'cashier',
+              'outlet_id': 0,
+            },
+          },
         ),
       );
       expect(
         () => repo.login(username: 'a', password: 'p'),
+        throwsA(
+          isA<AuthException>().having(
+            (e) => e.code,
+            'code',
+            AuthErrorCode.invalidCredentials,
+          ),
+        ),
+      );
+    });
+  });
+
+  group('login response parsing', () {
+    test('F8: reads outlet_id from login response (no extra call)', () async {
+      stubLogin(
+        _resp(
+          bearer: 'Bearer token-1',
+          body: {
+            'data': {
+              'id': 42,
+              'login': 'cashier',
+              'role': 'cashier',
+              'outlet_id': 7,
+              'refresh_token': 'r',
+            },
+          },
+        ),
+      );
+
+      final user = await repo.login(username: 'cashier', password: 'pw');
+
+      expect(user.username, 'cashier');
+      expect(user.role, UserRole.seller);
+      verify(
+        () => tokenStorage.saveSession(
+          accessToken: 'token-1',
+          refreshToken: 'r',
+        ),
+      ).called(1);
+      expect(prefs.getString('username'), 'cashier');
+      expect(prefs.getInt('outlet_id'), 7);
+      expect(prefs.getInt('user_id'), 42);
+      expect(prefs.getString('user_role'), 'cashier');
+      verifyNever(
+        () => apiClient.get(any<String>(), headers: any(named: 'headers')),
+      );
+    });
+
+    test('F8/F10: tolerates bare object without data envelope', () async {
+      stubLogin(
+        _resp(
+          bearer: 'Bearer t',
+          body: {
+            'id': 1,
+            'role': 'admin',
+            'outlet_id': 3,
+          },
+        ),
+      );
+
+      final user = await repo.login(username: 'a', password: 'b');
+
+      expect(user.role, UserRole.admin);
+      expect(prefs.getInt('outlet_id'), 3);
+    });
+
+    test('missing Authorization header maps to networkError', () async {
+      stubLogin(
+        _resp(
+          body: {
+            'data': {'role': 'admin', 'id': 1, 'outlet_id': 1},
+          },
+        ),
+      );
+
+      expect(
+        () => repo.login(username: 'u', password: 'p'),
+        throwsA(
+          isA<AuthException>().having(
+            (e) => e.code,
+            'code',
+            AuthErrorCode.networkError,
+          ),
+        ),
+      );
+    });
+
+    test('200 without parsable body maps to networkError', () async {
+      stubLogin(_resp(bearer: 'Bearer t'));
+
+      expect(
+        () => repo.login(username: 'u', password: 'p'),
+        throwsA(
+          isA<AuthException>().having(
+            (e) => e.code,
+            'code',
+            AuthErrorCode.networkError,
+          ),
+        ),
+      );
+    });
+
+    test('non-200 response value maps to invalidCredentials', () async {
+      stubLogin(_resp(status: 401, body: {'code': 'INVALID'}));
+
+      expect(
+        () => repo.login(username: 'u', password: 'p'),
         throwsA(
           isA<AuthException>().having(
             (e) => e.code,
@@ -209,18 +325,35 @@ void main() {
   });
 
   group('F1: invalid credentials mapping', () {
-    test('ApiException 401 maps to invalidCredentials', () async {
-      when(
-        () => loginService.login(
-          username: any(named: 'username'),
-          password: any(named: 'password'),
+    test('DioException 401 with server error body maps to invalidCredentials',
+        () async {
+      final dioErr = DioException(
+        requestOptions: RequestOptions(path: '/auth/login'),
+        response: Response<dynamic>(
+          requestOptions: RequestOptions(path: '/auth/login'),
+          statusCode: 401,
+          data: {
+            'error': {
+              'code': 'UNAUTHORIZED',
+              'message': 'Невірний логін або пароль',
+            },
+          },
         ),
-      ).thenThrow(
-        const AuthException(AuthErrorCode.networkError),
+        type: DioExceptionType.badResponse,
       );
+      when(
+        () => apiClient.post(any<String>(), data: any<dynamic>(named: 'data')),
+      ).thenThrow(dioErr);
+
       expect(
-        () => repo.login(username: 'a', password: 'p'),
-        throwsA(isA<AuthException>()),
+        () => repo.login(username: 'u', password: 'p'),
+        throwsA(
+          isA<AuthException>().having(
+            (e) => e.code,
+            'code',
+            AuthErrorCode.invalidCredentials,
+          ),
+        ),
       );
     });
   });
