@@ -50,8 +50,14 @@ class AuthGuard extends AutoRouteGuard {
     final state = bloc.state;
     if (state is AuthAuthenticated) {
       resolver.next();
-    } else {
-      resolver.redirectUntil(const LoginRoute(), replace: true);
+      return;
     }
+    if (state is AuthInitial ||
+        (state is AuthLoading &&
+            state.operation == AuthOperation.restore)) {
+      resolver.next();
+      return;
+    }
+    resolver.redirectUntil(const LoginRoute(), replace: true);
   }
 }

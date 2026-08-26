@@ -59,7 +59,7 @@ void main() {
       verifyNever(() => resolver.next(any()));
     });
 
-    test('redirects to LoginRoute when auth is loading', () {
+    test('redirects to LoginRoute when auth is loading login', () {
       when(() => bloc.state).thenReturn(
         const AuthLoading(operation: AuthOperation.login),
       );
@@ -70,6 +70,30 @@ void main() {
         () => resolver.redirectUntil(any(), replace: true),
       ).called(1);
       verifyNever(() => resolver.next(any()));
+    });
+
+    test('continues navigation when auth is initial (pending restore)', () {
+      when(() => bloc.state).thenReturn(const AuthInitial());
+
+      guard.onNavigation(resolver, router);
+
+      verify(() => resolver.next()).called(1);
+      verifyNever(
+        () => resolver.redirectUntil(any(), replace: any(named: 'replace')),
+      );
+    });
+
+    test('continues navigation when auth is loading restore', () {
+      when(() => bloc.state).thenReturn(
+        const AuthLoading(operation: AuthOperation.restore),
+      );
+
+      guard.onNavigation(resolver, router);
+
+      verify(() => resolver.next()).called(1);
+      verifyNever(
+        () => resolver.redirectUntil(any(), replace: any(named: 'replace')),
+      );
     });
 
     test('redirects to LoginRoute when auth failed', () {
