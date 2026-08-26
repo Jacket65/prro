@@ -218,6 +218,15 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i566.BalanceService(apiClient: gh<_i219.ApiClientI>()),
       registerFor: {_prod},
     );
+    gh.singleton<_i577.AuthRepositoryI>(
+      () => _i58.AuthRepositoryImpl(
+        loginService: gh<_i946.LoginServiceI>(),
+        tokenStorage: gh<_i330.TokenStorageI>(),
+        apiClient: gh<_i219.ApiClientI>(),
+        prefs: gh<_i460.SharedPreferences>(),
+      ),
+      registerFor: {_prod},
+    );
     gh.singleton<_i769.PaymentServiceI>(
       () => appModule.paymentService(
         gh<_i219.ApiClientI>(),
@@ -247,14 +256,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i75.AdminUserRepositoryI>(
       () => _i93.AdminUserRepositoryImpl(gh<_i219.ApiClientI>()),
-      registerFor: {_prod},
-    );
-    gh.singleton<_i577.AuthRepositoryI>(
-      () => _i58.AuthRepositoryImpl(
-        loginService: gh<_i946.LoginServiceI>(),
-        tokenStorage: gh<_i330.TokenStorageI>(),
-        prefs: gh<_i460.SharedPreferences>(),
-      ),
       registerFor: {_prod},
     );
     gh.factory<_i829.NfcPaymentServiceI>(
@@ -291,20 +292,21 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i244.ItemsRepository(gh<_i668.ItemsServiceI>()),
       registerFor: {_prod},
     );
-    gh.singleton<_i577.AuthRepositoryI>(
-      () => _i339.AuthRepositoryMock(
-        loginService: gh<_i946.LoginServiceI>(),
-        tokenStorage: gh<_i330.TokenStorageI>(),
-        prefs: gh<_i460.SharedPreferences>(),
-      ),
-      registerFor: {_mock},
-    );
     gh.singleton<_i957.ShiftRepositoryI>(
       () => _i302.ShiftRepositoryImpl(gh<_i957.ShiftServiceI>()),
       registerFor: {_prod},
     );
     gh.factory<_i544.NfcPaymentHandler>(
       () => _i544.NfcPaymentHandler(gh<_i829.NfcPaymentServiceI>()),
+    );
+    gh.singleton<_i577.AuthRepositoryI>(
+      () => _i339.AuthRepositoryMock(
+        loginService: gh<_i946.LoginServiceI>(),
+        tokenStorage: gh<_i330.TokenStorageI>(),
+        apiClient: gh<_i219.ApiClientI>(),
+        prefs: gh<_i460.SharedPreferences>(),
+      ),
+      registerFor: {_mock},
     );
     gh.factory<_i132.PayOrderUseCase>(
       () => _i132.PayOrderUseCase(

@@ -1,17 +1,21 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/security/token_storage_i.dart';
+import 'package:prro/data/api/api_client_i.dart';
+import 'package:prro/data/api/api_exception.dart';
 import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
 import 'package:prro/data/services/login_service_i.dart';
 import 'package:prro/features/auth/model/auth_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-UserRole _parseRole(String? roleStr) {
+UserRole? _parseRole(String? roleStr) {
   return switch (roleStr) {
     'admin' => UserRole.admin,
     'manager' => UserRole.manager,
-    _ => UserRole.seller,
+    'cashier' => UserRole.seller,
+    _ => null,
   };
 }
 
@@ -21,11 +25,13 @@ class AuthRepositoryMock implements AuthRepositoryI {
   AuthRepositoryMock({
     required this.loginService,
     required this.tokenStorage,
+    required this.apiClient,
     required this.prefs,
   });
 
   final LoginServiceI loginService;
   final TokenStorageI tokenStorage;
+  final ApiClientI apiClient;
   final SharedPreferences prefs;
 
   Completer<void>? _mutex;
@@ -53,6 +59,8 @@ class AuthRepositoryMock implements AuthRepositoryI {
     if (username == null || username.isEmpty) return null;
 
     final role = _parseRole(prefs.getString('user_role'));
+    if (role == null) return null;
+
     return AuthUser(username: username, role: role);
   }
 
@@ -100,12 +108,21 @@ class AuthRepositoryMock implements AuthRepositoryI {
         throw const AuthException(AuthErrorCode.invalidCredentials);
       }
 
+      if (result.outletId == null || result.outletId == 0) {
+        throw const AuthException(AuthErrorCode.invalidCredentials);
+      }
+
+      final role = _parseRole(result.role);
+      if (role == null) {
+        throw const AuthException(AuthErrorCode.invalidCredentials);
+      }
+
       await tokenStorage.saveSession(
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
       );
       await prefs.setString('username', username);
-      await prefs.setInt('outlet_id', result.outletId ?? 0);
+      await prefs.setInt('outlet_id', result.outletId!);
       if (result.role != null) {
         await prefs.setString('user_role', result.role!);
       }
@@ -113,12 +130,15 @@ class AuthRepositoryMock implements AuthRepositoryI {
         await prefs.setInt('user_id', result.userId!);
       }
 
-      return AuthUser(
-        username: username,
-        role: _parseRole(result.role),
-      );
+      return AuthUser(username: username, role: role);
     } on AuthException {
       rethrow;
+    } on ApiException catch (e) {
+      final status = e.statusCode;
+      if (status == 401 || status == 400) {
+        throw const AuthException(AuthErrorCode.invalidCredentials);
+      }
+      throw const AuthException(AuthErrorCode.networkError);
     } on TimeoutException {
       throw const AuthException(AuthErrorCode.networkError);
     } on Object {
@@ -127,6 +147,14 @@ class AuthRepositoryMock implements AuthRepositoryI {
   }
 
   Future<void> _doLogout() async {
+    try {
+      await apiClient.post('/auth/logout');
+    } on Object catch (e) {
+      developer.log(
+        '[AUTH] logout endpoint failed (swallowed): $e',
+        name: 'auth',
+      );
+    }
     await tokenStorage.clear();
     await prefs.remove('username');
     await prefs.remove('outlet_id');
@@ -140,6 +168,9 @@ class AuthRepositoryMock implements AuthRepositoryI {
       throw const AuthException(AuthErrorCode.sessionRestoreFailed);
     }
     final role = _parseRole(prefs.getString('user_role'));
+    if (role == null) {
+      throw const AuthException(AuthErrorCode.sessionRestoreFailed);
+    }
     return AuthUser(username: username, role: role);
   }
 }
