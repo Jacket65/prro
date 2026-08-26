@@ -291,10 +291,7 @@ class MockApiClient implements ApiClientI {
         final loginData = data as Map<String, dynamic>?;
         final login = loginData?['login'] as String? ?? '';
         final password = loginData?['password'] as String? ?? '';
-        log(
-          '[MOCK API] Login attempt with: $login'
-          ' and password: $password',
-        );
+        log('[MOCK API] Login attempt for user: $login');
 
         if (login.isEmpty || password.isEmpty) {
           return Response(
