@@ -9,4 +9,3 @@ export 'payment/payment_result.dart';
 export 'payment/payment_token.dart';
 export 'seller_item.dart';
 export 'shift.dart';
-export 'user_model.dart';
