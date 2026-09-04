@@ -1,158 +1,262 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:flutter_slidable/flutter_slidable.dart'; // Додано імпорт
+import 'package:prro/data/api/models/models.dart';
 import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
+import 'package:prro/features/seller/widgets/options_picker_dialog.dart';
 
 class ListItem extends StatefulWidget {
-  final String id;
-  final String name;
-  final double price;
-  final String imageUrl;
-  final int quantity;
-
   const ListItem({
-    super.key,
-    required this.id,
+    required this.lineId,
     required this.name,
     required this.price,
     required this.imageUrl,
     required this.quantity,
+    super.key,
+    this.unit,
+    this.selectedOptions = const [],
+    this.selectedBean,
   });
+  final String lineId;
+  final String name;
+  final double price;
+  final String imageUrl;
+  final Decimal quantity;
+  final MeasureUnit? unit;
+  final List<SelectedOption> selectedOptions;
+  final Bean? selectedBean;
 
   @override
   State<ListItem> createState() => _ListItemState();
 }
 
 class _ListItemState extends State<ListItem> {
-  bool _isChecked = false;
+  /// Whether the line carries any customisation (drives the tap hint).
+  bool get _hasChoices =>
+      widget.selectedOptions.isNotEmpty || widget.selectedBean != null;
+
+  /// Short summary of picked options and bean, e.g. "Соєве · Сироп ×2 · Арабіка
+  /// Колумбія".
+  String get _choicesSummary {
+    final parts = widget.selectedOptions
+        .map((o) => o.quantity > 1 ? '${o.name} ×${o.quantity}' : o.name)
+        .toList();
+    if (widget.selectedBean != null) parts.add(widget.selectedBean!.name);
+    return parts.join(' · ');
+  }
 
   @override
   Widget build(BuildContext sellerContext) {
     return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
-        if (state is! OrdersUpdated) {
-          return CircularProgressIndicator();
-        }
-        return Container(
-          height: 80,
-          decoration: BoxDecoration(
-            // border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
+        final products = switch (state) {
+          final OrdersUpdated s => s.products,
+          final OrdersError s => s.products,
+          final OrdersLoading s => s.products,
+          _ => <Product>[],
+        };
+
+        // Знаходимо продукт у стані для передачі в івенти
+        final productIndex = products.indexWhere(
+          (e) => e.lineId == widget.lineId,
+        );
+        final currentProduct = productIndex != -1
+            ? products[productIndex]
+            : null;
+
+        return Slidable(
+          // Ключ обов'язковий, щоб Slidable працював
+          // коректно всередині списків (ListView)
+          key: ValueKey(widget.lineId),
+
+          // Налаштування шторки дії (зсув вліво, кнопка з'являється справа)
+          endActionPane: ActionPane(
+            motion: const ScrollMotion(),
+            extentRatio: 0.25, // Скільки місця на екрані займає кнопка (25%)
             children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _isChecked = !_isChecked;
-                  });
+              SlidableAction(
+                onPressed: (context) {
+                  if (currentProduct != null) {
+                    // Викликаємо ваш івент Блоку для повного видалення позиції
+                    context.read<OrdersBloc>().add(
+                      DeleteProductLine(currentProduct),
+                    );
+                  }
                 },
-                child: Stack(
-                  alignment: Alignment.topLeft,
-                  children: [
-                    SizedBox(
-                      width: 120,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          opacity: _isChecked
-                              ? AlwaysStoppedAnimation(0.5)
-                              : AlwaysStoppedAnimation(1),
-                          widget.imageUrl,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Center(child: Text('No image')),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-
-                    Checkbox(
-                      value: _isChecked,
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          _isChecked = newValue ?? false;
-                        });
-                      },
-                    ),
-                  ],
+                backgroundColor: Colors.red.shade600,
+                foregroundColor: Colors.white,
+                icon: Icons.delete_outline,
+                label: 'Видалити',
+                borderRadius: const BorderRadius.horizontal(
+                  right: Radius.circular(8),
                 ),
-              ),
-
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.name,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.price.toStringAsFixed(2),
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10.0),
-                    child: Text(
-                      (widget.price * widget.quantity).toStringAsFixed(2),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: () {
-                          final productId = state.products.indexWhere(
-                            (e) => e.id == widget.id,
-                          );
-                          context.read<OrdersBloc>().add(
-                            RemoveProduct(state.products[productId]),
-                          );
-                        },
-                      ),
-                      const SizedBox(width: 4),
-                      Text("${widget.quantity}"),
-                      const SizedBox(width: 4),
-                      IconButton(
-                        padding: EdgeInsets.zero,
-
-                        icon: const Icon(Icons.add_circle_outline),
-                        onPressed: () {
-                          final productId = state.products.indexWhere(
-                            (e) => e.id == widget.id,
-                          );
-                          context.read<OrdersBloc>().add(
-                            AddProduct(state.products[productId]),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ],
               ),
             ],
           ),
+
+          child: Material(
+            borderRadius: BorderRadius.circular(8),
+            child: InkWell(
+              splashColor: Colors.grey.shade200,
+              borderRadius: const BorderRadius.horizontal(
+                left: Radius.circular(8),
+              ),
+              onTap: () => _onTap(context, products),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 64,
+                      height: 64,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: widget.imageUrl.isNotEmpty
+                            ? Image.network(
+                                widget.imageUrl,
+                                errorBuilder: (_, _, _) => const _Placeholder(),
+                                fit: BoxFit.cover,
+                              )
+                            : const _Placeholder(),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            widget.name,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (_hasChoices) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              _choicesSummary,
+                              style: TextStyle(
+                                color: Colors.blueGrey.shade600,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 2),
+                          Text(
+                            '${widget.price.toStringAsFixed(2)}₴',
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                          ),
+                          if (_hasChoices) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              'тап → опції',
+                              style: TextStyle(
+                                color: Colors.blue.shade400,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Text(
+                            (widget.price * widget.quantity.toDouble())
+                                .toStringAsFixed(2),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            IconButton(
+                              visualDensity: VisualDensity.standard,
+                              icon: const Icon(Icons.remove_circle_outline),
+                              onPressed: () {
+                                if (currentProduct == null) return;
+                                context.read<OrdersBloc>().add(
+                                  RemoveProduct(currentProduct),
+                                );
+                              },
+                            ),
+                            Text(
+                              formatQuantity(widget.quantity, widget.unit),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            IconButton(
+                              visualDensity: VisualDensity.standard,
+                              padding: EdgeInsets.zero,
+                              icon: const Icon(Icons.add_circle_outline),
+                              onPressed: () {
+                                if (currentProduct == null) return;
+                                context.read<OrdersBloc>().add(
+                                  AddProduct(currentProduct),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         );
       },
+    );
+  }
+
+  /// Tapping a cart line lets the cashier change the drink's options/bean.
+  /// Opens the line editor (quantity + options).
+  Future<void> _onTap(BuildContext context, List<Product> products) async {
+    final product = products.firstWhere(
+      (p) => p.lineId == widget.lineId,
+      // The line always exists in state; this fallback keeps the type checker
+      // happy. Recover the variant id from the lineId prefix.
+      orElse: () => Product(
+        id: widget.lineId.split('#').first,
+        name: widget.name,
+        price: widget.price,
+        imageUrl: widget.imageUrl,
+        quantity: widget.quantity,
+        unit: widget.unit,
+        selectedOptions: widget.selectedOptions,
+        selectedBean: widget.selectedBean,
+      ),
+    );
+    await openLineEditor(context, product);
+  }
+}
+
+class _Placeholder extends StatelessWidget {
+  const _Placeholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.grey.shade100,
+      child: const Icon(Icons.local_cafe_outlined, color: Colors.grey),
     );
   }
 }

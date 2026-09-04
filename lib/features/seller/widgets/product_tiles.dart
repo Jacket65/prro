@@ -5,15 +5,15 @@ import 'package:prro/features/seller/bloc/items_tiles/items_tiles_bloc.dart';
 import 'package:prro/features/seller/widgets/show_item.dart';
 
 class ProductTiles extends StatelessWidget {
+  const ProductTiles({required this.items, required this.cangoback, super.key});
   final List<Item> items;
   final bool cangoback;
-  const ProductTiles({super.key, required this.items, required this.cangoback});
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 250,
         ),
         itemCount: cangoback ? items.length + 1 : items.length,
@@ -33,7 +33,7 @@ class ProductTiles extends StatelessWidget {
         ? Card(
             color: Colors.white,
             child: IconButton(
-              icon: Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back),
               onPressed: () {
                 context.read<ItemsTilesBloc>().add(ItemsTilesBack());
               },

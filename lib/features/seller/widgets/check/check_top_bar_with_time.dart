@@ -18,10 +18,10 @@ class CheckTopBar extends StatelessWidget {
 
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                border: Border(
-                  top: BorderSide(color: Colors.black),
-                  right: BorderSide(color: Colors.black),
-                  left: BorderSide(color: Colors.black),
+                border: const Border(
+                  top: BorderSide(),
+                  right: BorderSide(),
+                  left: BorderSide(),
                 ),
               ),
               padding: EdgeInsets.zero,
@@ -29,35 +29,45 @@ class CheckTopBar extends StatelessWidget {
                 padding: EdgeInsets.zero,
 
                 onPressed: () {},
-                icon: Icon(Icons.add_outlined, size: 15),
+                icon: const Icon(Icons.add_outlined, size: 15),
               ),
             ),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
             SizedBox(
               width: 250,
               height: 30,
               child: ListView.separated(
-                itemCount: 3,
+                itemCount: 1,
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context, index) {
                   return Container(
-                    decoration: BoxDecoration(
+                    padding: EdgeInsets.zero,
+                    decoration: const BoxDecoration(
                       border: Border(
-                        top: BorderSide(color: Colors.black),
-                        right: BorderSide(color: Colors.black),
-                        left: BorderSide(color: Colors.black),
+                        top: BorderSide(),
+                        right: BorderSide(),
+                        left: BorderSide(),
                       ),
                     ),
                     child: TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
                       onPressed: () {},
                       child: Text(
-                        DateTime.now().toString().split(' ')[1].split('.')[0],
+                        DateTime.now()
+                            .toString()
+                            .split(' ')[1]
+                            .split('.')[0]
+                            .substring(0, 5),
                       ),
                     ),
                   );
                 },
-                separatorBuilder: (BuildContext context, int index) {
-                  return SizedBox(width: 4);
+                separatorBuilder: (context, index) {
+                  return const SizedBox(width: 4);
                 },
               ),
             ),

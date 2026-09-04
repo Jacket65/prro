@@ -1,8 +1,9 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-
 import 'package:prro/data/api/models/seller_item.dart';
-import 'package:prro/data/repositories/items_repository/items_repository.dart';
+import 'package:prro/data/repositories/items_repository/items_repo.dart';
+import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 
 class MockItemsService extends Mock implements ItemsServiceI {}
 
@@ -12,28 +13,47 @@ void main() {
 
   setUp(() {
     service = MockItemsService();
-    repository = ItemsRepository(itemsService: service);
+    repository = ItemsRepository(service);
   });
 
-  test('getItemsCategory returns list from service', () async {
-    final categories = [Category(id: 1, name: 'Test', items: [])];
+  test('getCategories returns list from service', () async {
+    final categories = [const Category(id: 1, name: 'Test')];
 
-    when(() => service.getItemsCategory()).thenAnswer((_) async => categories);
+    when(() => service.getCategories()).thenAnswer((_) async => categories);
 
-    final result = await repository.getItemsCategory();
+    final result = await repository.getCategories();
 
     expect(result, categories);
-    verify(() => service.getItemsCategory()).called(1);
+    verify(() => service.getCategories()).called(1);
   });
 
-  test('getItems calls service with id', () async {
-    final items = [Product(id: '1', name: 'Item', price: 10, imageUrl: '')];
+  test('getProducts calls service with category id', () async {
+    final products = [const ProductGroup(id: 10, name: 'Американо')];
 
-    when(() => service.getItems(1)).thenAnswer((_) async => items);
+    when(() => service.getProducts(1)).thenAnswer((_) async => products);
 
-    final result = await repository.getItems(1);
+    final result = await repository.getProducts(1);
 
-    expect(result, items);
-    verify(() => service.getItems(1)).called(1);
+    expect(result, products);
+    verify(() => service.getProducts(1)).called(1);
+  });
+
+  test('getVariants calls service with product id', () async {
+    final variants = [
+      Product(
+        id: '100',
+        name: 'Американо на арабіці',
+        price: 55,
+        imageUrl: '',
+        quantity: Decimal.one,
+      ),
+    ];
+
+    when(() => service.getVariants(10)).thenAnswer((_) async => variants);
+
+    final result = await repository.getVariants(10);
+
+    expect(result, variants);
+    verify(() => service.getVariants(10)).called(1);
   });
 }

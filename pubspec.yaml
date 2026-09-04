@@ -4,39 +4,47 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.10.0 <4.0.0"
+  sdk: ">=3.12.0 <4.0.0"
 
 dependencies:
+  app_links: ^6.3.0
+  auto_route: ^11.1.0
+  bloc_concurrency: ^0.3.0
+  cupertino_icons: ^1.0.9
+  decimal: ^3.2.4
+  dio: ^5.10.0
+  equatable: ^2.1.0
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
-
-  #http
-  http: ^1.6.0
-  dio: ^5.9.0
-
-  #bloc
   flutter_bloc: ^9.1.1
-  equatable: ^2.0.8
-  talker: ^5.1.11
-  talker_bloc_logger: ^5.0.1
-
-  #provider
+  flutter_secure_storage: ^9.2.2
+  flutter_slidable: ^4.0.3
+  freezed_annotation: ^3.1.0
+  get_it: ^9.2.1
+  http: ^1.6.0
+  injectable: ^3.0.0
+  intl: ^0.20.3
+  json_annotation: ^4.12.0
+  meta: ^1.15.0
+  path_provider: ^2.1.6
   provider: ^6.1.5+1
-  path_provider: ^2.1.5
-
-  #storage
-  shared_preferences: ^2.5.4
-
-  #firebase
-  firebase_core: ^4.4.0
+  shared_preferences: ^2.5.5
+  talker: ^5.1.17
+  talker_bloc_logger: ^5.1.17
+  url_launcher: ^6.3.0
 
 dev_dependencies:
+  auto_route_generator: ^10.5.0
+  bloc_test: ^10.0.0
+  build_runner: ^2.15.1
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
-  mocktail: ^1.0.4
-  bloc_test: ^10.0.0
+  freezed: ^3.2.5
+  injectable_generator: ^3.0.2
+  json_serializable: ^6.14.1
+  mocktail: ^1.0.5
+  very_good_analysis: ^10.3.0
 
 flutter:
   uses-material-design: true

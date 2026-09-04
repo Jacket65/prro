@@ -1,23 +1,16 @@
-import 'dart:convert';
-import 'dart:developer';
-
+import 'package:injectable/injectable.dart';
 import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
 
+@Environment('prod')
+@Singleton(as: BalanceServiceI)
 class BalanceService implements BalanceServiceI {
+  BalanceService({required this._apiClient});
+
+  /// Api client
+  // ignore: unused_field
   final ApiClientI _apiClient;
 
-  BalanceService({required ApiClientI apiClient}) : _apiClient = apiClient;
   @override
-  Future<int> getBalance() async {
-    try {
-      final response = await _apiClient.get("/seller/balance");
-
-      final int data = jsonDecode(response.data)['amount'];
-      return data;
-    } catch (e, stackTrace) {
-      log("Error in getItems: $e", stackTrace: stackTrace);
-      rethrow;
-    }
-  }
+  Future<int> getBalance() async => 0;
 }

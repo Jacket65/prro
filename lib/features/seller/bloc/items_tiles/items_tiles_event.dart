@@ -10,9 +10,8 @@ sealed class ItemsTilesEvent extends Equatable {
 class ItemsTilesStarted extends ItemsTilesEvent {}
 
 class ItemsTilesEnterCategory extends ItemsTilesEvent {
-  final Item item;
-
   const ItemsTilesEnterCategory(this.item);
+  final Item item;
 
   @override
   List<Object> get props => [item];

@@ -6,19 +6,24 @@ class CheckColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 350,
-      color: Colors.white,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          CheckTopBar(),
-          CheckMainInfo(),
-          CheckPrice(),
-          CheckBottomButtons(),
-          CheckPayButton(),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth.clamp(300.0, 380.0);
+        return Container(
+          width: maxWidth,
+          color: Colors.white,
+          child: const Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              CheckTopBar(),
+              Expanded(child: CheckBody()),
+              CheckPrice(),
+              CheckBottomButtons(),
+              CheckPayButton(),
+            ],
+          ),
+        );
+      },
     );
   }
 }

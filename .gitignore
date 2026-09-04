@@ -43,3 +43,12 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Agent skill files are installed from skills-lock.json
+.agents/skills/
+
+# Kilo agent plan files are local working artifacts
+.kilo/plans/
+
+# Backend API spec dump used for reviews
+prod_api_backend_real.txt

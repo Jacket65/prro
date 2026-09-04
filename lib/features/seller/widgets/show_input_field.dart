@@ -3,12 +3,12 @@ import 'package:flutter/services.dart';
 
 class ShowInputField extends StatefulWidget {
   const ShowInputField({
-    super.key,
     required this.title,
     required this.controller,
     required this.onChanged,
     required this.total,
     required this.onTap,
+    super.key,
   });
 
   final String title;
@@ -30,7 +30,7 @@ class _ShowInputFieldState extends State<ShowInputField> {
     myFocusNode = FocusNode();
     myFocusNode.addListener(() {
       if (!myFocusNode.hasFocus) {
-        double value = double.tryParse(widget.controller.text) ?? 0.0;
+        final value = double.tryParse(widget.controller.text) ?? 0.0;
         widget.controller.text = value.toStringAsFixed(2);
         widget.onChanged(widget.controller.text);
       }
@@ -58,7 +58,7 @@ class _ShowInputFieldState extends State<ShowInputField> {
 
       onPressed: () {
         widget.controller.text = widget.total;
-        widget.onChanged;
+        widget.onChanged(widget.controller.text);
         myFocusNode.requestFocus();
         widget.onTap();
       },
@@ -66,7 +66,7 @@ class _ShowInputFieldState extends State<ShowInputField> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(widget.title),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           SizedBox(
             width: 200,
             child: AbsorbPointer(
@@ -76,7 +76,9 @@ class _ShowInputFieldState extends State<ShowInputField> {
                 controller: widget.controller,
                 onChanged: widget.onChanged,
 
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   LengthLimitingTextInputFormatter(10),
                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
@@ -84,12 +86,12 @@ class _ShowInputFieldState extends State<ShowInputField> {
 
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.green),
+                    borderSide: const BorderSide(color: Colors.green),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   suffixText: '₴',
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.green),
+                    borderSide: const BorderSide(color: Colors.green),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
