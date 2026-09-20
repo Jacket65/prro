@@ -84,17 +84,15 @@ import 'package:prro/data/services/order_history_service_mock.dart' as _i422;
 import 'package:prro/data/services/payment_service.dart' as _i769;
 import 'package:prro/data/services/shift_service.dart' as _i819;
 import 'package:prro/di/app_module.dart' as _i745;
-import 'package:prro/features/seller/bloc/orders/payment/handlers/card_payment_handler.dart'
-    as _i685;
 import 'package:prro/features/seller/bloc/orders/payment/handlers/cash_payment_handler.dart'
     as _i502;
-import 'package:prro/features/seller/bloc/orders/payment/handlers/nfc_payment_handler.dart'
-    as _i544;
+import 'package:prro/features/seller/bloc/orders/payment/handlers/terminal_payment_handler.dart'
+    as _i792;
 import 'package:prro/features/seller/bloc/orders/payment/pay_order_use_case.dart'
     as _i132;
 import 'package:prro/services/deep_link_service.dart' as _i866;
-import 'package:prro/services/nfc_payment_service.dart' as _i829;
 import 'package:prro/services/terminal_launcher.dart' as _i1024;
+import 'package:prro/services/terminal_payment_service.dart' as _i226;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 import 'package:talker/talker.dart' as _i993;
 
@@ -113,7 +111,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => appModule.prefs,
       preResolve: true,
     );
-    gh.factory<_i685.CardPaymentHandler>(() => _i685.CardPaymentHandler());
     gh.factory<_i502.CashPaymentHandler>(() => _i502.CashPaymentHandler());
     gh.singleton<_i993.Talker>(() => appModule.talker());
     gh.singleton<_i296.BalanceServiceI>(
@@ -236,6 +233,14 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i608.AdminCatalogRepositoryImpl(gh<_i219.ApiClientI>()),
       registerFor: {_prod},
     );
+    gh.factory<_i226.TerminalPaymentServiceI>(
+      () => _i226.TerminalPaymentService(
+        paymentRepository: gh<_i844.PaymentRepositoryI>(),
+        terminalLauncher: gh<_i1024.TerminalLauncherI>(),
+        deepLinkService: gh<_i866.DeepLinkServiceI>(),
+        talker: gh<_i993.Talker>(),
+      ),
+    );
     gh.singleton<_i668.ItemsServiceI>(
       () => _i639.ItemsService(
         apiClient: gh<_i219.ApiClientI>(),
@@ -246,14 +251,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i75.AdminUserRepositoryI>(
       () => _i93.AdminUserRepositoryImpl(gh<_i219.ApiClientI>()),
       registerFor: {_prod},
-    );
-    gh.factory<_i829.NfcPaymentServiceI>(
-      () => _i829.NfcPaymentService(
-        paymentRepository: gh<_i844.PaymentRepositoryI>(),
-        terminalLauncher: gh<_i1024.TerminalLauncherI>(),
-        deepLinkService: gh<_i866.DeepLinkServiceI>(),
-        talker: gh<_i993.Talker>(),
-      ),
     );
     gh.singleton<_i957.ShiftServiceI>(
       () => _i819.ShiftService(
@@ -281,15 +278,17 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i302.ShiftRepositoryImpl(gh<_i957.ShiftServiceI>()),
       registerFor: {_prod},
     );
-    gh.factory<_i544.NfcPaymentHandler>(
-      () => _i544.NfcPaymentHandler(gh<_i829.NfcPaymentServiceI>()),
+    gh.factory<_i792.TerminalPaymentHandler>(
+      () => _i792.TerminalPaymentHandler(
+        gh<_i226.TerminalPaymentServiceI>(),
+        gh<_i232.OrdersRepositoryI>(),
+      ),
     );
     gh.factory<_i132.PayOrderUseCase>(
       () => _i132.PayOrderUseCase(
         ordersRepository: gh<_i232.OrdersRepositoryI>(),
         cash: gh<_i502.CashPaymentHandler>(),
-        card: gh<_i685.CardPaymentHandler>(),
-        nfc: gh<_i544.NfcPaymentHandler>(),
+        terminal: gh<_i792.TerminalPaymentHandler>(),
       ),
     );
     return this;

@@ -220,6 +220,55 @@ class MockApiClient implements ApiClientI {
     Map<String, dynamic>? headers,
   }) async {
     try {
+      // `POST /orders/{id}/confirm` — flips a pending (terminal) order to
+      // `completed`. Must be matched before the generic `/orders` branch.
+      if (RegExp(r'/orders/\d+/confirm').hasMatch(path)) {
+        final orderId = _extractIdAfter(path, 'orders');
+        final receipt = await mockBackend.confirmOrder(orderId!);
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          data: {'data': _receiptToJson(receipt)},
+          statusCode: 200,
+        );
+      }
+
+      // Terminal payment stand-ins, demoable until the real backend
+      // implements `payments/create` / `payments/check`.
+      if (path.contains('/payments/create')) {
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          data: {
+            'data': {
+              'token': 'mock_terminal_token_'
+                  '${DateTime.now().millisecondsSinceEpoch}',
+              'expires': DateTime.now()
+                  .add(const Duration(minutes: 10))
+                  .toIso8601String(),
+            },
+          },
+          statusCode: 200,
+        );
+      }
+      if (path.contains('/payments/check')) {
+        final transactionId =
+            (data as Map<String, dynamic>?)?['transaction_id']?.toString() ??
+            '';
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          data: {
+            'data': {
+              'success': true,
+              'status': 'SUCCESS',
+              'rrn': '123456789012',
+              'transaction_id': transactionId,
+              'card_mask': '5168 **** **** 1234',
+              'auth_code': '123456',
+            },
+          },
+          statusCode: 200,
+        );
+      }
+
       if (path.contains('/orders')) {
         final orderData = data as Map<String, dynamic>?;
         if (orderData != null) {
@@ -252,9 +301,8 @@ class MockApiClient implements ApiClientI {
           final receipt = await mockBackend.placeOrder(
             items: items,
             payment: PaymentDto(
-              method: paymentMethod == 'card'
-                  ? PaymentMethod.card
-                  : PaymentMethod.cash,
+              // `card` and `nfc` both map to the unified `terminal` method.
+              method: PaymentMethod.fromWire(paymentMethod),
               tenderedKopecks: tenderedKopecks,
             ),
             idempotencyKey: idempotencyKey ?? '',
@@ -262,28 +310,7 @@ class MockApiClient implements ApiClientI {
 
           return Response<dynamic>(
             requestOptions: RequestOptions(path: path),
-            data: <String, dynamic>{
-              'order_id': receipt.orderId,
-              'items': receipt.lines
-                  .map(
-                    (line) => <String, dynamic>{
-                      'variant_id': line.productId,
-                      'name': line.name,
-                      'quantity': line.quantity,
-                      'unit_price': (line.unitPriceKopecks / 100).toString(),
-                      'line_total': (line.subtotalKopecks / 100).toString(),
-                    },
-                  )
-                  .toList(),
-              'total_price': (receipt.totalKopecks / 100).toString(),
-              'payment': <String, String>{
-                'method': receipt.method.wire,
-                'tendered': (receipt.tenderedKopecks / 100).toString(),
-                'change': (receipt.changeKopecks / 100).toString(),
-              },
-              'status': receipt.status,
-              'created_at': receipt.issuedAt.toIso8601String(),
-            },
+            data: _receiptToJson(receipt),
             statusCode: 201,
           );
         }
@@ -607,4 +634,30 @@ class MockApiClient implements ApiClientI {
     }
     return null;
   }
+
+  /// Serializes a [OrderReceipt] into the order-response shape used by
+  /// `POST /orders` and `POST /orders/{id}/confirm` (decimal-string money).
+  Map<String, dynamic> _receiptToJson(OrderReceipt receipt) =>
+      <String, dynamic>{
+        'order_id': receipt.orderId,
+        'items': receipt.lines
+            .map(
+              (line) => <String, dynamic>{
+                'variant_id': line.productId,
+                'name': line.name,
+                'quantity': line.quantity,
+                'unit_price': (line.unitPriceKopecks / 100).toString(),
+                'line_total': (line.subtotalKopecks / 100).toString(),
+              },
+            )
+            .toList(),
+        'total_price': (receipt.totalKopecks / 100).toString(),
+        'payment': <String, String>{
+          'method': receipt.method.wire,
+          'tendered': (receipt.tenderedKopecks / 100).toString(),
+          'change': (receipt.changeKopecks / 100).toString(),
+        },
+        'status': receipt.status,
+        'created_at': receipt.issuedAt.toIso8601String(),
+      };
 }
