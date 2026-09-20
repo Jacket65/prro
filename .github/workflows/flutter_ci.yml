@@ -40,7 +40,10 @@ jobs:
         run: flutter test
 
       - name: Build PROD APK (real backend)
-        run: flutter build apk --release --target-platform=android-arm64 --dart-define=BACKEND_TYPE=real
+        run: >
+          flutter build apk --release --target-platform=android-arm64
+          --dart-define=BACKEND_TYPE=real
+          --dart-define=API_BASE_URL=https://pos.coffeebeans.space/api/v1
 
       - name: Upload PROD APK
         uses: actions/upload-artifact@v6
