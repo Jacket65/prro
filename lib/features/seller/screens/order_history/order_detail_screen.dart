@@ -74,8 +74,7 @@ class _OrderDetailView extends StatelessWidget {
     final timeFormat = DateFormat('dd.MM.yyyy HH:mm');
     final methodLabel = switch (detail.payment.method) {
       PaymentMethod.cash => 'Готівка',
-      PaymentMethod.card => 'Карта',
-      PaymentMethod.nfc => 'NFC',
+      PaymentMethod.terminal => 'Термінал',
     };
     return ListView(
       padding: const EdgeInsets.all(16),

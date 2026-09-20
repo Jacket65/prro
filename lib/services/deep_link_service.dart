@@ -89,7 +89,8 @@ class DeepLinkService implements DeepLinkServiceI {
   Future<void> dispose() async {
     // Tear down only the app_links subscription. We deliberately do NOT close
     // the broadcast [_controller]: this service is a long-lived singleton and
-    // [NfcPaymentService] calls init()/dispose() once per payment. Closing the
+    // [TerminalPaymentService] calls init()/dispose() once per payment.
+    // Closing the
     // controller would permanently break every subsequent payment's callback
     // delivery, so the controller persists for the app lifetime and is
     // recreated lazily in [init] only if it was somehow closed.
