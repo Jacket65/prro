@@ -149,7 +149,7 @@ class OrderHistoryServiceMock implements OrderHistoryServiceI {
         ),
       );
     }
-    final method = idx.isEven ? PaymentMethod.cash : PaymentMethod.card;
+    final method = idx.isEven ? PaymentMethod.cash : PaymentMethod.terminal;
     final tendered = method == PaymentMethod.cash ? total + 1000 : total;
     return OrderDetail(
       orderId: orderId,

@@ -1,22 +1,20 @@
 import 'package:prro/core/money.dart';
 
-/// Payment method. Wire form is the lowercase string the backend expects
-/// (`"cash"` / `"card"` / `"nfc"`).
+/// Payment method. `terminal` covers any card/tap payment on the external POS
+/// terminal. Wire form is the lowercase string the backend expects: the
+/// backend validates `oneof=cash card`, so `terminal` travels as `"card"`.
 enum PaymentMethod {
   cash,
-  card,
-  nfc;
+  terminal;
 
   String get wire => switch (this) {
     PaymentMethod.cash => 'cash',
-    PaymentMethod.card => 'card',
-    PaymentMethod.nfc => 'nfc',
+    PaymentMethod.terminal => 'card',
   };
 
-  static PaymentMethod fromWire(String? raw) => raw == 'card'
-      ? PaymentMethod.card
-      : raw == 'nfc'
-      ? PaymentMethod.nfc
+  /// Historic receipts may carry `"card"` or `"nfc"`; both map to [terminal].
+  static PaymentMethod fromWire(String? raw) => raw == 'card' || raw == 'nfc'
+      ? PaymentMethod.terminal
       : PaymentMethod.cash;
 }
 
@@ -48,7 +46,7 @@ class PaymentDto {
   final PaymentMethod method;
 
   /// Cash: amount the customer handed over (≥ total).
-  /// Card: must equal total.
+  /// Terminal: must equal total.
   final int tenderedKopecks;
 }
 

@@ -20,8 +20,12 @@ flutter pub get
 
 ### Production APK (real backend)
 
+Release builds require an explicit `API_BASE_URL` — without it the app fails
+fast at startup (`Env.assertBaseUrlConfigured`) instead of silently pointing
+at the dead default `.test` host.
+
 ```bash
-flutter build apk --release --target-platform=android-arm64 --dart-define=BACKEND_TYPE=real
+flutter build apk --release --target-platform=android-arm64 --dart-define=BACKEND_TYPE=real --dart-define=API_BASE_URL=https://pos.coffeebeans.space/api/v1
 ```
 
 ### Mock APK (optional, local/distribution)
@@ -43,8 +47,11 @@ This is the default if no `BACKEND_TYPE` is provided.
 ### Production environment
 
 ```bash
-flutter run --dart-define=BACKEND_TYPE=real
+flutter run --dart-define=BACKEND_TYPE=real --dart-define=API_BASE_URL=https://pos.coffeebeans.space/api/v1
 ```
+
+In debug builds the base URL falls back to a dev default when omitted, but
+release builds throw at startup unless `API_BASE_URL` is provided.
 
 ## CI / CD
 
@@ -53,7 +60,8 @@ GitHub Actions (`.github/workflows/flutter_ci.yml`) builds **only the production
 - Triggered on every push and pull request
 - Sets up Java 17 and Flutter `3.44.6`
 - Runs `flutter pub get`, `flutter analyze`, and `flutter test`
-- Builds a release ARM64 APK with `--dart-define=BACKEND_TYPE=real`
+- Builds a release ARM64 APK with `--dart-define=BACKEND_TYPE=real` and
+  `--dart-define=API_BASE_URL=https://pos.coffeebeans.space/api/v1`
 - Uploads the artifact as `app-prod-release`
 
 The mock build is intentionally not part of CI; it is available locally via the command above.

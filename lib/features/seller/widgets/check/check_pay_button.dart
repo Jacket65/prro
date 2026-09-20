@@ -105,8 +105,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
 
   int get _tenderedKopecks => switch (_method) {
     PaymentMethod.cash => kopecksFromString(_cashController.text),
-    PaymentMethod.card => widget.totalKopecks,
-    PaymentMethod.nfc => widget.totalKopecks,
+    PaymentMethod.terminal => widget.totalKopecks,
   };
 
   int get _changeKopecks {
@@ -118,8 +117,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
     if (widget.totalKopecks <= 0) return false;
     return switch (_method) {
       PaymentMethod.cash => _tenderedKopecks >= widget.totalKopecks,
-      PaymentMethod.card => true,
-      PaymentMethod.nfc => true,
+      PaymentMethod.terminal => true,
     };
   }
 
@@ -152,7 +150,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                     ? _ProcessingView(
                         method: state.method,
                         totalKopecks: widget.totalKopecks,
-                        onCancel: state.method == PaymentMethod.nfc
+                        onCancel: state.method == PaymentMethod.terminal
                             ? () => context.read<OrdersBloc>().add(
                                 const CancelPayment(),
                               )
@@ -195,7 +193,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
   }
 }
 
-// ── Form (Cash / Card) ─────────────────────────────────────────────────────
+// ── Form (Cash / Terminal) ─────────────────────────────────────────────────
 
 class _FormView extends StatelessWidget {
   const _FormView({
@@ -249,7 +247,7 @@ class _FormView extends StatelessWidget {
             changeKopecks: changeKopecks,
           )
         else
-          _CardField(totalKopecks: totalKopecks),
+          _TerminalField(totalKopecks: totalKopecks),
         if (errorMessage != null) ...[
           const SizedBox(height: 16),
           _ErrorBanner(message: errorMessage!),
@@ -306,14 +304,9 @@ class _MethodSelector extends StatelessWidget {
           icon: Icon(Icons.payments_outlined),
         ),
         ButtonSegment(
-          value: PaymentMethod.card,
-          label: Text('Картка', style: TextStyle(fontSize: 16)),
+          value: PaymentMethod.terminal,
+          label: Text('Термінал', style: TextStyle(fontSize: 16)),
           icon: Icon(Icons.credit_card),
-        ),
-        ButtonSegment(
-          value: PaymentMethod.nfc,
-          label: Text('NFC POS', style: TextStyle(fontSize: 16)),
-          icon: Icon(Icons.nfc),
         ),
       ],
       selected: {method},
@@ -402,8 +395,8 @@ class _CashFields extends StatelessWidget {
   }
 }
 
-class _CardField extends StatelessWidget {
-  const _CardField({required this.totalKopecks});
+class _TerminalField extends StatelessWidget {
+  const _TerminalField({required this.totalKopecks});
 
   final int totalKopecks;
 
@@ -423,7 +416,7 @@ class _CardField extends StatelessWidget {
             children: [
               Icon(Icons.credit_card, color: Colors.blue),
               SizedBox(width: 8),
-              Text('Списати з картки', style: TextStyle(fontSize: 16)),
+              Text('Оплата через термінал', style: TextStyle(fontSize: 16)),
             ],
           ),
           Text(
@@ -468,8 +461,9 @@ class _ErrorBanner extends StatelessWidget {
 
 // ── Processing View ───────────────────────────────────────────────────────
 
-/// Shown while any payment method is being processed. Renders the NFC-graphic
-/// view for NFC (with a cancel control) and a generic spinner otherwise.
+/// Shown while any payment method is being processed. Renders the
+/// terminal-graphic view for terminal payments (with a cancel control) and a
+/// generic spinner otherwise.
 class _ProcessingView extends StatelessWidget {
   const _ProcessingView({
     required this.method,
@@ -483,8 +477,8 @@ class _ProcessingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return method == PaymentMethod.nfc
-        ? _NfcPendingView(
+    return method == PaymentMethod.terminal
+        ? _TerminalPendingView(
             totalKopecks: totalKopecks,
             onCancel: onCancel ?? () {},
           )
@@ -532,10 +526,10 @@ class _GenericProcessingView extends StatelessWidget {
   }
 }
 
-// ── NFC Pending View ───────────────────────────────────────────────────────
+// ── Terminal Pending View ──────────────────────────────────────────────────
 
-class _NfcPendingView extends StatelessWidget {
-  const _NfcPendingView({
+class _TerminalPendingView extends StatelessWidget {
+  const _TerminalPendingView({
     required this.totalKopecks,
     required this.onCancel,
   });
@@ -573,7 +567,7 @@ class _NfcPendingView extends StatelessWidget {
           child: const Column(
             children: [
               Icon(
-                Icons.nfc,
+                Icons.credit_card,
                 size: 64,
                 color: Colors.blue,
               ),
@@ -710,8 +704,7 @@ class _ReceiptCard extends StatelessWidget {
 
   String get _methodLabel => switch (receipt.method) {
     PaymentMethod.cash => 'Готівка',
-    PaymentMethod.card => 'Картка',
-    PaymentMethod.nfc => 'NFC POS',
+    PaymentMethod.terminal => 'Термінал',
   };
 
   @override

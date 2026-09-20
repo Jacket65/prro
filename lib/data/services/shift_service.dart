@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Shift endpoints are scoped under the outlet — there is no `/shifts` group:
 ///   GET   /retail-outlets/{id}/shift/current   → 200 ShiftResponse | 404 none
 ///   POST  /retail-outlets/{id}/shift/open      {"cash_start":"0.00"}  (+ Idem)
-///   PATCH /retail-outlets/{id}/shift/close     {"cash_end":"0.00"}    (+ Idem)
+///   POST  /retail-outlets/{id}/shift/close     {"cash_end":"0.00"}    (+ Idem)
 ///
 /// The backend is the single source of truth for the shift state — we cache
 /// nothing in prefs here.
@@ -76,7 +76,7 @@ class ShiftService implements ShiftServiceI {
     required String idempotencyKey,
   }) async {
     try {
-      await _apiClient.patch(
+      await _apiClient.post(
         '/retail-outlets/${_outletId()}/shift/close',
         data: {'cash_end': cashEnd},
         idempotencyKey: idempotencyKey,

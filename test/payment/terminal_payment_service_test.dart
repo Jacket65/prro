@@ -8,8 +8,8 @@ import 'package:prro/data/api/models/payment/payment_result.dart';
 import 'package:prro/data/api/models/payment/payment_token.dart';
 import 'package:prro/data/repositories/payment_repository/payment_repo_i.dart';
 import 'package:prro/services/deep_link_service.dart';
-import 'package:prro/services/nfc_payment_service.dart';
 import 'package:prro/services/terminal_launcher.dart';
+import 'package:prro/services/terminal_payment_service.dart';
 import 'package:talker/talker.dart';
 
 // Mocks
@@ -28,12 +28,12 @@ void main() {
     );
   });
 
-  group('NfcPaymentService', () {
+  group('TerminalPaymentService', () {
     late MockPaymentRepository mockRepository;
     late MockTerminalLauncher mockTerminalLauncher;
     late MockDeepLinkService mockDeepLinkService;
     late MockTalker mockTalker;
-    late NfcPaymentService service;
+    late TerminalPaymentService service;
 
     setUp(() {
       mockRepository = MockPaymentRepository();
@@ -44,7 +44,7 @@ void main() {
       when(() => mockDeepLinkService.dispose()).thenAnswer((_) async {});
       when(() => mockDeepLinkService.init()).thenAnswer((_) async {});
 
-      service = NfcPaymentService(
+      service = TerminalPaymentService(
         paymentRepository: mockRepository,
         terminalLauncher: mockTerminalLauncher,
         deepLinkService: mockDeepLinkService,
@@ -204,7 +204,7 @@ void main() {
         );
 
         // Create service with short timeout for testing
-        final testService = NfcPaymentService(
+        final testService = TerminalPaymentService(
           paymentRepository: mockRepository,
           terminalLauncher: mockTerminalLauncher,
           deepLinkService: mockDeepLinkService,
@@ -996,7 +996,7 @@ void main() {
 
       test('callback after timeout is ignored (no verification)', () async {
         await stubCommon();
-        final testService = NfcPaymentService(
+        final testService = TerminalPaymentService(
           paymentRepository: mockRepository,
           terminalLauncher: mockTerminalLauncher,
           deepLinkService: mockDeepLinkService,

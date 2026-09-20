@@ -16,7 +16,7 @@ abstract interface class ShiftRepositoryI {
     String cashStart,
   });
 
-  /// Closes the current shift (`PATCH .../shift/close`, 204 no body) with the
+  /// Closes the current shift (`POST .../shift/close`, 204 no body) with the
   /// counted cash. [idempotencyKey] must be stable across retries.
   Future<void> closeShift({
     required String cashEnd,

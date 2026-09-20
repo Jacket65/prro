@@ -128,8 +128,9 @@ void main() {
     });
   });
 
-  group('F5: outlet validation', () {
-    test('treats missing outlet as invalid credentials', () async {
+  group('F5: outlet resolution with fallback', () {
+    test('missing outlet in login body falls back to GET /retail-outlets/ '
+        'and uses the first outlet', () async {
       stubLogin(
         _resp(
           bearer: 'Bearer tok',
@@ -137,10 +138,119 @@ void main() {
             'data': {
               'id': 1,
               'role': 'cashier',
+              'refresh_token': 'r',
             },
           },
         ),
       );
+      when(
+        () => apiClient.get(any<String>(), headers: any(named: 'headers')),
+      ).thenAnswer(
+        (_) async => Response<dynamic>(
+          requestOptions: RequestOptions(path: '/retail-outlets/'),
+          statusCode: 200,
+          data: {
+            'data': [
+              {'id': 5, 'name': 'Outlet A'},
+              {'id': 6, 'name': 'Outlet B'},
+            ],
+          },
+        ),
+      );
+
+      final user = await repo.login(username: 'a', password: 'p');
+
+      expect(user.role, UserRole.seller);
+      expect(prefs.getInt('outlet_id'), 5);
+      verify(
+        () => apiClient.get(
+          '/retail-outlets/',
+          headers: {'Authorization': 'Bearer tok'},
+        ),
+      ).called(1);
+    });
+
+    test('fallback skips zero ids and takes the first usable outlet',
+        () async {
+      stubLogin(
+        _resp(
+          bearer: 'Bearer tok',
+          body: {
+            'data': {'id': 1, 'role': 'cashier'},
+          },
+        ),
+      );
+      when(
+        () => apiClient.get(any<String>(), headers: any(named: 'headers')),
+      ).thenAnswer(
+        (_) async => Response<dynamic>(
+          requestOptions: RequestOptions(path: '/retail-outlets/'),
+          statusCode: 200,
+          data: {
+            'data': [
+              {'id': 0},
+              {'id': 9},
+            ],
+          },
+        ),
+      );
+
+      await repo.login(username: 'a', password: 'p');
+
+      expect(prefs.getInt('outlet_id'), 9);
+    });
+
+    test('empty outlet list is treated as invalid credentials', () async {
+      stubLogin(
+        _resp(
+          bearer: 'Bearer tok',
+          body: {
+            'data': {'id': 1, 'role': 'cashier'},
+          },
+        ),
+      );
+      when(
+        () => apiClient.get(any<String>(), headers: any(named: 'headers')),
+      ).thenAnswer(
+        (_) async => Response<dynamic>(
+          requestOptions: RequestOptions(path: '/retail-outlets/'),
+          statusCode: 200,
+          data: const {'data': <Map<String, dynamic>>[]},
+        ),
+      );
+
+      expect(
+        () => repo.login(username: 'a', password: 'p'),
+        throwsA(
+          isA<AuthException>().having(
+            (e) => e.code,
+            'code',
+            AuthErrorCode.invalidCredentials,
+          ),
+        ),
+      );
+      expect(prefs.getInt('outlet_id'), isNull);
+    });
+
+    test('outlet list call failure is treated as invalid credentials',
+        () async {
+      stubLogin(
+        _resp(
+          bearer: 'Bearer tok',
+          body: {
+            'data': {'id': 1, 'role': 'cashier', 'outlet_id': 0},
+          },
+        ),
+      );
+      when(
+        () => apiClient.get(any<String>(), headers: any(named: 'headers')),
+      ).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/retail-outlets/'),
+          type: DioExceptionType.connectionError,
+        ),
+      );
+
       expect(
         () => repo.login(username: 'a', password: 'p'),
         throwsA(
@@ -153,7 +263,8 @@ void main() {
       );
     });
 
-    test('treats zero outlet as invalid credentials', () async {
+    test('missing outlet AND no fallback reachable is invalid credentials',
+        () async {
       stubLogin(
         _resp(
           bearer: 'Bearer tok',
@@ -161,11 +272,20 @@ void main() {
             'data': {
               'id': 1,
               'role': 'cashier',
-              'outlet_id': 0,
             },
           },
         ),
       );
+      when(
+        () => apiClient.get(any<String>(), headers: any(named: 'headers')),
+      ).thenAnswer(
+        (_) async => Response<dynamic>(
+          requestOptions: RequestOptions(path: '/retail-outlets/'),
+          statusCode: 401,
+          data: const {'code': 'UNAUTHORIZED'},
+        ),
+      );
+
       expect(
         () => repo.login(username: 'a', password: 'p'),
         throwsA(

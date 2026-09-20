@@ -35,4 +35,12 @@ abstract interface class OrdersRepositoryI {
     required int tenderedKopecks,
     required String idempotencyKey,
   });
+
+  /// Confirms a pending (card/terminal) order: `POST /orders/{id}/confirm`.
+  ///
+  /// The backend moves a `type=card` order to `pending` without any cash/stock
+  /// movement; this call completes it (and only then does the backend move
+  /// stock). Re-calling on an already-completed order yields 409 — callers
+  /// should treat that as "already done" at a higher layer if it matters.
+  Future<OrderReceipt> confirmOrder(int orderId);
 }

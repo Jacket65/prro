@@ -38,6 +38,10 @@ class MockBackend {
   /// idempotencyKey → receipt. Replaying the same key returns the same body.
   final Map<String, OrderReceipt> _receiptsByKey = {};
 
+  /// orderId → receipt. Used by [confirmOrder] to flip pending terminal orders
+  /// to `completed`, mirroring `POST /orders/{id}/confirm`.
+  final Map<String, OrderReceipt> _receiptsByOrderId = {};
+
   // ──────────────────────────────────────────────────────────────────────────
   // Measure Units (mirrors GET /measure-units)
   // ──────────────────────────────────────────────────────────────────────────
@@ -394,19 +398,13 @@ class MockBackend {
           );
         }
         changeKopecks = payment.tenderedKopecks - totalKopecks;
-      case PaymentMethod.card:
+      case PaymentMethod.terminal:
+        // Terminal payments are charged on the external POS terminal; the
+        // amount must match the check exactly. Like the real backend, the
+        // order is created `pending` and completed only via confirmOrder.
         if (payment.tenderedKopecks != totalKopecks) {
           throw const MockBackendException(
-            'Сума оплати карткою має точно дорівнювати сумі чека.',
-          );
-        }
-        changeKopecks = 0;
-      case PaymentMethod.nfc:
-        // NFC payments are processed externally via PrivatBank Terminal
-        // The amount should match exactly
-        if (payment.tenderedKopecks != totalKopecks) {
-          throw const MockBackendException(
-            'Сума оплати NFC має точно дорівнювати сумі чека.',
+            'Сума оплати через термінал має точно дорівнювати сумі чека.',
           );
         }
         changeKopecks = 0;
@@ -419,14 +417,46 @@ class MockBackend {
       changeKopecks: changeKopecks,
       tenderedKopecks: payment.tenderedKopecks,
       method: payment.method,
-      status: 'completed',
+      status: payment.method == PaymentMethod.terminal
+          ? 'pending'
+          : 'completed',
       issuedAt: DateTime.now(),
       storeName: "Кав'ярня Grains World",
       cashierName: 'cashier1',
     );
     _receiptsByKey[idempotencyKey] = receipt;
+    _receiptsByOrderId[receipt.orderId] = receipt;
     log('[MOCK /orders] $idempotencyKey → $receipt');
     return receipt;
+  }
+
+  /// Mirrors `POST /orders/{id}/confirm`: flips a pending (terminal) order to
+  /// `completed`. Re-confirming an already-completed order returns it
+  /// unchanged (the real backend answers 409; the mock stays lenient).
+  Future<OrderReceipt> confirmOrder(int orderId) async {
+    await _network();
+
+    final id = orderId.toString();
+    final receipt = _receiptsByOrderId[id];
+    if (receipt == null) {
+      throw const MockBackendException('Замовлення не знайдено.');
+    }
+    if (receipt.status == 'completed') return receipt;
+    final confirmed = OrderReceipt(
+      orderId: receipt.orderId,
+      lines: receipt.lines,
+      totalKopecks: receipt.totalKopecks,
+      tenderedKopecks: receipt.tenderedKopecks,
+      changeKopecks: receipt.changeKopecks,
+      method: receipt.method,
+      status: 'completed',
+      issuedAt: receipt.issuedAt,
+      storeName: receipt.storeName,
+      cashierName: receipt.cashierName,
+    );
+    _receiptsByOrderId[id] = confirmed;
+    log('[MOCK /orders/$id/confirm] → $confirmed');
+    return confirmed;
   }
 
   _VariantInfo? _variantInfoForId(String id) {

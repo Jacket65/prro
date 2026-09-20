@@ -66,8 +66,7 @@ class AuthRepositoryImpl implements AuthRepositoryI {
   Future<AuthUser> login({
     required String username,
     required String password,
-  }) =>
-      _serialized(() => _doLogin(username: username, password: password));
+  }) => _serialized(() => _doLogin(username: username, password: password));
 
   @override
   Future<void> logout() => _serialized(_doLogout);
@@ -149,11 +148,25 @@ class AuthRepositoryImpl implements AuthRepositoryI {
       final role = data['role'] is String ? data['role'] as String : null;
       final userId = data['id'] is int ? data['id'] as int : null;
       final refresh = data['refresh_token'];
-      final refreshToken =
-          refresh is String && refresh.isNotEmpty ? refresh : null;
-      final outletId =
-          data['outlet_id'] is int ? data['outlet_id'] as int : null;
+      final refreshToken = refresh is String && refresh.isNotEmpty
+          ? refresh
+          : null;
+      var outletId = data['outlet_id'] is int
+          ? data['outlet_id'] as int
+          : null;
 
+      // The backend does not (yet) return `outlet_id` in the login payload.
+      // Fall back to the user-scoped outlet list, authenticated with the
+      // access token we just received (the session is persisted below, so the
+      // `Authorization` header must be overridden explicitly here). Reading
+      // the login body first keeps a future backend fix (a real `outlet_id`)
+      // authoritative automatically.
+      if (outletId == null || outletId == 0) {
+        outletId = await _firstOutletId(token);
+      }
+
+      // No outlet could be resolved from login or the outlet list → the user
+      // has no outlet assignment; treat as invalid credentials.
       if (outletId == null || outletId == 0) {
         throw const AuthException(AuthErrorCode.invalidCredentials);
       }
@@ -189,6 +202,32 @@ class AuthRepositoryImpl implements AuthRepositoryI {
       throw const AuthException(AuthErrorCode.networkError);
     } on Object {
       throw const AuthException(AuthErrorCode.networkError);
+    }
+  }
+
+  /// Resolves the first outlet visible to the freshly-logged-in user via
+  /// `GET /retail-outlets/` (the list is user-scoped server-side).
+  ///
+  /// Returns `null` when the list is empty or the call fails for any reason;
+  /// the caller maps that to [AuthErrorCode.invalidCredentials].
+  Future<int?> _firstOutletId(String accessToken) async {
+    try {
+      final response = await apiClient
+          .get(
+            '/retail-outlets/',
+            headers: {'Authorization': 'Bearer $accessToken'},
+          )
+          .timeout(const Duration(seconds: 15));
+      final ids = unwrapList<int?>(
+        response.data,
+        (m) => m['id'] is int ? m['id'] as int : null,
+      );
+      for (final id in ids) {
+        if (id != null && id != 0) return id;
+      }
+      return null;
+    } on Object {
+      return null;
     }
   }
 

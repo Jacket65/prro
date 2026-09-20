@@ -127,4 +127,13 @@ class OrdersRepositoryMock implements OrdersRepositoryI {
       throw ApiException(e.message);
     }
   }
+
+  @override
+  Future<OrderReceipt> confirmOrder(int orderId) async {
+    try {
+      return await _backend.confirmOrder(orderId);
+    } on MockBackendException catch (e) {
+      throw ApiException(e.message);
+    }
+  }
 }

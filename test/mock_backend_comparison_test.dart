@@ -192,7 +192,7 @@ void main() {
         );
       });
 
-      test('throws for card payment not matching total', () async {
+      test('throws for terminal payment not matching total', () async {
         final espresso = await backend
             .getProducts(1)
             .then(
@@ -211,10 +211,10 @@ void main() {
               ),
             ],
             payment: const PaymentDto(
-              method: PaymentMethod.card,
+              method: PaymentMethod.terminal,
               tenderedKopecks: 9999,
             ),
-            idempotencyKey: 'test-card-wrong-6',
+            idempotencyKey: 'test-terminal-wrong-6',
           ),
           throwsA(isA<MockBackendException>()),
         );

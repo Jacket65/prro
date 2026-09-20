@@ -130,6 +130,10 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
     }).toList();
 
     final body = {
+      // `type` is required by the backend (`oneof=cash card`); `terminal`
+      // travels as `card` and produces a `pending` order that the terminal
+      // flow confirms afterwards.
+      'type': method.wire,
       'products': productsJson,
       'payment': {
         'method': method.wire,
@@ -143,6 +147,24 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
         data: body,
         idempotencyKey: idempotencyKey,
       );
+      final raw = response.data;
+      final data = raw is Map && raw['data'] is Map
+          ? (raw['data'] as Map).cast<String, dynamic>()
+          : (raw as Map).cast<String, dynamic>();
+      return OrderReceipt.fromJson(
+        data,
+        storeName: Env.storeName,
+        cashierName: _prefs.getString('username') ?? '',
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  @override
+  Future<OrderReceipt> confirmOrder(int orderId) async {
+    try {
+      final response = await _apiClient.post('/orders/$orderId/confirm');
       final raw = response.data;
       final data = raw is Map && raw['data'] is Map
           ? (raw['data'] as Map).cast<String, dynamic>()

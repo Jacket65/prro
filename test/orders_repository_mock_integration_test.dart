@@ -70,5 +70,40 @@ void main() {
       expect(detail.items.length, 1);
       expect(detail.items.first.name, contains('Еспресо'));
     });
+
+    test('terminal order stays pending until confirmOrder completes it',
+        () async {
+      final product = Product(
+        id: '1',
+        name: 'Еспресо',
+        price: 35,
+        imageUrl: '',
+        quantity: Decimal.one,
+        unit: MeasureUnit(id: 3, name: 'шт', step: Decimal.one),
+      );
+      ordersRepository.addProduct(product);
+
+      final receipt = await ordersRepository.placeOrder(
+        method: PaymentMethod.terminal,
+        tenderedKopecks: 3500,
+        idempotencyKey: 'terminal-${DateTime.now().millisecondsSinceEpoch}',
+      );
+
+      expect(receipt.method, PaymentMethod.terminal);
+      expect(receipt.status, 'pending');
+
+      final confirmed = await ordersRepository.confirmOrder(
+        int.parse(receipt.orderId),
+      );
+
+      expect(confirmed.orderId, receipt.orderId);
+      expect(confirmed.status, 'completed');
+
+      // Re-confirm is harmless (the real backend answers 409).
+      final again = await ordersRepository.confirmOrder(
+        int.parse(receipt.orderId),
+      );
+      expect(again.status, 'completed');
+    });
   });
 }
