@@ -2,24 +2,38 @@ import 'package:prro/data/api/models/models.dart';
 
 /// Strategy for handling a single [PaymentMethod].
 ///
-/// Each concrete handler knows how to perform (or skip) the payment-specific
-/// step before the order is placed via `OrdersRepositoryI.placeOrder`. Cash and
-/// card handlers are no-ops because the backend performs the actual charge
-/// inside `placeOrder`; only the NFC handler talks to an external terminal.
+/// The order-first sequence is: `pay` → `OrdersRepositoryI.placeOrder` →
+/// [afterOrderCreated]. Cash implements both hooks trivially (the backend
+/// finalizes the charge inside `placeOrder`); the terminal handler charges the
+/// external POS terminal in [afterOrderCreated] — only after a server-side
+/// order record exists — and then confirms the pending order.
 abstract interface class PaymentMethodHandler {
   PaymentMethod get method;
 
-  /// Performs the method-specific payment step.
+  /// Performs the method-specific step BEFORE the order is placed.
   ///
-  /// For NFC this launches the terminal and resolves once the customer has paid
-  /// (or throws a `PaymentException` / `PaymentCancelledException`). For cash
-  /// and card it does nothing — the charge happens inside `placeOrder`.
+  /// A no-op for both cash and terminal today: cash is charged by the backend
+  /// inside `placeOrder`, and the terminal charge must not start before the
+  /// order record exists (see [afterOrderCreated]). May throw a
+  /// `PaymentException` / `PaymentCancelledException` to abort the sale before
+  /// any order is created.
   Future<void> pay(PaymentRequest request);
 
-  /// Aborts an in-flight [pay] if the method supports it.
+  /// Finalizes the payment AFTER `placeOrder` succeeded, returning the receipt
+  /// the UI should show.
   ///
-  /// No-op for cash/card (no cancellable external op); real behaviour lives in
-  /// the NFC handler.
+  /// Cash returns the receipt unchanged. The terminal handler launches the
+  /// terminal charge here and confirms the resulting `pending` order on
+  /// success. Throws only `PaymentException` / `PaymentCancelledException`.
+  Future<OrderReceipt> afterOrderCreated(
+    OrderReceipt order,
+    PaymentRequest request,
+  );
+
+  /// Aborts an in-flight payment step if the method supports it.
+  ///
+  /// No-op for cash (no cancellable external op); real behaviour lives in the
+  /// terminal handler.
   void cancel();
 }
 
@@ -35,13 +49,13 @@ final class PaymentRequest {
     required this.currency,
   });
 
-  /// Amount to charge the customer (in kopecks). For NFC this is sent to the
-  /// terminal; for cash/card it is informational only (the backend computes the
-  /// real total inside `placeOrder`).
+  /// Amount to charge the customer (in kopecks). For the terminal this is sent
+  /// to the POS terminal; for cash it is informational only (the backend
+  /// computes the real total inside `placeOrder`).
   final int amountKopecks;
 
   /// Amount the customer tendered (in kopecks). For cash this is what was
-  /// handed over; for card/nfc it equals the charge amount.
+  /// handed over; for the terminal it equals the charge amount.
   final int tenderedKopecks;
 
   /// ISO currency code (e.g. 'UAH').

@@ -5,9 +5,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:prro/data/api/api_exception.dart';
 import 'package:prro/data/api/models/models.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
-import 'package:prro/features/seller/bloc/orders/payment/handlers/card_payment_handler.dart';
 import 'package:prro/features/seller/bloc/orders/payment/handlers/cash_payment_handler.dart';
-import 'package:prro/features/seller/bloc/orders/payment/handlers/nfc_payment_handler.dart';
+import 'package:prro/features/seller/bloc/orders/payment/handlers/terminal_payment_handler.dart';
 import 'package:prro/features/seller/bloc/orders/payment/pay_order_request.dart';
 import 'package:prro/features/seller/bloc/orders/payment/pay_order_use_case.dart';
 import 'package:prro/features/seller/bloc/orders/payment/payment_exceptions.dart';
@@ -15,20 +14,18 @@ import 'package:prro/features/seller/bloc/orders/payment/payment_method_handler.
 
 class MockCashHandler extends Mock implements CashPaymentHandler {}
 
-class MockCardHandler extends Mock implements CardPaymentHandler {}
-
-class MockNfcHandler extends Mock implements NfcPaymentHandler {}
+class MockTerminalHandler extends Mock implements TerminalPaymentHandler {}
 
 class MockOrdersRepository extends Mock implements OrdersRepositoryI {}
 
-OrderReceipt _receipt() => OrderReceipt(
+OrderReceipt _receipt({String status = 'pending'}) => OrderReceipt(
   orderId: '1',
   lines: [],
   totalKopecks: 100,
   tenderedKopecks: 100,
   changeKopecks: 0,
   method: PaymentMethod.cash,
-  status: 'paid',
+  status: status,
   issuedAt: DateTime(2024),
   storeName: 'Store',
   cashierName: 'Cashier',
@@ -44,6 +41,7 @@ void main() {
         currency: 'UAH',
       ),
     );
+    registerFallbackValue(_receipt());
     registerFallbackValue(
       const PayOrderRequest(
         method: PaymentMethod.cash,
@@ -54,26 +52,29 @@ void main() {
   });
 
   late MockCashHandler cash;
-  late MockCardHandler card;
-  late MockNfcHandler nfc;
+  late MockTerminalHandler terminal;
   late MockOrdersRepository repo;
   late PayOrderUseCase useCase;
 
   setUp(() {
     cash = MockCashHandler();
-    card = MockCardHandler();
-    nfc = MockNfcHandler();
+    terminal = MockTerminalHandler();
     repo = MockOrdersRepository();
 
     when(() => cash.method).thenReturn(PaymentMethod.cash);
-    when(() => card.method).thenReturn(PaymentMethod.card);
-    when(() => nfc.method).thenReturn(PaymentMethod.nfc);
+    when(() => terminal.method).thenReturn(PaymentMethod.terminal);
     when(() => cash.pay(any())).thenAnswer((_) async {});
-    when(() => card.pay(any())).thenAnswer((_) async {});
-    when(() => nfc.pay(any())).thenAnswer((_) async {});
+    when(() => terminal.pay(any())).thenAnswer((_) async {});
     when(() => cash.cancel()).thenReturn(null);
-    when(() => card.cancel()).thenReturn(null);
-    when(() => nfc.cancel()).thenReturn(null);
+    when(() => terminal.cancel()).thenReturn(null);
+    // Cash: afterOrderCreated is identity — returns the placed receipt.
+    when(() => cash.afterOrderCreated(any(), any())).thenAnswer(
+      (inv) async => inv.positionalArguments[0] as OrderReceipt,
+    );
+    // Terminal: afterOrderCreated returns the confirmed receipt.
+    when(() => terminal.afterOrderCreated(any(), any())).thenAnswer(
+      (_) async => _receipt(status: 'completed'),
+    );
     when(
       () => repo.placeOrder(
         method: any(named: 'method'),
@@ -86,8 +87,7 @@ void main() {
     useCase = PayOrderUseCase(
       ordersRepository: repo,
       cash: cash,
-      card: card,
-      nfc: nfc,
+      terminal: terminal,
     );
   });
 
@@ -101,52 +101,70 @@ void main() {
     test('cash request uses the cash handler only', () async {
       await useCase(req(PaymentMethod.cash));
       verify(() => cash.pay(any())).called(1);
-      verifyNever(() => card.pay(any()));
-      verifyNever(() => nfc.pay(any()));
+      verifyNever(() => terminal.pay(any()));
     });
 
-    test('card request uses the card handler only', () async {
-      await useCase(req(PaymentMethod.card));
-      verify(() => card.pay(any())).called(1);
+    test('terminal request uses the terminal handler only', () async {
+      await useCase(req(PaymentMethod.terminal));
+      verify(() => terminal.pay(any())).called(1);
       verifyNever(() => cash.pay(any()));
-      verifyNever(() => nfc.pay(any()));
     });
+  });
 
-    test('nfc request uses the nfc handler only', () async {
-      await useCase(req(PaymentMethod.nfc));
-      verify(() => nfc.pay(any())).called(1);
-      verifyNever(() => cash.pay(any()));
-      verifyNever(() => card.pay(any()));
-    });
-
-    test(
-      'placeOrder throwing is translated to PaymentException and clears the '
-      'active handler (strict boundary)',
-      () async {
-        when(
+  group('sequence: pay → placeOrder → afterOrderCreated', () {
+    test('cash path: pay, placeOrder, then afterOrderCreated with the placed '
+        'receipt; the placed receipt is returned', () async {
+      when(() => cash.afterOrderCreated(any(), any())).thenAnswer((inv) async {
+        // placeOrder must have happened before the finalize hook runs.
+        verify(
           () => repo.placeOrder(
             method: any(named: 'method'),
             tenderedKopecks: any(named: 'tenderedKopecks'),
             idempotencyKey: any(named: 'idempotencyKey'),
           ),
-        ).thenThrow(const ApiException('store closed'));
-        await expectLater(
-          () => useCase(req(PaymentMethod.cash)),
-          throwsA(
-            isA<PaymentException>().having(
-              (e) => e.reason,
-              'reason',
-              PaymentFailureReason.verificationFailed,
-            ),
-          ),
-        );
-        useCase.cancel();
-        verifyNever(() => cash.cancel());
-      },
-    );
-  });
+        ).called(1);
+        return inv.positionalArguments[0] as OrderReceipt;
+      });
 
-  group('pay request + placeOrder', () {
+      final receipt = await useCase(req(PaymentMethod.cash));
+
+      final captured =
+          verify(() => cash.afterOrderCreated(captureAny(), any()))
+              .captured
+              .single;
+      expect(captured, isA<OrderReceipt>());
+      expect(receipt.status, 'pending'); // the placed (identical) receipt
+      verify(() => cash.pay(any())).called(1);
+    });
+
+    test('terminal path: placeOrder runs BEFORE the charge hook, and the '
+        'confirmed receipt is returned', () async {
+      when(() => terminal.afterOrderCreated(any(), any())).thenAnswer((_) {
+        // The order must exist server-side before the terminal charges.
+        verify(
+          () => repo.placeOrder(
+            method: any(named: 'method'),
+            tenderedKopecks: any(named: 'tenderedKopecks'),
+            idempotencyKey: any(named: 'idempotencyKey'),
+          ),
+        ).called(1);
+        return Future.value(_receipt(status: 'completed'));
+      });
+
+      final receipt = await useCase(req(PaymentMethod.terminal));
+
+      expect(receipt.status, 'completed');
+      final captured =
+          verify(() => terminal.afterOrderCreated(captureAny(), captureAny()))
+              .captured;
+      final order = captured[0] as OrderReceipt;
+      final paymentRequest = captured[1] as PaymentRequest;
+      expect(order.orderId, '1'); // receipt from placeOrder
+      expect(paymentRequest.amountKopecks, 5000); // uahToKopecks(totalPrice)
+      expect(paymentRequest.tenderedKopecks, 100);
+      expect(paymentRequest.currency, 'UAH');
+    });
+
     test('pay is called with amount derived from totalPrice', () async {
       await useCase(req(PaymentMethod.cash));
       final captured =
@@ -197,15 +215,85 @@ void main() {
         ),
       );
     });
+
+    test('afterOrderCreated is NOT called when placeOrder fails', () async {
+      when(
+        () => repo.placeOrder(
+          method: any(named: 'method'),
+          tenderedKopecks: any(named: 'tenderedKopecks'),
+          idempotencyKey: any(named: 'idempotencyKey'),
+        ),
+      ).thenThrow(const ApiException('store closed'));
+      await expectLater(
+        () => useCase(req(PaymentMethod.terminal)),
+        throwsA(
+          isA<PaymentException>().having(
+            (e) => e.reason,
+            'reason',
+            PaymentFailureReason.verificationFailed,
+          ),
+        ),
+      );
+      verifyNever(() => terminal.afterOrderCreated(any(), any()));
+    });
+  });
+
+  group('afterOrderCreated failures', () {
+    test('PaymentException propagates unchanged', () async {
+      when(() => terminal.afterOrderCreated(any(), any())).thenThrow(
+        const PaymentException(
+          'charge failed',
+          reason: PaymentFailureReason.terminalDeclined,
+        ),
+      );
+      await expectLater(
+        () => useCase(req(PaymentMethod.terminal)),
+        throwsA(
+          isA<PaymentException>().having(
+            (e) => e.reason,
+            'reason',
+            PaymentFailureReason.terminalDeclined,
+          ),
+        ),
+      );
+    });
+
+    test('cancel during the terminal charge propagates '
+        'PaymentCancelledException', () async {
+      when(() => terminal.afterOrderCreated(any(), any())).thenThrow(
+        const PaymentCancelledException(),
+      );
+      await expectLater(
+        () => useCase(req(PaymentMethod.terminal)),
+        throwsA(isA<PaymentCancelledException>()),
+      );
+    });
+
+    test('unexpected errors are wrapped into PaymentException (boundary)',
+        () async {
+      when(() => terminal.afterOrderCreated(any(), any())).thenThrow(
+        StateError('boom'),
+      );
+      await expectLater(
+        () => useCase(req(PaymentMethod.terminal)),
+        throwsA(
+          isA<PaymentException>().having(
+            (e) => e.reason,
+            'reason',
+            PaymentFailureReason.verificationFailed,
+          ),
+        ),
+      );
+    });
   });
 
   group('active handler lifecycle', () {
     test(
       'active handler is cleared after success (cancel is a no-op)',
       () async {
-        await useCase(req(PaymentMethod.nfc));
+        await useCase(req(PaymentMethod.terminal));
         useCase.cancel();
-        verifyNever(() => nfc.cancel());
+        verifyNever(() => terminal.cancel());
       },
     );
 
@@ -222,14 +310,17 @@ void main() {
       },
     );
 
-    test('cancel delegates to the in-flight handler', () async {
-      final completer = Completer<void>();
-      when(() => nfc.pay(any())).thenAnswer((_) => completer.future);
+    test('cancel delegates to the in-flight handler during the charge',
+        () async {
+      final completer = Completer<OrderReceipt>();
+      when(() => terminal.afterOrderCreated(any(), any())).thenAnswer(
+        (_) => completer.future,
+      );
 
-      final future = useCase(req(PaymentMethod.nfc));
+      final future = useCase(req(PaymentMethod.terminal));
       await Future<void>.delayed(Duration.zero);
       useCase.cancel();
-      verify(() => nfc.cancel()).called(1);
+      verify(() => terminal.cancel()).called(1);
 
       completer.completeError(const PaymentException('done'));
       await expectLater(future, throwsA(isA<PaymentException>()));
@@ -237,9 +328,8 @@ void main() {
 
     test('cancel is a harmless no-op when no payment is active', () {
       expect(() => useCase.cancel(), returnsNormally);
-      verifyNever(() => nfc.cancel());
+      verifyNever(() => terminal.cancel());
       verifyNever(() => cash.cancel());
-      verifyNever(() => card.cancel());
     });
   });
 }

@@ -1,35 +1,50 @@
 import 'package:injectable/injectable.dart';
 import 'package:prro/data/api/models/models.dart';
+import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
 import 'package:prro/features/seller/bloc/orders/payment/payment_exceptions.dart';
 import 'package:prro/features/seller/bloc/orders/payment/payment_method_handler.dart';
-import 'package:prro/services/nfc_payment_service.dart' as nfc;
+import 'package:prro/services/terminal_payment_service.dart' as terminal;
 
-/// NFC POS payment: launches the PrivatBank terminal and waits for the customer
-/// to pay there.
+/// POS terminal payment (order-first).
 ///
-/// This handler is the **strict exception boundary**: every NFC-specific
+/// `pay` is a no-op: the order must exist server-side before any money moves.
+/// The backend creates `type=card` orders as `pending` (no cash/stock
+/// movement), so the terminal charge and the `POST /orders/{id}/confirm` both
+/// happen in [afterOrderCreated]. The charge never runs before the order
+/// record exists, and confirm is re-call-safe, which keeps the flow
+/// money-safe.
+///
+/// This handler is the **strict exception boundary**: every terminal-specific
 /// exception is translated into one of the two app-level boundary types
 /// ([PaymentException] for failures, [PaymentCancelledException] for cancels)
 /// so callers never depend on terminal internals. A catch-all guarantees that
 /// even an unexpected error becomes a [PaymentException] rather than leaking a
 /// raw implementation exception past the boundary.
 @injectable
-class NfcPaymentHandler implements PaymentMethodHandler {
-  NfcPaymentHandler(this._nfcPaymentService);
+class TerminalPaymentHandler implements PaymentMethodHandler {
+  TerminalPaymentHandler(this._terminalPaymentService, this._ordersRepository);
 
-  final nfc.NfcPaymentServiceI _nfcPaymentService;
-
-  @override
-  PaymentMethod get method => PaymentMethod.nfc;
+  final terminal.TerminalPaymentServiceI _terminalPaymentService;
+  final OrdersRepositoryI _ordersRepository;
 
   @override
-  Future<void> pay(PaymentRequest request) async {
+  PaymentMethod get method => PaymentMethod.terminal;
+
+  @override
+  Future<void> pay(PaymentRequest request) async {}
+
+  @override
+  Future<OrderReceipt> afterOrderCreated(
+    OrderReceipt order,
+    PaymentRequest request,
+  ) async {
     try {
-      final result = await _nfcPaymentService.startPayment(
+      final result = await _terminalPaymentService.startPayment(
         CreatePaymentRequest(
           amount: request.amountKopecks,
           currency: request.currency,
           description: 'Order payment',
+          orderId: order.orderId,
         ),
       );
       if (!result.success) {
@@ -38,10 +53,10 @@ class NfcPaymentHandler implements PaymentMethodHandler {
           reason: PaymentFailureReason.verificationFailed,
         );
       }
-    } on nfc.PaymentCancelledException {
+    } on terminal.PaymentCancelledException {
       // Terminal/cashier cancellation stays a cancellation.
       throw const PaymentCancelledException();
-    } on nfc.NfcPaymentException catch (e, st) {
+    } on terminal.TerminalPaymentException catch (e, st) {
       // All well-defined terminal/callback/repository failures map to a single
       // boundary type, preserving the machine-readable reason and the original
       // cause + stack trace for diagnostics.
@@ -63,8 +78,21 @@ class NfcPaymentHandler implements PaymentMethodHandler {
         stackTrace: st,
       );
     }
+
+    // The charge succeeded → confirm the pending order so the backend
+    // completes it (that is also when stock moves). If the confirm response
+    // is unusable for any reason, fall back to the pending receipt rather
+    // than failing an already-paid sale (the order stays `pending`
+    // server-side until confirmed; known backend gap).
+    final orderId = int.tryParse(order.orderId);
+    if (orderId == null) return order;
+    try {
+      return await _ordersRepository.confirmOrder(orderId);
+    } on Object {
+      return order;
+    }
   }
 
   @override
-  void cancel() => _nfcPaymentService.cancelPayment();
+  void cancel() => _terminalPaymentService.cancelPayment();
 }

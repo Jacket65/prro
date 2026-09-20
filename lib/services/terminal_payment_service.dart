@@ -12,9 +12,9 @@ import 'package:prro/services/deep_link_service.dart';
 import 'package:prro/services/terminal_launcher.dart';
 import 'package:talker/talker.dart';
 
-/// Service interface for orchestrating the NFC POS payment flow.
-abstract interface class NfcPaymentServiceI {
-  /// Starts the complete NFC payment flow.
+/// Service interface for orchestrating the POS terminal payment flow.
+abstract interface class TerminalPaymentServiceI {
+  /// Starts the complete terminal payment flow.
   ///
   /// Flow:
   /// 1. Creates payment token via backend
@@ -23,9 +23,10 @@ abstract interface class NfcPaymentServiceI {
   /// 4. Verifies payment via backend
   /// 5. Returns final PaymentResult
   ///
-  /// Throws only [PaymentCancelledException] (cancel) or [NfcPaymentException]
-  /// subclasses (failure). Every repository/terminal/deep-link error is
-  /// translated at this boundary; no implementation-specific exception escapes.
+  /// Throws only [PaymentCancelledException] (cancel) or
+  /// [TerminalPaymentException] subclasses (failure). Every
+  /// repository/terminal/deep-link error is translated at this boundary; no
+  /// implementation-specific exception escapes.
   Future<PaymentResult> startPayment(CreatePaymentRequest request);
 
   /// Aborts an in-flight [startPayment] from the UI side (cashier cancel).
@@ -39,18 +40,18 @@ abstract interface class NfcPaymentServiceI {
   void cancelPayment();
 }
 
-/// Marker for every exception the NFC service can surface. The handler maps
-/// these uniformly into the app-level [PaymentException], preserving the
+/// Marker for every exception the terminal service can surface. The handler
+/// maps these uniformly into the app-level [PaymentException], preserving the
 /// [reason] so the boundary stays machine-readable.
-abstract interface class NfcPaymentException implements Exception {
+abstract interface class TerminalPaymentException implements Exception {
   String get message;
   PaymentFailureReason get reason;
 }
 
-/// Implementation of [NfcPaymentServiceI].
-@Injectable(as: NfcPaymentServiceI)
-class NfcPaymentService implements NfcPaymentServiceI {
-  NfcPaymentService({
+/// Implementation of [TerminalPaymentServiceI].
+@Injectable(as: TerminalPaymentServiceI)
+class TerminalPaymentService implements TerminalPaymentServiceI {
+  TerminalPaymentService({
     required this._paymentRepository,
     required this._terminalLauncher,
     required this._deepLinkService,
@@ -112,9 +113,9 @@ class NfcPaymentService implements NfcPaymentServiceI {
     _activeSessionId = sessionId;
 
     _talker
-      ..info('🔵 [NFC Payment] Starting payment flow', request.toString())
+      ..info('🔵 [Terminal Payment] Starting payment flow', request.toString())
       // Step 1: Create payment token
-      ..info('🔵 [NFC Payment] Creating payment token...');
+      ..info('🔵 [Terminal Payment] Creating payment token...');
 
     // Subscribe before launching the terminal so we never miss an immediate
     // redirect. The subscription is owned locally and always torn down in the
@@ -140,7 +141,7 @@ class NfcPaymentService implements NfcPaymentServiceI {
 
     try {
       final token = await _paymentRepository.createPaymentToken(request);
-      _talker.info('🟢 [NFC Payment] Token received', token.toString());
+      _talker.info('🟢 [Terminal Payment] Token received', token.toString());
 
       await _deepLinkService.init();
 
@@ -174,7 +175,7 @@ class NfcPaymentService implements NfcPaymentServiceI {
       // skip launching the terminal entirely; if a cancellation already
       // completed it, the `await` below re-throws and we never verify.
       if (!completer.isCompleted) {
-        _talker.info('🔵 [NFC Payment] Launching PrivatBank Terminal...');
+        _talker.info('🔵 [Terminal Payment] Launching PrivatBank Terminal...');
         await _terminalLauncher.launchTerminal(
           jwtToken: token.token,
           amount: request.amount,
@@ -182,7 +183,7 @@ class NfcPaymentService implements NfcPaymentServiceI {
           orderId: sessionId,
           merchantId: request.metadata?['merchantId']?.toString(),
         );
-        _talker.info('🟢 [NFC Payment] Terminal launched successfully');
+        _talker.info('🟢 [Terminal Payment] Terminal launched successfully');
 
         // Only arm the callback timeout if the payment is still unresolved
         // (a cancellation that arrived during `launchTerminal` would otherwise
@@ -200,7 +201,7 @@ class NfcPaymentService implements NfcPaymentServiceI {
         }
       }
 
-      _talker.info('🔵 [NFC Payment] Waiting for payment callback...');
+      _talker.info('🔵 [Terminal Payment] Waiting for payment callback...');
 
       // Resolves exactly once: via a successful callback, a terminal-reported
       // failure/cancellation, the timeout, or a cashier cancel. After this
@@ -209,26 +210,29 @@ class NfcPaymentService implements NfcPaymentServiceI {
       final transactionId = await completer.future;
       _talker
         ..info(
-          '🟢 [NFC Payment] Callback received',
+          '🟢 [Terminal Payment] Callback received',
           'transactionId: $transactionId',
         )
         // Step 4: Verify payment
-        ..info('🔵 [NFC Payment] Verifying payment...');
+        ..info('🔵 [Terminal Payment] Verifying payment...');
 
       // The backend verification is the single source of truth: success is
       // taken solely from the `verifyPayment` result, never from the callback
       // status.
       final result = await _paymentRepository.verifyPayment(transactionId);
-      _talker.info('🟢 [NFC Payment] Verification complete', result.toString());
+      _talker.info(
+        '🟢 [Terminal Payment] Verification complete',
+        result.toString(),
+      );
 
       return result;
     } on TerminalLaunchException catch (e) {
-      _talker.error('🔴 [NFC Payment] Failed to launch terminal', e);
+      _talker.error('🔴 [Terminal Payment] Failed to launch terminal', e);
       throw TerminalLaunchFailedException(e.message);
     } on PaymentCancelledException {
-      _talker.warning('🟡 [NFC Payment] Payment cancelled by terminal/user');
+      _talker.warning('🟡 [Terminal Payment] Payment cancelled by terminal/user');
       rethrow;
-    } on NfcPaymentException {
+    } on TerminalPaymentException {
       // Domain exceptions already carry a reason; propagate unchanged so the
       // handler maps them.
       rethrow;
@@ -237,7 +241,7 @@ class NfcPaymentService implements NfcPaymentServiceI {
       // stream error that reached `await completer.future`, etc.) is an
       // unexpected internal error. Translate so no implementation-specific
       // exception crosses the boundary.
-      _talker.error('🔴 [NFC Payment] Unexpected payment error', e, st);
+      _talker.error('🔴 [Terminal Payment] Unexpected payment error', e, st);
       throw PaymentOperationException(
         'Сталася неочікувана помилка оплати.',
         PaymentFailureReason.unknown,
@@ -337,7 +341,7 @@ class NfcPaymentService implements NfcPaymentServiceI {
     }
 
     _talker.info(
-      '🟢 [NFC Payment] Extracted transactionId',
+      '🟢 [Terminal Payment] Extracted transactionId',
       transactionId,
     );
 
@@ -401,7 +405,7 @@ enum PaymentStatus {
 }
 
 /// Exception thrown when the terminal app cannot be launched.
-class TerminalLaunchFailedException implements NfcPaymentException {
+class TerminalLaunchFailedException implements TerminalPaymentException {
   const TerminalLaunchFailedException(this.message);
   @override
   final String message;
@@ -412,7 +416,7 @@ class TerminalLaunchFailedException implements NfcPaymentException {
 }
 
 /// Exception thrown when the payment callback times out.
-class PaymentCallbackTimeoutException implements NfcPaymentException {
+class PaymentCallbackTimeoutException implements TerminalPaymentException {
   const PaymentCallbackTimeoutException(this.message);
   @override
   final String message;
@@ -423,7 +427,7 @@ class PaymentCallbackTimeoutException implements NfcPaymentException {
 }
 
 /// Exception thrown when the callback URI is malformed.
-class InvalidCallbackException implements NfcPaymentException {
+class InvalidCallbackException implements TerminalPaymentException {
   const InvalidCallbackException(this.message);
   @override
   final String message;
@@ -435,7 +439,7 @@ class InvalidCallbackException implements NfcPaymentException {
 
 /// Exception thrown when the terminal reports a payment failure without a
 /// usable transaction id (e.g. `status=error`/`status=failed`).
-class PaymentTerminalFailureException implements NfcPaymentException {
+class PaymentTerminalFailureException implements TerminalPaymentException {
   const PaymentTerminalFailureException(this.message);
   @override
   final String message;
@@ -457,7 +461,7 @@ class PaymentCancelledException implements Exception {
 /// session is already active. Enforced by the single-active-session guard
 /// (`activeSessionId`) as the strongest defense against stale/duplicate
 /// callbacks from the global deep-link broadcast stream.
-class PaymentAlreadyInProgressException implements NfcPaymentException {
+class PaymentAlreadyInProgressException implements TerminalPaymentException {
   const PaymentAlreadyInProgressException(this.message);
   @override
   final String message;
@@ -469,7 +473,7 @@ class PaymentAlreadyInProgressException implements NfcPaymentException {
 
 /// Exception thrown for any unexpected internal/repository/deep-link failure
 /// that is not one of the well-defined terminal/callback outcomes.
-class PaymentOperationException implements NfcPaymentException {
+class PaymentOperationException implements TerminalPaymentException {
   PaymentOperationException(
     this.message,
     this.reason, {
