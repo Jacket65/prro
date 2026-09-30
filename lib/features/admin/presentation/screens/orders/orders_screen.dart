@@ -4,7 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:prro/core/di/di.dart';
-import 'package:prro/data/repositories/order_history/order_history.dart';
+import 'package:prro/core/domain/repositories/order_history_repository_i.dart';
 import 'package:prro/features/admin/presentation/cubit/orders/shifts_history_cubit.dart';
 import 'package:prro/features/admin/presentation/cubit/outlets/outlets_cubit.dart';
 import 'package:prro/features/admin/presentation/screens/orders/shifts_history_screen.dart';

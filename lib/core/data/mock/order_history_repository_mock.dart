@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/data/services/order_history_service.dart';
 import 'package:prro/core/domain/order_history.dart';
-import 'package:prro/data/repositories/order_history/order_history_repo_i.dart';
-import 'package:prro/data/services/order_history_service.dart';
+import 'package:prro/core/domain/repositories/order_history_repository_i.dart';
 
 @Environment('mock')
 @Singleton(as: OrderHistoryRepositoryI)

@@ -1,10 +1,10 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:prro/core/data/mock/order_history_service_mock.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/mock/mock_backend.dart';
-import 'package:prro/data/services/order_history_service_mock.dart';
 import 'package:prro/features/seller/data/mock/orders_repository_mock.dart';
 
 void main() {

@@ -7,8 +7,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:prro/core/di/di.dart';
 import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/domain/order_history.dart';
+import 'package:prro/core/domain/repositories/order_history_repository_i.dart';
 import 'package:prro/core/utils/money.dart';
-import 'package:prro/data/repositories/order_history/order_history.dart';
 import 'package:prro/features/seller/presentation/bloc/order_history/order_detail_cubit.dart';
 
 @RoutePage(name: 'SellerOrderDetailRoute')
