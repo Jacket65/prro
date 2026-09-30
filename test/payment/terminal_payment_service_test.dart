@@ -3,13 +3,14 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:prro/core/network/api_exception.dart';
-import 'package:prro/data/api/models/payment/payment_request.dart';
-import 'package:prro/data/api/models/payment/payment_result.dart';
-import 'package:prro/data/api/models/payment/payment_token.dart';
-import 'package:prro/data/repositories/payment_repository/payment_repo_i.dart';
-import 'package:prro/services/deep_link_service.dart';
-import 'package:prro/services/terminal_launcher.dart';
-import 'package:prro/services/terminal_payment_service.dart';
+import 'package:prro/features/payment/data/models/payment_request.dart';
+import 'package:prro/features/payment/data/models/payment_result.dart';
+import 'package:prro/features/payment/data/models/payment_token.dart';
+import 'package:prro/features/payment/data/services/deep_link_service.dart';
+import 'package:prro/features/payment/data/services/terminal_launcher.dart';
+import 'package:prro/features/payment/data/services/terminal_payment_service.dart';
+import 'package:prro/features/payment/domain/repositories/payment_repository_i.dart';
+import 'package:prro/features/payment/domain/repositories/terminal_payment_service_i.dart';
 import 'package:talker/talker.dart';
 
 // Mocks
@@ -261,7 +262,7 @@ void main() {
     );
 
     test(
-      'startPayment throws PaymentCancelledException '
+      'startPayment throws TerminalPaymentCancelledException '
       'when terminal reports cancellation',
       () async {
         const request = CreatePaymentRequest(
@@ -308,7 +309,7 @@ void main() {
 
         await expectLater(
           paymentFuture,
-          throwsA(isA<PaymentCancelledException>()),
+          throwsA(isA<TerminalPaymentCancelledException>()),
         ).timeout(const Duration(seconds: 2));
         await controller.close();
       },
@@ -695,7 +696,8 @@ void main() {
 
     group('cancelPayment', () {
       test(
-        'completes the in-flight startPayment with PaymentCancelledException',
+        'completes the in-flight startPayment with '
+        'TerminalPaymentCancelledException',
         () async {
           const request = CreatePaymentRequest(
             amount: 15000,
@@ -734,7 +736,7 @@ void main() {
 
           await expectLater(
             future,
-            throwsA(isA<PaymentCancelledException>()),
+            throwsA(isA<TerminalPaymentCancelledException>()),
           ).timeout(const Duration(seconds: 2));
 
           // Cleanup ran: the session guard was cleared and the deep link
@@ -793,7 +795,7 @@ void main() {
         service.cancelPayment();
         await expectLater(
           future,
-          throwsA(isA<PaymentCancelledException>()),
+          throwsA(isA<TerminalPaymentCancelledException>()),
         ).timeout(const Duration(seconds: 2));
 
         // The single-active guard must have reset so a new attempt can start.
@@ -851,7 +853,7 @@ void main() {
           service.cancelPayment();
           await expectLater(
             future,
-            throwsA(isA<PaymentCancelledException>()),
+            throwsA(isA<TerminalPaymentCancelledException>()),
           ).timeout(const Duration(seconds: 2));
 
           // A second cancel after the session ended must be a no-op.
@@ -898,7 +900,7 @@ void main() {
 
           await expectLater(
             () => service.startPayment(request),
-            throwsA(isA<PaymentCancelledException>()),
+            throwsA(isA<TerminalPaymentCancelledException>()),
           ).timeout(const Duration(seconds: 2));
 
           // The terminal must never have been launched for a cancelled session.
@@ -1070,7 +1072,7 @@ void main() {
         // is always observed by a listener (the real caller awaits it too).
         final expectation = expectLater(
           future,
-          throwsA(isA<PaymentCancelledException>()),
+          throwsA(isA<TerminalPaymentCancelledException>()),
         );
         await Future<void>.delayed(Duration.zero);
         service.cancelPayment();
@@ -1115,7 +1117,7 @@ void main() {
 
         await expectLater(
           future,
-          throwsA(isA<PaymentCancelledException>()),
+          throwsA(isA<TerminalPaymentCancelledException>()),
         ).timeout(const Duration(seconds: 2));
         verifyNever(() => mockRepository.verifyPayment(any()));
         await controller.close();

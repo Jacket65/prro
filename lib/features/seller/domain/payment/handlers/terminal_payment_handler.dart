@@ -1,10 +1,10 @@
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/domain/order.dart';
-import 'package:prro/data/api/models/payment/payment_request.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
-import 'package:prro/features/seller/bloc/orders/payment/payment_exceptions.dart';
-import 'package:prro/features/seller/bloc/orders/payment/payment_method_handler.dart';
-import 'package:prro/services/terminal_payment_service.dart' as terminal;
+import 'package:prro/features/payment/data/models/payment_request.dart';
+import 'package:prro/features/payment/domain/payment_exceptions.dart';
+import 'package:prro/features/payment/domain/repositories/terminal_payment_service_i.dart' as terminal;
+import 'package:prro/features/seller/domain/payment/payment_method_handler.dart';
 
 /// POS terminal payment (order-first).
 ///
@@ -54,7 +54,7 @@ class TerminalPaymentHandler implements PaymentMethodHandler {
           reason: PaymentFailureReason.verificationFailed,
         );
       }
-    } on terminal.PaymentCancelledException {
+    } on terminal.TerminalPaymentCancelledException {
       // Terminal/cashier cancellation stays a cancellation.
       throw const PaymentCancelledException();
     } on terminal.TerminalPaymentException catch (e, st) {

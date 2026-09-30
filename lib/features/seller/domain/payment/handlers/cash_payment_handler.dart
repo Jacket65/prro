@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/domain/order.dart';
-import 'package:prro/features/seller/bloc/orders/payment/payment_method_handler.dart';
+import 'package:prro/features/seller/domain/payment/payment_method_handler.dart';
 
 /// Cash payments are finalized by the backend inside `placeOrder`, so there is
 /// no method-specific step to perform here; the receipt comes back complete.

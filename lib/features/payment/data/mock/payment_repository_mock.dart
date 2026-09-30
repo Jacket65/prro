@@ -1,9 +1,9 @@
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/utils/uuid.dart';
-import 'package:prro/data/api/models/payment/payment_request.dart';
-import 'package:prro/data/api/models/payment/payment_result.dart';
-import 'package:prro/data/api/models/payment/payment_token.dart';
-import 'package:prro/data/repositories/payment_repository/payment_repo_i.dart';
+import 'package:prro/features/payment/data/models/payment_request.dart';
+import 'package:prro/features/payment/data/models/payment_result.dart';
+import 'package:prro/features/payment/data/models/payment_token.dart';
+import 'package:prro/features/payment/domain/repositories/payment_repository_i.dart';
 
 /// Mock implementation of [PaymentRepositoryI] for testing.
 ///

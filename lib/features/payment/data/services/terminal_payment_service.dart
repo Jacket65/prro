@@ -4,49 +4,14 @@ import 'package:injectable/injectable.dart';
 import 'package:meta/meta.dart';
 import 'package:prro/core/config/payment_config.dart';
 import 'package:prro/core/utils/uuid.dart';
-import 'package:prro/data/api/models/payment/payment_request.dart';
-import 'package:prro/data/api/models/payment/payment_result.dart';
-import 'package:prro/data/repositories/payment_repository/payment_repo_i.dart';
-import 'package:prro/features/seller/bloc/orders/payment/payment_exceptions.dart';
-import 'package:prro/services/deep_link_service.dart';
-import 'package:prro/services/terminal_launcher.dart';
+import 'package:prro/features/payment/data/models/payment_request.dart';
+import 'package:prro/features/payment/data/models/payment_result.dart';
+import 'package:prro/features/payment/data/services/deep_link_service.dart';
+import 'package:prro/features/payment/data/services/terminal_launcher.dart';
+import 'package:prro/features/payment/domain/payment_exceptions.dart';
+import 'package:prro/features/payment/domain/repositories/payment_repository_i.dart';
+import 'package:prro/features/payment/domain/repositories/terminal_payment_service_i.dart';
 import 'package:talker/talker.dart';
-
-/// Service interface for orchestrating the POS terminal payment flow.
-abstract interface class TerminalPaymentServiceI {
-  /// Starts the complete terminal payment flow.
-  ///
-  /// Flow:
-  /// 1. Creates payment token via backend
-  /// 2. Launches PrivatBank Terminal
-  /// 3. Waits for deep link callback (with timeout)
-  /// 4. Verifies payment via backend
-  /// 5. Returns final PaymentResult
-  ///
-  /// Throws only [PaymentCancelledException] (cancel) or
-  /// [TerminalPaymentException] subclasses (failure). Every
-  /// repository/terminal/deep-link error is translated at this boundary; no
-  /// implementation-specific exception escapes.
-  Future<PaymentResult> startPayment(CreatePaymentRequest request);
-
-  /// Aborts an in-flight [startPayment] from the UI side (cashier cancel).
-  ///
-  /// Completes the in-flight session's completer with a
-  /// [PaymentCancelledException] so the caller observes a clean cancellation
-  /// instead of a hang. A no-op when no payment is active, the session has
-  /// already terminated, or the payment has already committed (a callback
-  /// completed the completer first — we must not claim a cancellation after the
-  /// terminal/backend may already have completed the charge).
-  void cancelPayment();
-}
-
-/// Marker for every exception the terminal service can surface. The handler
-/// maps these uniformly into the app-level [PaymentException], preserving the
-/// [reason] so the boundary stays machine-readable.
-abstract interface class TerminalPaymentException implements Exception {
-  String get message;
-  PaymentFailureReason get reason;
-}
 
 /// Implementation of [TerminalPaymentServiceI].
 @Injectable(as: TerminalPaymentServiceI)
@@ -76,9 +41,9 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
   /// Completer for the in-flight [startPayment] future, or `null` when idle.
   ///
   /// Hoisted to an instance field so [cancelPayment] can complete it with a
-  /// [PaymentCancelledException] from outside the method. Assigned right after
-  /// `_activeSessionId` is set (before the first `await`) and nulled in the
-  /// `finally` block.
+  /// [TerminalPaymentCancelledException] from outside the method. Assigned
+  /// right after `_activeSessionId` is set (before the first `await`) and
+  /// nulled in the `finally` block.
   Completer<String>? _completer;
 
   /// The id of the in-flight payment session, or `null` when idle.
@@ -229,7 +194,7 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
     } on TerminalLaunchException catch (e) {
       _talker.error('🔴 [Terminal Payment] Failed to launch terminal', e);
       throw TerminalLaunchFailedException(e.message);
-    } on PaymentCancelledException {
+    } on TerminalPaymentCancelledException {
       _talker.warning(
         '🟡 [Terminal Payment] Payment cancelled by terminal/user',
       );
@@ -271,7 +236,9 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
         completer != null &&
         !completer.isCompleted) {
       completer.completeError(
-        const PaymentCancelledException('Оплату скасовано у терміналі.'),
+        const TerminalPaymentCancelledException(
+          'Оплату скасовано у терміналі.',
+        ),
         StackTrace.current,
       );
     }
@@ -280,7 +247,8 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
   /// Validates an incoming callback URI and returns its transaction id.
   ///
   /// Throws:
-  /// - [PaymentCancelledException] when the terminal reports cancellation.
+  /// - [TerminalPaymentCancelledException] when the terminal reports
+  ///   cancellation.
   /// - [PaymentTerminalFailureException] when the terminal reports a failure
   ///   without a usable transaction id.
   /// - [InvalidCallbackException] for any other malformed / untrusted callback.
@@ -312,7 +280,9 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
 
     switch (status) {
       case PaymentStatus.cancelled:
-        throw const PaymentCancelledException('Оплату скасовано у терміналі.');
+        throw const TerminalPaymentCancelledException(
+          'Оплату скасовано у терміналі.',
+        );
       case PaymentStatus.timeout:
         throw const PaymentCallbackTimeoutException(
           'Оплату перервано за таймаутом у терміналі.',
@@ -362,132 +332,4 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
   bool _isPaymentCallback(Uri uri) =>
       uri.scheme == PaymentConfig.callbackScheme &&
       uri.host == PaymentConfig.callbackHost;
-}
-
-/// Payment outcome statuses carried by the terminal's callback URI.
-///
-/// This is PRRO's *internal* mapping of the terminal callback protocol — a
-/// fixed set of `status` query-parameter strings shared only at the URI
-/// level. The two apps never exchange Dart types.
-enum PaymentStatus {
-  /// Payment completed successfully (carries a `transactionId`).
-  success,
-
-  /// Payment was declined by the terminal (no `transactionId`).
-  declined,
-
-  /// Payment was cancelled by the user (no `transactionId`).
-  cancelled,
-
-  /// Payment encountered a terminal error (may carry an `errorCode`).
-  error,
-
-  /// Payment timed out at the terminal (no `transactionId`).
-  timeout;
-
-  /// Parses the terminal's `status` query parameter (case-insensitive).
-  /// Returns `null` for any value outside the callback contract.
-  static PaymentStatus? tryParse(String? raw) {
-    switch (raw?.trim().toLowerCase()) {
-      case 'success':
-        return PaymentStatus.success;
-      case 'declined':
-        return PaymentStatus.declined;
-      case 'error':
-        return PaymentStatus.error;
-      case 'cancelled':
-      case 'canceled':
-        return PaymentStatus.cancelled;
-      case 'timeout':
-        return PaymentStatus.timeout;
-      default:
-        return null;
-    }
-  }
-}
-
-/// Exception thrown when the terminal app cannot be launched.
-class TerminalLaunchFailedException implements TerminalPaymentException {
-  const TerminalLaunchFailedException(this.message);
-  @override
-  final String message;
-  @override
-  PaymentFailureReason get reason => PaymentFailureReason.terminalUnavailable;
-  @override
-  String toString() => 'TerminalLaunchFailedException: $message';
-}
-
-/// Exception thrown when the payment callback times out.
-class PaymentCallbackTimeoutException implements TerminalPaymentException {
-  const PaymentCallbackTimeoutException(this.message);
-  @override
-  final String message;
-  @override
-  PaymentFailureReason get reason => PaymentFailureReason.terminalTimeout;
-  @override
-  String toString() => 'PaymentCallbackTimeoutException: $message';
-}
-
-/// Exception thrown when the callback URI is malformed.
-class InvalidCallbackException implements TerminalPaymentException {
-  const InvalidCallbackException(this.message);
-  @override
-  final String message;
-  @override
-  PaymentFailureReason get reason => PaymentFailureReason.invalidCallback;
-  @override
-  String toString() => 'InvalidCallbackException: $message';
-}
-
-/// Exception thrown when the terminal reports a payment failure without a
-/// usable transaction id (e.g. `status=error`/`status=failed`).
-class PaymentTerminalFailureException implements TerminalPaymentException {
-  const PaymentTerminalFailureException(this.message);
-  @override
-  final String message;
-  @override
-  PaymentFailureReason get reason => PaymentFailureReason.terminalDeclined;
-  @override
-  String toString() => 'PaymentTerminalFailureException: $message';
-}
-
-/// Exception thrown when payment is cancelled by user.
-class PaymentCancelledException implements Exception {
-  const PaymentCancelledException(this.message);
-  final String message;
-  @override
-  String toString() => 'PaymentCancelledException: $message';
-}
-
-/// Exception thrown when `startPayment` is called while another payment
-/// session is already active. Enforced by the single-active-session guard
-/// (`activeSessionId`) as the strongest defense against stale/duplicate
-/// callbacks from the global deep-link broadcast stream.
-class PaymentAlreadyInProgressException implements TerminalPaymentException {
-  const PaymentAlreadyInProgressException(this.message);
-  @override
-  final String message;
-  @override
-  PaymentFailureReason get reason => PaymentFailureReason.alreadyInProgress;
-  @override
-  String toString() => 'PaymentAlreadyInProgressException: $message';
-}
-
-/// Exception thrown for any unexpected internal/repository/deep-link failure
-/// that is not one of the well-defined terminal/callback outcomes.
-class PaymentOperationException implements TerminalPaymentException {
-  PaymentOperationException(
-    this.message,
-    this.reason, {
-    this.cause,
-    this.stackTrace,
-  });
-  @override
-  final String message;
-  @override
-  final PaymentFailureReason reason;
-  final Object? cause;
-  final StackTrace? stackTrace;
-  @override
-  String toString() => 'PaymentOperationException(${reason.name}): $message';
 }

@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prro/data/api/models/payment/payment_request.dart';
-import 'package:prro/data/api/models/payment/payment_result.dart';
-import 'package:prro/data/api/models/payment/payment_token.dart';
-import 'package:prro/data/repositories/payment_repository/payment_repository_mock.dart';
+import 'package:prro/features/payment/data/mock/payment_repository_mock.dart';
+import 'package:prro/features/payment/data/models/payment_request.dart';
+import 'package:prro/features/payment/data/models/payment_result.dart';
+import 'package:prro/features/payment/data/models/payment_token.dart';
 
 void main() {
   group('PaymentRepositoryMock', () {

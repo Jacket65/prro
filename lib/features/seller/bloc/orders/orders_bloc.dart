@@ -10,9 +10,9 @@ import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/core/utils/uuid.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
-import 'package:prro/features/seller/bloc/orders/payment/pay_order_request.dart';
-import 'package:prro/features/seller/bloc/orders/payment/pay_order_use_case.dart';
-import 'package:prro/features/seller/bloc/orders/payment/payment_exceptions.dart';
+import 'package:prro/features/payment/domain/payment_exceptions.dart';
+import 'package:prro/features/seller/domain/payment/pay_order_request.dart';
+import 'package:prro/features/seller/domain/usecases/pay_order_use_case.dart';
 
 part 'orders_event.dart';
 part 'orders_state.dart';

@@ -5,12 +5,12 @@ import 'package:mocktail/mocktail.dart';
 import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
-import 'package:prro/features/seller/bloc/orders/payment/handlers/cash_payment_handler.dart';
-import 'package:prro/features/seller/bloc/orders/payment/handlers/terminal_payment_handler.dart';
-import 'package:prro/features/seller/bloc/orders/payment/pay_order_request.dart';
-import 'package:prro/features/seller/bloc/orders/payment/pay_order_use_case.dart';
-import 'package:prro/features/seller/bloc/orders/payment/payment_exceptions.dart';
-import 'package:prro/features/seller/bloc/orders/payment/payment_method_handler.dart';
+import 'package:prro/features/payment/domain/payment_exceptions.dart';
+import 'package:prro/features/seller/domain/payment/handlers/cash_payment_handler.dart';
+import 'package:prro/features/seller/domain/payment/handlers/terminal_payment_handler.dart';
+import 'package:prro/features/seller/domain/payment/pay_order_request.dart';
+import 'package:prro/features/seller/domain/payment/payment_method_handler.dart';
+import 'package:prro/features/seller/domain/usecases/pay_order_use_case.dart';
 
 class MockCashHandler extends Mock implements CashPaymentHandler {}
 

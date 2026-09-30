@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
-import 'package:prro/data/api/models/payment/payment_request.dart';
-import 'package:prro/data/api/models/payment/payment_result.dart';
-import 'package:prro/data/api/models/payment/payment_token.dart';
+import 'package:prro/features/payment/data/models/payment_request.dart';
+import 'package:prro/features/payment/data/models/payment_result.dart';
+import 'package:prro/features/payment/data/models/payment_token.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Service interface for payment-related API calls.

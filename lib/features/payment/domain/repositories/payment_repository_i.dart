@@ -1,6 +1,6 @@
-import 'package:prro/data/api/models/payment/payment_request.dart';
-import 'package:prro/data/api/models/payment/payment_result.dart';
-import 'package:prro/data/api/models/payment/payment_token.dart';
+import 'package:prro/features/payment/data/models/payment_request.dart';
+import 'package:prro/features/payment/data/models/payment_result.dart';
+import 'package:prro/features/payment/data/models/payment_token.dart';
 
 /// Repository interface for payment operations.
 abstract interface class PaymentRepositoryI {
