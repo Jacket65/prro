@@ -1,9 +1,9 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:prro/data/api/models/admin/admin_user.dart';
-import 'package:prro/data/repositories/admin_user_repository/admin_user_repository.dart';
-import 'package:prro/features/admin/tellers/tellers_cubit.dart';
+import 'package:prro/features/admin/data/models/admin_user.dart';
+import 'package:prro/features/admin/domain/repositories/admin_user_repository_i.dart';
+import 'package:prro/features/admin/presentation/cubit/tellers/tellers_cubit.dart';
 
 class MockAdminUserRepository extends Mock implements AdminUserRepositoryI {}
 

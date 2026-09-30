@@ -12,23 +12,28 @@
 
 import 'package:auto_route/auto_route.dart' as _i17;
 import 'package:material_ui/material_ui.dart' as _i18;
-import 'package:prro/features/admin/admin_shell.dart' as _i1;
-import 'package:prro/features/admin/items/items_screen.dart' as _i3;
-import 'package:prro/features/admin/items/screens/category_detail_screen.dart'
+import 'package:prro/features/admin/presentation/screens/admin_shell.dart'
+    as _i1;
+import 'package:prro/features/admin/presentation/screens/items/category_detail_screen.dart'
     as _i2;
-import 'package:prro/features/admin/items/screens/product_detail_screen.dart'
+import 'package:prro/features/admin/presentation/screens/items/items_screen.dart'
+    as _i3;
+import 'package:prro/features/admin/presentation/screens/items/product_detail_screen.dart'
     as _i11;
-import 'package:prro/features/admin/items/screens/variant_detail_screen.dart'
+import 'package:prro/features/admin/presentation/screens/items/variant_detail_screen.dart'
     as _i16;
-import 'package:prro/features/admin/orders/orders_screen.dart' as _i9;
-import 'package:prro/features/admin/orders/screens/order_detail_screen.dart'
+import 'package:prro/features/admin/presentation/screens/orders/order_detail_screen.dart'
     as _i5;
-import 'package:prro/features/admin/orders/screens/orders_history_screen.dart'
+import 'package:prro/features/admin/presentation/screens/orders/orders_history_screen.dart'
     as _i7;
-import 'package:prro/features/admin/orders/screens/shifts_history_screen.dart'
+import 'package:prro/features/admin/presentation/screens/orders/orders_screen.dart'
+    as _i9;
+import 'package:prro/features/admin/presentation/screens/orders/shifts_history_screen.dart'
     as _i13;
-import 'package:prro/features/admin/outlets/outlets_screen.dart' as _i10;
-import 'package:prro/features/admin/tellers/tellers_screen.dart' as _i15;
+import 'package:prro/features/admin/presentation/screens/outlets/outlets_screen.dart'
+    as _i10;
+import 'package:prro/features/admin/presentation/screens/tellers/tellers_screen.dart'
+    as _i15;
 import 'package:prro/features/auth/presentation/screens/login_screen.dart'
     as _i4;
 import 'package:prro/features/seller/screens/order_history/order_detail_screen.dart'

@@ -19,24 +19,6 @@ import 'package:prro/core/network/api_client_i.dart' as _i787;
 import 'package:prro/core/security/in_memory_token_storage.dart' as _i344;
 import 'package:prro/core/security/secure_token_storage.dart' as _i203;
 import 'package:prro/core/security/token_storage_i.dart' as _i330;
-import 'package:prro/data/repositories/admin_catalog_repository/admin_catalog_repository.dart'
-    as _i219;
-import 'package:prro/data/repositories/admin_catalog_repository/admin_catalog_repository_impl.dart'
-    as _i608;
-import 'package:prro/data/repositories/admin_catalog_repository/admin_catalog_repository_mock.dart'
-    as _i362;
-import 'package:prro/data/repositories/admin_outlet_repository/admin_outlet_repository.dart'
-    as _i738;
-import 'package:prro/data/repositories/admin_outlet_repository/admin_outlet_repository_impl.dart'
-    as _i874;
-import 'package:prro/data/repositories/admin_outlet_repository/admin_outlet_repository_mock.dart'
-    as _i433;
-import 'package:prro/data/repositories/admin_user_repository/admin_user_repository.dart'
-    as _i75;
-import 'package:prro/data/repositories/admin_user_repository/admin_user_repository_impl.dart'
-    as _i93;
-import 'package:prro/data/repositories/admin_user_repository/admin_user_repository_mock.dart'
-    as _i461;
 import 'package:prro/data/repositories/balance/balance.dart' as _i379;
 import 'package:prro/data/repositories/balance/balance_i.dart' as _i296;
 import 'package:prro/data/repositories/balance/balance_repository_mock.dart'
@@ -67,6 +49,24 @@ import 'package:prro/data/services/mock_balance_service.dart' as _i976;
 import 'package:prro/data/services/mock_items_service.dart' as _i649;
 import 'package:prro/data/services/order_history_service.dart' as _i772;
 import 'package:prro/data/services/order_history_service_mock.dart' as _i422;
+import 'package:prro/features/admin/data/mock/admin_catalog_repository_mock.dart'
+    as _i798;
+import 'package:prro/features/admin/data/mock/admin_outlet_repository_mock.dart'
+    as _i412;
+import 'package:prro/features/admin/data/mock/admin_user_repository_mock.dart'
+    as _i877;
+import 'package:prro/features/admin/data/repositories/admin_catalog_repository_impl.dart'
+    as _i744;
+import 'package:prro/features/admin/data/repositories/admin_outlet_repository_impl.dart'
+    as _i328;
+import 'package:prro/features/admin/data/repositories/admin_user_repository_impl.dart'
+    as _i524;
+import 'package:prro/features/admin/domain/repositories/admin_catalog_repository_i.dart'
+    as _i617;
+import 'package:prro/features/admin/domain/repositories/admin_outlet_repository_i.dart'
+    as _i310;
+import 'package:prro/features/admin/domain/repositories/admin_user_repository_i.dart'
+    as _i1053;
 import 'package:prro/features/auth/data/repositories/auth_repository.dart'
     as _i76;
 import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart'
@@ -160,8 +160,12 @@ extension GetItInjectableX on _i174.GetIt {
       registerFor: {_mock},
     );
     gh.singleton<_i361.Dio>(() => appModule.dio(), registerFor: {_prod});
-    gh.singleton<_i219.AdminCatalogRepositoryI>(
-      () => _i362.AdminCatalogRepositoryMock(gh<_i1010.MockBackend>()),
+    gh.singleton<_i1053.AdminUserRepositoryI>(
+      () => _i877.AdminUserRepositoryMock(gh<_i1010.MockBackend>()),
+      registerFor: {_mock},
+    );
+    gh.singleton<_i310.AdminOutletRepositoryI>(
+      () => _i412.AdminOutletRepositoryMock(gh<_i1010.MockBackend>()),
       registerFor: {_mock},
     );
     gh.singleton<_i232.OrdersRepositoryI>(
@@ -175,8 +179,8 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i971.ItemsRepositoryMock(gh<_i1010.MockBackend>()),
       registerFor: {_mock},
     );
-    gh.singleton<_i738.AdminOutletRepositoryI>(
-      () => _i433.AdminOutletRepositoryMock(gh<_i1010.MockBackend>()),
+    gh.singleton<_i617.AdminCatalogRepositoryI>(
+      () => _i798.AdminCatalogRepositoryMock(gh<_i1010.MockBackend>()),
       registerFor: {_mock},
     );
     gh.singleton<_i787.ApiClientI>(
@@ -202,10 +206,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i392.ShiftRepositoryMock(gh<_i28.ShiftServiceI>()),
       registerFor: {_mock},
     );
-    gh.singleton<_i75.AdminUserRepositoryI>(
-      () => _i461.AdminUserRepositoryMock(gh<_i1010.MockBackend>()),
-      registerFor: {_mock},
-    );
     gh.singleton<_i134.PaymentServiceI>(
       () => appModule.paymentService(
         gh<_i787.ApiClientI>(),
@@ -228,16 +228,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i883.PaymentRepositoryImpl(gh<_i134.PaymentServiceI>()),
       registerFor: {_prod},
     );
-    gh.singleton<_i738.AdminOutletRepositoryI>(
-      () => _i874.AdminOutletRepositoryImpl(gh<_i787.ApiClientI>()),
+    gh.singleton<_i310.AdminOutletRepositoryI>(
+      () => _i328.AdminOutletRepositoryImpl(gh<_i787.ApiClientI>()),
       registerFor: {_prod},
     );
-    gh.singleton<_i219.AdminCatalogRepositoryI>(
-      () => _i608.AdminCatalogRepositoryImpl(gh<_i787.ApiClientI>()),
-      registerFor: {_prod},
-    );
-    gh.singleton<_i75.AdminUserRepositoryI>(
-      () => _i93.AdminUserRepositoryImpl(gh<_i787.ApiClientI>()),
+    gh.singleton<_i617.AdminCatalogRepositoryI>(
+      () => _i744.AdminCatalogRepositoryImpl(gh<_i787.ApiClientI>()),
       registerFor: {_prod},
     );
     gh.factory<_i249.TerminalPaymentServiceI>(
@@ -247,6 +243,10 @@ extension GetItInjectableX on _i174.GetIt {
         deepLinkService: gh<_i792.DeepLinkServiceI>(),
         talker: gh<_i993.Talker>(),
       ),
+    );
+    gh.singleton<_i1053.AdminUserRepositoryI>(
+      () => _i524.AdminUserRepositoryImpl(gh<_i787.ApiClientI>()),
+      registerFor: {_prod},
     );
     gh.singleton<_i28.ShiftServiceI>(
       () => _i426.ShiftService(

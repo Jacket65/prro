@@ -1,9 +1,9 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:prro/data/api/models/admin/catalog.dart';
-import 'package:prro/data/repositories/admin_catalog_repository/admin_catalog_repository.dart';
-import 'package:prro/features/admin/items/variant_detail_cubit.dart';
+import 'package:prro/features/admin/data/models/catalog.dart';
+import 'package:prro/features/admin/domain/repositories/admin_catalog_repository_i.dart';
+import 'package:prro/features/admin/presentation/cubit/items/variant_detail_cubit.dart';
 
 class MockAdminCatalogRepository extends Mock
     implements AdminCatalogRepositoryI {}

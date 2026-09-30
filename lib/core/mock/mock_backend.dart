@@ -9,7 +9,7 @@ import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/mock/order_request_dto.dart';
 import 'package:prro/core/utils/money.dart';
-import 'package:prro/data/api/models/admin/admin_models.dart';
+import 'package:prro/features/admin/data/models/admin_models.dart';
 
 /// In-memory "server" used while the real backend's order/catalog endpoints
 /// are not ready. Every method mimics a real round-trip: configurable latency,

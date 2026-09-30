@@ -1,9 +1,9 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:prro/data/api/models/admin/retail_outlet.dart';
-import 'package:prro/data/repositories/admin_outlet_repository/admin_outlet_repository.dart';
-import 'package:prro/features/admin/outlets/outlets_cubit.dart';
+import 'package:prro/features/admin/data/models/retail_outlet.dart';
+import 'package:prro/features/admin/domain/repositories/admin_outlet_repository_i.dart';
+import 'package:prro/features/admin/presentation/cubit/outlets/outlets_cubit.dart';
 
 class MockAdminOutletRepository extends Mock
     implements AdminOutletRepositoryI {}
