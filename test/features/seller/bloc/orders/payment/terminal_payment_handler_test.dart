@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:prro/core/domain/order.dart';
-import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
 import 'package:prro/features/payment/data/models/payment_request.dart';
 import 'package:prro/features/payment/data/models/payment_result.dart';
 import 'package:prro/features/payment/domain/payment_exceptions.dart';
 import 'package:prro/features/payment/domain/repositories/terminal_payment_service_i.dart' as terminal;
 import 'package:prro/features/seller/domain/payment/handlers/terminal_payment_handler.dart';
 import 'package:prro/features/seller/domain/payment/payment_method_handler.dart';
+import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 
 class MockTerminalService extends Mock
     implements terminal.TerminalPaymentServiceI {}

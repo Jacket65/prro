@@ -36,13 +36,14 @@ import 'package:prro/features/admin/presentation/screens/tellers/tellers_screen.
     as _i15;
 import 'package:prro/features/auth/presentation/screens/login_screen.dart'
     as _i4;
-import 'package:prro/features/seller/screens/order_history/order_detail_screen.dart'
+import 'package:prro/features/seller/presentation/screens/order_history/order_detail_screen.dart'
     as _i6;
-import 'package:prro/features/seller/screens/order_history/orders_history_screen.dart'
+import 'package:prro/features/seller/presentation/screens/order_history/orders_history_screen.dart'
     as _i8;
-import 'package:prro/features/seller/screens/order_history/shifts_history_screen.dart'
+import 'package:prro/features/seller/presentation/screens/order_history/shifts_history_screen.dart'
     as _i14;
-import 'package:prro/features/seller/screens/seller_screen.dart' as _i12;
+import 'package:prro/features/seller/presentation/screens/seller_screen.dart'
+    as _i12;
 
 /// generated route for
 /// [_i1.AdminShell]

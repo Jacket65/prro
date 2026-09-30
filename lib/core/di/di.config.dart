@@ -19,38 +19,16 @@ import 'package:prro/core/network/api_client_i.dart' as _i787;
 import 'package:prro/core/security/in_memory_token_storage.dart' as _i344;
 import 'package:prro/core/security/secure_token_storage.dart' as _i203;
 import 'package:prro/core/security/token_storage_i.dart' as _i330;
-import 'package:prro/data/repositories/balance/balance.dart' as _i379;
-import 'package:prro/data/repositories/balance/balance_i.dart' as _i296;
-import 'package:prro/data/repositories/balance/balance_repository_mock.dart'
-    as _i797;
-import 'package:prro/data/repositories/items_repository/items_repo.dart'
-    as _i244;
-import 'package:prro/data/repositories/items_repository/items_repo_i.dart'
-    as _i668;
-import 'package:prro/data/repositories/items_repository/items_repository.dart'
-    as _i369;
-import 'package:prro/data/repositories/items_repository/items_repository_mock.dart'
-    as _i971;
 import 'package:prro/data/repositories/order_history/order_history_repo_i.dart'
     as _i923;
 import 'package:prro/data/repositories/order_history/order_history_repository.dart'
     as _i260;
 import 'package:prro/data/repositories/order_history/order_history_repository_mock.dart'
     as _i920;
-import 'package:prro/data/repositories/orders_repository/orders_repository.dart'
-    as _i232;
-import 'package:prro/data/repositories/orders_repository/orders_repository_impl.dart'
-    as _i307;
-import 'package:prro/data/repositories/orders_repository/orders_repository_mock.dart'
-    as _i499;
-import 'package:prro/data/services/balance.dart' as _i566;
-import 'package:prro/data/services/items_service.dart' as _i639;
-import 'package:prro/data/services/mock_balance_service.dart' as _i976;
-import 'package:prro/data/services/mock_items_service.dart' as _i649;
 import 'package:prro/data/services/order_history_service.dart' as _i772;
 import 'package:prro/data/services/order_history_service_mock.dart' as _i422;
 import 'package:prro/features/admin/data/mock/admin_catalog_repository_mock.dart'
-    as _i798;
+    as _i797;
 import 'package:prro/features/admin/data/mock/admin_outlet_repository_mock.dart'
     as _i412;
 import 'package:prro/features/admin/data/mock/admin_user_repository_mock.dart'
@@ -87,10 +65,28 @@ import 'package:prro/features/payment/domain/repositories/payment_repository_i.d
     as _i943;
 import 'package:prro/features/payment/domain/repositories/terminal_payment_service_i.dart'
     as _i249;
+import 'package:prro/features/seller/data/mock/balance_repository_mock.dart'
+    as _i728;
+import 'package:prro/features/seller/data/mock/items_repository_mock.dart'
+    as _i972;
+import 'package:prro/features/seller/data/mock/orders_repository_mock.dart'
+    as _i411;
+import 'package:prro/features/seller/data/repositories/balance_repository.dart'
+    as _i445;
+import 'package:prro/features/seller/data/repositories/items_repository.dart'
+    as _i1038;
+import 'package:prro/features/seller/data/repositories/orders_repository_impl.dart'
+    as _i278;
 import 'package:prro/features/seller/domain/payment/handlers/cash_payment_handler.dart'
     as _i131;
 import 'package:prro/features/seller/domain/payment/handlers/terminal_payment_handler.dart'
     as _i1000;
+import 'package:prro/features/seller/domain/repositories/balance_repository_i.dart'
+    as _i132;
+import 'package:prro/features/seller/domain/repositories/items_repository_i.dart'
+    as _i691;
+import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart'
+    as _i876;
 import 'package:prro/features/seller/domain/usecases/pay_order_use_case.dart'
     as _i367;
 import 'package:prro/features/shift/data/mock/mock_shift_service.dart' as _i699;
@@ -121,22 +117,18 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i131.CashPaymentHandler>(() => _i131.CashPaymentHandler());
     gh.singleton<_i993.Talker>(() => appModule.talker());
-    gh.singleton<_i296.BalanceServiceI>(
-      () => _i976.MockBalanceService(),
-      registerFor: {_mock},
-    );
     gh.singleton<_i772.OrderHistoryServiceI>(
       () => _i422.OrderHistoryServiceMock(),
       registerFor: {_mock},
     );
     gh.factory<_i792.DeepLinkServiceI>(() => _i792.DeepLinkService());
+    gh.singleton<_i132.BalanceRepositoryI>(
+      () => _i728.BalanceRepositoryMock(),
+      registerFor: {_mock},
+    );
     gh.lazySingleton<_i944.TerminalLauncherI>(() => _i944.TerminalLauncher());
     gh.lazySingleton<_i943.PaymentRepositoryI>(
       () => _i84.PaymentRepositoryMock(),
-      registerFor: {_mock},
-    );
-    gh.singleton<_i296.BalanceRepositoryI>(
-      () => _i797.BalanceRepositoryMock(),
       registerFor: {_mock},
     );
     gh.singleton<_i330.TokenStorageI>(
@@ -164,23 +156,19 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i877.AdminUserRepositoryMock(gh<_i1010.MockBackend>()),
       registerFor: {_mock},
     );
-    gh.singleton<_i310.AdminOutletRepositoryI>(
-      () => _i412.AdminOutletRepositoryMock(gh<_i1010.MockBackend>()),
-      registerFor: {_mock},
-    );
-    gh.singleton<_i232.OrdersRepositoryI>(
-      () => _i499.OrdersRepositoryMock(
+    gh.singleton<_i876.OrdersRepositoryI>(
+      () => _i411.OrdersRepositoryMock(
         gh<_i1010.MockBackend>(),
         gh<_i772.OrderHistoryServiceI>(),
       ),
       registerFor: {_mock},
     );
-    gh.singleton<_i369.ItemsRepositoryI>(
-      () => _i971.ItemsRepositoryMock(gh<_i1010.MockBackend>()),
+    gh.singleton<_i310.AdminOutletRepositoryI>(
+      () => _i412.AdminOutletRepositoryMock(gh<_i1010.MockBackend>()),
       registerFor: {_mock},
     );
     gh.singleton<_i617.AdminCatalogRepositoryI>(
-      () => _i798.AdminCatalogRepositoryMock(gh<_i1010.MockBackend>()),
+      () => _i797.AdminCatalogRepositoryMock(gh<_i1010.MockBackend>()),
       registerFor: {_mock},
     );
     gh.singleton<_i787.ApiClientI>(
@@ -191,20 +179,17 @@ extension GetItInjectableX on _i174.GetIt {
       () => appModule.mockApiClient(gh<_i1010.MockBackend>()),
       registerFor: {_mock},
     );
-    gh.singleton<_i668.ItemsServiceI>(
-      () => _i639.ItemsService(
-        apiClient: gh<_i787.ApiClientI>(),
-        prefs: gh<_i460.SharedPreferences>(),
-      ),
-      registerFor: {_prod},
-    );
-    gh.singleton<_i668.ItemsRepositoryI>(
-      () => _i244.ItemsRepository(gh<_i668.ItemsServiceI>()),
-      registerFor: {_prod},
+    gh.singleton<_i691.ItemsRepositoryI>(
+      () => _i972.ItemsRepositoryMock(gh<_i1010.MockBackend>()),
+      registerFor: {_mock},
     );
     gh.singleton<_i28.ShiftRepositoryI>(
       () => _i392.ShiftRepositoryMock(gh<_i28.ShiftServiceI>()),
       registerFor: {_mock},
+    );
+    gh.singleton<_i132.BalanceRepositoryI>(
+      () => _i445.BalanceRepository(apiClient: gh<_i787.ApiClientI>()),
+      registerFor: {_prod},
     );
     gh.singleton<_i134.PaymentServiceI>(
       () => appModule.paymentService(
@@ -212,10 +197,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferences>(),
       ),
       registerFor: {_prod},
-    );
-    gh.singleton<_i668.ItemsServiceI>(
-      () => _i649.MockItemsService(gh<_i1010.MockBackend>()),
-      registerFor: {_mock},
     );
     gh.singleton<_i749.AuthRepositoryI>(
       () => _i76.AuthRepositoryImpl(
@@ -262,12 +243,15 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       registerFor: {_prod},
     );
-    gh.singleton<_i296.BalanceServiceI>(
-      () => _i566.BalanceService(apiClient: gh<_i787.ApiClientI>()),
+    gh.singleton<_i691.ItemsRepositoryI>(
+      () => _i1038.ItemsRepository(
+        apiClient: gh<_i787.ApiClientI>(),
+        prefs: gh<_i460.SharedPreferences>(),
+      ),
       registerFor: {_prod},
     );
-    gh.singleton<_i232.OrdersRepositoryI>(
-      () => _i307.OrdersRepositoryImpl(
+    gh.singleton<_i876.OrdersRepositoryI>(
+      () => _i278.OrdersRepositoryImpl(
         apiClient: gh<_i787.ApiClientI>(),
         prefs: gh<_i460.SharedPreferences>(),
       ),
@@ -277,27 +261,22 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i260.OrderHistoryRepositoryImpl(gh<_i772.OrderHistoryServiceI>()),
       registerFor: {_prod},
     );
-    gh.singleton<_i28.ShiftRepositoryI>(
-      () => _i277.ShiftRepositoryImpl(gh<_i28.ShiftServiceI>()),
-      registerFor: {_prod},
-    );
     gh.factory<_i1000.TerminalPaymentHandler>(
       () => _i1000.TerminalPaymentHandler(
         gh<_i249.TerminalPaymentServiceI>(),
-        gh<_i232.OrdersRepositoryI>(),
+        gh<_i876.OrdersRepositoryI>(),
       ),
-    );
-    gh.singleton<_i296.BalanceRepositoryI>(
-      () =>
-          _i379.BalanceRepository(balanceService: gh<_i296.BalanceServiceI>()),
-      registerFor: {_prod},
     );
     gh.factory<_i367.PayOrderUseCase>(
       () => _i367.PayOrderUseCase(
-        ordersRepository: gh<_i232.OrdersRepositoryI>(),
+        ordersRepository: gh<_i876.OrdersRepositoryI>(),
         cash: gh<_i131.CashPaymentHandler>(),
         terminal: gh<_i1000.TerminalPaymentHandler>(),
       ),
+    );
+    gh.singleton<_i28.ShiftRepositoryI>(
+      () => _i277.ShiftRepositoryImpl(gh<_i28.ShiftServiceI>()),
+      registerFor: {_prod},
     );
     return this;
   }

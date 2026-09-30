@@ -1,12 +1,12 @@
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/utils/money.dart';
-import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
 import 'package:prro/features/payment/domain/payment_exceptions.dart';
 import 'package:prro/features/seller/domain/payment/handlers/cash_payment_handler.dart';
 import 'package:prro/features/seller/domain/payment/handlers/terminal_payment_handler.dart';
 import 'package:prro/features/seller/domain/payment/pay_order_request.dart';
 import 'package:prro/features/seller/domain/payment/payment_method_handler.dart';
+import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 
 /// Coordinates a single payment: picks the [PaymentMethodHandler] for the
 /// requested method, runs its method-specific [PaymentMethodHandler.pay],

@@ -4,7 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
-import 'package:prro/data/repositories/orders_repository/orders_repository_impl.dart';
+import 'package:prro/features/seller/data/repositories/orders_repository_impl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockApiClient extends Mock implements ApiClientI {}

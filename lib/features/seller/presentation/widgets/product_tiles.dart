@@ -1,0 +1,44 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:prro/core/domain/catalog_item.dart';
+import 'package:prro/features/seller/presentation/bloc/items_tiles/items_tiles_bloc.dart';
+import 'package:prro/features/seller/presentation/widgets/show_item.dart';
+
+class ProductTiles extends StatelessWidget {
+  const ProductTiles({required this.items, required this.cangoback, super.key});
+  final List<Item> items;
+  final bool cangoback;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 250,
+        ),
+        itemCount: cangoback ? items.length + 1 : items.length,
+        itemBuilder: (context, index) {
+          if (cangoback) {
+            return _ifCanGoBack(index, context);
+          } else {
+            return Card(color: Colors.white, child: ShowItem(items[index]));
+          }
+        },
+      ),
+    );
+  }
+
+  Card _ifCanGoBack(int index, BuildContext context) {
+    return index == 0
+        ? Card(
+            color: Colors.white,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                context.read<ItemsTilesBloc>().add(ItemsTilesBack());
+              },
+            ),
+          )
+        : Card(color: Colors.white, child: ShowItem(items[index - 1]));
+  }
+}
