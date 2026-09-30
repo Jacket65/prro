@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/data/api/models/shift.dart';
-import 'package:prro/data/repositories/shift_repository/shift_repository.dart';
+import 'package:prro/features/shift/domain/entities/shift.dart';
+import 'package:prro/features/shift/domain/repositories/shift_repository_i.dart';
 
 part 'shift_state.dart';
 

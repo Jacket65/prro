@@ -8,17 +8,17 @@ import 'package:prro/core/router/app_router.gr.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
 import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
-import 'package:prro/features/auth/bloc/auth_bloc.dart';
-import 'package:prro/features/auth/bloc/auth_event.dart';
+import 'package:prro/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:prro/features/auth/presentation/bloc/auth_event.dart';
 import 'package:prro/features/seller/bloc/balance/balance_cubit.dart';
 import 'package:prro/features/seller/bloc/items_tiles/items_tiles_bloc.dart';
 import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 import 'package:prro/features/seller/bloc/search/catalog_search_cubit.dart';
 import 'package:prro/features/seller/domain/usecases/pay_order_use_case.dart';
 import 'package:prro/features/seller/widgets/widgets.dart';
-import 'package:prro/features/shift/bloc/bloc.dart';
-import 'package:prro/features/shift/widgets/close_shift_dialog.dart';
-import 'package:prro/features/shift/widgets/open_shift_dialog.dart';
+import 'package:prro/features/shift/presentation/cubit/shift_cubit.dart';
+import 'package:prro/features/shift/presentation/widgets/close_shift_dialog.dart';
+import 'package:prro/features/shift/presentation/widgets/open_shift_dialog.dart';
 
 @RoutePage(name: 'SellerRoute')
 class SellerScreen extends StatefulWidget {

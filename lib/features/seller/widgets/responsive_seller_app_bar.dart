@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/features/auth/bloc/auth_bloc.dart';
-import 'package:prro/features/auth/bloc/auth_state.dart';
+import 'package:prro/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:prro/features/auth/presentation/bloc/auth_state.dart';
 import 'package:prro/features/seller/bloc/balance/balance_cubit.dart';
 import 'package:prro/features/seller/widgets/custom_popup_menu.dart';
 import 'package:prro/features/seller/widgets/search_field.dart';

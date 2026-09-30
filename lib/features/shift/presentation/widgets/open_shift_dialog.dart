@@ -2,12 +2,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:prro/core/utils/money.dart';
 import 'package:prro/core/utils/uuid.dart';
-import 'package:prro/features/shift/bloc/bloc.dart';
+import 'package:prro/features/shift/presentation/cubit/shift_cubit.dart';
 
-/// Asks for the counted cash and closes the current shift
-/// (`PATCH .../shift/close`). Pops `true` once the backend confirms (204).
-class CloseShiftDialog extends StatefulWidget {
-  const CloseShiftDialog({super.key});
+/// Asks for the starting cash and opens a shift (`POST .../shift/open`).
+/// Pops `true` once the backend confirms (201 → [ShiftOpen]).
+class OpenShiftDialog extends StatefulWidget {
+  const OpenShiftDialog({super.key});
 
   static Future<bool?> show(BuildContext context) {
     return showDialog<bool>(
@@ -15,17 +15,17 @@ class CloseShiftDialog extends StatefulWidget {
       barrierDismissible: false,
       builder: (_) => BlocProvider.value(
         value: context.read<ShiftCubit>(),
-        child: const CloseShiftDialog(),
+        child: const OpenShiftDialog(),
       ),
     );
   }
 
   @override
-  State<CloseShiftDialog> createState() => _CloseShiftDialogState();
+  State<OpenShiftDialog> createState() => _OpenShiftDialogState();
 }
 
-class _CloseShiftDialogState extends State<CloseShiftDialog> {
-  /// One key for the whole close action (reused on retry incl. after refresh).
+class _OpenShiftDialogState extends State<OpenShiftDialog> {
+  /// One key for the whole open action (reused on retry incl. after refresh).
   final String _idempotencyKey = uuidV4();
   final TextEditingController _cashController = TextEditingController(
     text: '0.00',
@@ -37,12 +37,13 @@ class _CloseShiftDialogState extends State<CloseShiftDialog> {
     super.dispose();
   }
 
-  /// Normalized decimal string for `cash_end`, e.g. "0.00", "1234.50".
-  String get _cashEnd => formatAmount(kopecksFromString(_cashController.text));
+  /// Normalized decimal string for `cash_start`, e.g. "0.00", "1234.50".
+  String get _cashStart =>
+      formatAmount(kopecksFromString(_cashController.text));
 
   Future<void> _confirm() async {
-    await context.read<ShiftCubit>().closeShift(
-      cashEnd: _cashEnd,
+    await context.read<ShiftCubit>().openShift(
+      cashStart: _cashStart,
       idempotencyKey: _idempotencyKey,
     );
   }
@@ -51,7 +52,7 @@ class _CloseShiftDialogState extends State<CloseShiftDialog> {
   Widget build(BuildContext context) {
     return BlocConsumer<ShiftCubit, ShiftState>(
       listener: (context, state) {
-        if (state is ShiftNone) {
+        if (state is ShiftOpen) {
           Navigator.of(context).pop(true);
         }
       },
@@ -59,12 +60,12 @@ class _CloseShiftDialogState extends State<CloseShiftDialog> {
         final loading = state is ShiftLoading;
         final error = state is ShiftError ? state.message : null;
         return AlertDialog(
-          title: const Text('Закрити зміну'),
+          title: const Text('Відкрити зміну'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Готівка в касі на момент закриття:'),
+              const Text('Готівка в касі на початок зміни:'),
               const SizedBox(height: 8),
               TextField(
                 controller: _cashController,
@@ -106,7 +107,7 @@ class _CloseShiftDialogState extends State<CloseShiftDialog> {
                       height: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Закрити зміну'),
+                  : const Text('Відкрити зміну'),
             ),
           ],
         );

@@ -2,8 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
-import 'package:prro/data/api/models/shift.dart';
-import 'package:prro/data/repositories/shift_repository/shift_repo_i.dart';
+import 'package:prro/features/shift/domain/entities/shift.dart';
+import 'package:prro/features/shift/domain/repositories/shift_repository_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Shift endpoints are scoped under the outlet — there is no `/shifts` group:

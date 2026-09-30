@@ -1,4 +1,4 @@
-import 'package:prro/features/auth/model/auth_user.dart';
+import 'package:prro/features/auth/domain/entities/auth_user.dart';
 
 enum AuthErrorCode {
   invalidCredentials,

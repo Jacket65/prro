@@ -29,7 +29,8 @@ import 'package:prro/features/admin/orders/screens/shifts_history_screen.dart'
     as _i13;
 import 'package:prro/features/admin/outlets/outlets_screen.dart' as _i10;
 import 'package:prro/features/admin/tellers/tellers_screen.dart' as _i15;
-import 'package:prro/features/auth/screens/login_screen.dart' as _i4;
+import 'package:prro/features/auth/presentation/screens/login_screen.dart'
+    as _i4;
 import 'package:prro/features/seller/screens/order_history/order_detail_screen.dart'
     as _i6;
 import 'package:prro/features/seller/screens/order_history/orders_history_screen.dart'

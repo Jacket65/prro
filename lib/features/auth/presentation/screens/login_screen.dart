@@ -5,11 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:prro/core/router/app_router.gr.dart';
-import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
-import 'package:prro/features/auth/bloc/auth_bloc.dart';
-import 'package:prro/features/auth/bloc/auth_event.dart';
-import 'package:prro/features/auth/bloc/auth_state.dart';
-import 'package:prro/features/auth/model/auth_user.dart';
+import 'package:prro/features/auth/domain/entities/auth_user.dart';
+import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart';
+import 'package:prro/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:prro/features/auth/presentation/bloc/auth_event.dart';
+import 'package:prro/features/auth/presentation/bloc/auth_state.dart';
 
 String _localizedError(AuthErrorCode code) {
   return switch (code) {

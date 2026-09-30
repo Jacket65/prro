@@ -1,9 +1,9 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prro/core/security/token_storage_i.dart';
-import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
-import 'package:prro/features/auth/bloc/auth_event.dart';
-import 'package:prro/features/auth/bloc/auth_state.dart';
+import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart';
+import 'package:prro/features/auth/presentation/bloc/auth_event.dart';
+import 'package:prro/features/auth/presentation/bloc/auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({

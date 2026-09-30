@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/features/auth/bloc/auth_bloc.dart';
-import 'package:prro/features/auth/bloc/auth_state.dart';
+import 'package:prro/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:prro/features/auth/presentation/bloc/auth_state.dart';
 
 class EmployeeInfo extends StatelessWidget {
   const EmployeeInfo({

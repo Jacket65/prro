@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
-import 'package:prro/features/auth/model/auth_user.dart';
+import 'package:prro/features/auth/domain/entities/auth_user.dart';
+import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart';
 
 enum AuthStatus {
   initial,

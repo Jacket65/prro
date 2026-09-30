@@ -8,12 +8,12 @@ import 'package:prro/core/router/app_router.dart';
 import 'package:prro/core/router/app_router.gr.dart';
 import 'package:prro/core/security/token_storage_i.dart';
 import 'package:prro/core/theme/theme.dart';
-import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
-import 'package:prro/data/repositories/shift_repository/shift_repo_i.dart';
-import 'package:prro/features/auth/bloc/auth_bloc.dart';
-import 'package:prro/features/auth/bloc/auth_event.dart';
-import 'package:prro/features/auth/bloc/auth_state.dart';
-import 'package:prro/features/shift/bloc/bloc.dart';
+import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart';
+import 'package:prro/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:prro/features/auth/presentation/bloc/auth_event.dart';
+import 'package:prro/features/auth/presentation/bloc/auth_state.dart';
+import 'package:prro/features/shift/domain/repositories/shift_repository_i.dart';
+import 'package:prro/features/shift/presentation/cubit/shift_cubit.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({required this.router, super.key});

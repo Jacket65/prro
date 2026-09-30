@@ -1,4 +1,4 @@
-import 'package:prro/data/api/models/shift.dart';
+import 'package:prro/features/shift/domain/entities/shift.dart';
 
 abstract interface class ShiftRepositoryI {
   /// Fetches the currently open shift for the outlet

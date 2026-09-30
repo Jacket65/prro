@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/security/token_storage_i.dart';
-import 'package:prro/data/repositories/auth_repository/auth_repo.dart';
-import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
-import 'package:prro/features/auth/model/auth_user.dart';
+import 'package:prro/features/auth/data/repositories/auth_repository.dart';
+import 'package:prro/features/auth/domain/entities/auth_user.dart';
+import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockApiClient extends Mock implements ApiClientI {}

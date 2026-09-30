@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-import 'package:prro/data/api/models/shift.dart';
-import 'package:prro/data/repositories/shift_repository/shift_repo_i.dart';
+import 'package:prro/features/shift/domain/entities/shift.dart';
+import 'package:prro/features/shift/domain/repositories/shift_repository_i.dart';
 
 @Environment('mock')
 @Singleton(as: ShiftServiceI)
