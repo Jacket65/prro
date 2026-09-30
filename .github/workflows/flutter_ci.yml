@@ -33,6 +33,9 @@ jobs:
       - name: Run build_runner
         run: dart run build_runner build --delete-conflicting-outputs
 
+      - name: Check layer boundaries
+        run: ./tool/check_boundaries.sh
+
       - name: Analyze code
         run: flutter analyze
 
