@@ -31,6 +31,9 @@ feature_of() {
   echo "$1" | sed -nE 's#.*package:prro/features/([^/]+)/.*#\1#p; s#^lib/features/([^/]+)/.*#\1#p'
 }
 
+# Layer rules (R1/R2/R3/R5/R6) describe lib/ only: a test is expected to import
+# whatever the code under test imports. R4 also covers test/ so a stale
+# package:prro/data/ reference cannot survive there either.
 SOURCES=$(find lib test -name '*.dart' \
   -not -name 'di.config.dart' \
   -not -name 'app_router.gr.dart' \
@@ -43,14 +46,8 @@ targets_of() {
 }
 
 while read -r file; do
-  layer=other
-  case "$file" in
-    */domain/*)       layer=domain ;;
-    */data/*)         layer=data ;;
-    */presentation/*) layer=presentation ;;
-  esac
-
   # R4 — the layer-first `data/` tree is gone; nothing may still point at it.
+  # This one covers test/ as well, so a stale reference cannot survive there.
   while read -r target; do
     [ -n "$target" ] || continue
     case "$target" in
@@ -59,6 +56,17 @@ while read -r file; do
         ;;
     esac
   done < <(targets_of "$file")
+
+  # The remaining rules describe lib/ only: a test may import whatever the code
+  # under test imports, so layering test/ by lib/ layer would be meaningless.
+  [ "${file#lib/}" = "$file" ] && continue
+
+  layer=other
+  case "$file" in
+    */domain/*)       layer=domain ;;
+    */data/*)         layer=data ;;
+    */presentation/*) layer=presentation ;;
+  esac
 
   # R6 — domain code stays framework-free.
   if [ "$layer" = domain ]; then
