@@ -80,11 +80,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           : () {
                               if (_formKey.currentState!.validate()) {
                                 context.read<AuthBloc>().add(
-                                      AuthLoginRequested(
-                                        username: _usernameController.text,
-                                        password: _passwordController.text,
-                                      ),
-                                    );
+                                  AuthLoginRequested(
+                                    username: _usernameController.text,
+                                    password: _passwordController.text,
+                                  ),
+                                );
                                 _clearTextFields();
                               }
                             },
@@ -120,11 +120,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             ? null
                             : () {
                                 context.read<AuthBloc>().add(
-                                      const AuthLoginRequested(
-                                        username: 'cashier',
-                                        password: '1',
-                                      ),
-                                    );
+                                  const AuthLoginRequested(
+                                    username: 'cashier',
+                                    password: '1',
+                                  ),
+                                );
                                 _clearTextFields();
                               },
                         icon: const Icon(Icons.flash_on, size: 16),
@@ -136,11 +136,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             ? null
                             : () {
                                 context.read<AuthBloc>().add(
-                                      const AuthAdminLoginRequested(
-                                        username: 'admin',
-                                        password: '1',
-                                      ),
-                                    );
+                                  const AuthAdminLoginRequested(
+                                    username: 'admin',
+                                    password: '1',
+                                  ),
+                                );
                                 _clearTextFields();
                               },
                         icon: const Icon(Icons.flash_on, size: 16),

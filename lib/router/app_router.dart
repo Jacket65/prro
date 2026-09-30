@@ -53,8 +53,7 @@ class AuthGuard extends AutoRouteGuard {
       return;
     }
     if (state is AuthInitial ||
-        (state is AuthLoading &&
-            state.operation == AuthOperation.restore)) {
+        (state is AuthLoading && state.operation == AuthOperation.restore)) {
       resolver.next();
       return;
     }

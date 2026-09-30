@@ -239,7 +239,8 @@ class MockApiClient implements ApiClientI {
           requestOptions: RequestOptions(path: path),
           data: {
             'data': {
-              'token': 'mock_terminal_token_'
+              'token':
+                  'mock_terminal_token_'
                   '${DateTime.now().millisecondsSinceEpoch}',
               'expires': DateTime.now()
                   .add(const Duration(minutes: 10))

@@ -47,10 +47,12 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
 
-    when(() => tokenStorage.saveSession(
-          accessToken: any(named: 'accessToken'),
-          refreshToken: any(named: 'refreshToken'),
-        )).thenAnswer((_) async {});
+    when(
+      () => tokenStorage.saveSession(
+        accessToken: any(named: 'accessToken'),
+        refreshToken: any(named: 'refreshToken'),
+      ),
+    ).thenAnswer((_) async {});
     when(() => tokenStorage.clear()).thenAnswer((_) async {});
 
     repo = AuthRepositoryImpl(
@@ -170,8 +172,7 @@ void main() {
       ).called(1);
     });
 
-    test('fallback skips zero ids and takes the first usable outlet',
-        () async {
+    test('fallback skips zero ids and takes the first usable outlet', () async {
       stubLogin(
         _resp(
           bearer: 'Bearer tok',
@@ -232,71 +233,75 @@ void main() {
       expect(prefs.getInt('outlet_id'), isNull);
     });
 
-    test('outlet list call failure is treated as invalid credentials',
-        () async {
-      stubLogin(
-        _resp(
-          bearer: 'Bearer tok',
-          body: {
-            'data': {'id': 1, 'role': 'cashier', 'outlet_id': 0},
-          },
-        ),
-      );
-      when(
-        () => apiClient.get(any<String>(), headers: any(named: 'headers')),
-      ).thenThrow(
-        DioException(
-          requestOptions: RequestOptions(path: '/retail-outlets/'),
-          type: DioExceptionType.connectionError,
-        ),
-      );
-
-      expect(
-        () => repo.login(username: 'a', password: 'p'),
-        throwsA(
-          isA<AuthException>().having(
-            (e) => e.code,
-            'code',
-            AuthErrorCode.invalidCredentials,
-          ),
-        ),
-      );
-    });
-
-    test('missing outlet AND no fallback reachable is invalid credentials',
-        () async {
-      stubLogin(
-        _resp(
-          bearer: 'Bearer tok',
-          body: {
-            'data': {
-              'id': 1,
-              'role': 'cashier',
+    test(
+      'outlet list call failure is treated as invalid credentials',
+      () async {
+        stubLogin(
+          _resp(
+            bearer: 'Bearer tok',
+            body: {
+              'data': {'id': 1, 'role': 'cashier', 'outlet_id': 0},
             },
-          },
-        ),
-      );
-      when(
-        () => apiClient.get(any<String>(), headers: any(named: 'headers')),
-      ).thenAnswer(
-        (_) async => Response<dynamic>(
-          requestOptions: RequestOptions(path: '/retail-outlets/'),
-          statusCode: 401,
-          data: const {'code': 'UNAUTHORIZED'},
-        ),
-      );
-
-      expect(
-        () => repo.login(username: 'a', password: 'p'),
-        throwsA(
-          isA<AuthException>().having(
-            (e) => e.code,
-            'code',
-            AuthErrorCode.invalidCredentials,
           ),
-        ),
-      );
-    });
+        );
+        when(
+          () => apiClient.get(any<String>(), headers: any(named: 'headers')),
+        ).thenThrow(
+          DioException(
+            requestOptions: RequestOptions(path: '/retail-outlets/'),
+            type: DioExceptionType.connectionError,
+          ),
+        );
+
+        expect(
+          () => repo.login(username: 'a', password: 'p'),
+          throwsA(
+            isA<AuthException>().having(
+              (e) => e.code,
+              'code',
+              AuthErrorCode.invalidCredentials,
+            ),
+          ),
+        );
+      },
+    );
+
+    test(
+      'missing outlet AND no fallback reachable is invalid credentials',
+      () async {
+        stubLogin(
+          _resp(
+            bearer: 'Bearer tok',
+            body: {
+              'data': {
+                'id': 1,
+                'role': 'cashier',
+              },
+            },
+          ),
+        );
+        when(
+          () => apiClient.get(any<String>(), headers: any(named: 'headers')),
+        ).thenAnswer(
+          (_) async => Response<dynamic>(
+            requestOptions: RequestOptions(path: '/retail-outlets/'),
+            statusCode: 401,
+            data: const {'code': 'UNAUTHORIZED'},
+          ),
+        );
+
+        expect(
+          () => repo.login(username: 'a', password: 'p'),
+          throwsA(
+            isA<AuthException>().having(
+              (e) => e.code,
+              'code',
+              AuthErrorCode.invalidCredentials,
+            ),
+          ),
+        );
+      },
+    );
   });
 
   group('login response parsing', () {
@@ -427,54 +432,60 @@ void main() {
       verify(() => apiClient.post('/auth/logout')).called(1);
     });
 
-    test('swallows logout endpoint failure and still clears local state',
-        () async {
-      when(
-        () => apiClient.post(any<String>(), data: any<dynamic>(named: 'data')),
-      ).thenThrow(
-        DioException(
-          requestOptions: RequestOptions(path: '/auth/logout'),
-          type: DioExceptionType.connectionError,
-        ),
-      );
+    test(
+      'swallows logout endpoint failure and still clears local state',
+      () async {
+        when(
+          () =>
+              apiClient.post(any<String>(), data: any<dynamic>(named: 'data')),
+        ).thenThrow(
+          DioException(
+            requestOptions: RequestOptions(path: '/auth/logout'),
+            type: DioExceptionType.connectionError,
+          ),
+        );
 
-      await repo.logout();
+        await repo.logout();
 
-      verify(() => tokenStorage.clear()).called(1);
-    });
+        verify(() => tokenStorage.clear()).called(1);
+      },
+    );
   });
 
   group('F1: invalid credentials mapping', () {
-    test('DioException 401 with server error body maps to invalidCredentials',
-        () async {
-      final dioErr = DioException(
-        requestOptions: RequestOptions(path: '/auth/login'),
-        response: Response<dynamic>(
+    test(
+      'DioException 401 with server error body maps to invalidCredentials',
+      () async {
+        final dioErr = DioException(
           requestOptions: RequestOptions(path: '/auth/login'),
-          statusCode: 401,
-          data: {
-            'error': {
-              'code': 'UNAUTHORIZED',
-              'message': 'Невірний логін або пароль',
+          response: Response<dynamic>(
+            requestOptions: RequestOptions(path: '/auth/login'),
+            statusCode: 401,
+            data: {
+              'error': {
+                'code': 'UNAUTHORIZED',
+                'message': 'Невірний логін або пароль',
+              },
             },
-          },
-        ),
-        type: DioExceptionType.badResponse,
-      );
-      when(
-        () => apiClient.post(any<String>(), data: any<dynamic>(named: 'data')),
-      ).thenThrow(dioErr);
-
-      expect(
-        () => repo.login(username: 'u', password: 'p'),
-        throwsA(
-          isA<AuthException>().having(
-            (e) => e.code,
-            'code',
-            AuthErrorCode.invalidCredentials,
           ),
-        ),
-      );
-    });
+          type: DioExceptionType.badResponse,
+        );
+        when(
+          () =>
+              apiClient.post(any<String>(), data: any<dynamic>(named: 'data')),
+        ).thenThrow(dioErr);
+
+        expect(
+          () => repo.login(username: 'u', password: 'p'),
+          throwsA(
+            isA<AuthException>().having(
+              (e) => e.code,
+              'code',
+              AuthErrorCode.invalidCredentials,
+            ),
+          ),
+        );
+      },
+    );
   });
 }

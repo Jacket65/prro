@@ -38,7 +38,7 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
         data: {'name': name},
         idempotencyKey: idempotencyKey,
       );
-      return unwrapObject(response.data, AdminCategory.fromJson) ??
+      return await unwrapObject(response.data, AdminCategory.fromJson) ??
           AdminCategory(id: 0, name: name);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
@@ -55,7 +55,7 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
         '/categories/$id',
         data: {'name': name},
       );
-      return unwrapObject(response.data, AdminCategory.fromJson) ??
+      return await unwrapObject(response.data, AdminCategory.fromJson) ??
           AdminCategory(id: id, name: name);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
@@ -96,7 +96,7 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
         data: {'name': name},
         idempotencyKey: idempotencyKey,
       );
-      return unwrapObject(response.data, AdminProduct.fromJson) ??
+      return await unwrapObject(response.data, AdminProduct.fromJson) ??
           AdminProduct(id: 0, name: name, categoryId: categoryId);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
@@ -113,7 +113,7 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
         '/products/$id',
         data: {'name': name},
       );
-      return unwrapObject(response.data, AdminProduct.fromJson) ??
+      return await unwrapObject(response.data, AdminProduct.fromJson) ??
           AdminProduct(id: id, name: name);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
@@ -166,7 +166,7 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
         },
         idempotencyKey: idempotencyKey,
       );
-      return unwrapObject(response.data, AdminVariant.fromJson) ??
+      return await unwrapObject(response.data, AdminVariant.fromJson) ??
           AdminVariant(id: 0, name: name, priceKopecks: priceKopecks);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
@@ -187,7 +187,7 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
           'price': (priceKopecks / 100).toStringAsFixed(2),
         },
       );
-      return unwrapObject(response.data, AdminVariant.fromJson) ??
+      return await unwrapObject(response.data, AdminVariant.fromJson) ??
           AdminVariant(id: id, name: name, priceKopecks: priceKopecks);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);

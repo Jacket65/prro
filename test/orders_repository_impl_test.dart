@@ -108,8 +108,8 @@ void main() {
 
         verify(
           () => apiClient.post(
-          '/retail-outlets/7/orders',
-          data: any<dynamic>(named: 'data'),
+            '/retail-outlets/7/orders',
+            data: any<dynamic>(named: 'data'),
             idempotencyKey: 'k3',
           ),
         ).called(1);

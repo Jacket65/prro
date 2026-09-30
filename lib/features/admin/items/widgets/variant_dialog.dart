@@ -6,7 +6,7 @@ import 'package:prro/core/money.dart';
 Future<(String name, int priceKopecks)?> showVariantDialog(
   BuildContext context,
 ) async {
-  return showDialog<(String, int)>(
+  return await showDialog<(String, int)>(
     context: context,
     builder: (ctx) => const _VariantDialogContent(),
   );

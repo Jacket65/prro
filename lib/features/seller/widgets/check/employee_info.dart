@@ -13,7 +13,7 @@ class EmployeeInfo extends StatelessWidget {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         return switch (state) {
-          AuthAuthenticated(: final user) => Column(
+          AuthAuthenticated(:final user) => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [Text('Працівник: ${user.username}')],
           ),

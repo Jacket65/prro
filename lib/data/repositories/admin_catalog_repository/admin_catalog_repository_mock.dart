@@ -35,7 +35,7 @@ class AdminCatalogRepositoryMock implements AdminCatalogRepositoryI {
   Future<List<AdminProduct>> fetchProducts({required int categoryId}) async =>
       // AdminProduct list is derived from variants in the mock backend; expose
       // thep arent products by reading the catalog shape through variants.
-      _mockBackend
+      await _mockBackend
           .getAdminVariants(categoryId)
           .then(
             (variants) => variants
@@ -105,9 +105,8 @@ class AdminCatalogRepositoryMock implements AdminCatalogRepositoryI {
   );
 
   @override
-  Future<List<AdminIngredient>> fetchIngredients({
-    required int outletId,
-  }) => _mockBackend.getAdminIngredients(outletId);
+  Future<List<AdminIngredient>> fetchIngredients({required int outletId}) =>
+      _mockBackend.getAdminIngredients(outletId);
 
   @override
   Future<List<MeasureUnit>> fetchMeasures() => _mockBackend.getMeasureUnits();

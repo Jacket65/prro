@@ -5,7 +5,6 @@ import 'package:prro/config/payment_config.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Service interface for launching the PrivatBank NFC POS Terminal.
-// ignore: one_member_abstracts
 abstract interface class TerminalLauncherI {
   /// Launches the PrivatBank Terminal with the given payment details.
   /// Throws [TerminalLaunchException] if the launch fails.

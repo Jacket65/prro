@@ -230,7 +230,9 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
       _talker.error('🔴 [Terminal Payment] Failed to launch terminal', e);
       throw TerminalLaunchFailedException(e.message);
     } on PaymentCancelledException {
-      _talker.warning('🟡 [Terminal Payment] Payment cancelled by terminal/user');
+      _talker.warning(
+        '🟡 [Terminal Payment] Payment cancelled by terminal/user',
+      );
       rethrow;
     } on TerminalPaymentException {
       // Domain exceptions already carry a reason; propagate unchanged so the

@@ -151,9 +151,7 @@ class AuthRepositoryImpl implements AuthRepositoryI {
       final refreshToken = refresh is String && refresh.isNotEmpty
           ? refresh
           : null;
-      var outletId = data['outlet_id'] is int
-          ? data['outlet_id'] as int
-          : null;
+      var outletId = data['outlet_id'] is int ? data['outlet_id'] as int : null;
 
       // The backend does not (yet) return `outlet_id` in the login payload.
       // Fall back to the user-scoped outlet list, authenticated with the

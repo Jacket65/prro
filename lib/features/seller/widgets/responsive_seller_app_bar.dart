@@ -138,7 +138,7 @@ class _ResponsiveSellerAppBarState extends State<ResponsiveSellerAppBar> {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (_, state) {
         return switch (state) {
-          AuthAuthenticated(: final user) => CustomPopupMenu(
+          AuthAuthenticated(:final user) => CustomPopupMenu(
             name: _isNarrow ? '' : user.username,
             icon: Icons.lock,
           ),

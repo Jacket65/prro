@@ -98,10 +98,7 @@ void main() {
       return bloc;
     },
     act: (b) => b.add(request),
-    expect: () => [
-      isA<OrdersPaymentProcessing>(),
-      isA<OrdersUpdated>(),
-    ],
+    expect: () => [isA<OrdersPaymentProcessing>(), isA<OrdersUpdated>()],
     verify: (_) => expect(fakeRepo.clearProductsCallCount, 0),
   );
 
@@ -112,10 +109,7 @@ void main() {
       return bloc;
     },
     act: (b) => b.add(request),
-    expect: () => [
-      isA<OrdersPaymentProcessing>(),
-      isA<OrdersError>(),
-    ],
+    expect: () => [isA<OrdersPaymentProcessing>(), isA<OrdersError>()],
     verify: (b) {
       final error = b.state as OrdersError;
       expect(error.message, 'boom');
@@ -129,10 +123,7 @@ void main() {
       return bloc;
     },
     act: (b) => b.add(request),
-    expect: () => [
-      isA<OrdersPaymentProcessing>(),
-      isA<OrdersError>(),
-    ],
+    expect: () => [isA<OrdersPaymentProcessing>(), isA<OrdersError>()],
     verify: (b) => expect((b.state as OrdersError).message, 'api down'),
   );
 
@@ -143,10 +134,7 @@ void main() {
       return bloc;
     },
     act: (b) => b.add(request),
-    expect: () => [
-      isA<OrdersPaymentProcessing>(),
-      isA<OrdersError>(),
-    ],
+    expect: () => [isA<OrdersPaymentProcessing>(), isA<OrdersError>()],
     verify: (b) => expect(
       (b.state as OrdersError).message,
       'Не вдалося оплатити. Спробуйте ще раз.',
@@ -222,7 +210,7 @@ void main() {
       var callIndex = 0;
       when(() => mockPayOrder(any())).thenAnswer((_) async {
         callIndex++;
-        if (callIndex == 1) return slow.future;
+        if (callIndex == 1) return await slow.future;
         return _receipt();
       });
 

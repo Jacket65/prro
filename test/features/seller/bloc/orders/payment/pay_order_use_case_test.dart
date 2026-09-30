@@ -128,10 +128,9 @@ void main() {
 
       final receipt = await useCase(req(PaymentMethod.cash));
 
-      final captured =
-          verify(() => cash.afterOrderCreated(captureAny(), any()))
-              .captured
-              .single;
+      final captured = verify(
+        () => cash.afterOrderCreated(captureAny(), any()),
+      ).captured.single;
       expect(captured, isA<OrderReceipt>());
       expect(receipt.status, 'pending'); // the placed (identical) receipt
       verify(() => cash.pay(any())).called(1);
@@ -154,9 +153,9 @@ void main() {
       final receipt = await useCase(req(PaymentMethod.terminal));
 
       expect(receipt.status, 'completed');
-      final captured =
-          verify(() => terminal.afterOrderCreated(captureAny(), captureAny()))
-              .captured;
+      final captured = verify(
+        () => terminal.afterOrderCreated(captureAny(), captureAny()),
+      ).captured;
       final order = captured[0] as OrderReceipt;
       final paymentRequest = captured[1] as PaymentRequest;
       expect(order.orderId, '1'); // receipt from placeOrder
@@ -269,22 +268,24 @@ void main() {
       );
     });
 
-    test('unexpected errors are wrapped into PaymentException (boundary)',
-        () async {
-      when(() => terminal.afterOrderCreated(any(), any())).thenThrow(
-        StateError('boom'),
-      );
-      await expectLater(
-        () => useCase(req(PaymentMethod.terminal)),
-        throwsA(
-          isA<PaymentException>().having(
-            (e) => e.reason,
-            'reason',
-            PaymentFailureReason.verificationFailed,
+    test(
+      'unexpected errors are wrapped into PaymentException (boundary)',
+      () async {
+        when(() => terminal.afterOrderCreated(any(), any())).thenThrow(
+          StateError('boom'),
+        );
+        await expectLater(
+          () => useCase(req(PaymentMethod.terminal)),
+          throwsA(
+            isA<PaymentException>().having(
+              (e) => e.reason,
+              'reason',
+              PaymentFailureReason.verificationFailed,
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   });
 
   group('active handler lifecycle', () {
@@ -310,21 +311,23 @@ void main() {
       },
     );
 
-    test('cancel delegates to the in-flight handler during the charge',
-        () async {
-      final completer = Completer<OrderReceipt>();
-      when(() => terminal.afterOrderCreated(any(), any())).thenAnswer(
-        (_) => completer.future,
-      );
+    test(
+      'cancel delegates to the in-flight handler during the charge',
+      () async {
+        final completer = Completer<OrderReceipt>();
+        when(() => terminal.afterOrderCreated(any(), any())).thenAnswer(
+          (_) => completer.future,
+        );
 
-      final future = useCase(req(PaymentMethod.terminal));
-      await Future<void>.delayed(Duration.zero);
-      useCase.cancel();
-      verify(() => terminal.cancel()).called(1);
+        final future = useCase(req(PaymentMethod.terminal));
+        await Future<void>.delayed(Duration.zero);
+        useCase.cancel();
+        verify(() => terminal.cancel()).called(1);
 
-      completer.completeError(const PaymentException('done'));
-      await expectLater(future, throwsA(isA<PaymentException>()));
-    });
+        completer.completeError(const PaymentException('done'));
+        await expectLater(future, throwsA(isA<PaymentException>()));
+      },
+    );
 
     test('cancel is a harmless no-op when no payment is active', () {
       expect(() => useCase.cancel(), returnsNormally);

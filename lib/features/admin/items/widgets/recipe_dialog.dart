@@ -12,7 +12,7 @@ Future<List<RecipeIngredient>?> showRecipeDialog(
   required List<RecipeIngredient> initial,
   required List<AdminIngredient> ingredients,
 }) async {
-  return showDialog<List<RecipeIngredient>>(
+  return await showDialog<List<RecipeIngredient>>(
     context: context,
     builder: (ctx) =>
         _RecipeEditDialog(initial: initial, ingredients: ingredients),
@@ -20,10 +20,7 @@ Future<List<RecipeIngredient>?> showRecipeDialog(
 }
 
 class _RecipeEditDialog extends StatefulWidget {
-  const _RecipeEditDialog({
-    required this.initial,
-    required this.ingredients,
-  });
+  const _RecipeEditDialog({required this.initial, required this.ingredients});
 
   final List<RecipeIngredient> initial;
   final List<AdminIngredient> ingredients;
@@ -127,10 +124,7 @@ class _RecipeEditDialogState extends State<_RecipeEditDialog> {
                       value: _selected,
                       items: [
                         for (final ing in widget.ingredients)
-                          DropdownMenuItem(
-                            value: ing,
-                            child: Text(ing.name),
-                          ),
+                          DropdownMenuItem(value: ing, child: Text(ing.name)),
                       ],
                       onChanged: (v) => setState(() => _selected = v),
                     ),

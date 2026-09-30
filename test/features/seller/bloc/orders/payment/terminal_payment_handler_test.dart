@@ -63,22 +63,24 @@ void main() {
   });
 
   group('afterOrderCreated', () {
-    test('maps order + request onto CreatePaymentRequest with order_id',
-        () async {
-      when(() => service.startPayment(any())).thenAnswer(
-        (_) async => const PaymentResult(success: true, status: 'SUCCESS'),
-      );
+    test(
+      'maps order + request onto CreatePaymentRequest with order_id',
+      () async {
+        when(() => service.startPayment(any())).thenAnswer(
+          (_) async => const PaymentResult(success: true, status: 'SUCCESS'),
+        );
 
-      await handler.afterOrderCreated(_receipt(), request);
+        await handler.afterOrderCreated(_receipt(), request);
 
-      final captured =
-          verify(() => service.startPayment(captureAny())).captured.single
-              as CreatePaymentRequest;
-      expect(captured.amount, 15000);
-      expect(captured.currency, 'UAH');
-      expect(captured.description, 'Order payment');
-      expect(captured.orderId, '42');
-    });
+        final captured =
+            verify(() => service.startPayment(captureAny())).captured.single
+                as CreatePaymentRequest;
+        expect(captured.amount, 15000);
+        expect(captured.currency, 'UAH');
+        expect(captured.description, 'Order payment');
+        expect(captured.orderId, '42');
+      },
+    );
 
     test('confirms the order after a successful charge and returns the '
         'confirmed receipt', () async {
@@ -106,29 +108,31 @@ void main() {
       expect(receipt, pending);
     });
 
-    test('falls back to the pending receipt when the order id is not an int',
-        () async {
-      when(() => service.startPayment(any())).thenAnswer(
-        (_) async => const PaymentResult(success: true, status: 'SUCCESS'),
-      );
+    test(
+      'falls back to the pending receipt when the order id is not an int',
+      () async {
+        when(() => service.startPayment(any())).thenAnswer(
+          (_) async => const PaymentResult(success: true, status: 'SUCCESS'),
+        );
 
-      final pending = OrderReceipt(
-        orderId: 'abc-1',
-        lines: [],
-        totalKopecks: 15000,
-        tenderedKopecks: 15000,
-        changeKopecks: 0,
-        method: PaymentMethod.terminal,
-        status: 'pending',
-        issuedAt: DateTime(2024),
-        storeName: 'Store',
-        cashierName: 'Cashier',
-      );
-      final receipt = await handler.afterOrderCreated(pending, request);
+        final pending = OrderReceipt(
+          orderId: 'abc-1',
+          lines: [],
+          totalKopecks: 15000,
+          tenderedKopecks: 15000,
+          changeKopecks: 0,
+          method: PaymentMethod.terminal,
+          status: 'pending',
+          issuedAt: DateTime(2024),
+          storeName: 'Store',
+          cashierName: 'Cashier',
+        );
+        final receipt = await handler.afterOrderCreated(pending, request);
 
-      expect(receipt, pending);
-      verifyNever(() => ordersRepository.confirmOrder(any()));
-    });
+        expect(receipt, pending);
+        verifyNever(() => ordersRepository.confirmOrder(any()));
+      },
+    );
 
     test('charge failure means confirm is never called', () async {
       when(() => service.startPayment(any())).thenThrow(

@@ -12,33 +12,33 @@ void main() {
     mockStore = <String, String>{};
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
-      (methodCall) async {
-        switch (methodCall.method) {
-          case 'read':
-            final args = methodCall.arguments as Map;
-            return mockStore[args['key'] as String];
-          case 'write':
-            final args = methodCall.arguments as Map;
-            mockStore[args['key'] as String] = args['value'] as String;
-            return null;
-          case 'delete':
-            final args = methodCall.arguments as Map;
-            mockStore.remove(args['key'] as String);
-            return null;
-          case 'readAll':
-            return Map<String, String>.from(mockStore);
-          case 'deleteAll':
-            mockStore.clear();
-            return null;
-          case 'containsKey':
-            final args = methodCall.arguments as Map;
-            return mockStore.containsKey(args['key'] as String);
-          default:
-            return null;
-        }
-      },
-    );
+          const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+          (methodCall) async {
+            switch (methodCall.method) {
+              case 'read':
+                final args = methodCall.arguments as Map;
+                return mockStore[args['key'] as String];
+              case 'write':
+                final args = methodCall.arguments as Map;
+                mockStore[args['key'] as String] = args['value'] as String;
+                return null;
+              case 'delete':
+                final args = methodCall.arguments as Map;
+                mockStore.remove(args['key'] as String);
+                return null;
+              case 'readAll':
+                return Map<String, String>.from(mockStore);
+              case 'deleteAll':
+                mockStore.clear();
+                return null;
+              case 'containsKey':
+                final args = methodCall.arguments as Map;
+                return mockStore.containsKey(args['key'] as String);
+              default:
+                return null;
+            }
+          },
+        );
 
     storage = SecureTokenStorage();
   });
@@ -46,9 +46,9 @@ void main() {
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
-      null,
-    );
+          const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+          null,
+        );
   });
 
   group('SecureTokenStorage', () {
@@ -117,17 +117,19 @@ void main() {
       expect(await storage.getRefreshToken(), isNull);
     });
 
-    test('cache coherence: getAccessToken returns new value without re-reading',
-        () async {
-      await storage.saveSession(
-        accessToken: 'cached-access',
-        refreshToken: 'cached-refresh',
-      );
+    test(
+      'cache coherence: getAccessToken returns new value without re-reading',
+      () async {
+        await storage.saveSession(
+          accessToken: 'cached-access',
+          refreshToken: 'cached-refresh',
+        );
 
-      mockStore.clear();
+        mockStore.clear();
 
-      expect(await storage.getAccessToken(), 'cached-access');
-      expect(await storage.getRefreshToken(), 'cached-refresh');
-    });
+        expect(await storage.getAccessToken(), 'cached-access');
+        expect(await storage.getRefreshToken(), 'cached-refresh');
+      },
+    );
   });
 }

@@ -49,24 +49,28 @@ void main() {
     apiClient = ApiClient(dio: dio, tokenStorage: tokenStorage);
   });
 
-  test('per-request Authorization header overrides default Bearer injection',
-      () async {
-    final response = await apiClient.get(
-      '/retail-outlets/',
-      headers: {'Authorization': 'Bearer per-request-token'},
-    );
+  test(
+    'per-request Authorization header overrides default Bearer injection',
+    () async {
+      final response = await apiClient.get(
+        '/retail-outlets/',
+        headers: {'Authorization': 'Bearer per-request-token'},
+      );
 
-    final data = response.data as Map<String, dynamic>;
-    expect(data['received'], 'Bearer per-request-token');
-  });
+      final data = response.data as Map<String, dynamic>;
+      expect(data['received'], 'Bearer per-request-token');
+    },
+  );
 
-  test('without per-request header, default Bearer token is injected',
-      () async {
-    final response = await apiClient.get('/some-protected-endpoint');
+  test(
+    'without per-request header, default Bearer token is injected',
+    () async {
+      final response = await apiClient.get('/some-protected-endpoint');
 
-    final data = response.data as Map<String, dynamic>;
-    expect(data['received'], 'Bearer default-token');
-  });
+      final data = response.data as Map<String, dynamic>;
+      expect(data['received'], 'Bearer default-token');
+    },
+  );
 
   test('per-request header override works on POST', () async {
     final response = await apiClient.post(

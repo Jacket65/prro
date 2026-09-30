@@ -44,7 +44,7 @@ class ItemsRepositoryMock implements ItemsRepositoryI {
         type: DioExceptionType.cancel,
       );
     }
-    return _backend.searchProducts(query: query, categoryId: categoryId);
+    return await _backend.searchProducts(query: query, categoryId: categoryId);
   }
 
   @override
@@ -52,7 +52,7 @@ class ItemsRepositoryMock implements ItemsRepositoryI {
 
   @override
   Future<List<MeasureUnit>> getMeasureUnits() async =>
-      _backend.getMeasureUnits();
+      await _backend.getMeasureUnits();
 
   @override
   Future<List<OptionGroup>> getVariantOptions(int variantId) =>
