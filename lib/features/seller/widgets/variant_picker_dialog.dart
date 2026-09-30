@@ -1,5 +1,5 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/data/api/models/seller_item.dart';
+import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/features/seller/widgets/options_picker_dialog.dart';
 
 /// Modal that lists the variants of a [ProductGroup]

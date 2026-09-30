@@ -2,10 +2,10 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart'; // Додано імпорт
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/data/api/models/bean.dart';
-import 'package:prro/data/api/models/drink_option.dart';
-import 'package:prro/data/api/models/measure_unit.dart';
-import 'package:prro/data/api/models/seller_item.dart';
+import 'package:prro/core/domain/bean.dart';
+import 'package:prro/core/domain/catalog_item.dart';
+import 'package:prro/core/domain/drink_option.dart';
+import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 import 'package:prro/features/seller/widgets/options_picker_dialog.dart';
 

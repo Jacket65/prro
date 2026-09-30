@@ -1,8 +1,8 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:prro/data/api/models/order.dart';
-import 'package:prro/data/api/models/order_history.dart';
+import 'package:prro/core/domain/order.dart';
+import 'package:prro/core/domain/order_history.dart';
 import 'package:prro/data/repositories/order_history/order_history.dart';
 import 'package:prro/features/seller/bloc/order_history/order_detail_cubit.dart';
 import 'package:prro/features/seller/bloc/order_history/orders_history_cubit.dart';

@@ -1,4 +1,4 @@
-import 'package:prro/data/api/models/order_history.dart';
+import 'package:prro/core/domain/order_history.dart';
 
 abstract interface class OrderHistoryRepositoryI {
   /// `GET /retail-outlets/{outlet_id}/shifts?page&sort&order`.

@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/data/api/models/admin/catalog.dart';
-import 'package:prro/data/api/models/measure_unit.dart';
 
 /// Edits the recipe (ingredient lines) for a variant. Returns the updated
 /// [RecipeIngredient] list, or `null` if cancelled.

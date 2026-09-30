@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/mock/mock_backend.dart';
 import 'package:prro/data/api/models/admin/catalog.dart';
-import 'package:prro/data/api/models/measure_unit.dart';
 import 'package:prro/data/repositories/admin_catalog_repository/admin_catalog_repository.dart';
 
 @Environment('mock')

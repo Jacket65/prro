@@ -1,9 +1,9 @@
 import 'package:decimal/decimal.dart';
 import 'package:equatable/equatable.dart';
+import 'package:prro/core/domain/bean.dart';
+import 'package:prro/core/domain/drink_option.dart';
+import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/utils/json.dart';
-import 'package:prro/data/api/models/bean.dart';
-import 'package:prro/data/api/models/drink_option.dart';
-import 'package:prro/data/api/models/measure_unit.dart';
 
 sealed class Item extends Equatable {
   const Item();

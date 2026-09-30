@@ -1,4 +1,4 @@
-import 'package:prro/data/api/models/order.dart';
+import 'package:prro/core/domain/order.dart';
 
 /// UI → application request to pay for the current cart.
 ///

@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:prro/data/api/models/bean.dart';
-import 'package:prro/data/api/models/drink_option.dart';
+import 'package:prro/core/domain/bean.dart';
+import 'package:prro/core/domain/catalog_item.dart';
+import 'package:prro/core/domain/drink_option.dart';
+import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/data/api/models/ingredient.dart';
-import 'package:prro/data/api/models/measure_unit.dart';
-import 'package:prro/data/api/models/seller_item.dart';
 
 abstract interface class ItemsServiceI {
   /// Top-level categories for the current outlet.

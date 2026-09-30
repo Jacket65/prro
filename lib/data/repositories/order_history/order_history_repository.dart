@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:prro/data/api/models/order_history.dart';
+import 'package:prro/core/domain/order_history.dart';
 import 'package:prro/data/repositories/order_history/order_history_repo_i.dart';
 import 'package:prro/data/services/order_history_service.dart';
 

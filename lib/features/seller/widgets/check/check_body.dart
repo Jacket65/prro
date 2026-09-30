@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/data/api/models/seller_item.dart';
+import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 import 'package:prro/features/seller/widgets/check/employee_info.dart';
 import 'package:prro/features/seller/widgets/seller_list_item.dart';

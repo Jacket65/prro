@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/domain/order_history.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
-import 'package:prro/data/api/models/order_history.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract interface class OrderHistoryServiceI {

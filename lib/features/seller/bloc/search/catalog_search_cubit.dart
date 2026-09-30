@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/data/api/models/seller_item.dart';
+import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 
 part 'catalog_search_state.dart';

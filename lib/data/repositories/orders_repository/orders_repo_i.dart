@@ -1,8 +1,8 @@
 import 'package:decimal/decimal.dart';
-import 'package:prro/data/api/models/bean.dart';
-import 'package:prro/data/api/models/drink_option.dart';
-import 'package:prro/data/api/models/order.dart';
-import 'package:prro/data/api/models/seller_item.dart';
+import 'package:prro/core/domain/bean.dart';
+import 'package:prro/core/domain/catalog_item.dart';
+import 'package:prro/core/domain/drink_option.dart';
+import 'package:prro/core/domain/order.dart';
 
 abstract interface class OrdersRepositoryI {
   List<Product> get products;

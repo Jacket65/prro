@@ -2,12 +2,12 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/domain/bean.dart';
+import 'package:prro/core/domain/catalog_item.dart';
+import 'package:prro/core/domain/drink_option.dart';
+import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/network/api_client_i.dart';
-import 'package:prro/data/api/models/bean.dart';
-import 'package:prro/data/api/models/drink_option.dart';
 import 'package:prro/data/api/models/ingredient.dart';
-import 'package:prro/data/api/models/measure_unit.dart';
-import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/data/repositories/items_repository/items_repo_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

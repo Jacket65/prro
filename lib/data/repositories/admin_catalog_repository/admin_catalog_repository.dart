@@ -1,5 +1,5 @@
+import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/data/api/models/admin/catalog.dart';
-import 'package:prro/data/api/models/measure_unit.dart';
 
 /// Catalog administration: categories, products, variants, recipes, ingredients
 /// and measure units. All state-changing calls forward a stable

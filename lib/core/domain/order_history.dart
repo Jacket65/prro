@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/utils/json.dart';
 import 'package:prro/core/utils/money.dart';
-import 'package:prro/data/api/models/order.dart';
 
 /// A single order as returned by `GET /shifts/{id}/orders` (a page row, not the
 /// full receipt). `total_price` is a decimal **string** on the wire, parsed to

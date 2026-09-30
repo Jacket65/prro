@@ -1,7 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:prro/core/domain/catalog_item.dart';
+import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/mock/mock_backend.dart';
-import 'package:prro/data/api/models/order.dart';
-import 'package:prro/data/api/models/seller_item.dart';
+import 'package:prro/core/mock/order_request_dto.dart';
 
 void main() {
   group('MockBackend vs Real Backend Behavior Comparison', () {

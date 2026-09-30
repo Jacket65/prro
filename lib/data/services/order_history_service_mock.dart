@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-import 'package:prro/data/api/models/order.dart';
-import 'package:prro/data/api/models/order_history.dart';
+import 'package:prro/core/domain/order.dart';
+import 'package:prro/core/domain/order_history.dart';
 import 'package:prro/data/services/order_history_service.dart';
 
 @Environment('mock')

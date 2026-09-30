@@ -1,5 +1,5 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/data/api/models/bean.dart';
+import 'package:prro/core/domain/bean.dart';
 
 /// Searchable bean chooser. Opened from the options dialog so a long bean
 /// catalogue stays manageable: type to filter across all groups, or browse by
