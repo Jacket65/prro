@@ -124,7 +124,7 @@ One stack: everything goes through the injected `ApiClientI` (Dio). A request in
 
 ## Conventions
 - Interfaces are suffixed `I` (`ApiClientI`, `ItemsRepositoryI`, `OrderHistoryRepositoryI`).
-- **Import explicit paths, not barrels.** The global barrels (`data/api/models/models.dart`, `data/repositories/repositories.dart`, `data/services/services.dart`, and the per-feature `admin.dart` / `auth.dart` / `bloc.dart` / `widgets.dart`) were all deleted.
+- **Import explicit paths, not barrels.** The global barrels (`data/api/models/models.dart`, `data/repositories/repositories.dart`, `data/services/services.dart`, and the per-feature `admin.dart` / `auth.dart` / `bloc.dart` / `widgets.dart`) were all deleted. The one deliberate survivor is `features/admin/data/models/admin_models.dart`, which the app-wide `MockBackend` uses to reach the admin DTOs.
 - `analysis_options.yaml` uses `very_good_analysis` 11 with `unused_import: error` and strict casts/inference/raw-types. No analyzer-coupled lint plugin is installed: `custom_lint`/`module_boundary` pin the `analyzer` package, which already conflicts with the freezed/auto_route_generator split (see `pubspec.yaml`), so the boundary check is a plain `rg` script instead.
 - Models extend `Equatable` and provide `props`; bloc state comparisons rely on value equality.
 - Logging uses `dart:developer`'s `log()`; the payment flow uses the injected `Talker`.
