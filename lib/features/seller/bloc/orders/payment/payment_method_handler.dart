@@ -1,4 +1,4 @@
-import 'package:prro/data/api/models/models.dart';
+import 'package:prro/data/api/models/order.dart';
 
 /// Strategy for handling a single [PaymentMethod].
 ///

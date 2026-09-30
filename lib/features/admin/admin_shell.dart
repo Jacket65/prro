@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prro/core/di/di.dart';
+import 'package:prro/core/router/app_router.gr.dart';
 import 'package:prro/data/repositories/admin_outlet_repository/admin_outlet_repository.dart';
-import 'package:prro/di/di.dart';
 import 'package:prro/features/admin/outlets/outlets_cubit.dart';
 import 'package:prro/features/admin/widgets/admin_back_button.dart';
-import 'package:prro/router/app_router.gr.dart';
 
 /// Top-level admin screen: a router-driven tabbed shell over the four admin
 /// resources.

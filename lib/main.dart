@@ -1,9 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:prro/app.dart';
-import 'package:prro/config/backend_config.dart';
-import 'package:prro/config/env.dart';
-import 'package:prro/di/di.dart';
-import 'package:prro/router/app_router.dart';
+import 'package:prro/core/config/backend_config.dart';
+import 'package:prro/core/config/env.dart';
+import 'package:prro/core/di/di.dart';
+import 'package:prro/core/router/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

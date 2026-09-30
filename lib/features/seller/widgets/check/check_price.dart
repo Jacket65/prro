@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/core/money.dart';
+import 'package:prro/core/utils/money.dart';
 import 'package:prro/features/seller/bloc/orders/orders_bloc.dart';
 
 class CheckPrice extends StatelessWidget {

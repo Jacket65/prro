@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:app_links/app_links.dart';
 import 'package:injectable/injectable.dart';
-import 'package:prro/config/payment_config.dart';
+import 'package:prro/core/config/payment_config.dart';
 
 /// Service interface for handling deep links
 /// (callbacks from PrivatBank Terminal).

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'catalog.dart';
@@ -9,6 +9,7 @@ part of 'catalog.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $AdminCategoryCopyWith<AdminCategory> get copyWith => _$AdminCategoryCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdminCategory&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+  final _this = this as AdminCategory;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdminCategory&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name);
+int get hashCode {
+  final _this = this as AdminCategory;
+  return Object.hash(runtimeType,_this.id,_this.name);
+}
 
 @override
 String toString() {
-  return 'AdminCategory(id: $id, name: $name)';
+  final _this = this as AdminCategory;
+  return 'AdminCategory(id: ${_this.id}, name: ${_this.name})';
 }
 
 
@@ -66,7 +72,7 @@ class _$AdminCategoryCopyWithImpl<$Res>
 /// Create a copy of AdminCategory
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,}) {
-  return _then(_self.copyWith(
+  return _then(AdminCategory(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,
@@ -229,16 +235,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdminCategory&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdminCategory&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name);
+int get hashCode {
+    return Object.hash(runtimeType,id,name);
+}
 
 @override
 String toString() {
-  return 'AdminCategory(id: $id, name: $name)';
+    return 'AdminCategory(id: $id, name: $name)';
 }
 
 
@@ -294,16 +302,21 @@ $AdminProductCopyWith<AdminProduct> get copyWith => _$AdminProductCopyWithImpl<A
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdminProduct&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId));
+  final _this = this as AdminProduct;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdminProduct&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.categoryId, _this.categoryId) || other.categoryId == _this.categoryId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,categoryId);
+int get hashCode {
+  final _this = this as AdminProduct;
+  return Object.hash(runtimeType,_this.id,_this.name,_this.categoryId);
+}
 
 @override
 String toString() {
-  return 'AdminProduct(id: $id, name: $name, categoryId: $categoryId)';
+  final _this = this as AdminProduct;
+  return 'AdminProduct(id: ${_this.id}, name: ${_this.name}, categoryId: ${_this.categoryId})';
 }
 
 
@@ -332,7 +345,7 @@ class _$AdminProductCopyWithImpl<$Res>
 /// Create a copy of AdminProduct
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? categoryId = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(AdminProduct(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
@@ -497,16 +510,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdminProduct&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdminProduct&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,categoryId);
+int get hashCode {
+    return Object.hash(runtimeType,id,name,categoryId);
+}
 
 @override
 String toString() {
-  return 'AdminProduct(id: $id, name: $name, categoryId: $categoryId)';
+    return 'AdminProduct(id: $id, name: $name, categoryId: $categoryId)';
 }
 
 
@@ -563,16 +578,21 @@ $AdminVariantCopyWith<AdminVariant> get copyWith => _$AdminVariantCopyWithImpl<A
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdminVariant&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.priceKopecks, priceKopecks) || other.priceKopecks == priceKopecks)&&(identical(other.productId, productId) || other.productId == productId));
+  final _this = this as AdminVariant;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdminVariant&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.priceKopecks, _this.priceKopecks) || other.priceKopecks == _this.priceKopecks)&&(identical(other.productId, _this.productId) || other.productId == _this.productId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,priceKopecks,productId);
+int get hashCode {
+  final _this = this as AdminVariant;
+  return Object.hash(runtimeType,_this.id,_this.name,_this.priceKopecks,_this.productId);
+}
 
 @override
 String toString() {
-  return 'AdminVariant(id: $id, name: $name, priceKopecks: $priceKopecks, productId: $productId)';
+  final _this = this as AdminVariant;
+  return 'AdminVariant(id: ${_this.id}, name: ${_this.name}, priceKopecks: ${_this.priceKopecks}, productId: ${_this.productId})';
 }
 
 
@@ -601,7 +621,7 @@ class _$AdminVariantCopyWithImpl<$Res>
 /// Create a copy of AdminVariant
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? priceKopecks = null,Object? productId = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(AdminVariant(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,priceKopecks: null == priceKopecks ? _self.priceKopecks : priceKopecks // ignore: cast_nullable_to_non_nullable
@@ -768,16 +788,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdminVariant&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.priceKopecks, priceKopecks) || other.priceKopecks == priceKopecks)&&(identical(other.productId, productId) || other.productId == productId));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdminVariant&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.priceKopecks, priceKopecks) || other.priceKopecks == priceKopecks)&&(identical(other.productId, productId) || other.productId == productId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,priceKopecks,productId);
+int get hashCode {
+    return Object.hash(runtimeType,id,name,priceKopecks,productId);
+}
 
 @override
 String toString() {
-  return 'AdminVariant(id: $id, name: $name, priceKopecks: $priceKopecks, productId: $productId)';
+    return 'AdminVariant(id: $id, name: $name, priceKopecks: $priceKopecks, productId: $productId)';
 }
 
 
@@ -835,16 +857,21 @@ $RecipeIngredientCopyWith<RecipeIngredient> get copyWith => _$RecipeIngredientCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RecipeIngredient&&(identical(other.ingredientId, ingredientId) || other.ingredientId == ingredientId)&&(identical(other.name, name) || other.name == name)&&(identical(other.quantity, quantity) || other.quantity == quantity));
+  final _this = this as RecipeIngredient;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RecipeIngredient&&(identical(other.ingredientId, _this.ingredientId) || other.ingredientId == _this.ingredientId)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.quantity, _this.quantity) || other.quantity == _this.quantity));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,ingredientId,name,quantity);
+int get hashCode {
+  final _this = this as RecipeIngredient;
+  return Object.hash(runtimeType,_this.ingredientId,_this.name,_this.quantity);
+}
 
 @override
 String toString() {
-  return 'RecipeIngredient(ingredientId: $ingredientId, name: $name, quantity: $quantity)';
+  final _this = this as RecipeIngredient;
+  return 'RecipeIngredient(ingredientId: ${_this.ingredientId}, name: ${_this.name}, quantity: ${_this.quantity})';
 }
 
 
@@ -873,7 +900,7 @@ class _$RecipeIngredientCopyWithImpl<$Res>
 /// Create a copy of RecipeIngredient
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? ingredientId = null,Object? name = null,Object? quantity = null,}) {
-  return _then(_self.copyWith(
+  return _then(RecipeIngredient(
 ingredientId: null == ingredientId ? _self.ingredientId : ingredientId // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
@@ -1038,16 +1065,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RecipeIngredient&&(identical(other.ingredientId, ingredientId) || other.ingredientId == ingredientId)&&(identical(other.name, name) || other.name == name)&&(identical(other.quantity, quantity) || other.quantity == quantity));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RecipeIngredient&&(identical(other.ingredientId, ingredientId) || other.ingredientId == ingredientId)&&(identical(other.name, name) || other.name == name)&&(identical(other.quantity, quantity) || other.quantity == quantity));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,ingredientId,name,quantity);
+int get hashCode {
+    return Object.hash(runtimeType,ingredientId,name,quantity);
+}
 
 @override
 String toString() {
-  return 'RecipeIngredient(ingredientId: $ingredientId, name: $name, quantity: $quantity)';
+    return 'RecipeIngredient(ingredientId: $ingredientId, name: $name, quantity: $quantity)';
 }
 
 
@@ -1104,16 +1133,21 @@ $AdminIngredientCopyWith<AdminIngredient> get copyWith => _$AdminIngredientCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdminIngredient&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.unitId, unitId) || other.unitId == unitId));
+  final _this = this as AdminIngredient;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdminIngredient&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.unitId, _this.unitId) || other.unitId == _this.unitId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,unitId);
+int get hashCode {
+  final _this = this as AdminIngredient;
+  return Object.hash(runtimeType,_this.id,_this.name,_this.unitId);
+}
 
 @override
 String toString() {
-  return 'AdminIngredient(id: $id, name: $name, unitId: $unitId)';
+  final _this = this as AdminIngredient;
+  return 'AdminIngredient(id: ${_this.id}, name: ${_this.name}, unitId: ${_this.unitId})';
 }
 
 
@@ -1142,7 +1176,7 @@ class _$AdminIngredientCopyWithImpl<$Res>
 /// Create a copy of AdminIngredient
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? unitId = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(AdminIngredient(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,unitId: freezed == unitId ? _self.unitId : unitId // ignore: cast_nullable_to_non_nullable
@@ -1307,16 +1341,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdminIngredient&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.unitId, unitId) || other.unitId == unitId));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdminIngredient&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.unitId, unitId) || other.unitId == unitId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,unitId);
+int get hashCode {
+    return Object.hash(runtimeType,id,name,unitId);
+}
 
 @override
 String toString() {
-  return 'AdminIngredient(id: $id, name: $name, unitId: $unitId)';
+    return 'AdminIngredient(id: $id, name: $name, unitId: $unitId)';
 }
 
 

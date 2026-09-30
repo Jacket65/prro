@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'package:prro/core/json.dart';
-import 'package:prro/core/money.dart';
+import 'package:prro/core/utils/json.dart';
+import 'package:prro/core/utils/money.dart';
 
 part 'catalog.freezed.dart';
 part 'catalog.g.dart';

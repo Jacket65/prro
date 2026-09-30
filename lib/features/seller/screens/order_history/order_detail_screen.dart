@@ -4,11 +4,11 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/core/money.dart';
+import 'package:prro/core/di/di.dart';
+import 'package:prro/core/utils/money.dart';
 import 'package:prro/data/api/models/order.dart';
 import 'package:prro/data/api/models/order_history.dart';
 import 'package:prro/data/repositories/order_history/order_history.dart';
-import 'package:prro/di/di.dart';
 import 'package:prro/features/seller/bloc/order_history/order_detail_cubit.dart';
 
 @RoutePage(name: 'SellerOrderDetailRoute')

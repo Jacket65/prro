@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:prro/core/uuid.dart';
+import 'package:prro/core/utils/uuid.dart';
 import 'package:prro/data/api/models/payment/payment_request.dart';
 import 'package:prro/data/api/models/payment/payment_result.dart';
 import 'package:prro/data/api/models/payment/payment_token.dart';

@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/security/token_storage_i.dart';
-import 'package:prro/data/api/api_client_i.dart';
 import 'package:prro/data/repositories/auth_repository/auth_repo.dart';
 import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
 import 'package:prro/features/auth/model/auth_user.dart';

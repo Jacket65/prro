@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:prro/core/network/api_client.dart';
 import 'package:prro/core/security/token_storage_i.dart';
-import 'package:prro/data/api/api_client.dart';
 
 class MockTokenStorage extends Mock implements TokenStorageI {}
 

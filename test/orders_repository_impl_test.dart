@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:prro/data/api/api_client_i.dart';
-import 'package:prro/data/api/api_exception.dart';
-import 'package:prro/data/api/models/models.dart';
+import 'package:prro/core/network/api_client_i.dart';
+import 'package:prro/core/network/api_exception.dart';
+import 'package:prro/data/api/models/order.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repository_impl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

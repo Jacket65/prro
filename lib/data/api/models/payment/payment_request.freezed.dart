@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'payment_request.dart';
@@ -9,6 +9,7 @@ part of 'payment_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -33,16 +34,21 @@ $CreatePaymentRequestCopyWith<CreatePaymentRequest> get copyWith => _$CreatePaym
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreatePaymentRequest&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.description, description) || other.description == description)&&(identical(other.orderId, orderId) || other.orderId == orderId)&&const DeepCollectionEquality().equals(other.metadata, metadata));
+  final _this = this as CreatePaymentRequest;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreatePaymentRequest&&(identical(other.amount, _this.amount) || other.amount == _this.amount)&&(identical(other.currency, _this.currency) || other.currency == _this.currency)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.orderId, _this.orderId) || other.orderId == _this.orderId)&&const DeepCollectionEquality().equals(other.metadata, _this.metadata));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,amount,currency,description,orderId,const DeepCollectionEquality().hash(metadata));
+int get hashCode {
+  final _this = this as CreatePaymentRequest;
+  return Object.hash(runtimeType,_this.amount,_this.currency,_this.description,_this.orderId,const DeepCollectionEquality().hash(_this.metadata));
+}
 
 @override
 String toString() {
-  return 'CreatePaymentRequest(amount: $amount, currency: $currency, description: $description, orderId: $orderId, metadata: $metadata)';
+  final _this = this as CreatePaymentRequest;
+  return 'CreatePaymentRequest(amount: ${_this.amount}, currency: ${_this.currency}, description: ${_this.description}, orderId: ${_this.orderId}, metadata: ${_this.metadata})';
 }
 
 
@@ -71,7 +77,7 @@ class _$CreatePaymentRequestCopyWithImpl<$Res>
 /// Create a copy of CreatePaymentRequest
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? amount = null,Object? currency = null,Object? description = null,Object? orderId = freezed,Object? metadata = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(CreatePaymentRequest(
 amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
 as int,currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -218,7 +224,7 @@ return $default(_that.amount,_that.currency,_that.description,_that.orderId,_tha
 @JsonSerializable()
 
 class _CreatePaymentRequest implements CreatePaymentRequest {
-  const _CreatePaymentRequest({required this.amount, required this.currency, required this.description, @JsonKey(name: 'order_id') this.orderId, final  Map<String, dynamic>? metadata}): _metadata = metadata;
+  const _CreatePaymentRequest({required this.amount, required this.currency, required this.description, @JsonKey(name: 'order_id') this.orderId,  Map<String, dynamic>? metadata}): _metadata = metadata;
   factory _CreatePaymentRequest.fromJson(Map<String, dynamic> json) => _$CreatePaymentRequestFromJson(json);
 
 /// Payment amount in kopecks (1/100 of currency unit).
@@ -254,16 +260,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreatePaymentRequest&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.description, description) || other.description == description)&&(identical(other.orderId, orderId) || other.orderId == orderId)&&const DeepCollectionEquality().equals(other._metadata, _metadata));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreatePaymentRequest&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.description, description) || other.description == description)&&(identical(other.orderId, orderId) || other.orderId == orderId)&&const DeepCollectionEquality().equals(other.metadata, _metadata));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,amount,currency,description,orderId,const DeepCollectionEquality().hash(_metadata));
+int get hashCode {
+    return Object.hash(runtimeType,amount,currency,description,orderId,const DeepCollectionEquality().hash(_metadata));
+}
 
 @override
 String toString() {
-  return 'CreatePaymentRequest(amount: $amount, currency: $currency, description: $description, orderId: $orderId, metadata: $metadata)';
+    return 'CreatePaymentRequest(amount: $amount, currency: $currency, description: $description, orderId: $orderId, metadata: $metadata)';
 }
 
 

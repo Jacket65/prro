@@ -1,6 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:equatable/equatable.dart';
-import 'package:prro/core/json.dart';
+import 'package:prro/core/utils/json.dart';
 
 /// Mirrors the backend measure unit carried by a variant:
 ///   { "id": 5, "name": "кг", "step": "0.001" }

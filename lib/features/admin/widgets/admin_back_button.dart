@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/router/app_router.gr.dart';
+import 'package:prro/core/router/app_router.gr.dart';
 
 /// Consistent back button for admin drill-down screens. Icon only, placed in
 /// the AppBar leading slot. Pops the current route to return to the immediate

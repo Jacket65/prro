@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:prro/core/json.dart';
+import 'package:prro/core/utils/json.dart';
 
 part 'admin_user.freezed.dart';
 part 'admin_user.g.dart';

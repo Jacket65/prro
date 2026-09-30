@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:prro/core/json.dart';
+import 'package:prro/core/utils/json.dart';
 
 /// How many options a customer may pick from an [OptionGroup].
 /// `single` → radio (one option), `multi` → checkboxes (several).

@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/mock/mock_backend.dart';
 import 'package:prro/data/api/models/admin/admin_user.dart';
-import 'package:prro/data/mock/mock_backend.dart';
 import 'package:prro/data/repositories/admin_user_repository/admin_user_repository.dart';
 
 @Environment('mock')

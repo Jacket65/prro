@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:prro/core/router/app_router.gr.dart';
 import 'package:prro/features/auth/bloc/auth_bloc.dart';
 import 'package:prro/features/auth/bloc/auth_state.dart';
-import 'package:prro/router/app_router.gr.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Screen|Page,Route')
 class AppRouter extends RootStackRouter {

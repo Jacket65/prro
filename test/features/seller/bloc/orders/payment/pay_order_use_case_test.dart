@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:prro/data/api/api_exception.dart';
-import 'package:prro/data/api/models/models.dart';
+import 'package:prro/core/network/api_exception.dart';
+import 'package:prro/data/api/models/order.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
 import 'package:prro/features/seller/bloc/orders/payment/handlers/cash_payment_handler.dart';
 import 'package:prro/features/seller/bloc/orders/payment/handlers/terminal_payment_handler.dart';

@@ -1,5 +1,6 @@
 import 'package:injectable/injectable.dart';
-import 'package:prro/data/api/models/models.dart';
+import 'package:prro/data/api/models/order.dart';
+import 'package:prro/data/api/models/payment/payment_request.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
 import 'package:prro/features/seller/bloc/orders/payment/payment_exceptions.dart';
 import 'package:prro/features/seller/bloc/orders/payment/payment_method_handler.dart';

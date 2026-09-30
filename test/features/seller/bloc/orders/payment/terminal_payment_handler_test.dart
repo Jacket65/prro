@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:prro/data/api/models/models.dart';
+import 'package:prro/data/api/models/order.dart';
+import 'package:prro/data/api/models/payment/payment_request.dart';
+import 'package:prro/data/api/models/payment/payment_result.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repo_i.dart';
 import 'package:prro/features/seller/bloc/orders/payment/handlers/terminal_payment_handler.dart';
 import 'package:prro/features/seller/bloc/orders/payment/payment_exceptions.dart';

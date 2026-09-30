@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:prro/core/json.dart';
+import 'package:prro/core/utils/json.dart';
 
 part 'retail_outlet.freezed.dart';
 part 'retail_outlet.g.dart';

@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/mock/mock_api_client.dart';
+import 'package:prro/core/mock/mock_backend.dart';
+import 'package:prro/core/network/api_client.dart';
+import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/security/token_storage_i.dart';
-import 'package:prro/data/api/api_client.dart';
-import 'package:prro/data/api/api_client_i.dart';
-import 'package:prro/data/api/mock_api_client.dart';
-import 'package:prro/data/mock/mock_backend.dart';
 import 'package:prro/data/services/payment_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talker/talker.dart';

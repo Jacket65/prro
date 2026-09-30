@@ -1,11 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:prro/core/router/app_router.dart';
 import 'package:prro/data/repositories/auth_repository/auth_repo_i.dart';
 import 'package:prro/features/auth/bloc/auth_bloc.dart';
 import 'package:prro/features/auth/bloc/auth_state.dart';
 import 'package:prro/features/auth/model/auth_user.dart';
-import 'package:prro/router/app_router.dart';
 
 class MockAuthBloc extends Mock implements AuthBloc {}
 

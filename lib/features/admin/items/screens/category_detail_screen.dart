@@ -3,16 +3,16 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/core/uuid.dart';
+import 'package:prro/core/di/di.dart';
+import 'package:prro/core/router/app_router.gr.dart';
+import 'package:prro/core/utils/uuid.dart';
 import 'package:prro/data/api/models/admin/catalog.dart';
 import 'package:prro/data/repositories/admin_catalog_repository/admin_catalog_repository.dart';
-import 'package:prro/di/di.dart';
 import 'package:prro/features/admin/items/category_detail_cubit.dart';
 import 'package:prro/features/admin/items/screens/product_detail_screen.dart'
     show ProductDetailScreen;
 import 'package:prro/features/admin/items/widgets/name_dialog.dart';
 import 'package:prro/features/admin/widgets/admin_back_button.dart';
-import 'package:prro/router/app_router.gr.dart';
 
 /// Lists products in a category and allows adding one. Tapping a product
 /// drills into [ProductDetailScreen].

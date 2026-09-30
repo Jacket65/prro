@@ -1,11 +1,15 @@
 import 'package:decimal/decimal.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
-import 'package:prro/config/env.dart';
-import 'package:prro/core/money.dart';
-import 'package:prro/data/api/api_client_i.dart';
-import 'package:prro/data/api/api_exception.dart';
-import 'package:prro/data/api/models/models.dart';
+import 'package:prro/core/config/env.dart';
+import 'package:prro/core/network/api_client_i.dart';
+import 'package:prro/core/network/api_exception.dart';
+import 'package:prro/core/utils/money.dart';
+import 'package:prro/data/api/models/bean.dart';
+import 'package:prro/data/api/models/drink_option.dart';
+import 'package:prro/data/api/models/measure_unit.dart';
+import 'package:prro/data/api/models/order.dart';
+import 'package:prro/data/api/models/seller_item.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

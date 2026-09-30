@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:prro/core/json.dart';
+import 'package:prro/core/utils/json.dart';
 
 /// A coffee bean a cashier can pick for a drink (e.g. "Арабіка Колумбія").
 /// Beans don't change the price for now, but mirror the option shape so a

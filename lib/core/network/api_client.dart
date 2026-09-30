@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:prro/config/env.dart';
+import 'package:prro/core/config/env.dart';
+import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/security/token_storage_i.dart';
-import 'package:prro/data/api/api_client_i.dart';
 
 class ApiClient implements ApiClientI {
   ApiClient({required this.dio, required this.tokenStorage})

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prro/core/money.dart';
+import 'package:prro/core/utils/money.dart';
 import 'package:prro/data/api/models/order.dart';
 import 'package:prro/data/api/models/order_history.dart';
 

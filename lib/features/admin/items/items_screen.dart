@@ -3,16 +3,16 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prro/core/di/di.dart';
+import 'package:prro/core/router/app_router.gr.dart';
 import 'package:prro/data/api/models/admin/catalog.dart';
 import 'package:prro/data/repositories/admin_catalog_repository/admin_catalog_repository.dart';
-import 'package:prro/di/di.dart';
 import 'package:prro/features/admin/items/categories_cubit.dart';
 import 'package:prro/features/admin/items/screens/category_detail_screen.dart'
     show CategoryDetailScreen;
 import 'package:prro/features/admin/items/widgets/name_dialog.dart';
 import 'package:prro/features/admin/outlets/outlets_cubit.dart';
 import 'package:prro/features/admin/widgets/confirm_dialog.dart';
-import 'package:prro/router/app_router.gr.dart';
 
 /// Items tab: outlet-scoped categories grid with create / rename / delete,
 /// driven by [CategoriesCubit]. Selecting a category drills into

@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-import 'package:prro/core/money.dart';
-import 'package:prro/data/api/models/models.dart';
+import 'package:prro/core/utils/money.dart';
+import 'package:prro/data/api/models/order.dart';
 import 'package:prro/data/repositories/orders_repository/orders_repository.dart';
 import 'package:prro/features/seller/bloc/orders/payment/handlers/cash_payment_handler.dart';
 import 'package:prro/features/seller/bloc/orders/payment/handlers/terminal_payment_handler.dart';

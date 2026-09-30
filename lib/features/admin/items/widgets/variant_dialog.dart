@@ -1,5 +1,5 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/core/money.dart';
+import 'package:prro/core/utils/money.dart';
 
 /// Add a variant. Returns `(name, priceKopecks)`, or `null` if cancelled.
 /// Price is entered in UAH and converted to kopecks via [uahToKopecks].

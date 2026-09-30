@@ -1,4 +1,4 @@
-import 'package:prro/core/money.dart';
+import 'package:prro/core/utils/money.dart';
 
 /// Payment method. `terminal` covers any card/tap payment on the external POS
 /// terminal. Wire form is the lowercase string the backend expects: the

@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:injectable/injectable.dart';
-import 'package:prro/config/payment_config.dart';
+import 'package:prro/core/config/payment_config.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Service interface for launching the PrivatBank NFC POS Terminal.

@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/mock/mock_backend.dart';
 import 'package:prro/data/api/models/bean.dart';
 import 'package:prro/data/api/models/drink_option.dart';
 import 'package:prro/data/api/models/ingredient.dart';
 import 'package:prro/data/api/models/measure_unit.dart';
 import 'package:prro/data/api/models/seller_item.dart';
-import 'package:prro/data/mock/mock_backend.dart';
 import 'package:prro/data/repositories/items_repository/items_repository.dart';
 
 @Environment('mock')

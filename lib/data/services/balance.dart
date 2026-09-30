@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:prro/data/api/api_client_i.dart';
+import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/data/repositories/balance/balance_i.dart';
 
 @Environment('prod')

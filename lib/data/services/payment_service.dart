@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:prro/data/api/api_client_i.dart';
-import 'package:prro/data/api/api_exception.dart';
+import 'package:prro/core/network/api_client_i.dart';
+import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/data/api/models/payment/payment_request.dart';
 import 'package:prro/data/api/models/payment/payment_result.dart';
 import 'package:prro/data/api/models/payment/payment_token.dart';

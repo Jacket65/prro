@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import 'package:prro/core/json.dart';
+import 'package:prro/core/utils/json.dart';
 
 /// A shift as returned by the backend (`GET/POST .../shift/...`).
 ///

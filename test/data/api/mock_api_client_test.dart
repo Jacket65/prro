@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prro/data/api/mock_api_client.dart';
-import 'package:prro/data/mock/mock_backend.dart';
+import 'package:prro/core/mock/mock_api_client.dart';
+import 'package:prro/core/mock/mock_backend.dart';
 
 void main() {
   late MockBackend mockBackend;

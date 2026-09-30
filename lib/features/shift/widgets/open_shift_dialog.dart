@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/core/money.dart';
-import 'package:prro/core/uuid.dart';
+import 'package:prro/core/utils/money.dart';
+import 'package:prro/core/utils/uuid.dart';
 import 'package:prro/features/shift/bloc/bloc.dart';
 
 /// Asks for the starting cash and opens a shift (`POST .../shift/open`).
