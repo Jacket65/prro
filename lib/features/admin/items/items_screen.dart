@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:prro/data/api/models/admin/catalog.dart';
 import 'package:prro/data/repositories/admin_catalog_repository/admin_catalog_repository.dart';
 import 'package:prro/di/di.dart';
@@ -110,10 +110,7 @@ class _ItemsView extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        state.message,
-                        textAlign: TextAlign.center,
-                      ),
+                      Text(state.message, textAlign: TextAlign.center),
                       const SizedBox(height: 16),
                       FilledButton.icon(
                         icon: const Icon(Icons.refresh),

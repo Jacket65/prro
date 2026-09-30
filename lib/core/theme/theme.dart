@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// App-specific semantic status colors that fall outside Material's standard
 /// [ColorScheme] roles. Chips and badges use these to convey open/closed,

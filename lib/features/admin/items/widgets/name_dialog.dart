@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Generic single-field text prompt. Returns the trimmed value, or `null` if
 /// cancelled / empty.

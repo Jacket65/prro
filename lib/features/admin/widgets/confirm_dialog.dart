@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Shared confirmation dialog (admin feature). Mirrors the seller
 /// confirmation dialog's static `show` pattern.

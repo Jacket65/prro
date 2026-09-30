@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:prro/features/seller/bloc/search/catalog_search_cubit.dart';
 
 /// Catalog search box. Debounces input (~300 ms) before querying so we don't

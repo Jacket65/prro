@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:prro/data/api/models/models.dart';
 
 /// Searchable bean chooser. Opened from the options dialog so a long bean

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:prro/core/money.dart';
 
 /// Add a variant. Returns `(name, priceKopecks)`, or `null` if cancelled.

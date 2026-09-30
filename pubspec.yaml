@@ -8,11 +8,7 @@ environment:
 
 dependencies:
   app_links: ^7.2.1
-  # auto_route 11.2.0 imports package:material_ui, which is a separate copy of
-  # Material. Until the Flutter SDK re-exports material_ui from
-  # package:flutter/material.dart, auto_route's TabController is a different
-  # type from the app's, breaking AutoTabsRouter.tabBar builders.
-  auto_route: ">=11.1.0 <11.2.0"
+  auto_route: 11.2.0
   bloc_concurrency: ^0.3.0
   cupertino_icons: ^2.0.0
   decimal: ^3.2.6
@@ -29,6 +25,8 @@ dependencies:
   injectable: ^3.0.0
   intl: ^0.20.3
   json_annotation: ^4.12.0
+  material_ui: ^1.5.0
+
   meta: ^1.19.0
   path_provider: ^2.1.6
   provider: ^6.1.5+1

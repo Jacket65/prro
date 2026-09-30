@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:prro/data/api/models/admin/retail_outlet.dart';
 import 'package:prro/features/admin/admin.dart' show OutletsCubit;
 import 'package:prro/features/admin/outlets/outlets_cubit.dart'

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Shows a confirmation dialog before logging out.
 /// Returns `true` if the user confirmed logout, `false` otherwise.

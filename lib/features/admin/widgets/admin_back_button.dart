@@ -1,5 +1,5 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:prro/router/app_router.gr.dart';
 
 /// Consistent back button for admin drill-down screens. Icon only, placed in

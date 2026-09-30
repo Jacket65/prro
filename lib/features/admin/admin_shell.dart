@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:prro/data/repositories/admin_outlet_repository/admin_outlet_repository.dart';
 import 'package:prro/di/di.dart';
 import 'package:prro/features/admin/outlets/outlets_cubit.dart';
@@ -60,18 +60,13 @@ class _AdminShellView extends StatelessWidget {
                   actionsPadding: EdgeInsets.zero,
                   leadingWidth: 0,
                   title: const Row(
-                    children: [
-                      AdminMainMenuButton(),
-                      Text('Адміністрування'),
-                    ],
+                    children: [AdminMainMenuButton(), Text('Адміністрування')],
                   ),
                   bottom: TabBar(
                     controller: tabController,
                     labelColor: const Color(0xFFFFFFFF),
                     unselectedLabelColor: const Color(0xFFE0E0E0),
-                    tabs: [
-                      for (final label in _tabs) Tab(text: label),
-                    ],
+                    tabs: [for (final label in _tabs) Tab(text: label)],
                   ),
                 ),
                 body: child,
