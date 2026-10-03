@@ -6,7 +6,7 @@ A Flutter application that supports two backend environments: a **production** b
 
 ### Prerequisites
 
-- [Flutter](https://flutter.dev/docs/get-started/install) `3.44.6` (or a compatible stable channel)
+- Flutter `3.44.6` (or a compatible stable channel)
 - Java 17 (for Android builds)
 - An IDE such as VS Code or Android Studio with the Flutter plugin
 
