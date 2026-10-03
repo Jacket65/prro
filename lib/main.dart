@@ -9,6 +9,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   Env.assertBaseUrlConfigured();
+  BackendConfig.assertBackendTypeConfigured();
 
   await configureDependencies(useMock: BackendConfig.useMock);
 
