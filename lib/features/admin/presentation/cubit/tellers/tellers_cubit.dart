@@ -27,13 +27,7 @@ class TellersCubit extends Cubit<TellersState> {
   void selectUser(int id) {
     final current = state;
     if (current is TellersLoaded) {
-      emit(
-        TellersLoaded(
-          current.users,
-          current.outletId,
-          selectedUserId: id,
-        ),
-      );
+      emit(TellersLoaded(current.users, current.outletId, selectedUserId: id));
     }
   }
 }

@@ -74,9 +74,9 @@ void main() {
         authCode: '123456',
       );
 
-      when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-        (_) async => token,
-      );
+      when(
+        () => mockRepository.createPaymentToken(request),
+      ).thenAnswer((_) async => token);
       when(
         () => mockTerminalLauncher.launchTerminal(
           jwtToken: any<String>(named: 'jwtToken'),
@@ -85,19 +85,17 @@ void main() {
           orderId: any<String>(named: 'orderId'),
           merchantId: any<String?>(named: 'merchantId'),
         ),
-      ).thenAnswer(
-        (_) async => true,
-      );
+      ).thenAnswer((_) async => true);
 
       // Use a StreamController so the correlated callback can be emitted only
       // after the session is established.
       final controller = StreamController<Uri>.broadcast();
-      when(() => mockDeepLinkService.onDeepLink).thenAnswer(
-        (_) => controller.stream,
-      );
-      when(() => mockRepository.verifyPayment('txn_12345')).thenAnswer(
-        (_) async => result,
-      );
+      when(
+        () => mockDeepLinkService.onDeepLink,
+      ).thenAnswer((_) => controller.stream);
+      when(
+        () => mockRepository.verifyPayment('txn_12345'),
+      ).thenAnswer((_) async => result);
 
       final paymentFuture = service.startPayment(request);
 
@@ -132,45 +130,40 @@ void main() {
       verify(() => mockRepository.verifyPayment('txn_12345')).called(1);
     });
 
-    test(
-      'startPayment throws TerminalLaunchFailedException '
-      'when terminal launch fails',
-      () async {
-        const request = CreatePaymentRequest(
-          amount: 15000,
-          currency: 'UAH',
-          description: 'Test payment',
-          orderId: 'test_order',
-        );
-        final token = TerminalToken(
-          token: 'test_jwt_token',
-          expiresAt: DateTime.now().add(const Duration(minutes: 10)),
-        );
+    test('startPayment throws TerminalLaunchFailedException '
+        'when terminal launch fails', () async {
+      const request = CreatePaymentRequest(
+        amount: 15000,
+        currency: 'UAH',
+        description: 'Test payment',
+        orderId: 'test_order',
+      );
+      final token = TerminalToken(
+        token: 'test_jwt_token',
+        expiresAt: DateTime.now().add(const Duration(minutes: 10)),
+      );
 
-        when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-          (_) async => token,
-        );
-        when(() => mockDeepLinkService.onDeepLink).thenAnswer(
-          (_) => const Stream.empty(),
-        );
-        when(
-          () => mockTerminalLauncher.launchTerminal(
-            jwtToken: any<String>(named: 'jwtToken'),
-            amount: any<int>(named: 'amount'),
-            currency: any<String>(named: 'currency'),
-            orderId: any<String>(named: 'orderId'),
-            merchantId: any<String?>(named: 'merchantId'),
-          ),
-        ).thenThrow(
-          const TerminalLaunchException('Terminal not available'),
-        );
+      when(
+        () => mockRepository.createPaymentToken(request),
+      ).thenAnswer((_) async => token);
+      when(
+        () => mockDeepLinkService.onDeepLink,
+      ).thenAnswer((_) => const Stream.empty());
+      when(
+        () => mockTerminalLauncher.launchTerminal(
+          jwtToken: any<String>(named: 'jwtToken'),
+          amount: any<int>(named: 'amount'),
+          currency: any<String>(named: 'currency'),
+          orderId: any<String>(named: 'orderId'),
+          merchantId: any<String?>(named: 'merchantId'),
+        ),
+      ).thenThrow(const TerminalLaunchException('Terminal not available'));
 
-        expect(
-          () => service.startPayment(request),
-          throwsA(isA<TerminalLaunchFailedException>()),
-        );
-      },
-    );
+      expect(
+        () => service.startPayment(request),
+        throwsA(isA<TerminalLaunchFailedException>()),
+      );
+    });
 
     test(
       'startPayment throws PaymentCallbackTimeoutException on timeout',
@@ -186,9 +179,9 @@ void main() {
           expiresAt: DateTime.now().add(const Duration(minutes: 10)),
         );
 
-        when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-          (_) async => token,
-        );
+        when(
+          () => mockRepository.createPaymentToken(request),
+        ).thenAnswer((_) async => token);
         when(
           () => mockTerminalLauncher.launchTerminal(
             jwtToken: any<String>(named: 'jwtToken'),
@@ -197,12 +190,10 @@ void main() {
             orderId: any<String>(named: 'orderId'),
             merchantId: any<String?>(named: 'merchantId'),
           ),
-        ).thenAnswer(
-          (_) async => true,
-        );
-        when(() => mockDeepLinkService.onDeepLink).thenAnswer(
-          (_) => const Stream.empty(),
-        );
+        ).thenAnswer((_) async => true);
+        when(
+          () => mockDeepLinkService.onDeepLink,
+        ).thenAnswer((_) => const Stream.empty());
 
         // Create service with short timeout for testing
         final testService = TerminalPaymentService(
@@ -219,359 +210,318 @@ void main() {
       },
     );
 
-    test(
-      'startPayment throws InvalidCallbackException '
-      'when transactionId is missing',
-      () async {
-        const request = CreatePaymentRequest(
-          amount: 15000,
-          currency: 'UAH',
-          description: 'Test payment',
-          orderId: 'test_order',
-        );
-        final token = TerminalToken(
-          token: 'test_jwt_token',
-          expiresAt: DateTime.now().add(const Duration(minutes: 10)),
-        );
+    test('startPayment throws InvalidCallbackException '
+        'when transactionId is missing', () async {
+      const request = CreatePaymentRequest(
+        amount: 15000,
+        currency: 'UAH',
+        description: 'Test payment',
+        orderId: 'test_order',
+      );
+      final token = TerminalToken(
+        token: 'test_jwt_token',
+        expiresAt: DateTime.now().add(const Duration(minutes: 10)),
+      );
 
-        when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-          (_) async => token,
-        );
-        when(
-          () => mockTerminalLauncher.launchTerminal(
-            jwtToken: any<String>(named: 'jwtToken'),
-            amount: any<int>(named: 'amount'),
-            currency: any<String>(named: 'currency'),
-            orderId: any<String>(named: 'orderId'),
-            merchantId: any<String?>(named: 'merchantId'),
-          ),
-        ).thenAnswer(
-          (_) async => true,
-        );
-        when(() => mockDeepLinkService.onDeepLink).thenAnswer(
-          (_) => Stream.fromIterable([
-            Uri.parse('prro://payment?status=SUCCESS'),
-          ]),
-        );
+      when(
+        () => mockRepository.createPaymentToken(request),
+      ).thenAnswer((_) async => token);
+      when(
+        () => mockTerminalLauncher.launchTerminal(
+          jwtToken: any<String>(named: 'jwtToken'),
+          amount: any<int>(named: 'amount'),
+          currency: any<String>(named: 'currency'),
+          orderId: any<String>(named: 'orderId'),
+          merchantId: any<String?>(named: 'merchantId'),
+        ),
+      ).thenAnswer((_) async => true);
+      when(() => mockDeepLinkService.onDeepLink).thenAnswer(
+        (_) =>
+            Stream.fromIterable([Uri.parse('prro://payment?status=SUCCESS')]),
+      );
 
-        expect(
-          () => service.startPayment(request),
-          throwsA(isA<InvalidCallbackException>()),
-        );
-      },
-    );
+      expect(
+        () => service.startPayment(request),
+        throwsA(isA<InvalidCallbackException>()),
+      );
+    });
 
-    test(
-      'startPayment throws TerminalPaymentCancelledException '
-      'when terminal reports cancellation',
-      () async {
-        const request = CreatePaymentRequest(
-          amount: 15000,
-          currency: 'UAH',
-          description: 'Test payment',
-          orderId: 'test_order',
-        );
-        final token = TerminalToken(
-          token: 'test_jwt_token',
-          expiresAt: DateTime.now().add(const Duration(minutes: 10)),
-        );
+    test('startPayment throws TerminalPaymentCancelledException '
+        'when terminal reports cancellation', () async {
+      const request = CreatePaymentRequest(
+        amount: 15000,
+        currency: 'UAH',
+        description: 'Test payment',
+        orderId: 'test_order',
+      );
+      final token = TerminalToken(
+        token: 'test_jwt_token',
+        expiresAt: DateTime.now().add(const Duration(minutes: 10)),
+      );
 
-        when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-          (_) async => token,
-        );
-        when(
-          () => mockTerminalLauncher.launchTerminal(
-            jwtToken: any<String>(named: 'jwtToken'),
-            amount: any<int>(named: 'amount'),
-            currency: any<String>(named: 'currency'),
-            orderId: any<String>(named: 'orderId'),
-            merchantId: any<String?>(named: 'merchantId'),
-          ),
-        ).thenAnswer(
-          (_) async => true,
-        );
-        // A terminal callback always echoes the orderId we launched with; the
-        // (secure) session-correlation check rejects any callback lacking or
-        // mismatching it before the status is inspected.
-        final controller = StreamController<Uri>();
-        when(
-          () => mockDeepLinkService.onDeepLink,
-        ).thenAnswer((_) => controller.stream);
+      when(
+        () => mockRepository.createPaymentToken(request),
+      ).thenAnswer((_) async => token);
+      when(
+        () => mockTerminalLauncher.launchTerminal(
+          jwtToken: any<String>(named: 'jwtToken'),
+          amount: any<int>(named: 'amount'),
+          currency: any<String>(named: 'currency'),
+          orderId: any<String>(named: 'orderId'),
+          merchantId: any<String?>(named: 'merchantId'),
+        ),
+      ).thenAnswer((_) async => true);
+      // A terminal callback always echoes the orderId we launched with; the
+      // (secure) session-correlation check rejects any callback lacking or
+      // mismatching it before the status is inspected.
+      final controller = StreamController<Uri>();
+      when(
+        () => mockDeepLinkService.onDeepLink,
+      ).thenAnswer((_) => controller.stream);
 
-        final paymentFuture = service.startPayment(request);
-        await Future<void>.delayed(Duration.zero);
-        final sessionId = service.activeSessionId;
-        expect(sessionId, isNotNull);
+      final paymentFuture = service.startPayment(request);
+      await Future<void>.delayed(Duration.zero);
+      final sessionId = service.activeSessionId;
+      expect(sessionId, isNotNull);
 
-        controller.add(
-          Uri.parse('prro://payment?status=CANCELLED&orderId=$sessionId'),
-        );
+      controller.add(
+        Uri.parse('prro://payment?status=CANCELLED&orderId=$sessionId'),
+      );
 
-        await expectLater(
-          paymentFuture,
-          throwsA(isA<TerminalPaymentCancelledException>()),
-        ).timeout(const Duration(seconds: 2));
-        await controller.close();
-      },
-    );
+      await expectLater(
+        paymentFuture,
+        throwsA(isA<TerminalPaymentCancelledException>()),
+      ).timeout(const Duration(seconds: 2));
+      await controller.close();
+    });
 
-    test(
-      'startPayment throws PaymentTerminalFailureException '
-      'when terminal reports an error without a transaction id',
-      () async {
-        const request = CreatePaymentRequest(
-          amount: 15000,
-          currency: 'UAH',
-          description: 'Test payment',
-          orderId: 'test_order',
-        );
-        final token = TerminalToken(
-          token: 'test_jwt_token',
-          expiresAt: DateTime.now().add(const Duration(minutes: 10)),
-        );
+    test('startPayment throws PaymentTerminalFailureException '
+        'when terminal reports an error without a transaction id', () async {
+      const request = CreatePaymentRequest(
+        amount: 15000,
+        currency: 'UAH',
+        description: 'Test payment',
+        orderId: 'test_order',
+      );
+      final token = TerminalToken(
+        token: 'test_jwt_token',
+        expiresAt: DateTime.now().add(const Duration(minutes: 10)),
+      );
 
-        when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-          (_) async => token,
-        );
-        when(
-          () => mockTerminalLauncher.launchTerminal(
-            jwtToken: any<String>(named: 'jwtToken'),
-            amount: any<int>(named: 'amount'),
-            currency: any<String>(named: 'currency'),
-            orderId: any<String>(named: 'orderId'),
-            merchantId: any<String?>(named: 'merchantId'),
-          ),
-        ).thenAnswer(
-          (_) async => true,
-        );
-        final controller = StreamController<Uri>();
-        when(
-          () => mockDeepLinkService.onDeepLink,
-        ).thenAnswer((_) => controller.stream);
+      when(
+        () => mockRepository.createPaymentToken(request),
+      ).thenAnswer((_) async => token);
+      when(
+        () => mockTerminalLauncher.launchTerminal(
+          jwtToken: any<String>(named: 'jwtToken'),
+          amount: any<int>(named: 'amount'),
+          currency: any<String>(named: 'currency'),
+          orderId: any<String>(named: 'orderId'),
+          merchantId: any<String?>(named: 'merchantId'),
+        ),
+      ).thenAnswer((_) async => true);
+      final controller = StreamController<Uri>();
+      when(
+        () => mockDeepLinkService.onDeepLink,
+      ).thenAnswer((_) => controller.stream);
 
-        final paymentFuture = service.startPayment(request);
-        await Future<void>.delayed(Duration.zero);
-        final sessionId = service.activeSessionId;
-        expect(sessionId, isNotNull);
+      final paymentFuture = service.startPayment(request);
+      await Future<void>.delayed(Duration.zero);
+      final sessionId = service.activeSessionId;
+      expect(sessionId, isNotNull);
 
-        controller.add(
-          Uri.parse('prro://payment?status=ERROR&orderId=$sessionId'),
-        );
+      controller.add(
+        Uri.parse('prro://payment?status=ERROR&orderId=$sessionId'),
+      );
 
-        await expectLater(
-          paymentFuture,
-          throwsA(isA<PaymentTerminalFailureException>()),
-        ).timeout(const Duration(seconds: 2));
-        await controller.close();
-      },
-    );
+      await expectLater(
+        paymentFuture,
+        throwsA(isA<PaymentTerminalFailureException>()),
+      ).timeout(const Duration(seconds: 2));
+      await controller.close();
+    });
 
-    test(
-      'startPayment throws PaymentTerminalFailureException '
-      'when terminal reports a declined payment',
-      () async {
-        const request = CreatePaymentRequest(
-          amount: 15000,
-          currency: 'UAH',
-          description: 'Test payment',
-          orderId: 'test_order',
-        );
-        final token = TerminalToken(
-          token: 'test_jwt_token',
-          expiresAt: DateTime.now().add(const Duration(minutes: 10)),
-        );
+    test('startPayment throws PaymentTerminalFailureException '
+        'when terminal reports a declined payment', () async {
+      const request = CreatePaymentRequest(
+        amount: 15000,
+        currency: 'UAH',
+        description: 'Test payment',
+        orderId: 'test_order',
+      );
+      final token = TerminalToken(
+        token: 'test_jwt_token',
+        expiresAt: DateTime.now().add(const Duration(minutes: 10)),
+      );
 
-        when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-          (_) async => token,
-        );
-        when(
-          () => mockTerminalLauncher.launchTerminal(
-            jwtToken: any<String>(named: 'jwtToken'),
-            amount: any<int>(named: 'amount'),
-            currency: any<String>(named: 'currency'),
-            orderId: any<String>(named: 'orderId'),
-            merchantId: any<String?>(named: 'merchantId'),
-          ),
-        ).thenAnswer(
-          (_) async => true,
-        );
-        final controller = StreamController<Uri>();
-        when(
-          () => mockDeepLinkService.onDeepLink,
-        ).thenAnswer((_) => controller.stream);
+      when(
+        () => mockRepository.createPaymentToken(request),
+      ).thenAnswer((_) async => token);
+      when(
+        () => mockTerminalLauncher.launchTerminal(
+          jwtToken: any<String>(named: 'jwtToken'),
+          amount: any<int>(named: 'amount'),
+          currency: any<String>(named: 'currency'),
+          orderId: any<String>(named: 'orderId'),
+          merchantId: any<String?>(named: 'merchantId'),
+        ),
+      ).thenAnswer((_) async => true);
+      final controller = StreamController<Uri>();
+      when(
+        () => mockDeepLinkService.onDeepLink,
+      ).thenAnswer((_) => controller.stream);
 
-        final paymentFuture = service.startPayment(request);
-        await Future<void>.delayed(Duration.zero);
-        final sessionId = service.activeSessionId;
-        expect(sessionId, isNotNull);
+      final paymentFuture = service.startPayment(request);
+      await Future<void>.delayed(Duration.zero);
+      final sessionId = service.activeSessionId;
+      expect(sessionId, isNotNull);
 
-        controller.add(
-          Uri.parse(
-            'prro://payment?transaction_id=txn_12345&status=DECLINED'
-            '&orderId=$sessionId',
-          ),
-        );
+      controller.add(
+        Uri.parse(
+          'prro://payment?transaction_id=txn_12345&status=DECLINED'
+          '&orderId=$sessionId',
+        ),
+      );
 
-        await expectLater(
-          paymentFuture,
-          throwsA(isA<PaymentTerminalFailureException>()),
-        ).timeout(const Duration(seconds: 2));
-        await controller.close();
-      },
-    );
+      await expectLater(
+        paymentFuture,
+        throwsA(isA<PaymentTerminalFailureException>()),
+      ).timeout(const Duration(seconds: 2));
+      await controller.close();
+    });
 
-    test(
-      'startPayment throws InvalidCallbackException '
-      'when transactionId format is invalid',
-      () async {
-        const request = CreatePaymentRequest(
-          amount: 15000,
-          currency: 'UAH',
-          description: 'Test payment',
-          orderId: 'test_order',
-        );
-        final token = TerminalToken(
-          token: 'test_jwt_token',
-          expiresAt: DateTime.now().add(const Duration(minutes: 10)),
-        );
+    test('startPayment throws InvalidCallbackException '
+        'when transactionId format is invalid', () async {
+      const request = CreatePaymentRequest(
+        amount: 15000,
+        currency: 'UAH',
+        description: 'Test payment',
+        orderId: 'test_order',
+      );
+      final token = TerminalToken(
+        token: 'test_jwt_token',
+        expiresAt: DateTime.now().add(const Duration(minutes: 10)),
+      );
 
-        when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-          (_) async => token,
-        );
-        when(
-          () => mockTerminalLauncher.launchTerminal(
-            jwtToken: any<String>(named: 'jwtToken'),
-            amount: any<int>(named: 'amount'),
-            currency: any<String>(named: 'currency'),
-            orderId: any<String>(named: 'orderId'),
-            merchantId: any<String?>(named: 'merchantId'),
-          ),
-        ).thenAnswer(
-          (_) async => true,
-        );
-        when(() => mockDeepLinkService.onDeepLink).thenAnswer(
-          (_) => Stream.fromIterable([
-            Uri.parse('prro://payment?transaction_id=ab'),
-          ]),
-        );
+      when(
+        () => mockRepository.createPaymentToken(request),
+      ).thenAnswer((_) async => token);
+      when(
+        () => mockTerminalLauncher.launchTerminal(
+          jwtToken: any<String>(named: 'jwtToken'),
+          amount: any<int>(named: 'amount'),
+          currency: any<String>(named: 'currency'),
+          orderId: any<String>(named: 'orderId'),
+          merchantId: any<String?>(named: 'merchantId'),
+        ),
+      ).thenAnswer((_) async => true);
+      when(() => mockDeepLinkService.onDeepLink).thenAnswer(
+        (_) => Stream.fromIterable([
+          Uri.parse('prro://payment?transaction_id=ab'),
+        ]),
+      );
 
-        expect(
-          () => service.startPayment(request),
-          throwsA(isA<InvalidCallbackException>()),
-        );
-      },
-    );
+      expect(
+        () => service.startPayment(request),
+        throwsA(isA<InvalidCallbackException>()),
+      );
+    });
 
-    test(
-      'startPayment throws InvalidCallbackException '
-      'when callback status is unknown',
-      () async {
-        const request = CreatePaymentRequest(
-          amount: 15000,
-          currency: 'UAH',
-          description: 'Test payment',
-          orderId: 'test_order',
-        );
-        final token = TerminalToken(
-          token: 'test_jwt_token',
-          expiresAt: DateTime.now().add(const Duration(minutes: 10)),
-        );
+    test('startPayment throws InvalidCallbackException '
+        'when callback status is unknown', () async {
+      const request = CreatePaymentRequest(
+        amount: 15000,
+        currency: 'UAH',
+        description: 'Test payment',
+        orderId: 'test_order',
+      );
+      final token = TerminalToken(
+        token: 'test_jwt_token',
+        expiresAt: DateTime.now().add(const Duration(minutes: 10)),
+      );
 
-        when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-          (_) async => token,
-        );
-        when(
-          () => mockTerminalLauncher.launchTerminal(
-            jwtToken: any<String>(named: 'jwtToken'),
-            amount: any<int>(named: 'amount'),
-            currency: any<String>(named: 'currency'),
-            orderId: any<String>(named: 'orderId'),
-            merchantId: any<String?>(named: 'merchantId'),
-          ),
-        ).thenAnswer(
-          (_) async => true,
-        );
-        when(() => mockDeepLinkService.onDeepLink).thenAnswer(
-          (_) => Stream.fromIterable([
-            Uri.parse(
-              'prro://payment?status=whatever&transaction_id=txn_12345',
-            ),
-          ]),
-        );
+      when(
+        () => mockRepository.createPaymentToken(request),
+      ).thenAnswer((_) async => token);
+      when(
+        () => mockTerminalLauncher.launchTerminal(
+          jwtToken: any<String>(named: 'jwtToken'),
+          amount: any<int>(named: 'amount'),
+          currency: any<String>(named: 'currency'),
+          orderId: any<String>(named: 'orderId'),
+          merchantId: any<String?>(named: 'merchantId'),
+        ),
+      ).thenAnswer((_) async => true);
+      when(() => mockDeepLinkService.onDeepLink).thenAnswer(
+        (_) => Stream.fromIterable([
+          Uri.parse('prro://payment?status=whatever&transaction_id=txn_12345'),
+        ]),
+      );
 
-        expect(
-          () => service.startPayment(request),
-          throwsA(isA<InvalidCallbackException>()),
-        );
-      },
-    );
+      expect(
+        () => service.startPayment(request),
+        throwsA(isA<InvalidCallbackException>()),
+      );
+    });
 
-    test(
-      'startPayment throws InvalidCallbackException '
-      'when callback orderId does not match the active session',
-      () async {
-        const request = CreatePaymentRequest(
-          amount: 15000,
-          currency: 'UAH',
-          description: 'Test payment',
-          orderId: 'test_order',
-        );
-        final token = TerminalToken(
-          token: 'test_jwt_token',
-          expiresAt: DateTime.now().add(const Duration(minutes: 10)),
-        );
-        const result = PaymentResult(
-          success: true,
-          status: 'SUCCESS',
-          rrn: '123456789012',
-          amount: 15000,
-          transactionId: 'txn_12345',
-          cardMask: '5168 **** **** 1234',
-          authCode: '123456',
-        );
+    test('startPayment throws InvalidCallbackException '
+        'when callback orderId does not match the active session', () async {
+      const request = CreatePaymentRequest(
+        amount: 15000,
+        currency: 'UAH',
+        description: 'Test payment',
+        orderId: 'test_order',
+      );
+      final token = TerminalToken(
+        token: 'test_jwt_token',
+        expiresAt: DateTime.now().add(const Duration(minutes: 10)),
+      );
+      const result = PaymentResult(
+        success: true,
+        status: 'SUCCESS',
+        rrn: '123456789012',
+        amount: 15000,
+        transactionId: 'txn_12345',
+        cardMask: '5168 **** **** 1234',
+        authCode: '123456',
+      );
 
-        when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-          (_) async => token,
-        );
-        when(
-          () => mockTerminalLauncher.launchTerminal(
-            jwtToken: any<String>(named: 'jwtToken'),
-            amount: any<int>(named: 'amount'),
-            currency: any<String>(named: 'currency'),
-            orderId: any<String>(named: 'orderId'),
-            merchantId: any<String?>(named: 'merchantId'),
-          ),
-        ).thenAnswer(
-          (_) async => true,
-        );
+      when(
+        () => mockRepository.createPaymentToken(request),
+      ).thenAnswer((_) async => token);
+      when(
+        () => mockTerminalLauncher.launchTerminal(
+          jwtToken: any<String>(named: 'jwtToken'),
+          amount: any<int>(named: 'amount'),
+          currency: any<String>(named: 'currency'),
+          orderId: any<String>(named: 'orderId'),
+          merchantId: any<String?>(named: 'merchantId'),
+        ),
+      ).thenAnswer((_) async => true);
 
-        final controller = StreamController<Uri>();
-        when(() => mockDeepLinkService.onDeepLink).thenAnswer(
-          (_) => controller.stream,
-        );
-        when(() => mockRepository.verifyPayment(any<String>())).thenAnswer(
-          (_) async => result,
-        );
+      final controller = StreamController<Uri>();
+      when(
+        () => mockDeepLinkService.onDeepLink,
+      ).thenAnswer((_) => controller.stream);
+      when(
+        () => mockRepository.verifyPayment(any<String>()),
+      ).thenAnswer((_) async => result);
 
-        final paymentFuture = service.startPayment(request);
-        await Future<void>.delayed(Duration.zero);
-        final sessionId = service.activeSessionId;
-        expect(sessionId, isNotNull);
+      final paymentFuture = service.startPayment(request);
+      await Future<void>.delayed(Duration.zero);
+      final sessionId = service.activeSessionId;
+      expect(sessionId, isNotNull);
 
-        // A callback echoing a different (stale) orderId must be rejected.
-        controller.add(
-          Uri.parse(
-            'prro://payment?transaction_id=txn_12345&status=SUCCESS'
-            '&orderId=stale_session_id',
-          ),
-        );
+      // A callback echoing a different (stale) orderId must be rejected.
+      controller.add(
+        Uri.parse(
+          'prro://payment?transaction_id=txn_12345&status=SUCCESS'
+          '&orderId=stale_session_id',
+        ),
+      );
 
-        expect(
-          paymentFuture,
-          throwsA(isA<InvalidCallbackException>()),
-        );
-      },
-    );
+      expect(paymentFuture, throwsA(isA<InvalidCallbackException>()));
+    });
 
     test(
       'startPayment disposes the DeepLinkService when the payment ends',
@@ -596,9 +546,9 @@ void main() {
           authCode: '123456',
         );
 
-        when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-          (_) async => token,
-        );
+        when(
+          () => mockRepository.createPaymentToken(request),
+        ).thenAnswer((_) async => token);
         when(
           () => mockTerminalLauncher.launchTerminal(
             jwtToken: any<String>(named: 'jwtToken'),
@@ -607,17 +557,15 @@ void main() {
             orderId: any<String>(named: 'orderId'),
             merchantId: any<String?>(named: 'merchantId'),
           ),
-        ).thenAnswer(
-          (_) async => true,
-        );
+        ).thenAnswer((_) async => true);
 
         final controller = StreamController<Uri>();
-        when(() => mockDeepLinkService.onDeepLink).thenAnswer(
-          (_) => controller.stream,
-        );
-        when(() => mockRepository.verifyPayment('txn_12345')).thenAnswer(
-          (_) async => result,
-        );
+        when(
+          () => mockDeepLinkService.onDeepLink,
+        ).thenAnswer((_) => controller.stream);
+        when(
+          () => mockRepository.verifyPayment('txn_12345'),
+        ).thenAnswer((_) async => result);
 
         final paymentFuture = service.startPayment(request);
         await Future<void>.delayed(Duration.zero);
@@ -638,10 +586,60 @@ void main() {
       },
     );
 
-    test(
-      'startPayment throws PaymentAlreadyInProgressException '
-      'when called while another session is active',
-      () async {
+    test('startPayment throws PaymentAlreadyInProgressException '
+        'when called while another session is active', () async {
+      const request = CreatePaymentRequest(
+        amount: 15000,
+        currency: 'UAH',
+        description: 'Test payment',
+        orderId: 'test_order',
+      );
+      final token = TerminalToken(
+        token: 'test_jwt_token',
+        expiresAt: DateTime.now().add(const Duration(minutes: 10)),
+      );
+
+      // Keep the first call active by never resolving its token creation.
+      final tokenCompleter = Completer<TerminalToken>();
+      when(
+        () => mockRepository.createPaymentToken(any()),
+      ).thenAnswer((_) => tokenCompleter.future);
+      when(
+        () => mockTerminalLauncher.launchTerminal(
+          jwtToken: any<String>(named: 'jwtToken'),
+          amount: any<int>(named: 'amount'),
+          currency: any<String>(named: 'currency'),
+          orderId: any<String>(named: 'orderId'),
+          merchantId: any<String?>(named: 'merchantId'),
+        ),
+      ).thenAnswer((_) async => true);
+      when(
+        () => mockDeepLinkService.onDeepLink,
+      ).thenAnswer((_) => const Stream.empty());
+
+      // A short timeout lets the (released) first call terminate quickly.
+      service.paymentTimeout = const Duration(milliseconds: 100);
+      final first = service.startPayment(request);
+      await Future<void>.delayed(Duration.zero);
+      expect(service.activeSessionId, isNotNull);
+
+      // The second concurrent call must be rejected by the guard.
+      expect(
+        () => service.startPayment(request),
+        throwsA(isA<PaymentAlreadyInProgressException>()),
+      );
+
+      // Release the first call and let it time out so nothing leaks.
+      tokenCompleter.complete(token);
+      await expectLater(
+        first,
+        throwsA(isA<PaymentCallbackTimeoutException>()),
+      ).timeout(const Duration(seconds: 2));
+    });
+
+    group('cancelPayment', () {
+      test('completes the in-flight startPayment with '
+          'TerminalPaymentCancelledException', () async {
         const request = CreatePaymentRequest(
           amount: 15000,
           currency: 'UAH',
@@ -653,11 +651,9 @@ void main() {
           expiresAt: DateTime.now().add(const Duration(minutes: 10)),
         );
 
-        // Keep the first call active by never resolving its token creation.
-        final tokenCompleter = Completer<TerminalToken>();
-        when(() => mockRepository.createPaymentToken(any())).thenAnswer(
-          (_) => tokenCompleter.future,
-        );
+        when(
+          () => mockRepository.createPaymentToken(request),
+        ).thenAnswer((_) async => token);
         when(
           () => mockTerminalLauncher.launchTerminal(
             jwtToken: any<String>(named: 'jwtToken'),
@@ -666,85 +662,27 @@ void main() {
             orderId: any<String>(named: 'orderId'),
             merchantId: any<String?>(named: 'merchantId'),
           ),
-        ).thenAnswer(
-          (_) async => true,
-        );
-        when(() => mockDeepLinkService.onDeepLink).thenAnswer(
-          (_) => const Stream.empty(),
-        );
+        ).thenAnswer((_) async => true);
+        when(
+          () => mockDeepLinkService.onDeepLink,
+        ).thenAnswer((_) => const Stream.empty());
 
-        // A short timeout lets the (released) first call terminate quickly.
-        service.paymentTimeout = const Duration(milliseconds: 100);
-        final first = service.startPayment(request);
+        final future = service.startPayment(request);
         await Future<void>.delayed(Duration.zero);
         expect(service.activeSessionId, isNotNull);
 
-        // The second concurrent call must be rejected by the guard.
-        expect(
-          () => service.startPayment(request),
-          throwsA(isA<PaymentAlreadyInProgressException>()),
-        );
+        service.cancelPayment();
 
-        // Release the first call and let it time out so nothing leaks.
-        tokenCompleter.complete(token);
         await expectLater(
-          first,
-          throwsA(isA<PaymentCallbackTimeoutException>()),
+          future,
+          throwsA(isA<TerminalPaymentCancelledException>()),
         ).timeout(const Duration(seconds: 2));
-      },
-    );
 
-    group('cancelPayment', () {
-      test(
-        'completes the in-flight startPayment with '
-        'TerminalPaymentCancelledException',
-        () async {
-          const request = CreatePaymentRequest(
-            amount: 15000,
-            currency: 'UAH',
-            description: 'Test payment',
-            orderId: 'test_order',
-          );
-          final token = TerminalToken(
-            token: 'test_jwt_token',
-            expiresAt: DateTime.now().add(const Duration(minutes: 10)),
-          );
-
-          when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-            (_) async => token,
-          );
-          when(
-            () => mockTerminalLauncher.launchTerminal(
-              jwtToken: any<String>(named: 'jwtToken'),
-              amount: any<int>(named: 'amount'),
-              currency: any<String>(named: 'currency'),
-              orderId: any<String>(named: 'orderId'),
-              merchantId: any<String?>(named: 'merchantId'),
-            ),
-          ).thenAnswer(
-            (_) async => true,
-          );
-          when(() => mockDeepLinkService.onDeepLink).thenAnswer(
-            (_) => const Stream.empty(),
-          );
-
-          final future = service.startPayment(request);
-          await Future<void>.delayed(Duration.zero);
-          expect(service.activeSessionId, isNotNull);
-
-          service.cancelPayment();
-
-          await expectLater(
-            future,
-            throwsA(isA<TerminalPaymentCancelledException>()),
-          ).timeout(const Duration(seconds: 2));
-
-          // Cleanup ran: the session guard was cleared and the deep link
-          // service was torn down.
-          expect(service.activeSessionId, isNull);
-          verify(() => mockDeepLinkService.dispose()).called(1);
-        },
-      );
+        // Cleanup ran: the session guard was cleared and the deep link
+        // service was torn down.
+        expect(service.activeSessionId, isNull);
+        verify(() => mockDeepLinkService.dispose()).called(1);
+      });
 
       test('a second startPayment succeeds after a cancellation', () async {
         const request = CreatePaymentRequest(
@@ -767,9 +705,9 @@ void main() {
           authCode: '123456',
         );
 
-        when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-          (_) async => token,
-        );
+        when(
+          () => mockRepository.createPaymentToken(request),
+        ).thenAnswer((_) async => token);
         when(
           () => mockTerminalLauncher.launchTerminal(
             jwtToken: any<String>(named: 'jwtToken'),
@@ -778,17 +716,15 @@ void main() {
             orderId: any<String>(named: 'orderId'),
             merchantId: any<String?>(named: 'merchantId'),
           ),
-        ).thenAnswer(
-          (_) async => true,
-        );
-        when(() => mockRepository.verifyPayment(any<String>())).thenAnswer(
-          (_) async => result,
-        );
+        ).thenAnswer((_) async => true);
+        when(
+          () => mockRepository.verifyPayment(any<String>()),
+        ).thenAnswer((_) async => result);
 
         final controller = StreamController<Uri>.broadcast();
-        when(() => mockDeepLinkService.onDeepLink).thenAnswer(
-          (_) => controller.stream,
-        );
+        when(
+          () => mockDeepLinkService.onDeepLink,
+        ).thenAnswer((_) => controller.stream);
 
         var future = service.startPayment(request);
         await Future<void>.delayed(Duration.zero);
@@ -830,9 +766,9 @@ void main() {
             expiresAt: DateTime.now().add(const Duration(minutes: 10)),
           );
 
-          when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-            (_) async => token,
-          );
+          when(
+            () => mockRepository.createPaymentToken(request),
+          ).thenAnswer((_) async => token);
           when(
             () => mockTerminalLauncher.launchTerminal(
               jwtToken: any<String>(named: 'jwtToken'),
@@ -841,12 +777,10 @@ void main() {
               orderId: any<String>(named: 'orderId'),
               merchantId: any<String?>(named: 'merchantId'),
             ),
-          ).thenAnswer(
-            (_) async => true,
-          );
-          when(() => mockDeepLinkService.onDeepLink).thenAnswer(
-            (_) => const Stream.empty(),
-          );
+          ).thenAnswer((_) async => true);
+          when(
+            () => mockDeepLinkService.onDeepLink,
+          ).thenAnswer((_) => const Stream.empty());
 
           final future = service.startPayment(request);
           await Future<void>.delayed(Duration.zero);
@@ -877,12 +811,12 @@ void main() {
 
           // Fire the cancel from inside token creation, before the terminal is
           // launched.
-          when(() => mockRepository.createPaymentToken(request)).thenAnswer(
-            (_) async {
-              service.cancelPayment();
-              return token;
-            },
-          );
+          when(() => mockRepository.createPaymentToken(request)).thenAnswer((
+            _,
+          ) async {
+            service.cancelPayment();
+            return token;
+          });
           when(
             () => mockTerminalLauncher.launchTerminal(
               jwtToken: any<String>(named: 'jwtToken'),
@@ -891,12 +825,10 @@ void main() {
               orderId: any<String>(named: 'orderId'),
               merchantId: any<String?>(named: 'merchantId'),
             ),
-          ).thenAnswer(
-            (_) async => true,
-          );
-          when(() => mockDeepLinkService.onDeepLink).thenAnswer(
-            (_) => const Stream.empty(),
-          );
+          ).thenAnswer((_) async => true);
+          when(
+            () => mockDeepLinkService.onDeepLink,
+          ).thenAnswer((_) => const Stream.empty());
 
           await expectLater(
             () => service.startPayment(request),

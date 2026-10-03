@@ -14,9 +14,7 @@ void main() {
   setUp(() {
     repository = MockAdminCatalogRepository();
   });
-  registerFallbackValue(
-    const AdminProduct(id: 0, name: ''),
-  );
+  registerFallbackValue(const AdminProduct(id: 0, name: ''));
   registerFallbackValue('');
 
   group('CategoryDetailCubit', () {
@@ -45,18 +43,16 @@ void main() {
     blocTest<CategoryDetailCubit, CategoryDetailState>(
       'createProduct appends to the list',
       build: () {
-        when(() => repository.fetchProducts(categoryId: 1)).thenAnswer(
-          (_) async => const [AdminProduct(id: 1, name: 'Лате')],
-        );
+        when(
+          () => repository.fetchProducts(categoryId: 1),
+        ).thenAnswer((_) async => const [AdminProduct(id: 1, name: 'Лате')]);
         when(
           () => repository.createProduct(
             categoryId: 1,
             name: 'Нове',
             idempotencyKey: any(named: 'idempotencyKey'),
           ),
-        ).thenAnswer(
-          (_) async => const AdminProduct(id: 9, name: 'Нове'),
-        );
+        ).thenAnswer((_) async => const AdminProduct(id: 9, name: 'Нове'));
         return CategoryDetailCubit(repository);
       },
       seed: () =>
@@ -77,16 +73,13 @@ void main() {
     blocTest<CategoryDetailCubit, CategoryDetailState>(
       'loadProducts emits error on failure',
       build: () {
-        when(() => repository.fetchProducts(categoryId: 1)).thenThrow(
-          Exception('boom'),
-        );
+        when(
+          () => repository.fetchProducts(categoryId: 1),
+        ).thenThrow(Exception('boom'));
         return CategoryDetailCubit(repository);
       },
       act: (cubit) => cubit.loadProducts(categoryId: 1),
-      expect: () => [
-        isA<CategoryDetailLoading>(),
-        isA<CategoryDetailError>(),
-      ],
+      expect: () => [isA<CategoryDetailLoading>(), isA<CategoryDetailError>()],
     );
   });
 }

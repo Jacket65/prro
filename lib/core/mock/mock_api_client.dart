@@ -281,15 +281,13 @@ class MockApiClient implements ApiClientI {
                   productId: itemMap['product_id'] as String,
                   quantity: itemMap['quantity'] as int,
                   options:
-                      (itemMap['options'] as List<dynamic>?)?.map(
-                        (opt) {
-                          final optMap = opt as Map<String, dynamic>;
-                          return SelectedOptionDto(
-                            optionId: optMap['option_id'] as int,
-                            quantity: optMap['quantity'] as int? ?? 1,
-                          );
-                        },
-                      ).toList() ??
+                      (itemMap['options'] as List<dynamic>?)?.map((opt) {
+                        final optMap = opt as Map<String, dynamic>;
+                        return SelectedOptionDto(
+                          optionId: optMap['option_id'] as int,
+                          quantity: optMap['quantity'] as int? ?? 1,
+                        );
+                      }).toList() ??
                       <SelectedOptionDto>[],
                   beanId: itemMap['bean_id'] as int?,
                 );

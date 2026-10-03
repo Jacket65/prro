@@ -84,9 +84,7 @@ final ThemeData lightTheme = ThemeData(
       foregroundColor: WidgetStatePropertyAll(Color(0xFF795548)),
     ),
   ),
-  dialogTheme: const DialogThemeData(
-    backgroundColor: Color(0xFFEFEBE9),
-  ),
+  dialogTheme: const DialogThemeData(backgroundColor: Color(0xFFEFEBE9)),
   extensions: const [
     AppStatusColors(
       success: Color(0xFF2E7D32),
@@ -137,9 +135,7 @@ final ThemeData darkTheme = ThemeData(
       foregroundColor: WidgetStatePropertyAll(Color(0xFFBCAAA4)),
     ),
   ),
-  dialogTheme: const DialogThemeData(
-    backgroundColor: Color(0xFF3E2723),
-  ),
+  dialogTheme: const DialogThemeData(backgroundColor: Color(0xFF3E2723)),
   extensions: const [
     AppStatusColors(
       success: Color(0xFF1B5E20),

@@ -12,10 +12,7 @@ import 'package:prro/features/payment/domain/repositories/payment_repository_i.d
 /// `verifyPayment` is the single source of truth and only succeeds for a
 /// transaction that was actually created (and not yet consumed), mirroring how
 /// the real backend owns payment state.
-@LazySingleton(
-  as: PaymentRepositoryI,
-  env: [Environment.mock],
-)
+@LazySingleton(as: PaymentRepositoryI, env: [Environment.mock])
 class PaymentRepositoryMock implements PaymentRepositoryI {
   PaymentRepositoryMock();
 

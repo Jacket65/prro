@@ -19,31 +19,29 @@ void main() {
 
   setUp(() {
     tokenStorage = MockTokenStorage();
-    when(() => tokenStorage.getAccessToken()).thenAnswer(
-      (_) async => 'default-token',
-    );
-    when(() => tokenStorage.getRefreshToken()).thenAnswer(
-      (_) async => 'some-refresh',
-    );
+    when(
+      () => tokenStorage.getAccessToken(),
+    ).thenAnswer((_) async => 'default-token');
+    when(
+      () => tokenStorage.getRefreshToken(),
+    ).thenAnswer((_) async => 'some-refresh');
     when(() => tokenStorage.hasValidSession()).thenAnswer((_) async => true);
     when(() => tokenStorage.saveAccessToken(any())).thenAnswer((_) async {});
     when(() => tokenStorage.clear()).thenAnswer((_) async {});
 
     adapter = MockHttpClientAdapter();
-    when(
-      () => adapter.fetch(any(), any(), any()),
-    ).thenAnswer(
-      (invocation) async {
-        final options = invocation.positionalArguments[0] as RequestOptions;
-        return ResponseBody.fromString(
-          '{"received":"${options.headers['Authorization']}"}',
-          200,
-          headers: {
-            'content-type': ['application/json'],
-          },
-        );
-      },
-    );
+    when(() => adapter.fetch(any(), any(), any())).thenAnswer((
+      invocation,
+    ) async {
+      final options = invocation.positionalArguments[0] as RequestOptions;
+      return ResponseBody.fromString(
+        '{"received":"${options.headers['Authorization']}"}',
+        200,
+        headers: {
+          'content-type': ['application/json'],
+        },
+      );
+    });
 
     final dio = Dio()..httpClientAdapter = adapter;
     apiClient = ApiClient(dio: dio, tokenStorage: tokenStorage);

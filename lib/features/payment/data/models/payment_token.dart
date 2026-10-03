@@ -6,10 +6,7 @@ import 'package:meta/meta.dart';
 /// and its expiration timestamp.
 @immutable
 class TerminalToken {
-  const TerminalToken({
-    required this.token,
-    required this.expiresAt,
-  });
+  const TerminalToken({required this.token, required this.expiresAt});
 
   factory TerminalToken.fromJson(Map<String, dynamic> json) {
     return TerminalToken(

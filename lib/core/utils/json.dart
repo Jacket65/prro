@@ -36,10 +36,7 @@ Decimal? parseNullableDecimal(Object? value) {
 /// `Decimal`, `num`, decimal `String`, or `null`; falls back to [fallback]
 /// (default `0`).
 
-Decimal parseDecimal(
-  Object? value, {
-  Decimal? fallback,
-}) {
+Decimal parseDecimal(Object? value, {Decimal? fallback}) {
   final fb = fallback ?? Decimal.zero;
 
   if (value == null) return fb;

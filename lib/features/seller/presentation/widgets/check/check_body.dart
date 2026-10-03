@@ -33,9 +33,7 @@ class _CheckInfoHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Дата: $date',
-        ),
+        Text('Дата: $date'),
         const EmployeeInfo(),
         // const Text('Замовлення №: WIP'),
         const SizedBox(height: 15),
@@ -92,10 +90,7 @@ class _EmptyOrder extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Center(
-      child: Text(
-        'Місце для замовлень',
-        style: theme.textTheme.bodyLarge,
-      ),
+      child: Text('Місце для замовлень', style: theme.textTheme.bodyLarge),
     );
   }
 }

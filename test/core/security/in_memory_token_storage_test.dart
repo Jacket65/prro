@@ -37,9 +37,7 @@ void main() {
           accessToken: 'first-access',
           refreshToken: 'first-refresh',
         );
-        await storage.saveSession(
-          accessToken: 'second-access',
-        );
+        await storage.saveSession(accessToken: 'second-access');
 
         expect(await storage.getAccessToken(), 'second-access');
         expect(await storage.getRefreshToken(), 'first-refresh');
@@ -68,10 +66,7 @@ void main() {
     });
 
     test('clear is idempotent', () async {
-      await storage.saveSession(
-        accessToken: 'a',
-        refreshToken: 'r',
-      );
+      await storage.saveSession(accessToken: 'a', refreshToken: 'r');
       await storage.clear();
       await storage.clear();
 

@@ -23,11 +23,7 @@ Response<dynamic> _orderResponse(
         'order_id': 11,
         'items': const <dynamic>[],
         'total_price': '45.00',
-        'payment': {
-          'method': method,
-          'tendered': '45.00',
-          'change': '0.00',
-        },
+        'payment': {'method': method, 'tendered': '45.00', 'change': '0.00'},
         'status': status,
         'created_at': '2026-01-01T00:00:00Z',
         ...?overrides,

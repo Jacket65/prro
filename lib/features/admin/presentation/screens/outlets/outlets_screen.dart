@@ -29,10 +29,7 @@ class _OutletsView extends StatelessWidget {
           }
           if (state is OutletsError) {
             return Center(
-              child: Text(
-                state.message,
-                textAlign: TextAlign.center,
-              ),
+              child: Text(state.message, textAlign: TextAlign.center),
             );
           }
           if (state is OutletsLoaded) {

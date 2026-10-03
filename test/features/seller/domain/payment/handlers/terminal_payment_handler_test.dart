@@ -4,7 +4,8 @@ import 'package:prro/core/domain/order.dart';
 import 'package:prro/features/payment/data/models/payment_request.dart';
 import 'package:prro/features/payment/data/models/payment_result.dart';
 import 'package:prro/features/payment/domain/payment_exceptions.dart';
-import 'package:prro/features/payment/domain/repositories/terminal_payment_service_i.dart' as terminal;
+import 'package:prro/features/payment/domain/repositories/terminal_payment_service_i.dart'
+    as terminal;
 import 'package:prro/features/seller/domain/payment/handlers/terminal_payment_handler.dart';
 import 'package:prro/features/seller/domain/payment/payment_method_handler.dart';
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
@@ -43,9 +44,9 @@ void main() {
     ordersRepository = MockOrdersRepository();
     handler = TerminalPaymentHandler(service, ordersRepository);
 
-    when(() => ordersRepository.confirmOrder(any())).thenAnswer(
-      (_) async => _receipt(status: 'completed'),
-    );
+    when(
+      () => ordersRepository.confirmOrder(any()),
+    ).thenAnswer((_) async => _receipt(status: 'completed'));
   });
 
   const request = PaymentRequest(
@@ -100,9 +101,9 @@ void main() {
       when(() => service.startPayment(any())).thenAnswer(
         (_) async => const PaymentResult(success: true, status: 'SUCCESS'),
       );
-      when(() => ordersRepository.confirmOrder(any())).thenThrow(
-        Exception('confirm 409'),
-      );
+      when(
+        () => ordersRepository.confirmOrder(any()),
+      ).thenThrow(Exception('confirm 409'));
 
       final pending = _receipt();
       final receipt = await handler.afterOrderCreated(pending, request);
@@ -137,9 +138,9 @@ void main() {
     );
 
     test('charge failure means confirm is never called', () async {
-      when(() => service.startPayment(any())).thenThrow(
-        const terminal.PaymentTerminalFailureException('declined'),
-      );
+      when(
+        () => service.startPayment(any()),
+      ).thenThrow(const terminal.PaymentTerminalFailureException('declined'));
 
       await expectLater(
         () => handler.afterOrderCreated(_receipt(), request),
@@ -212,22 +213,17 @@ void main() {
     });
   });
 
-  test(
-    'terminal TerminalPaymentCancelledException maps to app '
-    'PaymentCancelledException',
-    () async {
-      when(() => service.startPayment(any())).thenThrow(
-        const terminal.TerminalPaymentCancelledException(
-          'cancelled at terminal',
-        ),
-      );
-      await expectLater(
-        () => handler.afterOrderCreated(_receipt(), request),
-        throwsA(isA<PaymentCancelledException>()),
-      );
-      verifyNever(() => ordersRepository.confirmOrder(any()));
-    },
-  );
+  test('terminal TerminalPaymentCancelledException maps to app '
+      'PaymentCancelledException', () async {
+    when(() => service.startPayment(any())).thenThrow(
+      const terminal.TerminalPaymentCancelledException('cancelled at terminal'),
+    );
+    await expectLater(
+      () => handler.afterOrderCreated(_receipt(), request),
+      throwsA(isA<PaymentCancelledException>()),
+    );
+    verifyNever(() => ordersRepository.confirmOrder(any()));
+  });
 
   test('cancel delegates to the service cancelPayment', () {
     when(() => service.cancelPayment()).thenReturn(null);

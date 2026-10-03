@@ -11,10 +11,7 @@ class VariantDetailCubit extends Cubit<VariantDetailState> {
   VariantDetailCubit(this._repository) : super(const VariantDetailLoading());
   final AdminCatalogRepositoryI _repository;
 
-  Future<void> load({
-    required int variantId,
-    required int outletId,
-  }) async {
+  Future<void> load({required int variantId, required int outletId}) async {
     emit(const VariantDetailLoading());
     try {
       final recipe = await _repository.fetchRecipe(variantId: variantId);

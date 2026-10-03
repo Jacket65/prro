@@ -90,10 +90,7 @@ class _ProductGroupTile extends StatelessWidget {
             child: Text(
               group.name,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
           ),
           const Padding(
@@ -117,9 +114,8 @@ class _CategoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () => context.read<ItemsTilesBloc>().add(
-        ItemsTilesEnterCategory(category),
-      ),
+      onTap: () =>
+          context.read<ItemsTilesBloc>().add(ItemsTilesEnterCategory(category)),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

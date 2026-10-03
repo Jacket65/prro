@@ -18,10 +18,7 @@ abstract interface class PaymentServiceI {
 
 /// Production implementation of [PaymentServiceI].
 class PaymentService implements PaymentServiceI {
-  PaymentService({
-    required this._apiClient,
-    required this._prefs,
-  });
+  PaymentService({required this._apiClient, required this._prefs});
 
   final ApiClientI _apiClient;
   final SharedPreferences _prefs;

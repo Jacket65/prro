@@ -6,10 +6,8 @@ import 'package:prro/features/auth/presentation/bloc/auth_event.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc({
-    required this.authRepository,
-    required this.tokenStorage,
-  }) : super(const AuthInitial()) {
+  AuthBloc({required this.authRepository, required this.tokenStorage})
+    : super(const AuthInitial()) {
     on<AuthStarted>(_onAuthStarted, transformer: droppable());
     on<AuthLoginRequested>(_onLoginRequested, transformer: droppable());
     on<AuthAdminLoginRequested>(

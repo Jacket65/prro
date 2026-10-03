@@ -92,11 +92,7 @@ void main() {
         _resp(
           bearer: 'Bearer tok',
           body: {
-            'data': {
-              'id': 1,
-              'role': 'admin',
-              'outlet_id': 1,
-            },
+            'data': {'id': 1, 'role': 'admin', 'outlet_id': 1},
           },
         ),
       );
@@ -109,11 +105,7 @@ void main() {
         _resp(
           bearer: 'Bearer tok',
           body: {
-            'data': {
-              'id': 1,
-              'role': 'supervisor',
-              'outlet_id': 1,
-            },
+            'data': {'id': 1, 'role': 'supervisor', 'outlet_id': 1},
           },
         ),
       );
@@ -137,11 +129,7 @@ void main() {
         _resp(
           bearer: 'Bearer tok',
           body: {
-            'data': {
-              'id': 1,
-              'role': 'cashier',
-              'refresh_token': 'r',
-            },
+            'data': {'id': 1, 'role': 'cashier', 'refresh_token': 'r'},
           },
         ),
       );
@@ -273,10 +261,7 @@ void main() {
           _resp(
             bearer: 'Bearer tok',
             body: {
-              'data': {
-                'id': 1,
-                'role': 'cashier',
-              },
+              'data': {'id': 1, 'role': 'cashier'},
             },
           ),
         );
@@ -326,10 +311,8 @@ void main() {
       expect(user.username, 'cashier');
       expect(user.role, UserRole.seller);
       verify(
-        () => tokenStorage.saveSession(
-          accessToken: 'token-1',
-          refreshToken: 'r',
-        ),
+        () =>
+            tokenStorage.saveSession(accessToken: 'token-1', refreshToken: 'r'),
       ).called(1);
       expect(prefs.getString('username'), 'cashier');
       expect(prefs.getInt('outlet_id'), 7);
@@ -344,11 +327,7 @@ void main() {
       stubLogin(
         _resp(
           bearer: 'Bearer t',
-          body: {
-            'id': 1,
-            'role': 'admin',
-            'outlet_id': 3,
-          },
+          body: {'id': 1, 'role': 'admin', 'outlet_id': 3},
         ),
       );
 

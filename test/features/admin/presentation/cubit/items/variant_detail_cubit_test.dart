@@ -31,12 +31,12 @@ void main() {
     blocTest<VariantDetailCubit, VariantDetailState>(
       'load emits loading then loaded',
       build: () {
-        when(() => repository.fetchRecipe(variantId: 1)).thenAnswer(
-          (_) async => recipe,
-        );
-        when(() => repository.fetchIngredients(outletId: 1)).thenAnswer(
-          (_) async => ingredients,
-        );
+        when(
+          () => repository.fetchRecipe(variantId: 1),
+        ).thenAnswer((_) async => recipe);
+        when(
+          () => repository.fetchIngredients(outletId: 1),
+        ).thenAnswer((_) async => ingredients);
         return VariantDetailCubit(repository);
       },
       act: (cubit) => cubit.load(variantId: 1, outletId: 1),
@@ -68,27 +68,20 @@ void main() {
       ),
       expect: () => [
         isA<VariantDetailLoading>(),
-        isA<VariantDetailLoaded>().having(
-          (s) => s.recipe.length,
-          'recipe',
-          1,
-        ),
+        isA<VariantDetailLoaded>().having((s) => s.recipe.length, 'recipe', 1),
       ],
     );
 
     blocTest<VariantDetailCubit, VariantDetailState>(
       'load emits error on failure',
       build: () {
-        when(() => repository.fetchRecipe(variantId: 1)).thenThrow(
-          Exception('boom'),
-        );
+        when(
+          () => repository.fetchRecipe(variantId: 1),
+        ).thenThrow(Exception('boom'));
         return VariantDetailCubit(repository);
       },
       act: (cubit) => cubit.load(variantId: 1, outletId: 1),
-      expect: () => [
-        isA<VariantDetailLoading>(),
-        isA<VariantDetailError>(),
-      ],
+      expect: () => [isA<VariantDetailLoading>(), isA<VariantDetailError>()],
     );
   });
 }

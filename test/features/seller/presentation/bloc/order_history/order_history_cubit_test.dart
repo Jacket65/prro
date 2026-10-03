@@ -19,11 +19,8 @@ ShiftSummary shift(int id) => ShiftSummary(
   status: 'closed',
 );
 
-OrderListItem order(int id) => OrderListItem(
-  orderId: id,
-  createdAt: DateTime(2024),
-  totalKopecks: 1000,
-);
+OrderListItem order(int id) =>
+    OrderListItem(orderId: id, createdAt: DateTime(2024), totalKopecks: 1000);
 
 OrderDetail detail(int id) => OrderDetail(
   orderId: id,
@@ -54,11 +51,8 @@ void main() {
       'loadFirst emits loading then loaded',
       build: () {
         when(() => repo.getShifts()).thenAnswer(
-          (_) async => Page<ShiftSummary>(
-            items: [shift(1)],
-            page: 1,
-            hasNext: false,
-          ),
+          (_) async =>
+              Page<ShiftSummary>(items: [shift(1)], page: 1, hasNext: false),
         );
         return ShiftsHistoryCubit(repo);
       },
@@ -74,9 +68,9 @@ void main() {
     blocTest<ShiftsHistoryCubit, ShiftsHistoryState>(
       'loadMore appends and stops at hasNext=false',
       build: () {
-        when(
-          () => repo.getShifts(page: any(named: 'page')),
-        ).thenAnswer((inv) async {
+        when(() => repo.getShifts(page: any(named: 'page'))).thenAnswer((
+          inv,
+        ) async {
           final p = inv.namedArguments[#page] as int? ?? 1;
           if (p == 1) {
             return Page<ShiftSummary>(
@@ -86,11 +80,7 @@ void main() {
               nextPage: 2,
             );
           }
-          return Page<ShiftSummary>(
-            items: [shift(2)],
-            page: 2,
-            hasNext: false,
-          );
+          return Page<ShiftSummary>(items: [shift(2)], page: 2, hasNext: false);
         });
         return ShiftsHistoryCubit(repo);
       },
@@ -115,9 +105,9 @@ void main() {
     blocTest<ShiftsHistoryCubit, ShiftsHistoryState>(
       'loadMore surfaces error via loadMoreError and keeps hasNext',
       build: () {
-        when(
-          () => repo.getShifts(page: any(named: 'page')),
-        ).thenAnswer((inv) async {
+        when(() => repo.getShifts(page: any(named: 'page'))).thenAnswer((
+          inv,
+        ) async {
           final p = inv.namedArguments[#page] as int? ?? 1;
           if (p == 1) {
             return Page<ShiftSummary>(
@@ -169,11 +159,8 @@ void main() {
             order: any(named: 'order'),
           ),
         ).thenAnswer(
-          (_) async => Page<OrderListItem>(
-            items: [order(1)],
-            page: 1,
-            hasNext: false,
-          ),
+          (_) async =>
+              Page<OrderListItem>(items: [order(1)], page: 1, hasNext: false),
         );
         return OrdersHistoryCubit(repo, 1);
       },
@@ -196,11 +183,8 @@ void main() {
             order: any(named: 'order'),
           ),
         ).thenAnswer(
-          (_) async => Page<OrderListItem>(
-            items: [order(1)],
-            page: 1,
-            hasNext: false,
-          ),
+          (_) async =>
+              Page<OrderListItem>(items: [order(1)], page: 1, hasNext: false),
         );
         return OrdersHistoryCubit(repo, 1);
       },
@@ -221,11 +205,7 @@ void main() {
         isA<OrdersHistoryLoading>(),
         isA<OrdersHistoryLoaded>(),
         isA<OrdersHistoryLoading>(),
-        isA<OrdersHistoryLoaded>().having(
-          (s) => s.sort,
-          'sort',
-          'total_price',
-        ),
+        isA<OrdersHistoryLoaded>().having((s) => s.sort, 'sort', 'total_price'),
       ],
     );
 
@@ -242,10 +222,7 @@ void main() {
         return OrdersHistoryCubit(repo, 1);
       },
       act: (c) => c.loadFirst(),
-      expect: () => [
-        isA<OrdersHistoryLoading>(),
-        isA<OrdersHistoryError>(),
-      ],
+      expect: () => [isA<OrdersHistoryLoading>(), isA<OrdersHistoryError>()],
     );
   });
 
@@ -272,10 +249,7 @@ void main() {
         return OrderDetailCubit(repo);
       },
       act: (c) => c.load(1),
-      expect: () => [
-        isA<OrderDetailLoading>(),
-        isA<OrderDetailError>(),
-      ],
+      expect: () => [isA<OrderDetailLoading>(), isA<OrderDetailError>()],
     );
   });
 }

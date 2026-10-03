@@ -27,16 +27,14 @@ void main() {
 
   setUp(() async {
     tokenStorage = MockTokenStorage();
-    when(() => tokenStorage.getAccessToken()).thenAnswer(
-      (_) async => 'old-access',
-    );
-    when(() => tokenStorage.getRefreshToken()).thenAnswer(
-      (_) async => 'old-refresh',
-    );
+    when(
+      () => tokenStorage.getAccessToken(),
+    ).thenAnswer((_) async => 'old-access');
+    when(
+      () => tokenStorage.getRefreshToken(),
+    ).thenAnswer((_) async => 'old-refresh');
     when(() => tokenStorage.hasValidSession()).thenAnswer((_) async => true);
-    when(() => tokenStorage.saveAccessToken(any())).thenAnswer(
-      (_) async {},
-    );
+    when(() => tokenStorage.saveAccessToken(any())).thenAnswer((_) async {});
     when(() => tokenStorage.clear()).thenAnswer((_) async {});
 
     adapter = MockHttpClientAdapter();

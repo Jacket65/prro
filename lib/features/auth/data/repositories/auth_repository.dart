@@ -72,10 +72,7 @@ class AuthRepositoryImpl implements AuthRepositoryI {
   Future<void> logout() => _serialized(_doLogout);
 
   @override
-  Future<AuthUser> loginAsAdmin({
-    String? username,
-    String? password,
-  }) {
+  Future<AuthUser> loginAsAdmin({String? username, String? password}) {
     return _serialized(() async {
       final user = username != null && password != null
           ? await _doLogin(username: username, password: password)

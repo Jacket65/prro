@@ -16,10 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 @Environment('prod')
 @Singleton(as: ShiftServiceI)
 class ShiftService implements ShiftServiceI {
-  ShiftService({
-    required this._apiClient,
-    required this._prefs,
-  });
+  ShiftService({required this._apiClient, required this._prefs});
   final ApiClientI _apiClient;
   final SharedPreferences _prefs;
 

@@ -18,15 +18,9 @@ class AuthException implements Exception {
 abstract interface class AuthRepositoryI {
   Future<AuthUser?> restoreSession();
 
-  Future<AuthUser> login({
-    required String username,
-    required String password,
-  });
+  Future<AuthUser> login({required String username, required String password});
 
-  Future<AuthUser> loginAsAdmin({
-    String? username,
-    String? password,
-  });
+  Future<AuthUser> loginAsAdmin({String? username, String? password});
 
   Future<void> logout();
 }

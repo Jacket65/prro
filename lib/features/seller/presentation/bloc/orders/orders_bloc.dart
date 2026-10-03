@@ -18,10 +18,8 @@ part 'orders_event.dart';
 part 'orders_state.dart';
 
 class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
-  OrdersBloc({
-    required this._ordersRepository,
-    required this._payOrder,
-  }) : super(OrdersInitial()) {
+  OrdersBloc({required this._ordersRepository, required this._payOrder})
+    : super(OrdersInitial()) {
     on<AddProduct>(_onAddProduct);
     on<RemoveProduct>(_onRemoveProduct);
     on<DeleteProductLine>(_onDeleteProductLine);

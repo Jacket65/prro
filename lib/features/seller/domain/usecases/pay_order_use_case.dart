@@ -38,9 +38,7 @@ class PayOrderUseCase {
   Future<OrderReceipt> call(PayOrderRequest request) async {
     final handler = _handlers.firstWhere(
       (h) => h.method == request.method,
-      orElse: () => throw const PaymentException(
-        'Невідомий спосіб оплати.',
-      ),
+      orElse: () => throw const PaymentException('Невідомий спосіб оплати.'),
     );
 
     _activeHandler = handler;

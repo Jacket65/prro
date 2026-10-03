@@ -106,9 +106,7 @@ void main() {
               OrderLineDto(
                 productId: espresso.id,
                 quantity: 1,
-                options: [
-                  const SelectedOptionDto(optionId: 99999),
-                ],
+                options: [const SelectedOptionDto(optionId: 99999)],
               ),
             ],
             payment: const PaymentDto(
@@ -136,9 +134,7 @@ void main() {
               OrderLineDto(
                 productId: espresso.id,
                 quantity: 1,
-                options: [
-                  const SelectedOptionDto(optionId: 2),
-                ],
+                options: [const SelectedOptionDto(optionId: 2)],
               ),
             ],
             payment: const PaymentDto(
@@ -177,11 +173,7 @@ void main() {
         await expectLater(
           backend.placeOrder(
             items: [
-              OrderLineDto(
-                productId: espresso.id,
-                quantity: 1,
-                options: [],
-              ),
+              OrderLineDto(productId: espresso.id, quantity: 1, options: []),
             ],
             payment: const PaymentDto(
               method: PaymentMethod.cash,
@@ -205,11 +197,7 @@ void main() {
         await expectLater(
           backend.placeOrder(
             items: [
-              OrderLineDto(
-                productId: espresso.id,
-                quantity: 1,
-                options: [],
-              ),
+              OrderLineDto(productId: espresso.id, quantity: 1, options: []),
             ],
             payment: const PaymentDto(
               method: PaymentMethod.terminal,
@@ -232,11 +220,7 @@ void main() {
 
         final receipt1 = await backend.placeOrder(
           items: [
-            OrderLineDto(
-              productId: espresso.id,
-              quantity: 1,
-              options: [],
-            ),
+            OrderLineDto(productId: espresso.id, quantity: 1, options: []),
           ],
           payment: const PaymentDto(
             method: PaymentMethod.cash,
@@ -247,11 +231,7 @@ void main() {
 
         final receipt2 = await backend.placeOrder(
           items: [
-            OrderLineDto(
-              productId: espresso.id,
-              quantity: 2,
-              options: [],
-            ),
+            OrderLineDto(productId: espresso.id, quantity: 2, options: []),
           ],
           payment: const PaymentDto(
             method: PaymentMethod.cash,

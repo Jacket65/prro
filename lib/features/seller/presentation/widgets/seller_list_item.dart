@@ -107,10 +107,7 @@ class _ListItemState extends State<ListItem> {
               ),
               onTap: () => _onTap(context, products),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 4,
-                  vertical: 8,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                 child: Row(
                   children: [
                     SizedBox(

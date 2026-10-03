@@ -10,22 +10,15 @@ Future<String?> showNameDialog(
 }) async {
   final name = await showDialog<String>(
     context: context,
-    builder: (ctx) => _NameDialogContent(
-      title: title,
-      hint: hint,
-      initialName: initialName,
-    ),
+    builder: (ctx) =>
+        _NameDialogContent(title: title, hint: hint, initialName: initialName),
   );
   if (name == null || name.isEmpty) return null;
   return name;
 }
 
 class _NameDialogContent extends StatefulWidget {
-  const _NameDialogContent({
-    required this.title,
-    this.hint,
-    this.initialName,
-  });
+  const _NameDialogContent({required this.title, this.hint, this.initialName});
 
   final String title;
   final String? hint;

@@ -50,9 +50,7 @@ class ApiClient implements ApiClientI {
           }
           options.headers['Accept'] = 'application/json';
           options.headers['Content-Type'] = 'application/json';
-          log(
-            '[REQUEST] ${options.method} ${options.baseUrl} ${options.path}',
-          );
+          log('[REQUEST] ${options.method} ${options.baseUrl} ${options.path}');
           return handler.next(options);
         },
         onResponse: (response, handler) {
@@ -83,9 +81,7 @@ class ApiClient implements ApiClientI {
                   error.requestOptions.headers['Authorization'] =
                       'Bearer $token';
                 }
-                final cloned = await dio.fetch<dynamic>(
-                  error.requestOptions,
-                );
+                final cloned = await dio.fetch<dynamic>(error.requestOptions);
                 return handler.resolve(cloned);
               } on DioException catch (retryError) {
                 return handler.next(retryError);

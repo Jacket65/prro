@@ -66,9 +66,7 @@ class CategoriesCubit extends Cubit<CategoriesState> {
     emit(const CategoriesLoading());
     try {
       await _repository.deleteCategory(id: id);
-      emit(
-        CategoriesLoaded(previous.where((c) => c.id != id).toList()),
-      );
+      emit(CategoriesLoaded(previous.where((c) => c.id != id).toList()));
     } on Object catch (e) {
       emit(CategoriesError(e.toString()));
     }

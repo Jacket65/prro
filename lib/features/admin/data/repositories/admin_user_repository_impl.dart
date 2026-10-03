@@ -15,9 +15,7 @@ class AdminUserRepositoryImpl implements AdminUserRepositoryI {
   @override
   Future<List<AdminUser>> fetchUsers({required int outletId}) async {
     try {
-      final response = await _apiClient.get(
-        '/retail-outlets/$outletId/users',
-      );
+      final response = await _apiClient.get('/retail-outlets/$outletId/users');
       return unwrapList(response.data, AdminUser.fromJson);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);

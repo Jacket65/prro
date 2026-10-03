@@ -160,9 +160,8 @@ class _OrderTile extends StatelessWidget {
         formatUah(order.totalKopecks),
         style: const TextStyle(fontWeight: FontWeight.w600),
       ),
-      onTap: () => context.router.push(
-        SellerOrderDetailRoute(orderId: order.orderId),
-      ),
+      onTap: () =>
+          context.router.push(SellerOrderDetailRoute(orderId: order.orderId)),
     );
   }
 }

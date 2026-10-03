@@ -67,16 +67,13 @@ void main() {
       expect(result.amount, equals(25000));
     });
 
-    test(
-      'verifyPayment throws PaymentUnknownTransactionException '
-      'for an unknown transaction id',
-      () async {
-        expect(
-          () => repository.verifyPayment('unknown_txn_123'),
-          throwsA(isA<PaymentUnknownTransactionException>()),
-        );
-      },
-    );
+    test('verifyPayment throws PaymentUnknownTransactionException '
+        'for an unknown transaction id', () async {
+      expect(
+        () => repository.verifyPayment('unknown_txn_123'),
+        throwsA(isA<PaymentUnknownTransactionException>()),
+      );
+    });
 
     test(
       'verifyPayment is idempotent: a second verify of the same id throws',

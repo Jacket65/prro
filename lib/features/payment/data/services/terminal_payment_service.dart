@@ -96,10 +96,7 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
     // still propagates errors. The main `await` still receives the outcome
     // when it attaches (a completer's future may have multiple listeners).
     unawaited(
-      completer.future.then(
-        (_) {},
-        onError: (Object _, StackTrace? _) {},
-      ),
+      completer.future.then((_) {}, onError: (Object _, StackTrace? _) {}),
     );
     Timer? timer;
     StreamSubscription<Uri>? subscription;
@@ -115,10 +112,7 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
           if (completer.isCompleted) return;
 
           try {
-            final transactionId = _validateCallback(
-              uri,
-              sessionId,
-            );
+            final transactionId = _validateCallback(uri, sessionId);
 
             completer.complete(transactionId);
           } catch (e, st) {

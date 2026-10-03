@@ -6,10 +6,7 @@ import 'package:prro/features/payment/data/services/payment_service.dart';
 import 'package:prro/features/payment/domain/repositories/payment_repository_i.dart';
 
 /// Production implementation of [PaymentRepositoryI].
-@LazySingleton(
-  as: PaymentRepositoryI,
-  env: [Environment.prod],
-)
+@LazySingleton(as: PaymentRepositoryI, env: [Environment.prod])
 class PaymentRepositoryImpl implements PaymentRepositoryI {
   PaymentRepositoryImpl(this._paymentService);
 

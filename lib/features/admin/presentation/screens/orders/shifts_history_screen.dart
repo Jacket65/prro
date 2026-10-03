@@ -104,9 +104,8 @@ class _ShiftTile extends StatelessWidget {
             ? Theme.of(context).extension<AppStatusColors>()!.success
             : Theme.of(context).extension<AppStatusColors>()!.neutral,
       ),
-      onTap: () => context.router.push(
-        AdminOrdersHistoryRoute(shiftId: shift.id),
-      ),
+      onTap: () =>
+          context.router.push(AdminOrdersHistoryRoute(shiftId: shift.id)),
     );
   }
 }

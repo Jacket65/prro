@@ -13,9 +13,7 @@ void main() {
   setUp(() {
     repository = MockAdminUserRepository();
   });
-  registerFallbackValue(
-    const AdminUser(id: 0, name: ''),
-  );
+  registerFallbackValue(const AdminUser(id: 0, name: ''));
 
   group('TellersCubit', () {
     blocTest<TellersCubit, TellersState>(
@@ -44,32 +42,25 @@ void main() {
     blocTest<TellersCubit, TellersState>(
       'loadUsers emits error on failure',
       build: () {
-        when(() => repository.fetchUsers(outletId: 1)).thenThrow(
-          Exception('boom'),
-        );
+        when(
+          () => repository.fetchUsers(outletId: 1),
+        ).thenThrow(Exception('boom'));
         return TellersCubit(repository);
       },
       act: (cubit) => cubit.loadUsers(outletId: 1),
-      expect: () => [
-        isA<TellersLoading>(),
-        isA<TellersError>(),
-      ],
+      expect: () => [isA<TellersLoading>(), isA<TellersError>()],
     );
 
     blocTest<TellersCubit, TellersState>(
       'selectUser updates selection without refetch',
       build: () => TellersCubit(repository),
-      seed: () => const TellersLoaded(
-        [AdminUser(id: 1, name: 'Олена'), AdminUser(id: 2, name: 'Іван')],
-        1,
-      ),
+      seed: () => const TellersLoaded([
+        AdminUser(id: 1, name: 'Олена'),
+        AdminUser(id: 2, name: 'Іван'),
+      ], 1),
       act: (cubit) => cubit.selectUser(2),
       expect: () => [
-        isA<TellersLoaded>().having(
-          (s) => s.selectedUserId,
-          'selected',
-          2,
-        ),
+        isA<TellersLoaded>().having((s) => s.selectedUserId, 'selected', 2),
       ],
       verify: (_) {
         verifyNever(

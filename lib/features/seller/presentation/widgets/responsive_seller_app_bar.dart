@@ -113,9 +113,7 @@ class _ResponsiveSellerAppBarState extends State<ResponsiveSellerAppBar> {
     if (!_isNarrow) {
       return Row(
         key: const ValueKey('normal-wide'),
-        children: [
-          ...username.children,
-        ],
+        children: [...username.children],
       );
     }
 

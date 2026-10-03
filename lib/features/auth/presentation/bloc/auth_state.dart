@@ -2,27 +2,11 @@ import 'package:equatable/equatable.dart';
 import 'package:prro/features/auth/domain/entities/auth_user.dart';
 import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart';
 
-enum AuthStatus {
-  initial,
-  loading,
-  authenticated,
-  unauthenticated,
-}
+enum AuthStatus { initial, loading, authenticated, unauthenticated }
 
-enum AuthOperation {
-  none,
-  restore,
-  login,
-  adminLogin,
-  logout,
-  sessionExpiry,
-}
+enum AuthOperation { none, restore, login, adminLogin, logout, sessionExpiry }
 
-enum AuthUnauthenticatedReason {
-  noSession,
-  logout,
-  sessionExpired,
-}
+enum AuthUnauthenticatedReason { noSession, logout, sessionExpired }
 
 sealed class AuthState extends Equatable {
   const AuthState();

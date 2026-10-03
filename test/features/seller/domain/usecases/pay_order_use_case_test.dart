@@ -68,13 +68,13 @@ void main() {
     when(() => cash.cancel()).thenReturn(null);
     when(() => terminal.cancel()).thenReturn(null);
     // Cash: afterOrderCreated is identity — returns the placed receipt.
-    when(() => cash.afterOrderCreated(any(), any())).thenAnswer(
-      (inv) async => inv.positionalArguments[0] as OrderReceipt,
-    );
+    when(
+      () => cash.afterOrderCreated(any(), any()),
+    ).thenAnswer((inv) async => inv.positionalArguments[0] as OrderReceipt);
     // Terminal: afterOrderCreated returns the confirmed receipt.
-    when(() => terminal.afterOrderCreated(any(), any())).thenAnswer(
-      (_) async => _receipt(status: 'completed'),
-    );
+    when(
+      () => terminal.afterOrderCreated(any(), any()),
+    ).thenAnswer((_) async => _receipt(status: 'completed'));
     when(
       () => repo.placeOrder(
         method: any(named: 'method'),
@@ -91,11 +91,8 @@ void main() {
     );
   });
 
-  PayOrderRequest req(PaymentMethod m) => PayOrderRequest(
-    method: m,
-    tenderedKopecks: 100,
-    idempotencyKey: 'key',
-  );
+  PayOrderRequest req(PaymentMethod m) =>
+      PayOrderRequest(method: m, tenderedKopecks: 100, idempotencyKey: 'key');
 
   group('handler selection', () {
     test('cash request uses the cash handler only', () async {
@@ -259,9 +256,9 @@ void main() {
 
     test('cancel during the terminal charge propagates '
         'PaymentCancelledException', () async {
-      when(() => terminal.afterOrderCreated(any(), any())).thenThrow(
-        const PaymentCancelledException(),
-      );
+      when(
+        () => terminal.afterOrderCreated(any(), any()),
+      ).thenThrow(const PaymentCancelledException());
       await expectLater(
         () => useCase(req(PaymentMethod.terminal)),
         throwsA(isA<PaymentCancelledException>()),
@@ -271,9 +268,9 @@ void main() {
     test(
       'unexpected errors are wrapped into PaymentException (boundary)',
       () async {
-        when(() => terminal.afterOrderCreated(any(), any())).thenThrow(
-          StateError('boom'),
-        );
+        when(
+          () => terminal.afterOrderCreated(any(), any()),
+        ).thenThrow(StateError('boom'));
         await expectLater(
           () => useCase(req(PaymentMethod.terminal)),
           throwsA(
@@ -315,9 +312,9 @@ void main() {
       'cancel delegates to the in-flight handler during the charge',
       () async {
         final completer = Completer<OrderReceipt>();
-        when(() => terminal.afterOrderCreated(any(), any())).thenAnswer(
-          (_) => completer.future,
-        );
+        when(
+          () => terminal.afterOrderCreated(any(), any()),
+        ).thenAnswer((_) => completer.future);
 
         final future = useCase(req(PaymentMethod.terminal));
         await Future<void>.delayed(Duration.zero);

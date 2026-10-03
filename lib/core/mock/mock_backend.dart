@@ -306,10 +306,7 @@ class MockBackend {
       BeanGroup(
         id: 4,
         name: 'Без кофеїну',
-        beans: [
-          bean('Без кофеїну Бразилія'),
-          bean('Без кофеїну Колумбія'),
-        ],
+        beans: [bean('Без кофеїну Бразилія'), bean('Без кофеїну Колумбія')],
       ),
     ];
   }
@@ -339,9 +336,7 @@ class MockBackend {
     for (final line in items) {
       final info = _variantInfoForId(line.productId);
       if (info == null) {
-        throw MockBackendException(
-          'Невідомий товар: ${line.productId}.',
-        );
+        throw MockBackendException('Невідомий товар: ${line.productId}.');
       }
       if (line.quantity <= 0) {
         throw const MockBackendException('Кількість має бути додатньою.');
@@ -1191,11 +1186,7 @@ class _AdminCategory {
 }
 
 class _AdminProduct {
-  _AdminProduct({
-    required this.id,
-    required this.name,
-    required this.variants,
-  });
+  _AdminProduct({required this.id, required this.name, required this.variants});
   final int id;
   final String name;
   final List<_AdminVariant> variants;

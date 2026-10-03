@@ -2,7 +2,8 @@ import 'package:injectable/injectable.dart';
 import 'package:prro/core/domain/order.dart';
 import 'package:prro/features/payment/data/models/payment_request.dart';
 import 'package:prro/features/payment/domain/payment_exceptions.dart';
-import 'package:prro/features/payment/domain/repositories/terminal_payment_service_i.dart' as terminal;
+import 'package:prro/features/payment/domain/repositories/terminal_payment_service_i.dart'
+    as terminal;
 import 'package:prro/features/seller/domain/payment/payment_method_handler.dart';
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 
@@ -73,11 +74,7 @@ class TerminalPaymentHandler implements PaymentMethodHandler {
       rethrow;
     } on Object catch (e, st) {
       // Defense in depth: never let an unexpected error escape the boundary.
-      throw PaymentException(
-        'Не вдалося оплатити.',
-        cause: e,
-        stackTrace: st,
-      );
+      throw PaymentException('Не вдалося оплатити.', cause: e, stackTrace: st);
     }
 
     // The charge succeeded → confirm the pending order so the backend

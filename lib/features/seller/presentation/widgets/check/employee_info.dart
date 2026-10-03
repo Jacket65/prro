@@ -4,9 +4,7 @@ import 'package:prro/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_state.dart';
 
 class EmployeeInfo extends StatelessWidget {
-  const EmployeeInfo({
-    super.key,
-  });
+  const EmployeeInfo({super.key});
 
   @override
   Widget build(BuildContext context) {

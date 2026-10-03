@@ -14,9 +14,7 @@ void main() {
   setUp(() {
     repository = MockAdminOutletRepository();
   });
-  registerFallbackValue(
-    const RetailOutlet(id: 0, name: ''),
-  );
+  registerFallbackValue(const RetailOutlet(id: 0, name: ''));
 
   group('OutletsCubit', () {
     blocTest<OutletsCubit, OutletsState>(
@@ -45,16 +43,11 @@ void main() {
     blocTest<OutletsCubit, OutletsState>(
       'loadOutlets emits error on failure',
       build: () {
-        when(() => repository.fetchOutlets()).thenThrow(
-          Exception('boom'),
-        );
+        when(() => repository.fetchOutlets()).thenThrow(Exception('boom'));
         return OutletsCubit(repository);
       },
       act: (cubit) => cubit.loadOutlets(),
-      expect: () => [
-        isA<OutletsLoading>(),
-        isA<OutletsError>(),
-      ],
+      expect: () => [isA<OutletsLoading>(), isA<OutletsError>()],
     );
 
     blocTest<OutletsCubit, OutletsState>(
@@ -68,20 +61,13 @@ void main() {
         );
         return OutletsCubit(repository);
       },
-      seed: () => const OutletsLoaded(
-        [
-          RetailOutlet(id: 1, name: 'Центр'),
-          RetailOutlet(id: 2, name: 'Лівий берег'),
-        ],
-        selectedOutletId: 1,
-      ),
+      seed: () => const OutletsLoaded([
+        RetailOutlet(id: 1, name: 'Центр'),
+        RetailOutlet(id: 2, name: 'Лівий берег'),
+      ], selectedOutletId: 1),
       act: (cubit) => cubit.selectOutlet(2),
       expect: () => [
-        isA<OutletsLoaded>().having(
-          (s) => s.selectedOutletId,
-          'selected',
-          2,
-        ),
+        isA<OutletsLoaded>().having((s) => s.selectedOutletId, 'selected', 2),
       ],
       verify: (_) {
         verifyNever(() => repository.fetchOutlets());

@@ -108,9 +108,8 @@ class _ShiftTile extends StatelessWidget {
         ),
         backgroundColor: shift.isOpen ? Colors.green : Colors.grey,
       ),
-      onTap: () => context.router.push(
-        SellerOrdersHistoryRoute(shiftId: shift.id),
-      ),
+      onTap: () =>
+          context.router.push(SellerOrdersHistoryRoute(shiftId: shift.id)),
     );
   }
 }

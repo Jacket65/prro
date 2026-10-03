@@ -13,10 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 @Environment('prod')
 @Singleton(as: ItemsRepositoryI)
 class ItemsRepository implements ItemsRepositoryI {
-  ItemsRepository({
-    required this._apiClient,
-    required this._prefs,
-  });
+  ItemsRepository({required this._apiClient, required this._prefs});
   final ApiClientI _apiClient;
   final SharedPreferences _prefs;
 

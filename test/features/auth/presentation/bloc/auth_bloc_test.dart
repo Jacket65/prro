@@ -21,10 +21,7 @@ void main() {
     repository = MockAuthRepository();
     tokenStorage = MockTokenStorage();
     when(() => tokenStorage.getAccessToken()).thenAnswer((_) async => null);
-    authBloc = AuthBloc(
-      authRepository: repository,
-      tokenStorage: tokenStorage,
-    );
+    authBloc = AuthBloc(authRepository: repository, tokenStorage: tokenStorage);
   });
 
   group('AuthStarted', () {
@@ -32,10 +29,8 @@ void main() {
       'emits [AuthLoading(restore), AuthAuthenticated] when session is valid',
       build: () {
         when(() => repository.restoreSession()).thenAnswer(
-          (_) async => const AuthUser(
-            username: 'savedUser',
-            role: UserRole.seller,
-          ),
+          (_) async =>
+              const AuthUser(username: 'savedUser', role: UserRole.seller),
         );
         return authBloc;
       },
@@ -68,9 +63,9 @@ void main() {
     blocTest<AuthBloc, AuthState>(
       'emits [AuthLoading(restore), AuthFailure] when restore throws',
       build: () {
-        when(() => repository.restoreSession()).thenThrow(
-          const AuthException(AuthErrorCode.sessionRestoreFailed),
-        );
+        when(
+          () => repository.restoreSession(),
+        ).thenThrow(const AuthException(AuthErrorCode.sessionRestoreFailed));
         return authBloc;
       },
       act: (bloc) => bloc.add(const AuthStarted()),
@@ -95,10 +90,7 @@ void main() {
             password: any(named: 'password'),
           ),
         ).thenAnswer(
-          (_) async => const AuthUser(
-            username: 'test',
-            role: UserRole.seller,
-          ),
+          (_) async => const AuthUser(username: 'test', role: UserRole.seller),
         );
         return authBloc;
       },
@@ -178,10 +170,7 @@ void main() {
             password: any(named: 'password'),
           ),
         ).thenAnswer(
-          (_) async => const AuthUser(
-            username: 'admin',
-            role: UserRole.admin,
-          ),
+          (_) async => const AuthUser(username: 'admin', role: UserRole.admin),
         );
         return authBloc;
       },
@@ -210,10 +199,8 @@ void main() {
             password: any(named: 'password'),
           ),
         ).thenAnswer(
-          (_) async => const AuthUser(
-            username: 'manager',
-            role: UserRole.manager,
-          ),
+          (_) async =>
+              const AuthUser(username: 'manager', role: UserRole.manager),
         );
         return authBloc;
       },
@@ -239,10 +226,7 @@ void main() {
             password: any(named: 'password'),
           ),
         ).thenAnswer(
-          (_) async => const AuthUser(
-            username: 'admin',
-            role: UserRole.admin,
-          ),
+          (_) async => const AuthUser(username: 'admin', role: UserRole.admin),
         );
         return authBloc;
       },
@@ -414,17 +398,16 @@ void main() {
     blocTest<AuthBloc, AuthState>(
       'skips teardown when failedToken differs from current access token',
       build: () {
-        when(() => tokenStorage.getAccessToken()).thenAnswer(
-          (_) async => 'newer-access-token',
-        );
+        when(
+          () => tokenStorage.getAccessToken(),
+        ).thenAnswer((_) async => 'newer-access-token');
         return authBloc;
       },
       seed: () => const AuthAuthenticated(
         user: AuthUser(username: 'test', role: UserRole.seller),
       ),
-      act: (bloc) => bloc.add(
-        const AuthSessionExpired(failedToken: 'stale-access-token'),
-      ),
+      act: (bloc) =>
+          bloc.add(const AuthSessionExpired(failedToken: 'stale-access-token')),
       expect: () => <AuthState>[],
       verify: (_) {
         verifyNever(() => repository.logout());
@@ -434,9 +417,9 @@ void main() {
     blocTest<AuthBloc, AuthState>(
       'runs teardown when failedToken matches current access token',
       build: () {
-        when(() => tokenStorage.getAccessToken()).thenAnswer(
-          (_) async => 'current-access-token',
-        );
+        when(
+          () => tokenStorage.getAccessToken(),
+        ).thenAnswer((_) async => 'current-access-token');
         when(() => repository.logout()).thenAnswer((_) async {});
         return authBloc;
       },
@@ -467,12 +450,10 @@ void main() {
             username: any(named: 'username'),
             password: any(named: 'password'),
           ),
-        ).thenAnswer(
-          (_) async {
-            await Future<void>.delayed(const Duration(milliseconds: 50));
-            return const AuthUser(username: 'test', role: UserRole.seller);
-          },
-        );
+        ).thenAnswer((_) async {
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          return const AuthUser(username: 'test', role: UserRole.seller);
+        });
         when(() => repository.logout()).thenAnswer((_) async {});
         return authBloc;
       },
@@ -491,22 +472,17 @@ void main() {
     blocTest<AuthBloc, AuthState>(
       'manual login after AuthStarted discards stale restoration',
       build: () {
-        when(() => repository.restoreSession()).thenAnswer(
-          (_) async {
-            await Future<void>.delayed(const Duration(milliseconds: 50));
-            return null;
-          },
-        );
+        when(() => repository.restoreSession()).thenAnswer((_) async {
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          return null;
+        });
         when(
           () => repository.login(
             username: any(named: 'username'),
             password: any(named: 'password'),
           ),
         ).thenAnswer(
-          (_) async => const AuthUser(
-            username: 'test',
-            role: UserRole.seller,
-          ),
+          (_) async => const AuthUser(username: 'test', role: UserRole.seller),
         );
         return authBloc;
       },
@@ -532,12 +508,10 @@ void main() {
             username: any(named: 'username'),
             password: any(named: 'password'),
           ),
-        ).thenAnswer(
-          (_) async {
-            await Future<void>.delayed(const Duration(milliseconds: 50));
-            return const AuthUser(username: 'test', role: UserRole.seller);
-          },
-        );
+        ).thenAnswer((_) async {
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          return const AuthUser(username: 'test', role: UserRole.seller);
+        });
         return authBloc;
       },
       act: (bloc) {
@@ -563,11 +537,9 @@ void main() {
     blocTest<AuthBloc, AuthState>(
       'rapid duplicate logout requests produce only one network call',
       build: () {
-        when(() => repository.logout()).thenAnswer(
-          (_) async {
-            await Future<void>.delayed(const Duration(milliseconds: 50));
-          },
-        );
+        when(() => repository.logout()).thenAnswer((_) async {
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+        });
         return authBloc;
       },
       seed: () => const AuthAuthenticated(
@@ -597,12 +569,10 @@ void main() {
             username: any(named: 'username'),
             password: any(named: 'password'),
           ),
-        ).thenAnswer(
-          (_) async {
-            await Future<void>.delayed(const Duration(milliseconds: 50));
-            return const AuthUser(username: 'admin', role: UserRole.admin);
-          },
-        );
+        ).thenAnswer((_) async {
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          return const AuthUser(username: 'admin', role: UserRole.admin);
+        });
         return authBloc;
       },
       act: (bloc) {

@@ -53,22 +53,18 @@ void main() {
 
       guard.onNavigation(resolver, router);
 
-      verify(
-        () => resolver.redirectUntil(any(), replace: true),
-      ).called(1);
+      verify(() => resolver.redirectUntil(any(), replace: true)).called(1);
       verifyNever(() => resolver.next(any()));
     });
 
     test('redirects to LoginRoute when auth is loading login', () {
-      when(() => bloc.state).thenReturn(
-        const AuthLoading(operation: AuthOperation.login),
-      );
+      when(
+        () => bloc.state,
+      ).thenReturn(const AuthLoading(operation: AuthOperation.login));
 
       guard.onNavigation(resolver, router);
 
-      verify(
-        () => resolver.redirectUntil(any(), replace: true),
-      ).called(1);
+      verify(() => resolver.redirectUntil(any(), replace: true)).called(1);
       verifyNever(() => resolver.next(any()));
     });
 
@@ -84,9 +80,9 @@ void main() {
     });
 
     test('continues navigation when auth is loading restore', () {
-      when(() => bloc.state).thenReturn(
-        const AuthLoading(operation: AuthOperation.restore),
-      );
+      when(
+        () => bloc.state,
+      ).thenReturn(const AuthLoading(operation: AuthOperation.restore));
 
       guard.onNavigation(resolver, router);
 
@@ -107,18 +103,14 @@ void main() {
 
       guard.onNavigation(resolver, router);
 
-      verify(
-        () => resolver.redirectUntil(any(), replace: true),
-      ).called(1);
+      verify(() => resolver.redirectUntil(any(), replace: true)).called(1);
       verifyNever(() => resolver.next(any()));
     });
 
     test('redirects to LoginRoute when bloc is null', () {
       final _ = AuthGuard()..onNavigation(resolver, router);
 
-      verify(
-        () => resolver.redirectUntil(any(), replace: true),
-      ).called(1);
+      verify(() => resolver.redirectUntil(any(), replace: true)).called(1);
       verifyNever(() => resolver.next(any()));
     });
   });
