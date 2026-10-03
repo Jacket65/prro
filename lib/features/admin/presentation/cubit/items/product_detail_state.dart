@@ -12,12 +12,15 @@ final class ProductDetailLoading extends ProductDetailState {
 }
 
 final class ProductDetailLoaded extends ProductDetailState {
-  const ProductDetailLoaded(this.variants);
+  const ProductDetailLoaded(this.variants, {this.ingredients = const []});
 
   final List<AdminVariant> variants;
 
+  /// The outlet's available ingredients, used to build a new variant's recipe.
+  final List<AdminIngredient> ingredients;
+
   @override
-  List<Object?> get props => [variants];
+  List<Object?> get props => [variants, ingredients];
 }
 
 final class ProductDetailError extends ProductDetailState {

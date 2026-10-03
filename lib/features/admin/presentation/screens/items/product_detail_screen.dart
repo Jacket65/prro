@@ -7,7 +7,6 @@ import 'package:prro/core/di/di.dart';
 import 'package:prro/core/router/app_router.gr.dart';
 import 'package:prro/core/utils/money.dart';
 import 'package:prro/core/utils/uuid.dart';
-import 'package:prro/features/admin/data/models/catalog.dart';
 import 'package:prro/features/admin/domain/repositories/admin_catalog_repository_i.dart';
 import 'package:prro/features/admin/presentation/cubit/items/product_detail_cubit.dart';
 import 'package:prro/features/admin/presentation/screens/items/variant_detail_screen.dart'
@@ -36,7 +35,7 @@ class ProductDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) => BlocProvider<ProductDetailCubit>(
     create: (_) {
       final cubit = ProductDetailCubit(getIt<AdminCatalogRepositoryI>());
-      unawaited(cubit.loadVariants(productId: productId));
+      unawaited(cubit.loadVariants(productId: productId, outletId: outletId));
       return cubit;
     },
     child: _ProductDetailView(
@@ -64,16 +63,21 @@ class _ProductDetailView extends StatelessWidget {
   Future<void> _add(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
     final cubit = context.read<ProductDetailCubit>();
-    final previous = cubit.state is ProductDetailLoaded
-        ? (cubit.state as ProductDetailLoaded).variants
-        : const <AdminVariant>[];
-    final result = await showVariantDialog(context);
+    final current = cubit.state;
+    final previous = current is ProductDetailLoaded
+        ? current
+        : const ProductDetailLoaded([]);
+    final result = await showVariantDialog(
+      context,
+      ingredients: previous.ingredients,
+    );
     if (result == null) return;
-    final (name, priceKopecks) = result;
+    final (name, priceKopecks, ingredients) = result;
     await cubit.createVariant(
       productId: productId,
       name: name,
       priceKopecks: priceKopecks,
+      ingredients: ingredients,
       idempotencyKey: uuidV4(),
     );
     if (!context.mounted) return;
@@ -115,7 +119,7 @@ class _ProductDetailView extends StatelessWidget {
                     label: const Text('Спробувати ще раз'),
                     onPressed: () => context
                         .read<ProductDetailCubit>()
-                        .loadVariants(productId: productId),
+                        .loadVariants(productId: productId, outletId: outletId),
                   ),
                 ],
               ),
