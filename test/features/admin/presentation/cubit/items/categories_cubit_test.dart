@@ -1,6 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/features/admin/data/models/catalog.dart';
 import 'package:prro/features/admin/domain/repositories/admin_catalog_repository_i.dart';
 import 'package:prro/features/admin/presentation/cubit/items/categories_cubit.dart';
@@ -14,9 +15,7 @@ void main() {
   setUp(() {
     repository = MockAdminCatalogRepository();
   });
-  registerFallbackValue(
-    const AdminCategory(id: 0, name: ''),
-  );
+  registerFallbackValue(const AdminCategory(id: 0, name: ''));
   registerFallbackValue(const AdminProduct(id: 0, name: ''));
   registerFallbackValue('');
 
@@ -42,18 +41,16 @@ void main() {
     blocTest<CategoriesCubit, CategoriesState>(
       'createCategory appends to the list',
       build: () {
-        when(() => repository.fetchCategories(outletId: 1)).thenAnswer(
-          (_) async => const [AdminCategory(id: 1, name: 'Кава')],
-        );
+        when(
+          () => repository.fetchCategories(outletId: 1),
+        ).thenAnswer((_) async => const [AdminCategory(id: 1, name: 'Кава')]);
         when(
           () => repository.createCategory(
             outletId: 1,
             name: 'Нове',
             idempotencyKey: any(named: 'idempotencyKey'),
           ),
-        ).thenAnswer(
-          (_) async => const AdminCategory(id: 9, name: 'Нове'),
-        );
+        ).thenAnswer((_) async => const AdminCategory(id: 9, name: 'Нове'));
         return CategoriesCubit(repository);
       },
       seed: () => const CategoriesLoaded([AdminCategory(id: 1, name: 'Кава')]),
@@ -62,11 +59,7 @@ void main() {
         isA<CategoriesLoading>(),
         isA<CategoriesLoaded>()
             .having((s) => s.categories.length, 'count', 2)
-            .having(
-              (s) => s.categories.last.name,
-              'last name',
-              'Нове',
-            ),
+            .having((s) => s.categories.last.name, 'last name', 'Нове'),
       ],
     );
 
@@ -93,11 +86,29 @@ void main() {
     );
 
     blocTest<CategoriesCubit, CategoriesState>(
+      'renameCategory keeps the id the server returned',
+      build: () {
+        when(
+          () => repository.updateCategory(id: 1, name: 'Кава'),
+        ).thenAnswer((_) async => const AdminCategory(id: 42, name: 'Кава'));
+        return CategoriesCubit(repository);
+      },
+      seed: () => const CategoriesLoaded([AdminCategory(id: 1, name: 'Кава')]),
+      act: (cubit) => cubit.renameCategory(id: 1, name: 'Кава'),
+      expect: () => [
+        isA<CategoriesLoading>(),
+        isA<CategoriesLoaded>().having(
+          (s) => s.categories.single.id,
+          'server id',
+          42,
+        ),
+      ],
+    );
+
+    blocTest<CategoriesCubit, CategoriesState>(
       'deleteCategory removes the matching category',
       build: () {
-        when(() => repository.deleteCategory(id: 1)).thenAnswer(
-          (_) async {},
-        );
+        when(() => repository.deleteCategory(id: 1)).thenAnswer((_) async {});
         return CategoriesCubit(repository);
       },
       seed: () => const CategoriesLoaded([
@@ -114,18 +125,28 @@ void main() {
     );
 
     blocTest<CategoriesCubit, CategoriesState>(
+      'deleteCategory emits error when the server rejects the delete',
+      build: () {
+        when(
+          () => repository.deleteCategory(id: 1),
+        ).thenThrow(const ApiException('Конфлікт даних.', code: 'conflict'));
+        return CategoriesCubit(repository);
+      },
+      seed: () => const CategoriesLoaded([AdminCategory(id: 1, name: 'Кава')]),
+      act: (cubit) => cubit.deleteCategory(id: 1),
+      expect: () => [isA<CategoriesLoading>(), isA<CategoriesError>()],
+    );
+
+    blocTest<CategoriesCubit, CategoriesState>(
       'loadCategories emits error on failure',
       build: () {
-        when(() => repository.fetchCategories(outletId: 1)).thenThrow(
-          Exception('boom'),
-        );
+        when(
+          () => repository.fetchCategories(outletId: 1),
+        ).thenThrow(Exception('boom'));
         return CategoriesCubit(repository);
       },
       act: (cubit) => cubit.loadCategories(outletId: 1),
-      expect: () => [
-        isA<CategoriesLoading>(),
-        isA<CategoriesError>(),
-      ],
+      expect: () => [isA<CategoriesLoading>(), isA<CategoriesError>()],
     );
   });
 }

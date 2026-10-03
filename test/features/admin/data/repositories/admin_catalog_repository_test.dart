@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:prro/core/network/api_client_i.dart';
+import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/features/admin/data/models/catalog.dart';
 import 'package:prro/features/admin/data/repositories/admin_catalog_repository_impl.dart';
 
@@ -25,9 +26,7 @@ void main() {
 
   group('envelope parsing', () {
     test('fetchCategories unwraps {data:[...]}', () async {
-      when(
-        () => apiClient.get(any()),
-      ).thenAnswer(
+      when(() => apiClient.get(any())).thenAnswer(
         (_) async => _json({
           'data': [
             {'id': 1, 'name': 'Кава'},
@@ -38,15 +37,11 @@ void main() {
       final categories = await repository.fetchCategories(outletId: 1);
 
       expect(categories, [const AdminCategory(id: 1, name: 'Кава')]);
-      verify(
-        () => apiClient.get('/retail-outlets/1/categories'),
-      ).called(1);
+      verify(() => apiClient.get('/retail-outlets/1/categories')).called(1);
     });
 
     test('fetchMeasures parses MeasureUnit list', () async {
-      when(
-        () => apiClient.get(any()),
-      ).thenAnswer(
+      when(() => apiClient.get(any())).thenAnswer(
         (_) async => _json({
           'data': [
             {'id': 3, 'name': 'шт', 'step': '1'},
@@ -61,17 +56,10 @@ void main() {
     });
 
     test('AdminVariant price is parsed from kopecks (double string)', () async {
-      when(
-        () => apiClient.get(any()),
-      ).thenAnswer(
+      when(() => apiClient.get(any())).thenAnswer(
         (_) async => _json({
           'data': [
-            {
-              'id': 2,
-              'name': '250 мл',
-              'price': '45.50',
-              'product_id': 101,
-            },
+            {'id': 2, 'name': '250 мл', 'price': '45.50', 'product_id': 101},
           ],
         }),
       );
@@ -174,6 +162,55 @@ void main() {
               as Map<String, dynamic>;
 
       expect(captured['ingredients'], hasLength(1));
+    });
+
+    test(
+      'replaceRecipe throws when the backend answers 200 {"data":null}',
+      () async {
+        when(
+          () => apiClient.put(
+            any<String>(),
+            data: any<Map<String, dynamic>>(named: 'data'),
+          ),
+        ).thenAnswer((_) async => _json({'data': null}));
+
+        await expectLater(
+          repository.replaceRecipe(
+            variantId: 5,
+            ingredients: const [
+              RecipeIngredient(ingredientId: 2, name: 'Молоко', quantity: 0.1),
+            ],
+          ),
+          throwsA(
+            isA<ApiException>().having((e) => e.code, 'code', 'internal_error'),
+          ),
+        );
+      },
+    );
+
+    test('updateCategory unwraps {data:{id,name}}', () async {
+      when(
+        () => apiClient.patch(
+          any<String>(),
+          data: any<Map<String, dynamic>>(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => _json({
+          'data': {'id': 7, 'name': 'Кава ROAST'},
+          'error': null,
+          'meta': {'request_id': 'req-1'},
+        }),
+      );
+
+      final updated = await repository.updateCategory(
+        id: 7,
+        name: 'Кава ROAST',
+      );
+
+      expect(updated, const AdminCategory(id: 7, name: 'Кава ROAST'));
+      verify(
+        () => apiClient.patch('/categories/7', data: {'name': 'Кава ROAST'}),
+      ).called(1);
     });
 
     test('deleteCategory issues DELETE on /categories/:id', () async {

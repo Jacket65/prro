@@ -7,6 +7,13 @@ import 'package:prro/core/network/unwrap.dart';
 import 'package:prro/features/admin/data/models/catalog.dart';
 import 'package:prro/features/admin/domain/repositories/admin_catalog_repository_i.dart';
 
+/// The payload inside the `{data, error, meta}` envelope, or `null` when the
+/// response carries no data at all.
+Object? _envelopePayload(Object? raw) {
+  if (raw is Map && raw.containsKey('data')) return raw['data'];
+  return raw;
+}
+
 @Environment('prod')
 @Singleton(as: AdminCatalogRepositoryI)
 class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
@@ -75,9 +82,7 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
   @override
   Future<List<AdminProduct>> fetchProducts({required int categoryId}) async {
     try {
-      final response = await _apiClient.get(
-        '/categories/$categoryId/products',
-      );
+      final response = await _apiClient.get('/categories/$categoryId/products');
       return unwrapList(response.data, AdminProduct.fromJson);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
@@ -182,10 +187,7 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
     try {
       final response = await _apiClient.patch(
         '/variants/$id',
-        data: {
-          'name': name,
-          'price': (priceKopecks / 100).toStringAsFixed(2),
-        },
+        data: {'name': name, 'price': (priceKopecks / 100).toStringAsFixed(2)},
       );
       return await unwrapObject(response.data, AdminVariant.fromJson) ??
           AdminVariant(id: id, name: name, priceKopecks: priceKopecks);
@@ -205,9 +207,7 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
 
   // ── Recipe ──
   @override
-  Future<List<RecipeIngredient>> fetchRecipe({
-    required int variantId,
-  }) async {
+  Future<List<RecipeIngredient>> fetchRecipe({required int variantId}) async {
     try {
       final response = await _apiClient.get('/variants/$variantId/recipe');
       return unwrapList(response.data, RecipeIngredient.fromJson);
@@ -222,7 +222,7 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
     required List<RecipeIngredient> ingredients,
   }) async {
     try {
-      await _apiClient.put(
+      final response = await _apiClient.put(
         '/variants/$variantId/recipe',
         data: {
           'ingredients': ingredients
@@ -236,6 +236,17 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
               .toList(),
         },
       );
+      // Backend defect: `PUT /variants/:id/recipe` is a stub whose body is
+      // commented out, so it answers `200 {"data":null}` without persisting
+      // anything. Reporting that as a success silently drops the edit, so an
+      // empty payload is treated as a failure instead.
+      if (_envelopePayload(response.data) == null) {
+        throw ApiException(
+          'Сервер не зберіг рецепт.',
+          code: 'internal_error',
+          statusCode: response.statusCode,
+        );
+      }
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
