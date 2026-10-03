@@ -142,6 +142,10 @@ extension GetItInjectableX on _i174.GetIt {
       registerFor: {_prod},
     );
     gh.singleton<_i361.Dio>(() => appModule.dio(), registerFor: {_prod});
+    gh.singleton<_i132.BalanceRepositoryI>(
+      () => _i445.BalanceRepository(),
+      registerFor: {_prod},
+    );
     gh.singleton<_i876.OrdersRepositoryI>(
       () => _i411.OrdersRepositoryMock(
         gh<_i1010.MockBackend>(),
@@ -179,10 +183,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i691.ItemsRepositoryI>(
       () => _i972.ItemsRepositoryMock(gh<_i1010.MockBackend>()),
       registerFor: {_mock},
-    );
-    gh.singleton<_i132.BalanceRepositoryI>(
-      () => _i445.BalanceRepository(apiClient: gh<_i787.ApiClientI>()),
-      registerFor: {_prod},
     );
     gh.lazySingleton<_i943.PaymentRepositoryI>(
       () => _i883.PaymentRepositoryImpl(

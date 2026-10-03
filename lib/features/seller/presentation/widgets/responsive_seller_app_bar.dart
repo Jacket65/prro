@@ -1,11 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:prro/core/theme/breakpoints.dart';
+import 'package:prro/core/utils/money.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_state.dart';
 import 'package:prro/features/seller/presentation/bloc/balance/balance_cubit.dart';
 import 'package:prro/features/seller/presentation/widgets/custom_popup_menu.dart';
 import 'package:prro/features/seller/presentation/widgets/search_field.dart';
+
+/// The app bar's balance readout, in the UI language and in kopecks.
+const String _balanceLabel = 'Баланс:';
 
 class ResponsiveSellerAppBar extends StatefulWidget
     implements PreferredSizeWidget {
@@ -158,12 +162,12 @@ class _ResponsiveSellerAppBarState extends State<ResponsiveSellerAppBar> {
   Widget _buildBalance(BalanceState state) {
     switch (state) {
       case BalanceLoaded(:final balance):
-        return Text('balance: ${balance.toStringAsFixed(2)}');
+        return Text('$_balanceLabel ${formatUah(balance)}');
       case BalanceLoading():
         return const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('balance: '),
+            Text(_balanceLabel),
             SizedBox(
               width: 16,
               height: 16,
@@ -177,7 +181,7 @@ class _ResponsiveSellerAppBarState extends State<ResponsiveSellerAppBar> {
           style: const TextStyle(color: Colors.redAccent),
         );
       default:
-        return const Text('balance: ...');
+        return const Text('$_balanceLabel ...');
     }
   }
 }
