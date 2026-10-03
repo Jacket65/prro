@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 /// Environment configuration.
 ///
 /// The API base URL is overridable at build time:
-///   flutter run --dart-define=API_BASE_URL=http://pos.grainsworld.click/api/v1
+///   flutter run --dart-define=API_BASE_URL=https://pos.coffeebeans.space.test/api/v1
 /// Defaults to the local dev backend.
 class Env {
   Env._();

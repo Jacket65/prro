@@ -511,9 +511,7 @@ class _GenericProcessingView extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 32),
-        const Center(
-          child: CircularProgressIndicator(strokeWidth: 3),
-        ),
+        const Center(child: CircularProgressIndicator(strokeWidth: 3)),
         const SizedBox(height: 24),
         const Center(
           child: Text(
@@ -566,11 +564,7 @@ class _TerminalPendingView extends StatelessWidget {
           ),
           child: const Column(
             children: [
-              Icon(
-                Icons.credit_card,
-                size: 64,
-                color: Colors.blue,
-              ),
+              Icon(Icons.credit_card, size: 64, color: Colors.blue),
               SizedBox(height: 16),
               Text(
                 'Очікування оплати...',
@@ -733,7 +727,7 @@ class _ReceiptCard extends StatelessWidget {
                   style: _mono.copyWith(fontSize: 11, color: Colors.black54),
                 ),
                 Text(
-                  'grainsworld.click',
+                  'pos.coffeebeans.space',
                   style: _mono.copyWith(fontSize: 11, color: Colors.black54),
                 ),
               ],
