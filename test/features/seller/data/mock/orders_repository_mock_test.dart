@@ -1,6 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prro/core/data/mock/order_history_service_mock.dart';
+import 'package:prro/core/data/mock/order_history_repository_mock.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/domain/order.dart';
@@ -8,15 +8,15 @@ import 'package:prro/core/mock/mock_backend.dart';
 import 'package:prro/features/seller/data/mock/orders_repository_mock.dart';
 
 void main() {
-  group('OrdersRepositoryMock integration with OrderHistoryServiceMock', () {
+  group('OrdersRepositoryMock integration with OrderHistoryRepositoryMock', () {
     late MockBackend backend;
-    late OrderHistoryServiceMock historyService;
+    late OrderHistoryRepositoryMock historyRepository;
     late OrdersRepositoryMock ordersRepository;
 
     setUp(() {
       backend = MockBackend.instance;
-      historyService = OrderHistoryServiceMock();
-      ordersRepository = OrdersRepositoryMock(backend, historyService);
+      historyRepository = OrderHistoryRepositoryMock();
+      ordersRepository = OrdersRepositoryMock(backend, historyRepository);
     });
 
     test('placing a mock order adds it to the mock history service', () async {
@@ -33,11 +33,11 @@ void main() {
       ordersRepository.addProduct(product);
 
       // 2. Initial state check: no custom orders in history
-      final initialShifts = await historyService.getShifts();
+      final initialShifts = await historyRepository.getShifts();
       expect(initialShifts.items, isNotEmpty);
       final activeShift = initialShifts.items.first;
 
-      // final initialOrders = await historyService.getShiftOrders(
+      // final initialOrders = await historyRepository.getShiftOrders(
       //   activeShift.id,
       //   sort: 'created_at',
       //   order: 'desc',
@@ -52,7 +52,7 @@ void main() {
       );
 
       // 4. History service check: order must be added
-      final updatedOrders = await historyService.getShiftOrders(
+      final updatedOrders = await historyRepository.getShiftOrders(
         activeShift.id,
         sort: 'created_at',
         order: 'desc',
@@ -63,7 +63,7 @@ void main() {
       expect(updatedOrders.items.first.orderId, newOrderId);
 
       // Check order details can be retrieved correctly
-      final detail = await historyService.getOrder(newOrderId);
+      final detail = await historyRepository.getOrder(newOrderId);
       expect(detail.orderId, newOrderId);
       expect(detail.shiftId, activeShift.id);
       expect(detail.totalKopecks, 3500);

@@ -1,12 +1,12 @@
 import 'package:decimal/decimal.dart';
 import 'package:injectable/injectable.dart';
-import 'package:prro/core/data/mock/order_history_service_mock.dart';
-import 'package:prro/core/data/services/order_history_service.dart';
+import 'package:prro/core/data/mock/order_history_repository_mock.dart';
 import 'package:prro/core/domain/bean.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
 import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/domain/order.dart';
+import 'package:prro/core/domain/repositories/order_history_repository_i.dart';
 import 'package:prro/core/mock/mock_backend.dart';
 import 'package:prro/core/mock/order_request_dto.dart';
 import 'package:prro/core/network/api_exception.dart';
@@ -15,9 +15,9 @@ import 'package:prro/features/seller/domain/repositories/orders_repository_i.dar
 @Environment('mock')
 @Singleton(as: OrdersRepositoryI)
 class OrdersRepositoryMock implements OrdersRepositoryI {
-  OrdersRepositoryMock(this._backend, this._historyService);
+  OrdersRepositoryMock(this._backend, this._historyRepository);
   final MockBackend _backend;
-  final OrderHistoryServiceI _historyService;
+  final OrderHistoryRepositoryI _historyRepository;
 
   final List<Product> _products = [];
 
@@ -119,9 +119,11 @@ class OrdersRepositoryMock implements OrdersRepositoryI {
         payment: PaymentDto(method: method, tenderedKopecks: tenderedKopecks),
         idempotencyKey: idempotencyKey,
       );
-      final hs = _historyService;
-      if (hs is OrderHistoryServiceMock) {
-        hs.addMockOrder(receipt);
+      // The mock history is in-process, so a placed order is appended to it
+      // directly; prod history is read back from the backend on refresh.
+      final history = _historyRepository;
+      if (history is OrderHistoryRepositoryMock) {
+        history.addMockOrder(receipt);
       }
       return receipt;
     } on MockBackendException catch (e) {

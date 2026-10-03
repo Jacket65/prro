@@ -1,13 +1,25 @@
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
-import 'package:prro/core/data/services/order_history_service.dart';
 import 'package:prro/core/domain/order_history.dart';
 import 'package:prro/core/domain/repositories/order_history_repository_i.dart';
+import 'package:prro/core/network/api_client_i.dart';
+import 'package:prro/core/network/api_exception.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @Environment('prod')
 @Singleton(as: OrderHistoryRepositoryI)
 class OrderHistoryRepositoryImpl implements OrderHistoryRepositoryI {
-  OrderHistoryRepositoryImpl(this._service);
-  final OrderHistoryServiceI _service;
+  OrderHistoryRepositoryImpl({required this._apiClient, required this._prefs});
+  final ApiClientI _apiClient;
+  final SharedPreferences _prefs;
+
+  int _outletId() {
+    final id = _prefs.getInt('outlet_id');
+    if (id == null) {
+      throw const ApiException('Точку продажу не визначено. Увійдіть знову.');
+    }
+    return id;
+  }
 
   @override
   Future<Page<ShiftSummary>> getShifts({
@@ -15,12 +27,20 @@ class OrderHistoryRepositoryImpl implements OrderHistoryRepositoryI {
     String sort = 'opened_at',
     String order = 'desc',
     int? outletId,
-  }) => _service.getShifts(
-    page: page,
-    sort: sort,
-    order: order,
-    outletId: outletId,
-  );
+  }) async {
+    try {
+      final response = await _apiClient.get(
+        '/retail-outlets/${outletId ?? _outletId()}/shifts',
+        queryParameters: {'page': page, 'sort': sort, 'order': order},
+      );
+      return Page<ShiftSummary>.fromJson(
+        (response.data as Map).cast<String, dynamic>(),
+        ShiftSummary.fromJson,
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
 
   @override
   Future<Page<OrderListItem>> getShiftOrders(
@@ -28,8 +48,30 @@ class OrderHistoryRepositoryImpl implements OrderHistoryRepositoryI {
     required String sort,
     required String order,
     int page = 1,
-  }) => _service.getShiftOrders(shiftId, page: page, sort: sort, order: order);
+  }) async {
+    try {
+      final response = await _apiClient.get(
+        '/shifts/$shiftId/orders',
+        queryParameters: {'page': page, 'sort': sort, 'order': order},
+      );
+      return Page<OrderListItem>.fromJson(
+        (response.data as Map).cast<String, dynamic>(),
+        OrderListItem.fromJson,
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
 
   @override
-  Future<OrderDetail> getOrder(int orderId) => _service.getOrder(orderId);
+  Future<OrderDetail> getOrder(int orderId) async {
+    try {
+      final response = await _apiClient.get('/orders/$orderId');
+      return OrderDetail.fromJson(
+        (response.data as Map).cast<String, dynamic>(),
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
 }
