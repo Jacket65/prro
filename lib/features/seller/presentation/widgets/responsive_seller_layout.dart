@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:prro/core/theme/breakpoints.dart';
 import 'package:prro/features/seller/presentation/widgets/check/check_column.dart';
 import 'package:prro/features/seller/presentation/widgets/items_tiles.dart';
 
@@ -9,8 +10,7 @@ class ResponsiveSellerLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        const double narrowBreakpoint = 600;
-        final isNarrow = constraints.maxWidth < narrowBreakpoint;
+        final isNarrow = constraints.maxWidth < kNarrowWidth;
 
         if (isNarrow) {
           return Column(

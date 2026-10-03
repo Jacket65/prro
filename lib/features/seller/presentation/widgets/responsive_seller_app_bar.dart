@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prro/core/theme/breakpoints.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_state.dart';
 import 'package:prro/features/seller/presentation/bloc/balance/balance_cubit.dart';
@@ -37,7 +38,7 @@ class _ResponsiveSellerAppBarState extends State<ResponsiveSellerAppBar> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        _isNarrow = constraints.maxWidth < 600;
+        _isNarrow = constraints.maxWidth < kNarrowWidth;
         return AppBar(
           backgroundColor: widget.theme.appBarTheme.backgroundColor,
           title: AnimatedSwitcher(

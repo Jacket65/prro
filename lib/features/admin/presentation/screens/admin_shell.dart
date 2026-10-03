@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:prro/core/di/di.dart';
 import 'package:prro/core/router/app_router.gr.dart';
+import 'package:prro/core/theme/breakpoints.dart';
 import 'package:prro/features/admin/domain/repositories/admin_outlet_repository_i.dart';
 import 'package:prro/features/admin/presentation/cubit/outlets/outlets_cubit.dart';
 import 'package:prro/features/admin/presentation/widgets/admin_back_button.dart';
@@ -53,7 +54,7 @@ class _AdminShellView extends StatelessWidget {
         final tabsRouter = AutoTabsRouter.of(context);
         return LayoutBuilder(
           builder: (context, constraints) {
-            final isNarrow = constraints.maxWidth < 600;
+            final isNarrow = constraints.maxWidth < kNarrowWidth;
             if (isNarrow) {
               return Scaffold(
                 appBar: AppBar(
