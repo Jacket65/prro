@@ -9,30 +9,37 @@ int uahToKopecks(num uah) => (uah * 100).round();
 int kopecksFromString(String raw) {
   final trimmed = raw.trim().replaceAll(',', '.');
   if (trimmed.isEmpty) return 0;
-  final parts = trimmed.split('.');
+  // The sign has to be read off the string: `int.tryParse('-0')` is 0, so a
+  // negative kopeck amount such as "-0.50" would parse as positive.
+  final negative = trimmed.startsWith('-');
+  final magnitude = negative ? trimmed.substring(1) : trimmed;
+  final parts = magnitude.split('.');
   final whole = int.tryParse(parts[0]) ?? 0;
-  if (parts.length == 1) return whole * 100;
+  if (parts.length == 1) return (negative ? -1 : 1) * whole * 100;
   var frac = parts[1];
   if (frac.length == 1) frac = '${frac}0';
   if (frac.length > 2) frac = frac.substring(0, 2);
   final cents = int.tryParse(frac) ?? 0;
-  return whole * 100 + (whole < 0 ? -cents : cents);
+  return (negative ? -1 : 1) * (whole * 100 + cents);
 }
 
+/// Splits [kopecks] into a sign, whole hryvnias and zero-padded kopecks.
+(String, int, String) _splitKopecks(int kopecks) {
+  final abs = kopecks.abs();
+  final whole = abs ~/ 100;
+  final cents = (abs % 100).toString().padLeft(2, '0');
+  return (kopecks < 0 ? '-' : '', whole, cents);
+}
+
+/// `₴1234.50` — the display form used everywhere in the UI.
 String formatUah(int kopecks) {
-  final negative = kopecks < 0;
-  final abs = kopecks.abs();
-  final whole = abs ~/ 100;
-  final cents = abs % 100;
-  final centsStr = cents.toString().padLeft(2, '0');
-  return '${negative ? '-' : ''}₴$whole.$centsStr';
+  final (sign, whole, cents) = _splitKopecks(kopecks);
+  return '$sign₴$whole.$cents';
 }
 
-/// Bare numeric form `123.45` (no symbol). Useful for filling input fields.
+/// Bare numeric form `123.45` (no symbol). Useful for filling input fields and
+/// for the decimal strings the backend expects on the wire.
 String formatAmount(int kopecks) {
-  final negative = kopecks < 0;
-  final abs = kopecks.abs();
-  final whole = abs ~/ 100;
-  final cents = abs % 100;
-  return '${negative ? '-' : ''}$whole.${cents.toString().padLeft(2, '0')}';
+  final (sign, whole, cents) = _splitKopecks(kopecks);
+  return '$sign$whole.$cents';
 }
