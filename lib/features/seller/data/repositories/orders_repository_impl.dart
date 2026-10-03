@@ -9,6 +9,7 @@ import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
+import 'package:prro/core/utils/json.dart';
 import 'package:prro/core/utils/money.dart';
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -103,6 +104,17 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
     }
   }
 
+  /// `POST /orders` and `POST /orders/{id}/confirm` answer with the same receipt
+  /// envelope, so the parse is shared. The store/cashier names are local-only
+  /// fields the backend does not return.
+  OrderReceipt _receipt(Response<dynamic> response) => OrderReceipt.fromJson(
+    // A body with no object payload is a protocol violation: fail rather than
+    // invent an empty receipt.
+    unwrapPayload(response.data)!,
+    storeName: Env.storeName,
+    cashierName: _prefs.getString('username') ?? '',
+  );
+
   @override
   Future<OrderReceipt> placeOrder({
     required PaymentMethod method,
@@ -148,15 +160,7 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
         data: body,
         idempotencyKey: idempotencyKey,
       );
-      final raw = response.data;
-      final data = raw is Map && raw['data'] is Map
-          ? (raw['data'] as Map).cast<String, dynamic>()
-          : (raw as Map).cast<String, dynamic>();
-      return OrderReceipt.fromJson(
-        data,
-        storeName: Env.storeName,
-        cashierName: _prefs.getString('username') ?? '',
-      );
+      return _receipt(response);
     } on DioException catch (e) {
       // The seller's shift can be closed from another device while the screen
       // is still open: the backend answers 404 (no open shift) instead of 409.
@@ -176,15 +180,7 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
   Future<OrderReceipt> confirmOrder(int orderId) async {
     try {
       final response = await _apiClient.post('/orders/$orderId/confirm');
-      final raw = response.data;
-      final data = raw is Map && raw['data'] is Map
-          ? (raw['data'] as Map).cast<String, dynamic>()
-          : (raw as Map).cast<String, dynamic>();
-      return OrderReceipt.fromJson(
-        data,
-        storeName: Env.storeName,
-        cashierName: _prefs.getString('username') ?? '',
-      );
+      return _receipt(response);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

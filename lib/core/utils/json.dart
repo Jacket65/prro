@@ -85,3 +85,33 @@ String parseString(dynamic v, {String fallback = ''}) {
   final s = v.toString().trim();
   return s.isEmpty ? fallback : s;
 }
+
+/// The object payload of a backend response, unwrapped from its
+/// `{data, error, meta}` envelope.
+///
+/// Prefers `data` when it is itself an object and otherwise hands back the
+/// envelope, so a caller that already tolerates a bare body (the order-history
+/// models) keeps working. Returns `null` only when the body carries no object
+/// at all — a call site that requires one fails loudly on that `null` rather
+/// than defaulting to an empty payload.
+///
+/// Sibling of `unwrapList`/`unwrapObject` in `core/network/unwrap.dart`; it
+/// lives here so `core/domain` can unwrap without reaching into `core/network`.
+Map<String, dynamic>? unwrapPayload(Object? raw) {
+  if (raw is Map && raw['data'] is Map) {
+    return (raw['data'] as Map).cast<String, dynamic>();
+  }
+  if (raw is Map) return raw.cast<String, dynamic>();
+  return null;
+}
+
+/// The value of the envelope's `data` key, or [raw] itself when the body is not
+/// an envelope.
+///
+/// Unlike [unwrapPayload] this is *presence*-based, not type-based: a
+/// `{"data": null}` body yields `null`. That is what lets a caller detect the
+/// backend's stub responses, which answer 200 with an explicitly empty payload.
+Object? unwrapData(Object? raw) {
+  if (raw is Map && raw.containsKey('data')) return raw['data'];
+  return raw;
+}

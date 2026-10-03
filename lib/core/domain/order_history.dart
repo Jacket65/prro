@@ -212,9 +212,7 @@ class OrderDetail extends Equatable {
   });
 
   factory OrderDetail.fromJson(Map<String, dynamic> json) {
-    final raw = json['data'] is Map
-        ? (json['data'] as Map).cast<String, dynamic>()
-        : json;
+    final raw = unwrapPayload(json) ?? json;
     final paymentJson =
         (raw['payment'] as Map?)?.cast<String, dynamic>() ?? const {};
     final items = (raw['items'] as List<dynamic>? ?? const [])
@@ -272,9 +270,7 @@ class Page<T> extends Equatable {
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromItem,
   ) {
-    final data = json['data'] is Map
-        ? (json['data'] as Map).cast<String, dynamic>()
-        : json;
+    final data = unwrapPayload(json) ?? json;
     final itemsRaw = data['items'] as List<dynamic>? ?? const [];
     final items = itemsRaw
         .whereType<Map<dynamic, dynamic>>()

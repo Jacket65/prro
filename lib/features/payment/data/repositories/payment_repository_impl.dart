@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
+import 'package:prro/core/utils/json.dart';
 import 'package:prro/features/payment/data/models/payment_request.dart';
 import 'package:prro/features/payment/data/models/payment_result.dart';
 import 'package:prro/features/payment/data/models/payment_token.dart';
@@ -35,11 +36,7 @@ class PaymentRepositoryImpl implements PaymentRepositoryI {
         '/retail-outlets/${_outletId()}/payments/create',
         data: request.toJson(),
       );
-      final raw = response.data;
-      final data = raw is Map && raw['data'] is Map
-          ? (raw['data'] as Map).cast<String, dynamic>()
-          : (raw as Map).cast<String, dynamic>();
-      return TerminalToken.fromJson(data);
+      return TerminalToken.fromJson(unwrapPayload(response.data)!);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -52,11 +49,7 @@ class PaymentRepositoryImpl implements PaymentRepositoryI {
         '/retail-outlets/${_outletId()}/payments/check',
         data: {'transaction_id': transactionId},
       );
-      final raw = response.data;
-      final data = raw is Map && raw['data'] is Map
-          ? (raw['data'] as Map).cast<String, dynamic>()
-          : (raw as Map).cast<String, dynamic>();
-      return PaymentResult.fromJson(data);
+      return PaymentResult.fromJson(unwrapPayload(response.data)!);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

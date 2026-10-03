@@ -7,6 +7,7 @@ import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
 import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/network/api_client_i.dart';
+import 'package:prro/core/network/unwrap.dart';
 import 'package:prro/features/seller/domain/repositories/items_repository_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,10 +37,7 @@ class ItemsRepository implements ItemsRepositoryI {
       final response = await _apiClient.get(
         '/retail-outlets/$outletId/categories',
       );
-      final data = _extractList(response.data);
-      return data
-          .map<Item>((json) => Category.fromJson(json as Map<String, dynamic>))
-          .toList();
+      return unwrapList(response.data, Category.fromJson);
     } on Object catch (e, stackTrace) {
       log('Error in getCategories: $e', stackTrace: stackTrace);
       return [];
@@ -50,7 +48,7 @@ class ItemsRepository implements ItemsRepositoryI {
   Future<List<Item>> getProducts(int categoryId) async {
     try {
       final response = await _apiClient.get('/categories/$categoryId/products');
-      return _flattenProducts(_extractList(response.data));
+      return _flattenProducts(unwrapList(response.data, ProductGroup.fromJson));
     } on Object catch (e, stackTrace) {
       log('Error in getProducts: $e', stackTrace: stackTrace);
       return [];
@@ -75,17 +73,16 @@ class ItemsRepository implements ItemsRepositoryI {
       },
       cancelToken: cancelToken,
     );
-    return _flattenProducts(_extractList(response.data));
+    return _flattenProducts(unwrapList(response.data, ProductGroup.fromJson));
   }
 
   /// Products arrive with their variants inline (single request, no N+1).
   /// Flatten for the catalog: a product with exactly one variant becomes a
   /// directly-orderable tile, more than one keeps the picker, and zero variants
   /// is hidden (unsellable).
-  List<Item> _flattenProducts(List<dynamic> data) {
+  List<Item> _flattenProducts(List<ProductGroup> groups) {
     final out = <Item>[];
-    for (final json in data.whereType<Map<dynamic, dynamic>>()) {
-      final group = ProductGroup.fromJson(json.cast<String, dynamic>());
+    for (final group in groups) {
       if (group.variants.isEmpty) continue;
       out.add(group.variants.length == 1 ? group.variants.first : group);
     }
@@ -96,12 +93,7 @@ class ItemsRepository implements ItemsRepositoryI {
   Future<List<MeasureUnit>> getMeasureUnits() async {
     try {
       final response = await _apiClient.get('/measure-units');
-      final data = _extractList(response.data);
-      return data
-          .map<MeasureUnit>(
-            (json) => MeasureUnit.fromJson(json as Map<String, dynamic>),
-          )
-          .toList();
+      return unwrapList(response.data, MeasureUnit.fromJson);
     } on Object catch (e, stackTrace) {
       log('Error in getMeasureUnits: $e', stackTrace: stackTrace);
       return [];
@@ -125,11 +117,7 @@ class ItemsRepository implements ItemsRepositoryI {
     return _optionsInFlight.putIfAbsent(variantId, () async {
       try {
         final response = await _apiClient.get('/variants/$variantId/options');
-        final data = _extractList(response.data);
-        final groups = data
-            .whereType<Map<dynamic, dynamic>>()
-            .map((m) => OptionGroup.fromJson(m.cast<String, dynamic>()))
-            .toList();
+        final groups = unwrapList(response.data, OptionGroup.fromJson);
         _optionsCache[variantId] = groups;
         return groups;
       } on Object catch (e, stackTrace) {
@@ -173,12 +161,5 @@ class ItemsRepository implements ItemsRepositoryI {
         beans: ordered.map((o) => Bean(id: o.id, name: o.name)).toList(),
       );
     }).toList();
-  }
-
-  List<dynamic> _extractList(dynamic body) {
-    if (body is Map && body['data'] is List) {
-      return body['data'] as List<dynamic>;
-    }
-    return const <dynamic>[];
   }
 }

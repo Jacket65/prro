@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
+import 'package:prro/core/utils/json.dart';
 import 'package:prro/features/shift/domain/entities/shift.dart';
 import 'package:prro/features/shift/domain/repositories/shift_repository_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,12 +29,11 @@ class ShiftRepositoryImpl implements ShiftRepositoryI {
     return id;
   }
 
-  ShiftResponse _parse(dynamic body) {
-    final data = body is Map && body['data'] is Map
-        ? (body['data'] as Map).cast<String, dynamic>()
-        : (body as Map).cast<String, dynamic>();
-    return ShiftResponse.fromJson(data);
-  }
+  ShiftResponse _parse(dynamic body) => ShiftResponse.fromJson(
+    // A body with no object payload is a protocol violation: fail rather than
+    // hand the parser something it cannot read.
+    unwrapPayload(body)!,
+  );
 
   @override
   Future<ShiftResponse?> currentShift() async {

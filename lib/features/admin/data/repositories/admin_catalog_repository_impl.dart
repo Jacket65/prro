@@ -4,15 +4,9 @@ import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/core/network/unwrap.dart';
+import 'package:prro/core/utils/json.dart';
 import 'package:prro/features/admin/data/models/catalog.dart';
 import 'package:prro/features/admin/domain/repositories/admin_catalog_repository_i.dart';
-
-/// The payload inside the `{data, error, meta}` envelope, or `null` when the
-/// response carries no data at all.
-Object? _envelopePayload(Object? raw) {
-  if (raw is Map && raw.containsKey('data')) return raw['data'];
-  return raw;
-}
 
 @Environment('prod')
 @Singleton(as: AdminCatalogRepositoryI)
@@ -240,7 +234,7 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
       // commented out, so it answers `200 {"data":null}` without persisting
       // anything. Reporting that as a success silently drops the edit, so an
       // empty payload is treated as a failure instead.
-      if (_envelopePayload(response.data) == null) {
+      if (unwrapData(response.data) == null) {
         throw ApiException(
           'Сервер не зберіг рецепт.',
           code: 'internal_error',
