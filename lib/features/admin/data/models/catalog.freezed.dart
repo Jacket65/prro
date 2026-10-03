@@ -844,7 +844,7 @@ as int?,
 /// @nodoc
 mixin _$RecipeIngredient {
 
-@JsonKey(name: 'ingredient_id', fromJson: parseInt) int get ingredientId;@JsonKey(fromJson: parseString) String get name;@JsonKey(fromJson: parseDouble) double get quantity;
+@JsonKey(name: 'ingredient_id', fromJson: parseInt) int get ingredientId;@JsonKey(readValue: _ingredientNameFromJson) String get name;@JsonKey(fromJson: parseDouble) double get quantity;
 /// Create a copy of RecipeIngredient
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -882,7 +882,7 @@ abstract mixin class $RecipeIngredientCopyWith<$Res>  {
   factory $RecipeIngredientCopyWith(RecipeIngredient value, $Res Function(RecipeIngredient) _then) = _$RecipeIngredientCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'ingredient_id', fromJson: parseInt) int ingredientId,@JsonKey(fromJson: parseString) String name,@JsonKey(fromJson: parseDouble) double quantity
+@JsonKey(name: 'ingredient_id', fromJson: parseInt) int ingredientId,@JsonKey(readValue: _ingredientNameFromJson) String name,@JsonKey(fromJson: parseDouble) double quantity
 });
 
 
@@ -989,7 +989,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'ingredient_id', fromJson: parseInt)  int ingredientId, @JsonKey(fromJson: parseString)  String name, @JsonKey(fromJson: parseDouble)  double quantity)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'ingredient_id', fromJson: parseInt)  int ingredientId, @JsonKey(readValue: _ingredientNameFromJson)  String name, @JsonKey(fromJson: parseDouble)  double quantity)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RecipeIngredient() when $default != null:
 return $default(_that.ingredientId,_that.name,_that.quantity);case _:
@@ -1010,7 +1010,7 @@ return $default(_that.ingredientId,_that.name,_that.quantity);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'ingredient_id', fromJson: parseInt)  int ingredientId, @JsonKey(fromJson: parseString)  String name, @JsonKey(fromJson: parseDouble)  double quantity)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'ingredient_id', fromJson: parseInt)  int ingredientId, @JsonKey(readValue: _ingredientNameFromJson)  String name, @JsonKey(fromJson: parseDouble)  double quantity)  $default,) {final _that = this;
 switch (_that) {
 case _RecipeIngredient():
 return $default(_that.ingredientId,_that.name,_that.quantity);case _:
@@ -1030,7 +1030,7 @@ return $default(_that.ingredientId,_that.name,_that.quantity);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'ingredient_id', fromJson: parseInt)  int ingredientId, @JsonKey(fromJson: parseString)  String name, @JsonKey(fromJson: parseDouble)  double quantity)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'ingredient_id', fromJson: parseInt)  int ingredientId, @JsonKey(readValue: _ingredientNameFromJson)  String name, @JsonKey(fromJson: parseDouble)  double quantity)?  $default,) {final _that = this;
 switch (_that) {
 case _RecipeIngredient() when $default != null:
 return $default(_that.ingredientId,_that.name,_that.quantity);case _:
@@ -1045,11 +1045,11 @@ return $default(_that.ingredientId,_that.name,_that.quantity);case _:
 @JsonSerializable()
 
 class _RecipeIngredient implements RecipeIngredient {
-  const _RecipeIngredient({@JsonKey(name: 'ingredient_id', fromJson: parseInt) required this.ingredientId, @JsonKey(fromJson: parseString) required this.name, @JsonKey(fromJson: parseDouble) required this.quantity});
+  const _RecipeIngredient({@JsonKey(name: 'ingredient_id', fromJson: parseInt) required this.ingredientId, @JsonKey(readValue: _ingredientNameFromJson) required this.name, @JsonKey(fromJson: parseDouble) required this.quantity});
   factory _RecipeIngredient.fromJson(Map<String, dynamic> json) => _$RecipeIngredientFromJson(json);
 
 @override@JsonKey(name: 'ingredient_id', fromJson: parseInt) final  int ingredientId;
-@override@JsonKey(fromJson: parseString) final  String name;
+@override@JsonKey(readValue: _ingredientNameFromJson) final  String name;
 @override@JsonKey(fromJson: parseDouble) final  double quantity;
 
 /// Create a copy of RecipeIngredient
@@ -1087,7 +1087,7 @@ abstract mixin class _$RecipeIngredientCopyWith<$Res> implements $RecipeIngredie
   factory _$RecipeIngredientCopyWith(_RecipeIngredient value, $Res Function(_RecipeIngredient) _then) = __$RecipeIngredientCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'ingredient_id', fromJson: parseInt) int ingredientId,@JsonKey(fromJson: parseString) String name,@JsonKey(fromJson: parseDouble) double quantity
+@JsonKey(name: 'ingredient_id', fromJson: parseInt) int ingredientId,@JsonKey(readValue: _ingredientNameFromJson) String name,@JsonKey(fromJson: parseDouble) double quantity
 });
 
 

@@ -45,7 +45,7 @@ Map<String, dynamic> _$AdminVariantToJson(_AdminVariant instance) =>
 _RecipeIngredient _$RecipeIngredientFromJson(Map<String, dynamic> json) =>
     _RecipeIngredient(
       ingredientId: parseInt(json['ingredient_id']),
-      name: parseString(json['name']),
+      name: _ingredientNameFromJson(json, 'name') as String,
       quantity: parseDouble(json['quantity']),
     );
 

@@ -68,19 +68,26 @@ abstract class AdminVariant with _$AdminVariant {
 
 /// An ingredient line in a variant's recipe.
 ///
-/// `GET /variants/{id}/recipe` → `{ "data": [ {ingredient_id, name, quantity}, … ] }`.
+/// `GET /variants/{id}/recipe` → `{ "data": [ {ingredient_id, ingredient_name,
+/// quantity}, … ] }`. The backend sends the resolved display name as
+/// `ingredient_name` (`dto.RecipeResponseItem`); `name` is kept as a legacy
+/// fallback. `unit_id` / `cost_per_unit` are also sent but unused by the UI
+/// today, so they are deliberately not modelled.
 @freezed
 abstract class RecipeIngredient with _$RecipeIngredient {
   const factory RecipeIngredient({
     @JsonKey(name: 'ingredient_id', fromJson: parseInt)
     required int ingredientId,
-    @JsonKey(fromJson: parseString) required String name,
+    @JsonKey(readValue: _ingredientNameFromJson) required String name,
     @JsonKey(fromJson: parseDouble) required double quantity,
   }) = _RecipeIngredient;
 
   factory RecipeIngredient.fromJson(Map<String, dynamic> json) =>
       _$RecipeIngredientFromJson(json);
 }
+
+String _ingredientNameFromJson(Map<dynamic, dynamic> json, String key) =>
+    parseString(json['ingredient_name'], fallback: parseString(json['name']));
 
 /// A raw ingredient available to the outlet (for building recipes).
 ///
