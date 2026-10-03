@@ -3,6 +3,19 @@ import 'package:prro/features/admin/data/models/admin_user.dart';
 import 'package:prro/features/admin/presentation/cubit/tellers/tellers_cubit.dart'
     show TellersCubit;
 
+/// Ukrainian label for a backend role (`admin` / `manager` / `cashier`). An
+/// unrecognized non-empty role is shown verbatim rather than hidden.
+String _roleLabel(String? role) {
+  final value = role?.trim() ?? '';
+  if (value.isEmpty) return '';
+  return switch (value) {
+    'admin' => 'Адміністратор',
+    'manager' => 'Менеджер',
+    'cashier' => 'Касир',
+    _ => value,
+  };
+}
+
 /// Presentational table of outlet users (tellers/sellers). Selecting one calls
 /// [onSelect]; the selected user is highlighted. Driven entirely by
 /// [TellersCubit] state — no `setState` data-loading.
@@ -29,11 +42,12 @@ class TellerTable extends StatelessWidget {
       itemBuilder: (context, index) {
         final user = users[index];
         final selected = user.id == selectedUserId;
-        final statusName = user.status?.name;
-        final status = statusName == null ? '' : ' · $statusName';
+        // The subtitle shows the role: `phone`/`status` are not sent by the
+        // backend yet, so the old composition was always hidden.
+        final role = _roleLabel(user.role);
         return ListTile(
           title: Text(user.name),
-          subtitle: user.phone == null ? null : Text('${user.phone!}$status'),
+          subtitle: role.isEmpty ? null : Text(role),
           selected: selected,
           selectedTileColor: Theme.of(context).highlightColor,
           onTap: () => onSelect(user.id),

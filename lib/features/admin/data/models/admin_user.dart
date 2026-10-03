@@ -32,12 +32,27 @@ DpsStatus? _statusFromJson(Object? value) {
   };
 }
 
+/// Resolves the display name of an outlet user.
+///
+/// The backend sends the name split into `first_name` / `last_name`, with
+/// `login` as the only always-present identifier — none of `name`/`username`/
+/// `full_name` is ever sent. Those three stay as a legacy fallback chain so a
+/// mock/older payload still renders.
 String _nameFromJson(Map<dynamic, dynamic> json, String key) {
+  final fullName =
+      '${parseString(json['first_name'])} ${parseString(json['last_name'])}'
+          .trim();
   return parseString(
-    json['name'],
+    fullName,
     fallback: parseString(
-      json['username'],
-      fallback: parseString(json['full_name']),
+      json['login'],
+      fallback: parseString(
+        json['name'],
+        fallback: parseString(
+          json['username'],
+          fallback: parseString(json['full_name']),
+        ),
+      ),
     ),
   );
 }
