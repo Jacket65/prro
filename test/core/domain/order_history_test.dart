@@ -5,15 +5,34 @@ import 'package:prro/core/utils/money.dart';
 
 void main() {
   group('OrderListItem.fromJson', () {
-    test('parses id, created_at and total_price (kopecks)', () {
+    test('parses order_id, created_at and total_price (kopecks)', () {
       final item = OrderListItem.fromJson(const {
-        'id': 42,
+        'order_id': 42,
         'created_at': '2024-05-01T12:30:00Z',
         'total_price': '12.50',
       });
       expect(item.orderId, 42);
       expect(item.totalKopecks, kopecksFromString('12.50'));
       expect(item.createdAt, isA<DateTime>());
+    });
+
+    test('falls back to the legacy id key', () {
+      final item = OrderListItem.fromJson(const {
+        'id': 42,
+        'created_at': '2024-05-01T12:30:00Z',
+        'total_price': '12.50',
+      });
+      expect(item.orderId, 42);
+    });
+
+    test('prefers order_id over id', () {
+      final item = OrderListItem.fromJson(const {
+        'order_id': 7,
+        'id': 99,
+        'created_at': '2024-05-01T12:30:00Z',
+        'total_price': '1.00',
+      });
+      expect(item.orderId, 7);
     });
   });
 
@@ -49,8 +68,16 @@ void main() {
       final page = Page<OrderListItem>.fromJson(const {
         'data': {
           'items': [
-            {'id': 1, 'created_at': '2024-05-01T12:00:00Z', 'total_price': '5'},
-            {'id': 2, 'created_at': '2024-05-01T13:00:00Z', 'total_price': '9'},
+            {
+              'order_id': 1,
+              'created_at': '2024-05-01T12:00:00Z',
+              'total_price': '5',
+            },
+            {
+              'order_id': 2,
+              'created_at': '2024-05-01T13:00:00Z',
+              'total_price': '9',
+            },
           ],
           'page': 1,
           'has_next': true,
@@ -58,6 +85,7 @@ void main() {
         },
       }, OrderListItem.fromJson);
       expect(page.items.length, 2);
+      expect(page.items.map((i) => i.orderId), [1, 2]);
       expect(page.page, 1);
       expect(page.hasNext, isTrue);
       expect(page.nextPage, 2);

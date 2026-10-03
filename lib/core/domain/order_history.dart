@@ -6,6 +6,9 @@ import 'package:prro/core/utils/money.dart';
 /// A single order as returned by `GET /shifts/{id}/orders` (a page row, not the
 /// full receipt). `total_price` is a decimal **string** on the wire, parsed to
 /// kopecks via [kopecksFromString].
+///
+/// The row's identifier arrives as `order_id` (`dto.OrderListItem`); `id` is
+/// kept as a legacy fallback so an older payload still resolves.
 class OrderListItem extends Equatable {
   const OrderListItem({
     required this.orderId,
@@ -15,7 +18,7 @@ class OrderListItem extends Equatable {
 
   factory OrderListItem.fromJson(Map<String, dynamic> json) {
     return OrderListItem(
-      orderId: parseInt(json['id']),
+      orderId: parseInt(json['order_id'] ?? json['id']),
       createdAt:
           DateTime.tryParse((json['created_at'] ?? '').toString())?.toLocal() ??
           DateTime.now(),
@@ -57,9 +60,7 @@ class ShiftSummary extends Equatable {
           DateTime.now(),
       closedAt: json['closed_at'] == null
           ? null
-          : DateTime.tryParse(
-              json['closed_at'].toString(),
-            )?.toLocal(),
+          : DateTime.tryParse(json['closed_at'].toString())?.toLocal(),
       cashEnd: json['cash_end']?.toString(),
       status: (json['status'] ?? '').toString(),
     );
@@ -103,9 +104,7 @@ class OrderDetailItem extends Equatable {
   factory OrderDetailItem.fromJson(Map<String, dynamic> json) {
     final options = (json['options'] as List<dynamic>? ?? const [])
         .whereType<Map<dynamic, dynamic>>()
-        .map(
-          (o) => OrderDetailOption.fromJson(o.cast<String, dynamic>()),
-        )
+        .map((o) => OrderDetailOption.fromJson(o.cast<String, dynamic>()))
         .toList();
     return OrderDetailItem(
       name: (json['name'] ?? '').toString(),
