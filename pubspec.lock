@@ -257,14 +257,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.7"
-  cupertino_icons:
-    dependency: "direct main"
-    description:
-      name: cupertino_icons
-      sha256: b7cc2390aac296c083bea762859413eb1cf5b630c70e0c7e4d831018f762a8b2
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
   cupertino_ui:
     dependency: transitive
     description:
@@ -750,7 +742,7 @@ packages:
     source: hosted
     version: "1.9.1"
   path_provider:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: path_provider
       sha256: a7f4874f987173da295a61c181b8ee71dab59b332a486b391babf26a1b884825
@@ -1039,14 +1031,6 @@ packages:
     description:
       name: talker
       sha256: "57b160b70123fdb28cc1035987e4718bce5715c724a40ff74d6466d1559de68a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.1.20"
-  talker_bloc_logger:
-    dependency: "direct main"
-    description:
-      name: talker_bloc_logger
-      sha256: "340e47226be980c7478fcc9070678b565c5b8ce763107ae49eaa2fb24c9e1f79"
       url: "https://pub.dev"
     source: hosted
     version: "5.1.20"

@@ -10,7 +10,6 @@ dependencies:
   app_links: ^7.2.1
   auto_route: 11.2.0
   bloc_concurrency: ^0.3.0
-  cupertino_icons: ^2.0.0
   decimal: ^3.2.6
   dio: ^5.11.1
   equatable: ^3.0.0
@@ -27,10 +26,8 @@ dependencies:
   material_ui: ^1.5.0
 
   meta: ^1.19.0
-  path_provider: ^2.1.6
   shared_preferences: ^2.5.5
   talker: ^5.1.20
-  talker_bloc_logger: ^5.1.20
   url_launcher: ^6.3.2
 
 dev_dependencies:
