@@ -4,9 +4,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/domain/order_history.dart';
 import 'package:prro/core/domain/repositories/order_history_repository_i.dart';
-import 'package:prro/features/seller/presentation/bloc/order_history/order_detail_cubit.dart';
-import 'package:prro/features/seller/presentation/bloc/order_history/orders_history_cubit.dart';
-import 'package:prro/features/seller/presentation/bloc/order_history/shifts_history_cubit.dart';
+import 'package:prro/core/presentation/order_history/order_detail_cubit.dart';
+import 'package:prro/core/presentation/order_history/orders_history_cubit.dart';
+import 'package:prro/core/presentation/order_history/shifts_history_cubit.dart';
 
 class MockOrderHistoryRepository extends Mock
     implements OrderHistoryRepositoryI {}
@@ -63,6 +63,38 @@ void main() {
             .having((s) => s.items.length, 'items', 1)
             .having((s) => s.hasNext, 'hasNext', false),
       ],
+    );
+
+    blocTest<ShiftsHistoryCubit, ShiftsHistoryState>(
+      'an admin outletId is forwarded to the repository',
+      build: () {
+        when(() => repo.getShifts(outletId: any(named: 'outletId'))).thenAnswer(
+          (_) async =>
+              Page<ShiftSummary>(items: [shift(1)], page: 1, hasNext: false),
+        );
+        return ShiftsHistoryCubit(repo, outletId: 42);
+      },
+      act: (c) => c.loadFirst(),
+      verify: (_) {
+        verify(() => repo.getShifts(outletId: 42)).called(1);
+      },
+      expect: () => [isA<ShiftsHistoryLoading>(), isA<ShiftsHistoryLoaded>()],
+    );
+
+    blocTest<ShiftsHistoryCubit, ShiftsHistoryState>(
+      'a seller leaves outletId unset so the session outlet is used',
+      build: () {
+        when(() => repo.getShifts()).thenAnswer(
+          (_) async =>
+              Page<ShiftSummary>(items: [shift(1)], page: 1, hasNext: false),
+        );
+        return ShiftsHistoryCubit(repo);
+      },
+      act: (c) => c.loadFirst(),
+      verify: (_) {
+        verify(() => repo.getShifts()).called(1);
+      },
+      expect: () => [isA<ShiftsHistoryLoading>(), isA<ShiftsHistoryLoaded>()],
     );
 
     blocTest<ShiftsHistoryCubit, ShiftsHistoryState>(

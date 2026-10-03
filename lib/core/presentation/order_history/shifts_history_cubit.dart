@@ -6,10 +6,14 @@ import 'package:prro/core/domain/repositories/order_history_repository_i.dart';
 part 'shifts_history_state.dart';
 
 class ShiftsHistoryCubit extends Cubit<ShiftsHistoryState> {
-  ShiftsHistoryCubit(this._repository, this.outletId)
+  ShiftsHistoryCubit(this._repository, {this.outletId})
     : super(const ShiftsHistoryInitial());
   final OrderHistoryRepositoryI _repository;
-  final int outletId;
+
+  /// The outlet whose shifts are listed. Admin scopes the list to the outlet
+  /// selected in the outlets tab; the seller omits it and the repository falls
+  /// back to the session outlet.
+  final int? outletId;
 
   Future<void> loadFirst() async {
     emit(const ShiftsHistoryLoading());

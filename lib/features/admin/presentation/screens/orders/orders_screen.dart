@@ -1,16 +1,12 @@
-import 'dart:async';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/core/di/di.dart';
-import 'package:prro/core/domain/repositories/order_history_repository_i.dart';
-import 'package:prro/features/admin/presentation/cubit/orders/shifts_history_cubit.dart';
 import 'package:prro/features/admin/presentation/cubit/outlets/outlets_cubit.dart';
 import 'package:prro/features/admin/presentation/screens/orders/shifts_history_screen.dart';
 
 /// Orders tab. Reads the shared [OutletsCubit] for the selected outlet and
-/// (re)builds its own [ShiftsHistoryCubit] keyed by `selectedOutletId`.
+/// rebuilds [ShiftsHistoryScreen] keyed by it, so switching outlets reloads the
+/// shift list.
 @RoutePage(name: 'AdminOrdersTabRoute')
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
@@ -27,17 +23,6 @@ class OrdersScreen extends StatelessWidget {
         body: const Center(child: Text('Оберіть торговельну точку')),
       );
     }
-    return BlocProvider<ShiftsHistoryCubit>(
-      key: ValueKey(outletId),
-      create: (_) {
-        final cubit = ShiftsHistoryCubit(
-          getIt<OrderHistoryRepositoryI>(),
-          outletId,
-        );
-        unawaited(cubit.loadFirst());
-        return cubit;
-      },
-      child: const ShiftsHistoryScreen(),
-    );
+    return ShiftsHistoryScreen(key: ValueKey(outletId), outletId: outletId);
   }
 }

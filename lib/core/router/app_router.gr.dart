@@ -495,18 +495,52 @@ class SellerRoute extends _i17.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i13.ShiftsHistoryScreen]
-class AdminShiftsHistoryRoute extends _i17.PageRouteInfo<void> {
-  const AdminShiftsHistoryRoute({List<_i17.PageRouteInfo>? children})
-    : super(AdminShiftsHistoryRoute.name, initialChildren: children);
+class AdminShiftsHistoryRoute
+    extends _i17.PageRouteInfo<AdminShiftsHistoryRouteArgs> {
+  AdminShiftsHistoryRoute({
+    int? outletId,
+    _i18.Key? key,
+    List<_i17.PageRouteInfo>? children,
+  }) : super(
+         AdminShiftsHistoryRoute.name,
+         args: AdminShiftsHistoryRouteArgs(outletId: outletId, key: key),
+         initialChildren: children,
+       );
 
   static const String name = 'AdminShiftsHistoryRoute';
 
   static _i17.PageInfo page = _i17.PageInfo(
     name,
     builder: (data) {
-      return const _i13.ShiftsHistoryScreen();
+      final args = data.argsAs<AdminShiftsHistoryRouteArgs>(
+        orElse: () => const AdminShiftsHistoryRouteArgs(),
+      );
+      return _i13.ShiftsHistoryScreen(outletId: args.outletId, key: args.key);
     },
   );
+}
+
+class AdminShiftsHistoryRouteArgs {
+  const AdminShiftsHistoryRouteArgs({this.outletId, this.key});
+
+  final int? outletId;
+
+  final _i18.Key? key;
+
+  @override
+  String toString() {
+    return 'AdminShiftsHistoryRouteArgs{outletId: $outletId, key: $key}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! AdminShiftsHistoryRouteArgs) return false;
+    return outletId == other.outletId && key == other.key;
+  }
+
+  @override
+  int get hashCode => outletId.hashCode ^ key.hashCode;
 }
 
 /// generated route for
