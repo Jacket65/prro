@@ -159,15 +159,6 @@ class MockApiClient implements ApiClientI {
           );
         }
       } else if (path.contains('/variants')) {
-        final productId = _extractProductId(path);
-        if (productId != null) {
-          final variants = await mockBackend.getVariants(productId);
-          return Response<dynamic>(
-            requestOptions: RequestOptions(path: path),
-            data: {'data': variants},
-            statusCode: 200,
-          );
-        }
         final variantId = _extractVariantId(path);
         if (variantId != null) {
           final options = await mockBackend.getVariantOptions(variantId);
@@ -177,13 +168,6 @@ class MockApiClient implements ApiClientI {
             statusCode: 200,
           );
         }
-      } else if (path.contains('/beans')) {
-        final popularBeans = await mockBackend.getPopularBeans();
-        return Response<dynamic>(
-          requestOptions: RequestOptions(path: path),
-          data: {'data': popularBeans},
-          statusCode: 200,
-        );
       } else if (path.contains('/ingredients')) {
         return Response<dynamic>(
           requestOptions: RequestOptions(path: path),
@@ -617,14 +601,6 @@ class MockApiClient implements ApiClientI {
             quantity: parseDouble(e['quantity']),
           ),
     ];
-  }
-
-  int? _extractProductId(String path) {
-    final match = RegExp(r'/products/(\d+)/variants').firstMatch(path);
-    if (match != null) {
-      return int.parse(match.group(1)!);
-    }
-    return null;
   }
 
   int? _extractVariantId(String path) {

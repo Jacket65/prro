@@ -12,10 +12,6 @@ abstract interface class ItemsRepositoryI {
   /// because they are navigable (have no own price).
   Future<List<Item>> getProducts(int categoryId);
 
-  /// Concrete variants of an abstract product. Returned as [Product]-typed
-  /// [Item]s because each variant is orderable (has a price).
-  Future<List<Item>> getVariants(int productId);
-
   /// Searches products of the current outlet by name
   /// (`GET /retail-outlets/{id}/products?q=...`). Same response shape as
   /// [getProducts] (products with inline variants), so results render with the
@@ -38,14 +34,4 @@ abstract interface class ItemsRepositoryI {
   /// options picker so the cashier can choose which bean was used. Empty if
   /// the drink doesn't support bean selection.
   Future<List<BeanGroup>> getVariantBeans(int variantId);
-
-  /// Most-used beans first, for the "Часто вживані" shortcut in the bean
-  /// picker. (Ideally backend-computed popularity; empty for now.)
-  Future<List<Bean>> getPopularBeans({int limit});
-
-  /// Kept for callers that still want the legacy entry point — returns
-  /// root categories.
-  Future<List<Item>> getItemsCategory();
-  Future<List<Item>> fetchItems();
-  Future<List<Item>> fetchItemsForCategory(Category category);
 }

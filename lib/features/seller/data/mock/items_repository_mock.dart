@@ -21,16 +21,6 @@ class ItemsRepositoryMock implements ItemsRepositoryI {
       _backend.getProducts(categoryId);
 
   @override
-  Future<List<Item>> getItemsCategory() => _backend.getCategories();
-
-  @override
-  Future<List<Item>> fetchItems() => _backend.getCategories();
-
-  @override
-  Future<List<Item>> fetchItemsForCategory(Category category) =>
-      Future.value(category.items);
-
-  @override
   Future<List<Item>> searchProducts({
     required String query,
     int? categoryId,
@@ -57,12 +47,4 @@ class ItemsRepositoryMock implements ItemsRepositoryI {
   @override
   Future<List<BeanGroup>> getVariantBeans(int variantId) =>
       _backend.getVariantBeans(variantId);
-
-  @override
-  Future<List<Bean>> getPopularBeans({int limit = 5}) =>
-      _backend.getPopularBeans(limit: limit);
-
-  @override
-  Future<List<Item>> getVariants(int productId) =>
-      _backend.getVariants(productId);
 }

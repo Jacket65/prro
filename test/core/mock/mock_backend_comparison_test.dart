@@ -246,13 +246,6 @@ void main() {
       });
     });
 
-    group('Beans - getPopularBeans', () {
-      test('returns beans sorted by usage descending', () async {
-        final popular = await backend.getPopularBeans(limit: 3);
-        expect(popular.length, lessThanOrEqualTo(3));
-      });
-    });
-
     group('Error simulation', () {
       test('simulateError causes MockBackendException', () async {
         MockBackend.simulateError = true;

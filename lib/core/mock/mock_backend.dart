@@ -99,18 +99,6 @@ class MockBackend {
     return out;
   }
 
-  Future<List<Item>> getVariants(int productGroupId) async {
-    await _network();
-    for (final cat in _catalog) {
-      for (final p in cat.products) {
-        if (p.id == productGroupId) {
-          return p.variants.map<Item>((v) => _variantToProduct(p, v)).toList();
-        }
-      }
-    }
-    return const [];
-  }
-
   Future<List<Item>> searchProducts({
     required String query,
     int? categoryId,
@@ -240,23 +228,6 @@ class MockBackend {
     return null;
   }
 
-  /// bean id → how many times it was sold. Seeded so "popular" is meaningful
-  /// before the first sale. Incremented in [placeOrder].
-  /// NOTE: real popularity should come from the backend (shared across
-  /// cashiers/devices); this stand-in keeps the demo self-contained.
-  final Map<int, int> _beanUsage = {1: 42, 17: 30, 12: 18, 5: 9, 2: 6};
-
-  /// Most-used beans first (only those actually used), capped at [limit].
-  Future<List<Bean>> getPopularBeans({int limit = 5}) async {
-    await _network();
-    final all = [for (final g in _beans) ...g.beans];
-    final used = all.where((b) => (_beanUsage[b.id] ?? 0) > 0).toList()
-      ..sort(
-        (a, b) => (_beanUsage[b.id] ?? 0).compareTo(_beanUsage[a.id] ?? 0),
-      );
-    return used.take(limit).toList();
-  }
-
   List<BeanGroup> _seedBeans() {
     var beanId = 1;
     Bean bean(String name) => Bean(id: beanId++, name: name);
@@ -349,7 +320,6 @@ class MockBackend {
         final bean = _beanForId(opt.optionId);
         if (bean != null) {
           optionNames.add(bean.name);
-          _beanUsage[bean.id] = (_beanUsage[bean.id] ?? 0) + line.quantity;
           continue;
         }
         final o = _optionForId(line.productId, opt.optionId);

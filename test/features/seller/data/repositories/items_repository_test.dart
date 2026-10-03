@@ -1,4 +1,3 @@
-import 'package:decimal/decimal.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -74,25 +73,4 @@ void main() {
       verify(() => apiClient.get('/categories/1/products')).called(1);
     },
   );
-
-  test('getVariants returns orderable products for a product', () async {
-    when(() => apiClient.get(any())).thenAnswer(
-      (_) async => _response([
-        {'id': '100', 'name': 'Американо', 'price': '55.00', 'quantity': '1'},
-      ]),
-    );
-
-    final result = await repository.getVariants(10);
-
-    expect(result, [
-      Product(
-        id: '100',
-        name: 'Американо',
-        price: 55,
-        imageUrl: '',
-        quantity: Decimal.one,
-      ),
-    ]);
-    verify(() => apiClient.get('/products/10/variants')).called(1);
-  });
 }

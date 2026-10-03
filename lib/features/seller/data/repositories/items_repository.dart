@@ -92,24 +92,6 @@ class ItemsRepository implements ItemsRepositoryI {
     return out;
   }
 
-  /// Variants of a single product. The menu no longer needs this (variants come
-  /// inline with [getProducts]); kept because the endpoint still exists.
-  @override
-  Future<List<Item>> getVariants(int productId) async {
-    try {
-      final response = await _apiClient.get('/products/$productId/variants');
-      final data = _extractList(response.data);
-      // Variants are the leaves — they have a price/unit and go into the cart.
-      return data
-          .whereType<Map<dynamic, dynamic>>()
-          .map<Item>((json) => Product.fromJson(json.cast<String, dynamic>()))
-          .toList();
-    } on Object catch (e, stackTrace) {
-      log('Error in getVariants: $e', stackTrace: stackTrace);
-      return [];
-    }
-  }
-
   @override
   Future<List<MeasureUnit>> getMeasureUnits() async {
     try {
@@ -191,26 +173,6 @@ class ItemsRepository implements ItemsRepositoryI {
         beans: ordered.map((o) => Bean(id: o.id, name: o.name)).toList(),
       );
     }).toList();
-  }
-
-  @override
-  Future<List<Bean>> getPopularBeans({int limit = 5}) async {
-    // The backend does not rank beans by sales yet. There is also no
-    // outlet-wide beans endpoint (beans live under a variant), so the "Часто
-    // вживані" shortcut stays empty; the full bean list is shown via the
-    // variant's bean group instead.
-    return const [];
-  }
-
-  @override
-  Future<List<Item>> getItemsCategory() => getCategories();
-
-  @override
-  Future<List<Item>> fetchItems() => getCategories();
-
-  @override
-  Future<List<Item>> fetchItemsForCategory(Category category) {
-    return Future.value(category.items);
   }
 
   List<dynamic> _extractList(dynamic body) {
