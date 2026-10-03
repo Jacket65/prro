@@ -60,7 +60,7 @@ final class AcknowledgePayment extends OrdersEvent {
 }
 
 /// Aborts an in-flight payment (e.g. the cashier taps "Скасувати оплату" while
-/// the NFC terminal is waiting). Delegates to [PayOrderUseCase.cancel].
+/// the terminal is waiting). Delegates to [PayOrderUseCase.cancel].
 final class CancelPayment extends OrdersEvent {
   const CancelPayment();
 

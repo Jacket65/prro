@@ -18,9 +18,9 @@ class PaymentConfig {
   /// Payment timeout duration.
   static const Duration paymentTimeout = Duration(seconds: 120);
 
-  /// PrivatBank NFC POS Terminal URI scheme.
+  /// PrivatBank POS Terminal URI scheme.
   /// Change this to match your mock terminal app's scheme
-  /// (e.g., 'mocknfc', 'testterminal')
+  /// (e.g., 'mockterminal', 'testterminal')
   static const String terminalUriScheme = 'privatpay';
 
   /// Terminal pay action path.

@@ -59,7 +59,8 @@ GitHub Actions (`.github/workflows/flutter_ci.yml`) builds **only the production
 
 - Triggered on every push and pull request
 - Sets up Java 17 and Flutter `3.44.6`
-- Runs `flutter pub get`, `flutter analyze`, and `flutter test`
+- Runs `flutter pub get`, `dart run build_runner build`, `./tool/check_boundaries.sh`,
+  `flutter analyze`, and `flutter test`
 - Builds a release ARM64 APK with `--dart-define=BACKEND_TYPE=real` and
   `--dart-define=API_BASE_URL=https://pos.coffeebeans.space/api/v1`
 - Uploads the artifact as `app-prod-release`
@@ -68,9 +69,16 @@ The mock build is intentionally not part of CI; it is available locally via the 
 
 ## Project Structure
 
-- `lib/config/backend_config.dart` — backend selection logic
-- `lib/` — application source code (features, state management, services)
-- `test/` — unit and widget tests
+Feature-first, enforced by `./tool/check_boundaries.sh`:
+
+- `lib/core/` — shared code and app infrastructure (`config`, `di`, `router`,
+  `domain`, `data`, `network`, `security`, `mock`, `theme`, `utils`,
+  `presentation`)
+- `lib/features/<feature>/` — `domain` (contracts + entities), `data`
+  (implementations, wire DTOs, mocks) and `presentation` (blocs, cubits,
+  screens, widgets)
+- `lib/core/config/backend_config.dart` — backend selection logic
+- `test/` — unit and widget tests, mirroring `lib/` 1:1
 
 ## Screens
 

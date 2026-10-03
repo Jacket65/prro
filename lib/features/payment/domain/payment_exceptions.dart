@@ -1,6 +1,6 @@
 /// App-level payment failure surfaced to the UI layer.
 ///
-/// Translates every method-specific failure (e.g. NFC terminal errors,
+/// Translates every method-specific failure (e.g. terminal launch errors,
 /// repository/network errors, deep-link failures) into a single boundary type
 /// so `OrdersBloc` stays payment-implementation agnostic. Cancellation is a
 /// separate type (see [PaymentCancelledException]) so a cancellation can never

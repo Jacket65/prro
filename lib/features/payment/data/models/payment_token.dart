@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 
 /// Terminal token response from backend.
 ///
-/// Contains the JWT token used to launch the PrivatBank NFC POS Terminal
+/// Contains the JWT token used to launch the PrivatBank POS Terminal
 /// and its expiration timestamp.
 @immutable
 class TerminalToken {

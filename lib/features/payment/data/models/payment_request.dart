@@ -6,7 +6,7 @@ part 'payment_request.g.dart';
 /// Request to create a payment token.
 ///
 /// Sent to the backend which signs the request and calls PrivatBank
-/// to obtain a JWT token for the NFC POS Terminal.
+/// to obtain a JWT token for the POS Terminal.
 @freezed
 abstract class CreatePaymentRequest with _$CreatePaymentRequest {
   const factory CreatePaymentRequest({
