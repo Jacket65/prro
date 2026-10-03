@@ -23,15 +23,3 @@ abstract interface class ShiftRepositoryI {
     required String idempotencyKey,
   });
 }
-
-abstract interface class ShiftServiceI {
-  Future<ShiftResponse?> currentShift();
-  Future<ShiftResponse> openShift({
-    required String idempotencyKey,
-    String cashStart,
-  });
-  Future<void> closeShift({
-    required String cashEnd,
-    required String idempotencyKey,
-  });
-}
