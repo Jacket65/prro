@@ -5,7 +5,6 @@ import 'package:prro/core/mock/mock_backend.dart';
 import 'package:prro/core/network/api_client.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/security/token_storage_i.dart';
-import 'package:prro/features/payment/data/services/payment_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talker/talker.dart';
 
@@ -34,12 +33,4 @@ abstract class AppModule {
 
   @singleton
   Talker talker() => Talker();
-
-  // Payment services
-  @singleton
-  @Environment('prod')
-  PaymentServiceI paymentService(
-    ApiClientI apiClient,
-    SharedPreferences prefs,
-  ) => PaymentService(apiClient: apiClient, prefs: prefs);
 }

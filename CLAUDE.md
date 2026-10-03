@@ -143,7 +143,7 @@ Known backend defects — Go-side fixes, deliberately **not** worked around in F
 | B10 | `meta.request_id` is emitted only outside release mode. |
 
 Routes the app already calls that the backend does not serve yet — left wired, visible and un-gated on purpose, failing with a 404:
-- `POST /retail-outlets/{id}/payments/create` and `/payments/check` (`features/payment/data/services/payment_service.dart`) — reachable from the "Термінал" segment in the payment dialog.
+- `POST /retail-outlets/{id}/payments/create` and `/payments/check` (`features/payment/data/repositories/payment_repository_impl.dart`, reached through `TerminalPaymentService` from the "Термінал" segment of the payment dialog).
 - `PATCH /variants/{id}` and `DELETE /variants/{id}` (`AdminCatalogRepositoryImpl`) — contract only, no UI caller today. (`updateProduct`/`deleteProduct` hit routes that *do* exist and are correct, just unreachable.)
 - User create/update/delete and outlet create/update/delete — declared in `AuthRepositoryI`, not implemented in the app; add them when the backend side lands.
 

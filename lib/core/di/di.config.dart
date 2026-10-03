@@ -53,8 +53,6 @@ import 'package:prro/features/payment/data/repositories/payment_repository_impl.
     as _i883;
 import 'package:prro/features/payment/data/services/deep_link_service.dart'
     as _i792;
-import 'package:prro/features/payment/data/services/payment_service.dart'
-    as _i134;
 import 'package:prro/features/payment/data/services/terminal_launcher.dart'
     as _i944;
 import 'package:prro/features/payment/data/services/terminal_payment_service.dart'
@@ -186,10 +184,10 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i445.BalanceRepository(apiClient: gh<_i787.ApiClientI>()),
       registerFor: {_prod},
     );
-    gh.singleton<_i134.PaymentServiceI>(
-      () => appModule.paymentService(
-        gh<_i787.ApiClientI>(),
-        gh<_i460.SharedPreferences>(),
+    gh.lazySingleton<_i943.PaymentRepositoryI>(
+      () => _i883.PaymentRepositoryImpl(
+        apiClient: gh<_i787.ApiClientI>(),
+        prefs: gh<_i460.SharedPreferences>(),
       ),
       registerFor: {_prod},
     );
@@ -199,10 +197,6 @@ extension GetItInjectableX on _i174.GetIt {
         apiClient: gh<_i787.ApiClientI>(),
         prefs: gh<_i460.SharedPreferences>(),
       ),
-    );
-    gh.lazySingleton<_i943.PaymentRepositoryI>(
-      () => _i883.PaymentRepositoryImpl(gh<_i134.PaymentServiceI>()),
-      registerFor: {_prod},
     );
     gh.singleton<_i310.AdminOutletRepositoryI>(
       () => _i328.AdminOutletRepositoryImpl(gh<_i787.ApiClientI>()),
