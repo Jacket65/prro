@@ -16,10 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 @Singleton(as: OrdersRepositoryI)
 @Environment('prod')
 class OrdersRepositoryImpl implements OrdersRepositoryI {
-  OrdersRepositoryImpl({
-    required this._apiClient,
-    required this._prefs,
-  });
+  OrdersRepositoryImpl({required this._apiClient, required this._prefs});
   final ApiClientI _apiClient;
   final SharedPreferences _prefs;
 
@@ -161,6 +158,16 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
         cashierName: _prefs.getString('username') ?? '',
       );
     } on DioException catch (e) {
+      // The seller's shift can be closed from another device while the screen
+      // is still open: the backend answers 404 (no open shift) instead of 409.
+      // Say so in plain words rather than showing a bare server error.
+      if (e.response?.statusCode == 404) {
+        throw const ApiException(
+          'Зміну закрито — відкрийте зміну, щоб продавати.',
+          code: 'not_found',
+          statusCode: 404,
+        );
+      }
       throw ApiException.fromDio(e);
     }
   }
