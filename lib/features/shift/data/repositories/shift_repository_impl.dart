@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/core/utils/json.dart';
@@ -21,14 +22,6 @@ class ShiftRepositoryImpl implements ShiftRepositoryI {
   final ApiClientI _apiClient;
   final SharedPreferences _prefs;
 
-  int _outletId() {
-    final id = _prefs.getInt('outlet_id');
-    if (id == null) {
-      throw const ApiException('Точку продажу не визначено. Увійдіть знову.');
-    }
-    return id;
-  }
-
   ShiftResponse _parse(dynamic body) => ShiftResponse.fromJson(
     // A body with no object payload is a protocol violation: fail rather than
     // hand the parser something it cannot read.
@@ -39,7 +32,7 @@ class ShiftRepositoryImpl implements ShiftRepositoryI {
   Future<ShiftResponse?> currentShift() async {
     try {
       final response = await _apiClient.get(
-        '/retail-outlets/${_outletId()}/shift/current',
+        '/retail-outlets/${requireOutletId(_prefs)}/shift/current',
       );
       return _parse(response.data);
     } on DioException catch (e) {
@@ -57,7 +50,7 @@ class ShiftRepositoryImpl implements ShiftRepositoryI {
   }) async {
     try {
       final response = await _apiClient.post(
-        '/retail-outlets/${_outletId()}/shift/open',
+        '/retail-outlets/${requireOutletId(_prefs)}/shift/open',
         data: {'cash_start': cashStart},
         idempotencyKey: idempotencyKey,
       );
@@ -74,7 +67,7 @@ class ShiftRepositoryImpl implements ShiftRepositoryI {
   }) async {
     try {
       await _apiClient.post(
-        '/retail-outlets/${_outletId()}/shift/close',
+        '/retail-outlets/${requireOutletId(_prefs)}/shift/close',
         data: {'cash_end': cashEnd},
         idempotencyKey: idempotencyKey,
       );

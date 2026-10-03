@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/domain/order_history.dart';
 import 'package:prro/core/domain/repositories/order_history_repository_i.dart';
 import 'package:prro/core/network/api_client_i.dart';
@@ -13,14 +14,6 @@ class OrderHistoryRepositoryImpl implements OrderHistoryRepositoryI {
   final ApiClientI _apiClient;
   final SharedPreferences _prefs;
 
-  int _outletId() {
-    final id = _prefs.getInt('outlet_id');
-    if (id == null) {
-      throw const ApiException('Точку продажу не визначено. Увійдіть знову.');
-    }
-    return id;
-  }
-
   @override
   Future<Page<ShiftSummary>> getShifts({
     int page = 1,
@@ -30,7 +23,7 @@ class OrderHistoryRepositoryImpl implements OrderHistoryRepositoryI {
   }) async {
     try {
       final response = await _apiClient.get(
-        '/retail-outlets/${outletId ?? _outletId()}/shifts',
+        '/retail-outlets/${outletId ?? requireOutletId(_prefs)}/shifts',
         queryParameters: {'page': page, 'sort': sort, 'order': order},
       );
       return Page<ShiftSummary>.fromJson(

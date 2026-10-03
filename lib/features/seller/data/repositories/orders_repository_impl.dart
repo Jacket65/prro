@@ -2,6 +2,7 @@ import 'package:decimal/decimal.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/config/env.dart';
+import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/domain/bean.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
@@ -121,10 +122,7 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
     required int tenderedKopecks,
     required String idempotencyKey,
   }) async {
-    final outletId = _prefs.getInt('outlet_id');
-    if (outletId == null) {
-      throw const ApiException('Точку продажу не визначено. Увійдіть знову.');
-    }
+    final outletId = requireOutletId(_prefs);
     // Backend expects quantities/amounts as decimal STRINGS. The selected bean
     // is just another option, so it folds into the line's `options` array.
     final productsJson = _products.map((p) {

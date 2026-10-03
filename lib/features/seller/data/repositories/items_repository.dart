@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/domain/bean.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
@@ -24,12 +25,10 @@ class ItemsRepository implements ItemsRepositoryI {
   final Map<int, List<OptionGroup>> _optionsCache = {};
   final Map<int, Future<List<OptionGroup>>> _optionsInFlight = {};
 
-  int? _outletId() => _prefs.getInt('outlet_id');
-
   @override
   Future<List<Item>> getCategories() async {
     try {
-      final outletId = _outletId();
+      final outletId = maybeOutletId(_prefs);
       if (outletId == null) {
         log('ItemsRepository.getCategories: outlet_id is not set');
         return [];
@@ -61,7 +60,7 @@ class ItemsRepository implements ItemsRepositoryI {
     int? categoryId,
     CancelToken? cancelToken,
   }) async {
-    final outletId = _outletId();
+    final outletId = maybeOutletId(_prefs);
     if (outletId == null) return const [];
     // Errors (incl. cancellation) propagate so the caller can tell a superseded
     // search from a real failure.

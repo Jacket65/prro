@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/core/network/unwrap.dart';
@@ -176,7 +177,7 @@ class AuthRepositoryImpl implements AuthRepositoryI {
         refreshToken: refreshToken,
       );
       await prefs.setString('username', username);
-      await prefs.setInt('outlet_id', outletId);
+      await prefs.setInt(outletIdKey, outletId);
       if (role != null) {
         await prefs.setString('user_role', role);
       }
@@ -237,7 +238,7 @@ class AuthRepositoryImpl implements AuthRepositoryI {
     }
     await tokenStorage.clear();
     await prefs.remove('username');
-    await prefs.remove('outlet_id');
+    await prefs.remove(outletIdKey);
     await prefs.remove('user_role');
     await prefs.remove('user_id');
   }
