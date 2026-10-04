@@ -1,4 +1,8 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:prro/core/utils/json.dart';
 import 'package:prro/core/utils/money.dart';
+
+part 'order.freezed.dart';
 
 /// Payment method. `terminal` covers any card/tap payment on the external POS
 /// terminal. Wire form is the lowercase string the backend expects: the
@@ -22,60 +26,62 @@ enum PaymentMethod {
 
 /// One printed line of the receipt. Money is `int` kopecks; the backend ships
 /// it as a decimal string, parsed via [kopecksFromString].
-class ReceiptLine {
-  const ReceiptLine({
-    required this.productId,
-    required this.name,
-    required this.quantity,
-    required this.unitPriceKopecks,
-    required this.subtotalKopecks,
-  });
+///
+/// Decoding stays hand-written: the picked option names are folded into [name],
+/// which no per-field converter can express.
+@Freezed(toJson: false)
+abstract class ReceiptLine with _$ReceiptLine {
+  const factory ReceiptLine({
+    required String productId,
+    required String name,
+
+    /// Quantity as the backend returned it (decimal string, e.g. "0.250" / "2");
+    /// kept as text since it may be fractional for weight goods.
+    required String quantity,
+    required int unitPriceKopecks,
+    required int subtotalKopecks,
+  }) = _ReceiptLine;
 
   /// Maps one entry of the order response `items[]`. Picked option names are
   /// appended to the line name for the printout (beans arrive as options too).
   factory ReceiptLine.fromJson(Map<String, dynamic> json) {
-    final base = (json['name'] ?? '').toString();
+    final base = stringOr(json['name'], '');
     final optionNames = (json['options'] as List<dynamic>? ?? const [])
         .whereType<Map<dynamic, dynamic>>()
-        .map((o) => (o['name'] ?? '').toString())
+        .map((o) => stringOr(o['name'], ''))
         .where((s) => s.isNotEmpty)
         .toList();
     return ReceiptLine(
-      productId: (json['variant_id'] ?? '').toString(),
+      productId: stringOr(json['variant_id'], ''),
       name: optionNames.isEmpty ? base : '$base · ${optionNames.join(', ')}',
-      quantity: (json['quantity'] ?? '1').toString(),
-      unitPriceKopecks: kopecksFromString(
-        (json['unit_price'] ?? '0').toString(),
-      ),
-      subtotalKopecks: kopecksFromString(
-        (json['line_total'] ?? '0').toString(),
-      ),
+      quantity: stringOr(json['quantity'], '1'),
+      unitPriceKopecks: kopecksFromString(stringOr(json['unit_price'], '0')),
+      subtotalKopecks: kopecksFromString(stringOr(json['line_total'], '0')),
     );
   }
-  final String productId;
-  final String name;
-
-  /// Quantity as the backend returned it (decimal string, e.g. "0.250" / "2");
-  /// kept as text since it may be fractional for weight goods.
-  final String quantity;
-  final int unitPriceKopecks;
-  final int subtotalKopecks;
 }
 
 /// The receipt the cashier sees after a successful sale.
-class OrderReceipt {
-  const OrderReceipt({
-    required this.orderId,
-    required this.lines,
-    required this.totalKopecks,
-    required this.tenderedKopecks,
-    required this.changeKopecks,
-    required this.method,
-    required this.status,
-    required this.issuedAt,
-    required this.storeName,
-    required this.cashierName,
-  });
+///
+/// Decoding stays hand-written: `fromJson` takes the local-only store/cashier
+/// names, which the order response does not carry.
+@Freezed(toJson: false)
+abstract class OrderReceipt with _$OrderReceipt {
+  const factory OrderReceipt({
+    required String orderId,
+    required List<ReceiptLine> lines,
+    required int totalKopecks,
+    required int tenderedKopecks,
+    required int changeKopecks,
+    required PaymentMethod method,
+    required String status,
+    required DateTime issuedAt,
+
+    /// Header info for the printout. The order response carries neither, so the
+    /// caller supplies them (store from config, cashier from the session).
+    required String storeName,
+    required String cashierName,
+  }) = _OrderReceipt;
 
   /// Builds a receipt from the (already-unwrapped) `data` object of a
   /// `POST /retail-outlets/{id}/orders` 201 response.
@@ -91,40 +97,18 @@ class OrderReceipt {
         .map((m) => ReceiptLine.fromJson(m.cast<String, dynamic>()))
         .toList();
     return OrderReceipt(
-      orderId: (json['order_id'] ?? '').toString(),
+      orderId: stringOr(json['order_id'], ''),
       lines: lines,
       totalKopecks: kopecksFromString(
-        (json['total_price'] ?? payment['total'] ?? '0').toString(),
+        stringOr(json['total_price'] ?? payment['total'], '0'),
       ),
-      tenderedKopecks: kopecksFromString(
-        (payment['tendered'] ?? '0').toString(),
-      ),
-      changeKopecks: kopecksFromString((payment['change'] ?? '0').toString()),
-      method: PaymentMethod.fromWire(payment['method']?.toString()),
-      status: (json['status'] ?? '').toString(),
-      issuedAt:
-          DateTime.tryParse((json['created_at'] ?? '').toString())?.toLocal() ??
-          DateTime.now(),
+      tenderedKopecks: kopecksFromString(stringOr(payment['tendered'], '0')),
+      changeKopecks: kopecksFromString(stringOr(payment['change'], '0')),
+      method: PaymentMethod.fromWire(stringOrNull(payment['method'])),
+      status: stringOr(json['status'], ''),
+      issuedAt: parseLocalDateTime(json['created_at']),
       storeName: storeName,
       cashierName: cashierName,
     );
   }
-  final String orderId;
-  final List<ReceiptLine> lines;
-  final int totalKopecks;
-  final int tenderedKopecks;
-  final int changeKopecks;
-  final PaymentMethod method;
-  final String status;
-  final DateTime issuedAt;
-
-  /// Header info for the printout. The order response carries neither, so the
-  /// caller supplies them (store from config, cashier from the session).
-  final String storeName;
-  final String cashierName;
-
-  @override
-  String toString() =>
-      'OrderReceipt($orderId, total=${formatUah(totalKopecks)}, '
-      'change=${formatUah(changeKopecks)}, method=$method, $status)';
 }
