@@ -1,6 +1,8 @@
 import 'package:decimal/decimal.dart';
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:prro/core/utils/json.dart';
+
+part 'measure_unit.freezed.dart';
 
 /// Mirrors the backend measure unit carried by a variant:
 ///   { "id": 5, "name": "кг", "step": "0.001" }
@@ -8,38 +10,37 @@ import 'package:prro/core/utils/json.dart';
 /// `step` is the quantity increment (decimal STRING). [scale] is the number of
 /// fractional digits implied by it ("1" → 0, "0.001" → 3), used for display and
 /// rounding. A `null` unit elsewhere means piece semantics (step 1, scale 0).
-class MeasureUnit extends Equatable {
-  const MeasureUnit({
-    required this.id,
-    required this.name,
-    required this.step,
-    this.scale = 0,
-  });
+///
+/// Decoding stays hand-written: [scale] is derived from the *raw* `step` string
+/// (so a `"0.50"` step scales to 2 even though `Decimal` would normalise it),
+/// which a per-field converter cannot express.
+@Freezed(toJson: false)
+abstract class MeasureUnit with _$MeasureUnit {
+  const factory MeasureUnit({
+    required int id,
+    required String name,
+    required Decimal step,
+    @Default(0) int scale,
+  }) = _MeasureUnit;
 
   factory MeasureUnit.fromJson(Map<String, dynamic> json) {
-    final raw = (json['step'] ?? '1').toString().trim().replaceAll(',', '.');
+    final raw = stringOr(json['step'], '1').trim().replaceAll(',', '.');
     var step = parseDecimal(raw, fallback: Decimal.one);
     if (step <= Decimal.zero) step = Decimal.one;
     return MeasureUnit(
       id: parseInt(json['id']),
-      name: (json['name'] ?? '').toString(),
+      name: stringOr(json['name'], ''),
       step: step,
-      scale: _scaleOf(raw),
+      scale: scaleOf(raw),
     );
   }
-  final int id;
-  final String name;
-  final Decimal step;
-  final int scale;
 
-  static int _scaleOf(String raw) {
+  /// Fractional-digit count implied by a raw `step` string.
+  static int scaleOf(String raw) {
     final dot = raw.indexOf('.');
     if (dot < 0) return 0;
     return raw.length - dot - 1;
   }
-
-  @override
-  List<Object?> get props => [id, name, step, scale];
 }
 
 /// Quantity step for a (possibly null) unit — `1` for piece/null.
