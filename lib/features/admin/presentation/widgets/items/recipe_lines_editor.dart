@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:prro/core/utils/json.dart';
 import 'package:prro/features/admin/data/models/catalog.dart';
 
 /// Shared editor for a recipe's ingredient lines.
@@ -62,7 +63,7 @@ class _RecipeLinesEditorState extends State<RecipeLinesEditor> {
   }
 
   void _updateQuantity(int index, String value) {
-    final q = double.tryParse(value.replaceAll(',', '.')) ?? 0;
+    final q = parseDouble(value);
     setState(() {
       _lines = [
         for (var i = 0; i < _lines.length; i++)

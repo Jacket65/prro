@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:prro/core/utils/json.dart';
 import 'package:prro/core/utils/money.dart';
 import 'package:prro/features/admin/data/models/catalog.dart';
 import 'package:prro/features/admin/presentation/widgets/items/recipe_lines_editor.dart';
@@ -46,8 +47,7 @@ class _VariantDialogContentState extends State<_VariantDialogContent> {
 
   void _save() {
     final name = _nameController.text.trim();
-    final price =
-        double.tryParse(_priceController.text.trim().replaceAll(',', '.')) ?? 0;
+    final price = parseDouble(_priceController.text);
     if (name.isEmpty || !_hasUsableLine) return;
     Navigator.of(context).pop((name, uahToKopecks(price), _lines));
   }
