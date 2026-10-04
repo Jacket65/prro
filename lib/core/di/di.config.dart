@@ -115,7 +115,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i798.OrderHistoryRepositoryMock(),
       registerFor: {_mock},
     );
-    gh.factory<_i792.DeepLinkServiceI>(() => _i792.DeepLinkService());
+    gh.lazySingleton<_i792.DeepLinkServiceI>(() => _i792.DeepLinkService());
     gh.singleton<_i132.BalanceRepositoryI>(
       () => _i728.BalanceRepositoryMock(),
       registerFor: {_mock},

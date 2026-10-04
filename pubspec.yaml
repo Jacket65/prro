@@ -37,6 +37,7 @@ dependencies:
   url_launcher: ^6.3.2
 
 dev_dependencies:
+  app_links_platform_interface: ^2.0.4
   auto_route_generator: ^10.6.0
   bloc_test: ^10.0.0
   build_runner: ^2.16.1

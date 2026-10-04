@@ -19,7 +19,13 @@ abstract interface class DeepLinkServiceI {
 }
 
 /// Production implementation of [DeepLinkServiceI] using app_links package.
-@Injectable(as: DeepLinkServiceI)
+///
+/// The singleton lifetime is load-bearing, not a default: the terminal payment
+/// orchestrator calls [init] and [dispose] once per payment, and each call must
+/// leave exactly one live `app_links` subscription behind. Two instances would
+/// mean two subscriptions on the same global link stream, so every callback
+/// would be delivered twice and one charge could complete two payments.
+@LazySingleton(as: DeepLinkServiceI)
 class DeepLinkService implements DeepLinkServiceI {
   DeepLinkService();
 
