@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 `prro` ("Prro beta") is the **Flutter client for the Grains World POS system** — the frontend to the Go backend deployed at `pos.coffeebeans.space` (dev host `pos.coffeebeans.space.test`). It talks to that backend's REST API (`/api/v1`) over HTTP.
 
-- **Stack:** Flutter (Dart SDK `>=3.12.0`, CI on Flutter `3.44.6`), `flutter_bloc` + `equatable` (state), `dio` (the only HTTP client), `injectable` + `get_it` (DI), `auto_route` (navigation), `freezed` + `json_serializable` (admin/payment wire DTOs), `shared_preferences` (session persistence), `mocktail` + `bloc_test` (tests).
+- **Stack:** Flutter (Dart SDK `>=3.12.0`, CI on Flutter `3.44.6`), `flutter_bloc` (state), `dio` (the only HTTP client), `injectable` + `get_it` (DI), `auto_route` (navigation), `freezed` + `json_serializable` (every model's equality and wire decoding, including in `core/domain`), `shared_preferences` (session persistence), `mocktail` + `bloc_test` (tests).
 - **UI language:** Ukrainian (all user-facing strings, snackbars, error messages).
 - **Targets:** multi-platform (android/ios/web/windows/linux/macos); CI builds the Android APK.
 
@@ -24,7 +24,9 @@ flutter run                        # run on a connected device/emulator
 flutter build apk --release --dart-define=BACKEND_TYPE=real --dart-define=API_BASE_URL=...  # what CI produces
 ```
 
-**After any move or annotation change, run `build_runner` *before* `flutter analyze`** — stale generated paths produce misleading errors. Generated files are never hand-edited: `git mv` the `part` source, delete its generated output, and let `build_runner` rewrite it.
+**After any move or annotation change, run `build_runner` *before* `flutter analyze`** — stale generated paths produce misleading errors. Generated files are never hand-edited: `git mv` the `part` source, delete its generated output, and let `build_runner` rewrite it. `--delete-conflicting-outputs` was removed in build_runner 2.16, so plain `build` is enough.
+
+A generated part is named after the **library**, not after the file that declares the class: the states in `orders_state.dart` (a `part of`) are generated into `orders_bloc.freezed.dart`. `auth_state.dart` / `auth_event.dart` are separate libraries, so each has its own part.
 
 The backend base URL comes from `--dart-define=API_BASE_URL` via `core/config/env.dart`; `BACKEND_TYPE=mock` swaps every `@Environment('mock')` binding. Seeded dev credentials: `cashier1`/`cashier123`, plus `admin`/`manager1`/`manager2`/`cashier2`.
 
@@ -65,7 +67,7 @@ lib/
 | R3 | `presentation/` may not import another feature's `presentation/` or `data/` |
 | R4 | Nothing may import `package:prro/data/` — the old global layer is gone |
 | R5 | `core/` may not reach into `features/`, except `core/mock` and the composition roots `core/di` + `core/router` |
-| R6 | `domain/` is framework-free: no `package:dio` / `http` / `freezed` / `get_it` |
+| R6 | `domain/` is framework-free: no `package:dio` / `http` / `freezed` / `get_it` — the `freezed` and `json_serializable` *annotations* are fine (`freezed_annotation`, `json_serializable`), and so is any generated part |
 
 The rules apply to `lib/` only — a test may import whatever the code under test imports. R4 also covers `test/`.
 
@@ -87,7 +89,8 @@ The rules apply to `lib/` only — a test may import whatever the code under tes
 ### How to add a resource
 - **Consumed by more than one feature → `core/`.** Consumed by exactly one → that feature's `data/`. (`Bean` lives in `core/domain/bean.dart` because the shared `Product` entity references it; `Ingredient` is seller-only.)
 - **One contract, not two.** A repository interface plus a service interface with the same members behind a pure pass-through is the anti-pattern this codebase has now removed everywhere: `ItemsServiceI`/`BalanceServiceI`, then `ShiftServiceI`, `OrderHistoryServiceI` and `PaymentServiceI`. No feature has a `services/` twin of a repository any more — the only remaining `features/payment/data/services/` are `deep_link_service`, `terminal_launcher` and `terminal_payment_service`, which hold real logic. Put the contract in `domain/repositories/` and let the `data/` class implement it directly.
-- **Entity vs DTO:** domain entities keep their inline `fromJson` factory. Only the freezed/json_serializable wire models (`admin/data/models`, `payment/data/models`) get generated `fromJson`/`toJson` — don't duplicate those into domain.
+- **Entity vs DTO:** domain entities are freezed data classes whose generated `fromJson` reuses the shared converters in `core/utils/json.dart`, and they are read models — `@Freezed(toJson: false)` keeps serialization out of the layer; the order wire is built by `core/mock/order_request_dto.dart`. Only `admin/data/models` and `payment/data/models` get a generated `toJson`. Decoding stays hand-written where a single field cannot express it: field-presence dispatch (`Category`), cross-field defaults (`Product.quantity` → `unitStep(unit)`, `MeasureUnit.scale` → the raw `step` string), a per-item decoder argument (`Page<T>`) or a local-only parameter (`OrderReceipt.fromJson`). Every other model has generated decoding, and a two-name wire key (`order_id`|`id`, `group_id`|`id`, `option_id`|`id`) needs `@JsonKey(readValue:)` returning the raw value with `fromJson` chained onto it — `@JsonKey(name:)` can only name one key.
+- **Equality and copyWith are generated.** Do not write `==`, `hashCode`, `props` or `copyWith` by hand; if a class needs a custom one (only `Page` does), stop and reconsider. Beware two freezed 4.0.1 traps: a hand-written `toString` in a freezed class suppresses the generated one *and* is never called, because the generated class `implements` rather than extends the public class; and the typed `copyWith` cannot take an explicit `null` for a non-nullable field, so a nullable caller variable needs a branch.
 - Unwrap the backend's `{ "data": ... }` envelope with the shared helpers, never by hand: `unwrapList` / `unwrapObject` in `core/network/unwrap.dart`, and `unwrapPayload` / `unwrapData` in `core/utils/json.dart` (`core/domain` uses the latter so it need not reach into `core/network`). `unwrapPayload` is type-directed and falls back to the envelope; `unwrapData` is presence-based and returns `null` for `{"data": null}` — that is how the stub recipe response is detected.
 
 ### HTTP access
@@ -152,5 +155,6 @@ Routes the app already calls that the backend does not serve yet — left wired,
 - Interfaces are suffixed `I` (`ApiClientI`, `ItemsRepositoryI`, `OrderHistoryRepositoryI`).
 - **Import explicit paths, not barrels.** The global barrels (`data/api/models/models.dart`, `data/repositories/repositories.dart`, `data/services/services.dart`, and the per-feature `admin.dart` / `auth.dart` / `bloc.dart` / `widgets.dart`) were all deleted. The one deliberate survivor is `features/admin/data/models/admin_models.dart`, which the app-wide `MockBackend` uses to reach the admin DTOs.
 - `analysis_options.yaml` uses `very_good_analysis` 11 with `unused_import: error` and strict casts/inference/raw-types. No analyzer-coupled lint plugin is installed: `custom_lint`/`module_boundary` pin the `analyzer` package, which already conflicts with the freezed/auto_route_generator split (see `pubspec.yaml`), so the boundary check is a plain `rg` script instead.
-- Models extend `Equatable` and provide `props`; bloc state comparisons rely on value equality.
+- Models are freezed classes (`@Freezed(toJson: false)` when they are read models); equality, `hashCode`, `toString` and `copyWith` are generated. Bloc state comparisons rely on value equality, so a state that forgets a field silently stops comparing it.
+- A freezed union cannot own a hand-written case *with fields* under freezed 4.0.1: with an ejected case the generated case mixin declares no fields, and declaring them on the case class is impossible next to the private `MyClass._()` constructor. `core/domain`'s `Item` hierarchy is therefore a plain `sealed class` with three freezed subclasses, which keeps each field written once and keeps `switch` exhaustive.
 - Logging uses `dart:developer`'s `log()`; the payment flow uses the injected `Talker`.

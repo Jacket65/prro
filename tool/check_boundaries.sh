@@ -69,6 +69,11 @@ while read -r file; do
   esac
 
   # R6 — domain code stays framework-free.
+  #
+  # The pattern requires a slash after the package name, so it matches
+  # `package:freezed/…` but not the code-generation annotations
+  # `package:freezed_annotation/…` / `package:json_serializable/…`, which the
+  # domain models legitimately import. Generated parts are skipped above.
   if [ "$layer" = domain ]; then
     while read -r bad; do
       [ -n "$bad" ] || continue
