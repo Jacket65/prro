@@ -32,17 +32,12 @@ void main() {
 
       ordersRepository.addProduct(product);
 
-      // 2. Initial state check: no custom orders in history
+      // 2. Resolve the open shift the mock backend is currently serving. It is
+      // pre-seeded with orders, so the check that matters is the one in step 4:
+      // the order placed below comes back as the newest row.
       final initialShifts = await historyRepository.getShifts();
       expect(initialShifts.items, isNotEmpty);
       final activeShift = initialShifts.items.first;
-
-      // final initialOrders = await historyRepository.getShiftOrders(
-      //   activeShift.id,
-      //   sort: 'created_at',
-      //   order: 'desc',
-      // );
-      // final initialCount = initialOrders.items.length;
 
       // 3. Place order
       final receipt = await ordersRepository.placeOrder(
