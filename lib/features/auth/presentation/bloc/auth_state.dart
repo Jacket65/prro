@@ -1,6 +1,8 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:prro/features/auth/domain/entities/auth_user.dart';
 import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart';
+
+part 'auth_state.freezed.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated }
 
@@ -8,45 +10,38 @@ enum AuthOperation { none, restore, login, adminLogin, logout, sessionExpiry }
 
 enum AuthUnauthenticatedReason { noSession, logout, sessionExpired }
 
-sealed class AuthState extends Equatable {
+sealed class AuthState {
   const AuthState();
-
-  @override
-  List<Object?> get props => [];
 }
 
-class AuthInitial extends AuthState {
+@Freezed(toJson: false)
+class AuthInitial extends AuthState with _$AuthInitial {
   const AuthInitial();
 }
 
-class AuthLoading extends AuthState {
+@Freezed(toJson: false)
+class AuthLoading extends AuthState with _$AuthLoading {
   const AuthLoading({required this.operation});
 
   final AuthOperation operation;
-
-  @override
-  List<Object> get props => [operation];
 }
 
-class AuthAuthenticated extends AuthState {
+@Freezed(toJson: false)
+class AuthAuthenticated extends AuthState with _$AuthAuthenticated {
   const AuthAuthenticated({required this.user});
 
   final AuthUser user;
-
-  @override
-  List<Object> get props => [user];
 }
 
-class AuthUnauthenticated extends AuthState {
+@Freezed(toJson: false)
+class AuthUnauthenticated extends AuthState with _$AuthUnauthenticated {
   const AuthUnauthenticated({required this.reason});
 
   final AuthUnauthenticatedReason reason;
-
-  @override
-  List<Object> get props => [reason];
 }
 
-class AuthFailure extends AuthState {
+@Freezed(toJson: false)
+class AuthFailure extends AuthState with _$AuthFailure {
   const AuthFailure({
     required this.operation,
     required this.previousStatus,
@@ -56,7 +51,4 @@ class AuthFailure extends AuthState {
   final AuthOperation operation;
   final AuthStatus previousStatus;
   final AuthException error;
-
-  @override
-  List<Object> get props => [operation, previousStatus, error];
 }

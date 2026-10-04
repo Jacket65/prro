@@ -1,8 +1,9 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:prro/features/admin/data/models/catalog.dart';
 import 'package:prro/features/admin/domain/repositories/admin_catalog_repository_i.dart';
 
+part 'category_detail_cubit.freezed.dart';
 part 'category_detail_state.dart';
 
 /// Products within a category. Drives the category detail screen.

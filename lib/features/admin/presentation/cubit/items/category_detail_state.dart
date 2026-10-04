@@ -1,35 +1,34 @@
 part of 'category_detail_cubit.dart';
 
-sealed class CategoryDetailState extends Equatable {
+sealed class CategoryDetailState {
   const CategoryDetailState();
-
-  @override
-  List<Object?> get props => [];
 }
 
-final class CategoryDetailInitial extends CategoryDetailState {
+@Freezed(toJson: false)
+class CategoryDetailInitial extends CategoryDetailState
+    with _$CategoryDetailInitial {
   const CategoryDetailInitial();
 }
 
-final class CategoryDetailLoading extends CategoryDetailState {
+@Freezed(toJson: false)
+class CategoryDetailLoading extends CategoryDetailState
+    with _$CategoryDetailLoading {
   const CategoryDetailLoading();
 }
 
 /// Loaded products for a category.
-final class CategoryDetailLoaded extends CategoryDetailState {
+@Freezed(toJson: false)
+class CategoryDetailLoaded extends CategoryDetailState
+    with _$CategoryDetailLoaded {
   const CategoryDetailLoaded(this.products);
 
   final List<AdminProduct> products;
-
-  @override
-  List<Object?> get props => [products];
 }
 
-final class CategoryDetailError extends CategoryDetailState {
+@Freezed(toJson: false)
+class CategoryDetailError extends CategoryDetailState
+    with _$CategoryDetailError {
   const CategoryDetailError(this.message);
 
   final String message;
-
-  @override
-  List<Object?> get props => [message];
 }

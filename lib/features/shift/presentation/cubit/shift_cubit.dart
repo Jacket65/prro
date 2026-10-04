@@ -1,8 +1,9 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:prro/features/shift/domain/entities/shift.dart';
 import 'package:prro/features/shift/domain/repositories/shift_repository_i.dart';
 
+part 'shift_cubit.freezed.dart';
 part 'shift_state.dart';
 
 /// Single source of truth for the cashier's shift state. The backend decides;

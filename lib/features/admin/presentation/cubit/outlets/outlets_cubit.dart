@@ -1,8 +1,9 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:prro/features/admin/data/models/retail_outlet.dart';
 import 'package:prro/features/admin/domain/repositories/admin_outlet_repository_i.dart';
 
+part 'outlets_cubit.freezed.dart';
 part 'outlets_state.dart';
 
 /// Single source of truth for the admin outlets tab.

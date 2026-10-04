@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:decimal/decimal.dart';
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:prro/core/domain/bean.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
@@ -14,12 +14,13 @@ import 'package:prro/features/seller/domain/payment/pay_order_request.dart';
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 import 'package:prro/features/seller/domain/usecases/pay_order_use_case.dart';
 
+part 'orders_bloc.freezed.dart';
 part 'orders_event.dart';
 part 'orders_state.dart';
 
 class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   OrdersBloc({required this._ordersRepository, required this._payOrder})
-    : super(OrdersInitial()) {
+    : super(const OrdersInitial()) {
     on<AddProduct>(_onAddProduct);
     on<RemoveProduct>(_onRemoveProduct);
     on<DeleteProductLine>(_onDeleteProductLine);
@@ -50,7 +51,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   void _onRemoveProduct(RemoveProduct event, Emitter<OrdersState> emit) {
     _ordersRepository.removeProduct(event.product);
     if (_ordersRepository.products.isEmpty) {
-      emit(OrdersInitial());
+      emit(const OrdersInitial());
     } else {
       emit(_buildUpdatedState());
     }
@@ -62,7 +63,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   ) {
     _ordersRepository.deleteProductLine(event.product);
     if (_ordersRepository.products.isEmpty) {
-      emit(OrdersInitial());
+      emit(const OrdersInitial());
     } else {
       emit(_buildUpdatedState());
     }
@@ -70,7 +71,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
 
   void _onClearProducts(ClearProducts event, Emitter<OrdersState> emit) {
     _ordersRepository.clearProducts();
-    emit(OrdersInitial());
+    emit(const OrdersInitial());
   }
 
   /// Id of the payment attempt currently being processed, or `null` when idle.
@@ -164,7 +165,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     Emitter<OrdersState> emit,
   ) {
     if (_ordersRepository.products.isEmpty) {
-      emit(OrdersInitial());
+      emit(const OrdersInitial());
     } else {
       emit(_buildUpdatedState());
     }

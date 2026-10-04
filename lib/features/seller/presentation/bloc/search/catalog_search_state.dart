@@ -1,33 +1,33 @@
 part of 'catalog_search_cubit.dart';
 
-sealed class CatalogSearchState extends Equatable {
+sealed class CatalogSearchState {
   const CatalogSearchState();
-
-  @override
-  List<Object> get props => [];
 }
 
 /// No active search — show the normal catalog.
-final class CatalogSearchIdle extends CatalogSearchState {
+@Freezed(toJson: false)
+class CatalogSearchIdle extends CatalogSearchState with _$CatalogSearchIdle {
   const CatalogSearchIdle();
 }
 
-final class CatalogSearchLoading extends CatalogSearchState {
+@Freezed(toJson: false)
+class CatalogSearchLoading extends CatalogSearchState
+    with _$CatalogSearchLoading {
   const CatalogSearchLoading();
 }
 
-final class CatalogSearchResults extends CatalogSearchState {
+@Freezed(toJson: false)
+class CatalogSearchResults extends CatalogSearchState
+    with _$CatalogSearchResults {
   const CatalogSearchResults(this.items);
-  final List<Item> items;
 
-  @override
-  List<Object> get props => [items];
+  final List<Item> items;
 }
 
-final class CatalogSearchError extends CatalogSearchState {
+@Freezed(toJson: false)
+class CatalogSearchError extends CatalogSearchState
+    with _$CatalogSearchError {
   const CatalogSearchError(this.message);
-  final String message;
 
-  @override
-  List<Object> get props => [message];
+  final String message;
 }

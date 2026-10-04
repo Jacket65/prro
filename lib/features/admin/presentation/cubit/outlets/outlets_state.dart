@@ -1,40 +1,35 @@
 part of 'outlets_cubit.dart';
 
-sealed class OutletsState extends Equatable {
+sealed class OutletsState {
   const OutletsState();
-
-  @override
-  List<Object?> get props => [];
 }
 
 /// Nothing loaded yet.
-final class OutletsInitial extends OutletsState {
+@Freezed(toJson: false)
+class OutletsInitial extends OutletsState with _$OutletsInitial {
   const OutletsInitial();
 }
 
 /// Outlets are being fetched.
-final class OutletsLoading extends OutletsState {
+@Freezed(toJson: false)
+class OutletsLoading extends OutletsState with _$OutletsLoading {
   const OutletsLoading();
 }
 
 /// Outlets loaded. [selectedOutletId] is the admin-session-scoped outlet
 /// (replaces the old `getIt<int>()` outlet threading).
-final class OutletsLoaded extends OutletsState {
+@Freezed(toJson: false)
+class OutletsLoaded extends OutletsState with _$OutletsLoaded {
   const OutletsLoaded(this.outlets, {this.selectedOutletId});
 
   final List<RetailOutlet> outlets;
   final int? selectedOutletId;
-
-  @override
-  List<Object?> get props => [outlets, selectedOutletId];
 }
 
 /// A real failure (network, 401, …) while loading outlets.
-final class OutletsError extends OutletsState {
+@Freezed(toJson: false)
+class OutletsError extends OutletsState with _$OutletsError {
   const OutletsError(this.message);
 
   final String message;
-
-  @override
-  List<Object?> get props => [message];
 }

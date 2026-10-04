@@ -1,8 +1,9 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/features/seller/domain/repositories/items_repository_i.dart';
 
+part 'items_tiles_bloc.freezed.dart';
 part 'items_tiles_event.dart';
 part 'items_tiles_state.dart';
 
@@ -14,7 +15,7 @@ part 'items_tiles_state.dart';
 class ItemsTilesBloc extends Bloc<ItemsTilesEvent, ItemsTilesState> {
   ItemsTilesBloc({required ItemsRepositoryI itemsRepository})
     : _repository = itemsRepository,
-      super(ItemsTilesLoading()) {
+      super(const ItemsTilesLoading()) {
     on<ItemsTilesStarted>(_onStarted);
     on<ItemsTilesEnterCategory>(_onEnterCategory);
     on<ItemsTilesBack>(_onBack);
@@ -57,7 +58,7 @@ class ItemsTilesBloc extends Bloc<ItemsTilesEvent, ItemsTilesState> {
   }
 
   Future<void> _loadForCurrentDepth(Emitter<ItemsTilesState> emit) async {
-    emit(ItemsTilesLoading());
+    emit(const ItemsTilesLoading());
     try {
       final List<Item> items;
       switch (_stack.length) {

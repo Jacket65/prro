@@ -1,29 +1,32 @@
 part of 'shifts_history_cubit.dart';
 
-sealed class ShiftsHistoryState extends Equatable {
+sealed class ShiftsHistoryState {
   const ShiftsHistoryState();
-
-  @override
-  List<Object?> get props => [];
 }
 
-final class ShiftsHistoryInitial extends ShiftsHistoryState {
+@Freezed(toJson: false)
+class ShiftsHistoryInitial extends ShiftsHistoryState
+    with _$ShiftsHistoryInitial {
   const ShiftsHistoryInitial();
 }
 
-final class ShiftsHistoryLoading extends ShiftsHistoryState {
+@Freezed(toJson: false)
+class ShiftsHistoryLoading extends ShiftsHistoryState
+    with _$ShiftsHistoryLoading {
   const ShiftsHistoryLoading();
 }
 
-final class ShiftsHistoryError extends ShiftsHistoryState {
+@Freezed(toJson: false)
+class ShiftsHistoryError extends ShiftsHistoryState
+    with _$ShiftsHistoryError {
   const ShiftsHistoryError(this.message);
-  final String message;
 
-  @override
-  List<Object?> get props => [message];
+  final String message;
 }
 
-final class ShiftsHistoryLoaded extends ShiftsHistoryState {
+@Freezed(toJson: false)
+class ShiftsHistoryLoaded extends ShiftsHistoryState
+    with _$ShiftsHistoryLoaded {
   const ShiftsHistoryLoaded({
     required this.items,
     required this.hasNext,
@@ -37,27 +40,4 @@ final class ShiftsHistoryLoaded extends ShiftsHistoryState {
   final int page;
   final bool isLoadingMore;
   final bool loadMoreError;
-
-  ShiftsHistoryLoaded copyWith({
-    List<ShiftSummary>? items,
-    bool? hasNext,
-    int? page,
-    bool? isLoadingMore,
-    bool? loadMoreError,
-  }) => ShiftsHistoryLoaded(
-    items: items ?? this.items,
-    hasNext: hasNext ?? this.hasNext,
-    page: page ?? this.page,
-    isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-    loadMoreError: loadMoreError ?? this.loadMoreError,
-  );
-
-  @override
-  List<Object?> get props => [
-    items,
-    hasNext,
-    page,
-    isLoadingMore,
-    loadMoreError,
-  ];
 }

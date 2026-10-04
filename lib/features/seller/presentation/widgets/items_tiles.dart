@@ -19,7 +19,7 @@ class ItemsTiles extends StatelessWidget {
             children: [
               IconButton(
                 onPressed: () {
-                  context.read<ItemsTilesBloc>().add(ItemsTilesStarted());
+                  context.read<ItemsTilesBloc>().add(const ItemsTilesStarted());
                 },
                 icon: const Icon(Icons.house_rounded),
               ),

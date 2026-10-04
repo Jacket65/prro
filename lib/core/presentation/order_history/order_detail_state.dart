@@ -1,32 +1,30 @@
 part of 'order_detail_cubit.dart';
 
-sealed class OrderDetailState extends Equatable {
+sealed class OrderDetailState {
   const OrderDetailState();
-
-  @override
-  List<Object?> get props => [];
 }
 
-final class OrderDetailInitial extends OrderDetailState {
+@Freezed(toJson: false)
+class OrderDetailInitial extends OrderDetailState
+    with _$OrderDetailInitial {
   const OrderDetailInitial();
 }
 
-final class OrderDetailLoading extends OrderDetailState {
+@Freezed(toJson: false)
+class OrderDetailLoading extends OrderDetailState with _$OrderDetailLoading {
   const OrderDetailLoading();
 }
 
-final class OrderDetailError extends OrderDetailState {
+@Freezed(toJson: false)
+class OrderDetailError extends OrderDetailState with _$OrderDetailError {
   const OrderDetailError(this.message);
-  final String message;
 
-  @override
-  List<Object?> get props => [message];
+  final String message;
 }
 
-final class OrderDetailLoaded extends OrderDetailState {
+@Freezed(toJson: false)
+class OrderDetailLoaded extends OrderDetailState with _$OrderDetailLoaded {
   const OrderDetailLoaded(this.detail);
-  final OrderDetail detail;
 
-  @override
-  List<Object?> get props => [detail];
+  final OrderDetail detail;
 }

@@ -1,7 +1,8 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:prro/features/seller/domain/repositories/balance_repository_i.dart';
 
+part 'balance_cubit.freezed.dart';
 part 'balance_state.dart';
 
 class BalanceCubit extends Cubit<BalanceState> {

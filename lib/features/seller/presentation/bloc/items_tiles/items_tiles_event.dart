@@ -1,20 +1,23 @@
 part of 'items_tiles_bloc.dart';
 
-sealed class ItemsTilesEvent extends Equatable {
+sealed class ItemsTilesEvent {
   const ItemsTilesEvent();
-
-  @override
-  List<Object> get props => [];
 }
 
-class ItemsTilesStarted extends ItemsTilesEvent {}
+@Freezed(toJson: false)
+class ItemsTilesStarted extends ItemsTilesEvent with _$ItemsTilesStarted {
+  const ItemsTilesStarted();
+}
 
-class ItemsTilesEnterCategory extends ItemsTilesEvent {
+@Freezed(toJson: false)
+class ItemsTilesEnterCategory extends ItemsTilesEvent
+    with _$ItemsTilesEnterCategory {
   const ItemsTilesEnterCategory(this.item);
-  final Item item;
 
-  @override
-  List<Object> get props => [item];
+  final Item item;
 }
 
-class ItemsTilesBack extends ItemsTilesEvent {}
+@Freezed(toJson: false)
+class ItemsTilesBack extends ItemsTilesEvent with _$ItemsTilesBack {
+  const ItemsTilesBack();
+}

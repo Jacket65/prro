@@ -35,7 +35,7 @@ class ProductTiles extends StatelessWidget {
             child: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
-                context.read<ItemsTilesBloc>().add(ItemsTilesBack());
+                context.read<ItemsTilesBloc>().add(const ItemsTilesBack());
               },
             ),
           )

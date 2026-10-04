@@ -1,9 +1,10 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:prro/core/utils/uuid.dart';
 import 'package:prro/features/admin/data/models/catalog.dart';
 import 'package:prro/features/admin/domain/repositories/admin_catalog_repository_i.dart';
 
+part 'categories_cubit.freezed.dart';
 part 'categories_state.dart';
 
 /// Catalog categories (outlet-scoped) with CRUD. Drives the items tab grid.

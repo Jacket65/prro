@@ -1,29 +1,32 @@
 part of 'orders_history_cubit.dart';
 
-sealed class OrdersHistoryState extends Equatable {
+sealed class OrdersHistoryState {
   const OrdersHistoryState();
-
-  @override
-  List<Object?> get props => [];
 }
 
-final class OrdersHistoryInitial extends OrdersHistoryState {
+@Freezed(toJson: false)
+class OrdersHistoryInitial extends OrdersHistoryState
+    with _$OrdersHistoryInitial {
   const OrdersHistoryInitial();
 }
 
-final class OrdersHistoryLoading extends OrdersHistoryState {
+@Freezed(toJson: false)
+class OrdersHistoryLoading extends OrdersHistoryState
+    with _$OrdersHistoryLoading {
   const OrdersHistoryLoading();
 }
 
-final class OrdersHistoryError extends OrdersHistoryState {
+@Freezed(toJson: false)
+class OrdersHistoryError extends OrdersHistoryState
+    with _$OrdersHistoryError {
   const OrdersHistoryError(this.message);
-  final String message;
 
-  @override
-  List<Object?> get props => [message];
+  final String message;
 }
 
-final class OrdersHistoryLoaded extends OrdersHistoryState {
+@Freezed(toJson: false)
+class OrdersHistoryLoaded extends OrdersHistoryState
+    with _$OrdersHistoryLoaded {
   const OrdersHistoryLoaded({
     required this.items,
     required this.hasNext,
@@ -41,33 +44,4 @@ final class OrdersHistoryLoaded extends OrdersHistoryState {
   final String order;
   final bool isLoadingMore;
   final bool loadMoreError;
-
-  OrdersHistoryLoaded copyWith({
-    List<OrderListItem>? items,
-    bool? hasNext,
-    int? page,
-    String? sort,
-    String? order,
-    bool? isLoadingMore,
-    bool? loadMoreError,
-  }) => OrdersHistoryLoaded(
-    items: items ?? this.items,
-    hasNext: hasNext ?? this.hasNext,
-    page: page ?? this.page,
-    sort: sort ?? this.sort,
-    order: order ?? this.order,
-    isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-    loadMoreError: loadMoreError ?? this.loadMoreError,
-  );
-
-  @override
-  List<Object?> get props => [
-    items,
-    hasNext,
-    page,
-    sort,
-    order,
-    isLoadingMore,
-    loadMoreError,
-  ];
 }

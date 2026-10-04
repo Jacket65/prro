@@ -1,8 +1,9 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:prro/core/domain/order_history.dart';
 import 'package:prro/core/domain/repositories/order_history_repository_i.dart';
 
+part 'shifts_history_cubit.freezed.dart';
 part 'shifts_history_state.dart';
 
 class ShiftsHistoryCubit extends Cubit<ShiftsHistoryState> {

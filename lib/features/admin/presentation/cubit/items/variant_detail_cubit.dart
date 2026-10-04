@@ -1,8 +1,9 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:prro/features/admin/data/models/catalog.dart';
 import 'package:prro/features/admin/domain/repositories/admin_catalog_repository_i.dart';
 
+part 'variant_detail_cubit.freezed.dart';
 part 'variant_detail_state.dart';
 
 /// Recipe of a variant, plus the outlet's available ingredients for editing.

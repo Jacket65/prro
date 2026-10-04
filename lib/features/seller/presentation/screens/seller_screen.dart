@@ -48,7 +48,7 @@ class _SellerScreenState extends State<SellerScreen> {
         BlocProvider(
           create: (context) =>
               ItemsTilesBloc(itemsRepository: getIt<ItemsRepositoryI>())
-                ..add(ItemsTilesStarted()),
+                ..add(const ItemsTilesStarted()),
         ),
         BlocProvider(
           create: (context) => OrdersBloc(

@@ -1,42 +1,40 @@
 part of 'shift_cubit.dart';
 
-sealed class ShiftState extends Equatable {
+sealed class ShiftState {
   const ShiftState();
-
-  @override
-  List<Object?> get props => [];
 }
 
 /// Nothing fetched yet.
-final class ShiftInitial extends ShiftState {
+@Freezed(toJson: false)
+class ShiftInitial extends ShiftState with _$ShiftInitial {
   const ShiftInitial();
 }
 
 /// A shift lifecycle call is in flight (current/open/close).
-final class ShiftLoading extends ShiftState {
+@Freezed(toJson: false)
+class ShiftLoading extends ShiftState with _$ShiftLoading {
   const ShiftLoading();
 }
 
 /// An open shift exists — sales are allowed.
-final class ShiftOpen extends ShiftState {
+@Freezed(toJson: false)
+class ShiftOpen extends ShiftState with _$ShiftOpen {
   const ShiftOpen(this.shift);
-  final ShiftResponse shift;
 
-  @override
-  List<Object?> get props => [shift];
+  final ShiftResponse shift;
 }
 
 /// No open shift (backend answered 404, or the shift was just closed) — show
 /// the "open shift" gate and block sales. This is a normal state, not an error.
-final class ShiftNone extends ShiftState {
+@Freezed(toJson: false)
+class ShiftNone extends ShiftState with _$ShiftNone {
   const ShiftNone();
 }
 
 /// A real failure (network, 500, …) while talking to the shift endpoints.
-final class ShiftError extends ShiftState {
+@Freezed(toJson: false)
+class ShiftError extends ShiftState with _$ShiftError {
   const ShiftError(this.message);
-  final String message;
 
-  @override
-  List<Object?> get props => [message];
+  final String message;
 }

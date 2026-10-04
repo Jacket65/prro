@@ -1,37 +1,29 @@
 part of 'balance_cubit.dart';
 
-sealed class BalanceState extends Equatable {
+sealed class BalanceState {
   const BalanceState();
-  @override
-  List<Object> get props => [];
 }
 
-final class BalanceInitial extends BalanceState {
+@Freezed(toJson: false)
+class BalanceInitial extends BalanceState with _$BalanceInitial {
   const BalanceInitial();
-
-  @override
-  List<Object> get props => [];
 }
 
-final class BalanceLoading extends BalanceState {
+@Freezed(toJson: false)
+class BalanceLoading extends BalanceState with _$BalanceLoading {
   const BalanceLoading();
-
-  @override
-  List<Object> get props => [];
 }
 
-final class BalanceLoaded extends BalanceState {
+@Freezed(toJson: false)
+class BalanceLoaded extends BalanceState with _$BalanceLoaded {
   const BalanceLoaded(this.balance);
-  final int balance;
 
-  @override
-  List<Object> get props => [balance];
+  final int balance;
 }
 
-final class BalanceError extends BalanceState {
+@Freezed(toJson: false)
+class BalanceError extends BalanceState with _$BalanceError {
   const BalanceError(this.message);
-  final String message;
 
-  @override
-  List<Object> get props => [message];
+  final String message;
 }
