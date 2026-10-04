@@ -61,6 +61,54 @@ void main() {
       expect(closed.isOpen, isFalse);
       expect(closed.closedAt, isNotNull);
     });
+
+    test('keeps cash_end as the text the backend sent', () {
+      expect(
+        ShiftSummary.fromJson(
+          const {'id': 2, 'cash_end': '100.00'},
+        ).cashEnd,
+        '100.00',
+      );
+      expect(
+        ShiftSummary.fromJson(const {'id': 2, 'cash_end': 100}).cashEnd,
+        '100',
+      );
+      expect(ShiftSummary.fromJson(const {'id': 2}).cashEnd, isNull);
+    });
+
+    test('a missing or malformed opened_at falls back to now', () {
+      expect(
+        ShiftSummary.fromJson(const {'id': 1}).openedAt.isAfter(
+              DateTime.now().subtract(const Duration(minutes: 1)),
+            ),
+        isTrue,
+      );
+      expect(
+        ShiftSummary.fromJson(const {'id': 1, 'opened_at': 'nope'}).openedAt,
+        isA<DateTime>(),
+      );
+    });
+
+    test('two summaries from the same payload are equal', () {
+      Map<String, dynamic> payload() => {
+            'id': 2,
+            'outlet_id': 5,
+            'opened_by': 3,
+            'opened_at': '2024-05-01T18:00:00Z',
+            'closed_by': 4,
+            'closed_at': '2024-05-01T19:00:00Z',
+            'cash_end': '100.00',
+            'status': 'closed',
+          };
+      expect(
+        ShiftSummary.fromJson(payload()),
+        ShiftSummary.fromJson(payload()),
+      );
+      expect(
+        ShiftSummary.fromJson(payload()),
+        isNot(ShiftSummary.fromJson({...payload(), 'cash_end': '110.00'})),
+      );
+    });
   });
 
   group('Page.fromJson', () {
@@ -139,6 +187,113 @@ void main() {
       expect(detail.payment.method, PaymentMethod.cash);
       expect(detail.payment.tenderedKopecks, 1200);
       expect(detail.totalKopecks, 1000);
+    });
+
+    test('a missing quantity decodes as a single portion', () {
+      final detail = OrderDetail.fromJson(const {
+        'id': 1,
+        'items': [
+          {'name': 'Кава'},
+        ],
+      });
+      expect(detail.items.single.quantity, '1');
+      expect(detail.items.single.options, isEmpty);
+      expect(detail.items.single.variantId, isEmpty);
+      expect(detail.totalKopecks, 0);
+    });
+
+    test('a missing option quantity decodes as one', () {
+      expect(
+        OrderDetailOption.fromJson(const {'name': 'Молоко'}).quantity,
+        1,
+      );
+    });
+
+    test('a card or nfc method decodes as terminal', () {
+      for (final wire in ['card', 'nfc']) {
+        expect(
+          OrderDetailPayment.fromJson({'method': wire}).method,
+          PaymentMethod.terminal,
+          reason: wire,
+        );
+      }
+      expect(
+        OrderDetailPayment.fromJson(const {}).method,
+        PaymentMethod.cash,
+      );
+    });
+
+    test('two details from the same payload are equal', () {
+      Map<String, dynamic> payload() => {
+            'id': 99,
+            'shift_id': 5,
+            'status': 'paid',
+            'created_at': '2024-05-01T12:00:00Z',
+            'total_price': '10.00',
+            'items': [
+              {'name': 'Кава', 'quantity': '2', 'variant_id': 'v1'},
+            ],
+            'payment': {'method': 'cash', 'total': '10.00'},
+          };
+      expect(OrderDetail.fromJson(payload()), OrderDetail.fromJson(payload()));
+      expect(
+        OrderDetail.fromJson(payload()),
+        isNot(OrderDetail.fromJson({...payload(), 'total_price': '11.00'})),
+      );
+    });
+  });
+
+  group('Page equality', () {
+    OrderListItem item(int orderId) => OrderListItem(
+          orderId: orderId,
+          createdAt: DateTime(2024, 5),
+          totalKopecks: 100,
+        );
+
+    test('pages with the same content are equal', () {
+      expect(
+        Page<OrderListItem>(
+          items: [item(1)],
+          page: 1,
+          hasNext: false,
+        ),
+        Page<OrderListItem>(
+          items: [item(1)],
+          page: 1,
+          hasNext: false,
+        ),
+      );
+    });
+
+    test('pages differing in items, page, hasNext or nextPage are not', () {
+      final page = Page<OrderListItem>(
+        items: [item(1)],
+        page: 1,
+        hasNext: false,
+      );
+      expect(
+        page,
+        isNot(Page<OrderListItem>(items: [item(2)], page: 1, hasNext: false)),
+      );
+      expect(
+        page,
+        isNot(Page<OrderListItem>(items: [item(1)], page: 2, hasNext: false)),
+      );
+      expect(
+        page,
+        isNot(Page<OrderListItem>(items: [item(1)], page: 1, hasNext: true)),
+      );
+      expect(
+        page,
+        isNot(
+          Page<OrderListItem>(
+            items: [item(1)],
+            page: 1,
+            hasNext: false,
+            nextPage: 2,
+          ),
+        ),
+      );
     });
   });
 }

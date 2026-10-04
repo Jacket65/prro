@@ -30,6 +30,10 @@ String stringOr(Object? value, String fallback) =>
 /// [stringOr] with an empty fallback; a missing key yields `''`.
 String stringOrEmpty(Object? value) => stringOr(value, '');
 
+/// Nullable counterpart: `value?.toString()` — a non-string value stays
+/// readable instead of throwing on a cast, and `null` stays `null`.
+String? stringOrNull(Object? value) => value?.toString();
+
 /// `value == true` — backend flags are strict booleans, so anything else
 /// (including the `"true"` string some stubs send) is not the flag.
 bool boolOrFalse(Object? value) => value == true;

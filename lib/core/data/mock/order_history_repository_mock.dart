@@ -190,13 +190,12 @@ class OrderHistoryRepositoryMock implements OrderHistoryRepositoryI {
       createdAt: receipt.issuedAt,
       totalKopecks: receipt.totalKopecks,
       items: receipt.lines.map((l) {
-        return OrderDetailItem(
+return OrderDetailItem(
           name: l.name,
           quantity: l.quantity,
           unitPriceKopecks: l.unitPriceKopecks,
           lineTotalKopecks: l.subtotalKopecks,
           variantId: l.productId,
-          options: const [],
         );
       }).toList(),
       payment: OrderDetailPayment(
