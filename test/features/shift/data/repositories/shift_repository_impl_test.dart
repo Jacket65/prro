@@ -169,6 +169,70 @@ void main() {
     });
   });
 
+  group('ShiftResponse decoding', () {
+    ShiftResponse decode(Map<String, dynamic> json) =>
+        ShiftResponse.fromJson(json);
+
+    test('keeps the money and the timestamps as text', () {
+      final shift = decode(const {
+        ..._openShiftJson,
+        'closed_by': 4,
+        'closed_at': '2024-05-01T21:00:00Z',
+        'cash_end': '410.00',
+      });
+      expect(shift.cashStart, '250.00');
+      expect(shift.cashEnd, '410.00');
+      expect(shift.openedAt, '2024-05-01T09:00:00Z');
+      expect(shift.closedAt, '2024-05-01T21:00:00Z');
+      expect(shift.closedBy, 4);
+      expect(shift.isOpen, isTrue);
+    });
+
+    test('parses numeric-string ids', () {
+      final shift = decode(const {
+        'id': '11',
+        'outlet_id': '7',
+        'opened_by': '3',
+        'opened_at': '2024-05-01T09:00:00Z',
+        'cash_start': '250.00',
+        'status': 'open',
+      });
+      expect(shift.id, 11);
+      expect(shift.outletId, 7);
+      expect(shift.openedBy, 3);
+    });
+
+    test('defaults the open-shift fields when keys are missing', () {
+      final shift = decode(const {});
+      expect(shift.id, 0);
+      expect(shift.outletId, 0);
+      expect(shift.openedBy, 0);
+      expect(shift.openedAt, isEmpty);
+      expect(shift.cashStart, '0.00');
+      expect(shift.status, isEmpty);
+      expect(shift.isOpen, isFalse);
+      expect(shift.closedBy, isNull);
+      expect(shift.closedAt, isNull);
+      expect(shift.cashEnd, isNull);
+    });
+
+    test('keeps a numeric cash_end readable', () {
+      expect(decode(const {'cash_end': 410}).cashEnd, '410');
+    });
+
+    test('two shifts from the same payload are equal', () {
+      expect(decode(_openShiftJson), decode(_openShiftJson));
+      expect(
+        decode(_openShiftJson),
+        isNot(decode({..._openShiftJson, 'status': 'closed'})),
+      );
+      expect(
+        decode(_openShiftJson).hashCode,
+        decode(_openShiftJson).hashCode,
+      );
+    });
+  });
+
   group('missing outlet', () {
     setUp(() async {
       SharedPreferences.setMockInitialValues(<String, Object>{});
