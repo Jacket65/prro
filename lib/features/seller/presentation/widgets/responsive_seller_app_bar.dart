@@ -62,9 +62,7 @@ class _ResponsiveSellerAppBarState extends State<ResponsiveSellerAppBar> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Expanded(
-                        child: SearchField(fullWidth: true, autofocus: true),
-                      ),
+                      const Expanded(child: SearchField(autofocus: true)),
                     ],
                   )
                 : _buildNormalTitle(context),

@@ -35,7 +35,6 @@ class _CheckInfoHeader extends StatelessWidget {
       children: [
         Text('Дата: $date'),
         const EmployeeInfo(),
-        // const Text('Замовлення №: WIP'),
         const SizedBox(height: 15),
         const Divider(),
       ],

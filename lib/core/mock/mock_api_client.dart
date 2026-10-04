@@ -174,12 +174,6 @@ class MockApiClient implements ApiClientI {
           data: {'data': const <List<dynamic>>[]},
           statusCode: 200,
         );
-      } else if (path.contains('/retail-outlets')) {
-        return Response<dynamic>(
-          requestOptions: RequestOptions(path: path),
-          data: {'data': const <List<dynamic>>[]},
-          statusCode: 200,
-        );
       }
 
       log('[MOCK API] Unhandled GET path: $path');
@@ -273,7 +267,6 @@ class MockApiClient implements ApiClientI {
                         );
                       }).toList() ??
                       <SelectedOptionDto>[],
-                  beanId: itemMap['bean_id'] as int?,
                 );
               }).toList() ??
               <OrderLineDto>[];

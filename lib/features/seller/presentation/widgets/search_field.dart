@@ -7,13 +7,8 @@ import 'package:prro/features/seller/presentation/bloc/search/catalog_search_cub
 /// Catalog search box. Debounces input (~300 ms) before querying so we don't
 /// fire a request per keystroke; the × button clears back to the catalog.
 class SearchField extends StatefulWidget {
-  const SearchField({
-    super.key,
-    this.fullWidth = false,
-    this.autofocus = false,
-  });
+  const SearchField({super.key, this.autofocus = false});
 
-  final bool fullWidth;
   final bool autofocus;
 
   @override

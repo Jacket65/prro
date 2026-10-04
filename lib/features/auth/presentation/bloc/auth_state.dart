@@ -6,7 +6,7 @@ part 'auth_state.freezed.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated }
 
-enum AuthOperation { none, restore, login, adminLogin, logout, sessionExpiry }
+enum AuthOperation { restore, login, adminLogin, logout, sessionExpiry }
 
 enum AuthUnauthenticatedReason { noSession, logout, sessionExpired }
 

@@ -16,12 +16,10 @@ class OrderLineDto {
     required this.productId,
     required this.quantity,
     this.options = const [],
-    this.beanId,
   });
   final String productId;
   final int quantity;
   final List<SelectedOptionDto> options;
-  final int? beanId;
 }
 
 class PaymentDto {

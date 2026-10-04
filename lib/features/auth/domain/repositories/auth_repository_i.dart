@@ -9,10 +9,9 @@ enum AuthErrorCode {
 }
 
 class AuthException implements Exception {
-  const AuthException(this.code, [this.message]);
+  const AuthException(this.code);
 
   final AuthErrorCode code;
-  final String? message;
 }
 
 abstract interface class AuthRepositoryI {

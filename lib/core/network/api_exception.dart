@@ -79,7 +79,3 @@ class ApiException implements Exception {
   @override
   String toString() => message;
 }
-
-/// Wraps any error thrown by the Dio layer into an [ApiException].
-ApiException asApiException(Object e) =>
-    e is DioException ? ApiException.fromDio(e) : ApiException(e.toString());
