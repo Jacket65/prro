@@ -18,10 +18,13 @@ class ProductDetailCubit extends Cubit<ProductDetailState> {
   }) async {
     emit(const ProductDetailLoading());
     try {
-      final variants = await _repository.fetchVariants(productId: productId);
-      final ingredients = await _repository.fetchIngredients(
-        outletId: outletId,
-      );
+      // The variant list and the outlet's ingredient list are independent, so
+      // they are fetched together: awaiting them one after the other made every
+      // open of this screen (and every retry) pay two round-trips.
+      final (variants, ingredients) = await (
+        _repository.fetchVariants(productId: productId),
+        _repository.fetchIngredients(outletId: outletId),
+      ).wait;
       emit(ProductDetailLoaded(variants, ingredients: ingredients));
     } on Object catch (e) {
       emit(ProductDetailError(e.toString()));

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -158,5 +160,31 @@ void main() {
       act: (cubit) => cubit.loadVariants(productId: 1, outletId: 1),
       expect: () => [isA<ProductDetailLoading>(), isA<ProductDetailError>()],
     );
+
+    test('loadVariants requests both endpoints before awaiting either',
+        () async {
+      // Guards the concurrency: the ingredient list is independent of the
+      // variant list, so awaiting them in sequence doubled the load latency of
+      // this screen. `fetchIngredients` must already be in flight while
+      // `fetchVariants` is still pending.
+      final variants = Completer<List<AdminVariant>>();
+      when(
+        () => repository.fetchVariants(productId: 1),
+      ).thenAnswer((_) => variants.future);
+      stubIngredients();
+
+      final cubit = ProductDetailCubit(repository);
+      final pending = cubit.loadVariants(productId: 1, outletId: 1);
+      await Future<void>.delayed(Duration.zero);
+
+      verify(() => repository.fetchIngredients(outletId: 1)).called(1);
+
+      variants.complete(
+        const [AdminVariant(id: 1, name: 'Малиний', priceKopecks: 2500)],
+      );
+      await pending;
+      expect(cubit.state, isA<ProductDetailLoaded>());
+      await cubit.close();
+    });
   });
 }
