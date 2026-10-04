@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 `prro` ("Prro beta") is the **Flutter client for the Grains World POS system** — the frontend to the Go backend deployed at `pos.coffeebeans.space` (dev host `pos.coffeebeans.space.test`). It talks to that backend's REST API (`/api/v1`) over HTTP.
 
-- **Stack:** Flutter (Dart SDK `>=3.12.0`, CI on Flutter `3.44.6`), `flutter_bloc` (state), `dio` (the only HTTP client), `injectable` + `get_it` (DI), `auto_route` (navigation), `freezed` + `json_serializable` (every model's equality and wire decoding, including in `core/domain`), `shared_preferences` (session persistence), `mocktail` + `bloc_test` (tests).
+- **Stack:** Flutter (Dart `>=3.13.0` in practice — see the note in `pubspec.yaml`; CI on Flutter `3.47.5`), `flutter_bloc` (state), `dio` (the only HTTP client), `injectable` + `get_it` (DI), `auto_route` (navigation), `freezed` + `json_serializable` (every model's equality and wire decoding, including in `core/domain`), `shared_preferences` (session persistence), `mocktail` + `bloc_test` (tests).
 - **UI language:** Ukrainian (all user-facing strings, snackbars, error messages).
 - **Targets:** multi-platform (android/ios/web/windows/linux/macos); CI builds the Android APK.
 

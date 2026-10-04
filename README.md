@@ -6,7 +6,7 @@ A Flutter application that supports two backend environments: a **production** b
 
 ### Prerequisites
 
-- Flutter `3.44.6` (or a compatible stable channel)
+- Flutter `3.47.5` (or a compatible stable channel; Dart `>=3.13.0`)
 - Java 17 (for Android builds)
 - An IDE such as VS Code or Android Studio with the Flutter plugin
 
@@ -58,7 +58,7 @@ release builds throw at startup unless `API_BASE_URL` is provided.
 GitHub Actions (`.github/workflows/flutter_ci.yml`) builds **only the production (real) APK**:
 
 - Triggered on every push and pull request
-- Sets up Java 17 and Flutter `3.44.6`
+- Sets up Java 17 and Flutter `3.47.5`
 - Runs `flutter pub get`, `dart run build_runner build`, `./tool/check_boundaries.sh`,
   `flutter analyze`, and `flutter test`
 - Builds a release ARM64 APK with `--dart-define=BACKEND_TYPE=real` and

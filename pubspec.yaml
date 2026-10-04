@@ -4,6 +4,13 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
+  # The *effective* floor is Dart 3.13 / Flutter 3.47, enforced by the
+  # dependencies themselves (`material_ui` declares `flutter: ">=3.47.0"`,
+  # `freezed` 4 and `very_good_analysis` 11 declare `sdk: ^3.13.0`) and
+  # recorded in pubspec.lock. Do NOT raise this to `>=3.13.0`: with
+  # `analyzer` 13.3.0 that makes the analyzer silently stop applying
+  # `very_good_analysis`, so `flutter analyze` reports ~355 default-lint infos
+  # and fails. CI pins Flutter 3.47.5 to satisfy the real floor.
   sdk: ">=3.12.0 <4.0.0"
 
 dependencies:
