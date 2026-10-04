@@ -16,8 +16,6 @@ class Bean extends Equatable {
   final int id;
   final String name;
 
-  Map<String, dynamic> toJson() => {'id': id, 'name': name};
-
   @override
   List<Object?> get props => [id, name];
 }

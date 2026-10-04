@@ -11,19 +11,9 @@ int? parseNullableInt(Object? value) {
   return parseInt(value);
 }
 
-double? parseNullableDouble(Object? value) {
-  if (value == null) return null;
-  return parseDouble(value);
-}
-
 String? parseNullableString(Object? value) {
   if (value == null) return null;
   return parseString(value);
-}
-
-Decimal? parseNullableDecimal(Object? value) {
-  if (value == null) return null;
-  return parseDecimal(value);
 }
 
 /// Backend uses `shopspring/decimal.Decimal` for prices, quantities, costs,

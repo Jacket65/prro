@@ -109,13 +109,6 @@ class SelectedOption extends Equatable {
     );
   }
 
-  /// Cart → backend shape. `quantity` defaults to 1 server-side, but we always
-  /// send it for clarity.
-  Map<String, dynamic> toOrderJson() => {
-    'option_id': optionId,
-    'quantity': quantity,
-  };
-
   @override
   List<Object?> get props => [optionId, name, priceDelta, quantity];
 }

@@ -79,16 +79,6 @@ final class Product extends Item {
       price +
       selectedOptions.fold(0.0, (sum, o) => sum + o.priceDelta * o.quantity);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'price': price,
-      'image_url': imageUrl,
-      'quantity': quantity.toString(),
-    };
-  }
-
   Product copyWith({
     String? id,
     String? name,

@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 flutter pub get                    # install deps
-dart run build_runner build --delete-conflicting-outputs   # regenerate di.config.dart, app_router.gr.dart, *.g.dart, *.freezed.dart
+dart run build_runner build   # regenerate di.config.dart, app_router.gr.dart, *.g.dart, *.freezed.dart
 ./tool/check_boundaries.sh         # layer-boundary check (also a CI step, before flutter analyze)
 flutter analyze                    # lint (very_good_analysis 11 via analysis_options.yaml)
 flutter test                       # all tests

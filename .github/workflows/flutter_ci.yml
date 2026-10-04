@@ -31,7 +31,7 @@ jobs:
         run: flutter pub get
 
       - name: Run build_runner
-        run: dart run build_runner build --delete-conflicting-outputs
+        run: dart run build_runner build
 
       - name: Check layer boundaries
         run: ./tool/check_boundaries.sh
