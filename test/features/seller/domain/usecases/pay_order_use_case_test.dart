@@ -234,6 +234,74 @@ void main() {
     });
   });
 
+  group('placeOrder failures', () {
+    void placeOrderThrows(Object error) {
+      when(
+        () => repo.placeOrder(
+          method: any(named: 'method'),
+          tenderedKopecks: any(named: 'tenderedKopecks'),
+          idempotencyKey: any(named: 'idempotencyKey'),
+        ),
+      ).thenThrow(error);
+    }
+
+    test('a closed shift becomes the actionable message, not the generic one',
+        () async {
+      // The repository can no longer carry this wording: everything it throws
+      // is caught by the boundary catch-all below, so the seller would only
+      // ever see the generic failure.
+      placeOrderThrows(const ShiftClosedException());
+
+      await expectLater(
+        () => useCase(req(PaymentMethod.cash)),
+        throwsA(
+          isA<PaymentException>()
+              .having(
+                (e) => e.message,
+                'message',
+                'Зміну закрито — відкрийте зміну, щоб продавати.',
+              )
+              .having(
+                (e) => e.reason,
+                'reason',
+                PaymentFailureReason.verificationFailed,
+              ),
+        ),
+      );
+    });
+
+    test('no money moved: the finalize hook never runs on a closed shift',
+        () async {
+      placeOrderThrows(const ShiftClosedException());
+
+      await expectLater(
+        () => useCase(req(PaymentMethod.terminal)),
+        throwsA(isA<PaymentException>()),
+      );
+
+      verifyNever(() => terminal.afterOrderCreated(any(), any()));
+      verifyNever(() => cash.afterOrderCreated(any(), any()));
+    });
+
+    test('an ApiException still maps to the generic message', () async {
+      placeOrderThrows(
+        const ApiException('Сесія прострочена. Увійдіть знову.',
+            code: 'token_error', statusCode: 401),
+      );
+
+      await expectLater(
+        () => useCase(req(PaymentMethod.cash)),
+        throwsA(
+          isA<PaymentException>().having(
+            (e) => e.message,
+            'message',
+            'Не вдалося оформити замовлення.',
+          ),
+        ),
+      );
+    });
+  });
+
   group('afterOrderCreated failures', () {
     test('PaymentException propagates unchanged', () async {
       when(() => terminal.afterOrderCreated(any(), any())).thenThrow(

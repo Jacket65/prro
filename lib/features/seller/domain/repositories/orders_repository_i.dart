@@ -31,6 +31,10 @@ abstract interface class OrdersRepositoryI {
   /// Sends the current cart to the backend (`POST /retail-outlets/{id}/orders`).
   /// Prices and totals are computed server-side; the receipt is authoritative.
   ///
+  /// Throws [ShiftClosedException] when the backend answers 404 because the
+  /// seller's shift is no longer open (it can be closed from another device
+  /// while the screen is still up).
+  ///
   /// Re-calling with the same [idempotencyKey] is safe and returns the same
   /// receipt (no duplicate order is created).
   Future<OrderReceipt> placeOrder({
@@ -46,4 +50,14 @@ abstract interface class OrdersRepositoryI {
   /// stock). Re-calling on an already-completed order yields 409 — callers
   /// should treat that as "already done" at a higher layer if it matters.
   Future<OrderReceipt> confirmOrder(int orderId);
+}
+
+/// The seller's shift is closed, so an order cannot be placed right now.
+///
+/// A domain fact rather than a message: the repository reports *what* happened
+/// and the payment boundary (`PayOrderUseCase`) owns the wording, which is the
+/// only place whose translation the UI actually sees. A Ukrainian string thrown
+/// from here would be swallowed by that boundary and never rendered.
+class ShiftClosedException implements Exception {
+  const ShiftClosedException();
 }

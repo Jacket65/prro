@@ -21,6 +21,10 @@ import 'package:prro/features/seller/domain/repositories/orders_repository_i.dar
 /// This use case is the final boundary before the UI/bloc: any failure from
 /// `placeOrder` or the handler hooks is translated into [PaymentException] so
 /// the bloc only ever sees [PaymentException] or [PaymentCancelledException].
+/// That makes it the only place a repository failure can still become words the
+/// seller reads — a message thrown from a repository is discarded by the
+/// catch-all below, so repositories report facts (see [ShiftClosedException])
+/// and the wording lives here.
 @injectable
 class PayOrderUseCase {
   PayOrderUseCase({
@@ -61,6 +65,14 @@ class PayOrderUseCase {
         rethrow;
       } on PaymentException {
         rethrow;
+      } on ShiftClosedException {
+        // The shift was closed elsewhere: say what to do about it, and note
+        // that no money moved — for a card order the charge only runs in
+        // [PaymentMethodHandler.afterOrderCreated], which never happened.
+        throw const PaymentException(
+          'Зміну закрито — відкрийте зміну, щоб продавати.',
+          reason: PaymentFailureReason.verificationFailed,
+        );
       } on Object catch (e, st) {
         throw PaymentException(
           'Не вдалося оформити замовлення.',

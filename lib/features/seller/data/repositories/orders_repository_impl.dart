@@ -168,13 +168,10 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
     } on DioException catch (e) {
       // The seller's shift can be closed from another device while the screen
       // is still open: the backend answers 404 (no open shift) instead of 409.
-      // Say so in plain words rather than showing a bare server error.
+      // Report the fact; `PayOrderUseCase` turns it into the wording the seller
+      // sees, since a message thrown from here never reaches the UI.
       if (e.response?.statusCode == 404) {
-        throw const ApiException(
-          'Зміну закрито — відкрийте зміну, щоб продавати.',
-          code: 'not_found',
-          statusCode: 404,
-        );
+        throw const ShiftClosedException();
       }
       throw ApiException.fromDio(e);
     }

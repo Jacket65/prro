@@ -9,6 +9,7 @@ import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/features/seller/data/repositories/orders_repository_impl.dart';
+import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockApiClient extends Mock implements ApiClientI {}
@@ -35,6 +36,31 @@ Response<dynamic> _orderResponse(
     },
   );
 }
+
+/// A backend 404 on order creation: the seller's shift was closed from another
+/// device while this screen was open.
+DioException _notFound() => DioException(
+      requestOptions: RequestOptions(path: '/retail-outlets/7/orders'),
+      response: Response<dynamic>(
+        requestOptions: RequestOptions(path: '/retail-outlets/7/orders'),
+        statusCode: 404,
+        data: {
+          'error': {'code': 'not_found', 'message': 'shift not found'},
+        },
+      ),
+    );
+
+/// A backend 500, to prove the 404 mapping is narrow.
+DioException _serverError() => DioException(
+      requestOptions: RequestOptions(path: '/retail-outlets/7/orders'),
+      response: Response<dynamic>(
+        requestOptions: RequestOptions(path: '/retail-outlets/7/orders'),
+        statusCode: 500,
+        data: {
+          'error': {'code': 'internal_error', 'message': 'boom'},
+        },
+      ),
+    );
 
 void main() {
   late MockApiClient apiClient;
@@ -115,6 +141,67 @@ void main() {
         ).called(1);
       },
     );
+
+    test('a 404 becomes ShiftClosedException, not a bare ApiException',
+        () async {
+      when(
+        () => apiClient.post(
+          any<String>(),
+          data: any<dynamic>(named: 'data'),
+          idempotencyKey: any(named: 'idempotencyKey'),
+        ),
+      ).thenThrow(_notFound());
+
+      await expectLater(
+        () => repo.placeOrder(
+          method: PaymentMethod.cash,
+          tenderedKopecks: 4500,
+          idempotencyKey: 'k5',
+        ),
+        throwsA(isA<ShiftClosedException>()),
+      );
+    });
+
+    test('a 404 on the terminal path also becomes ShiftClosedException',
+        () async {
+      when(
+        () => apiClient.post(
+          any<String>(),
+          data: any<dynamic>(named: 'data'),
+          idempotencyKey: any(named: 'idempotencyKey'),
+        ),
+      ).thenThrow(_notFound());
+
+      await expectLater(
+        () => repo.placeOrder(
+          method: PaymentMethod.terminal,
+          tenderedKopecks: 4500,
+          idempotencyKey: 'k6',
+        ),
+        throwsA(isA<ShiftClosedException>()),
+      );
+    });
+
+    test('a non-404 failure still maps to ApiException', () async {
+      when(
+        () => apiClient.post(
+          any<String>(),
+          data: any<dynamic>(named: 'data'),
+          idempotencyKey: any(named: 'idempotencyKey'),
+        ),
+      ).thenThrow(_serverError());
+
+      await expectLater(
+        () => repo.placeOrder(
+          method: PaymentMethod.cash,
+          tenderedKopecks: 4500,
+          idempotencyKey: 'k7',
+        ),
+        throwsA(
+          isA<ApiException>().having((e) => e.statusCode, 'statusCode', 500),
+        ),
+      );
+    });
 
     test('throws when no outlet is stored', () async {
       SharedPreferences.setMockInitialValues({});
