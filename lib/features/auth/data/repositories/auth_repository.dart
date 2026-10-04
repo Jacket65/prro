@@ -16,7 +16,7 @@ UserRole? _parseRole(String? roleStr) {
   return switch (roleStr) {
     'admin' => UserRole.admin,
     'manager' => UserRole.manager,
-    'cashier' => UserRole.seller,
+    'cashier' => UserRole.cashier,
     _ => null,
   };
 }

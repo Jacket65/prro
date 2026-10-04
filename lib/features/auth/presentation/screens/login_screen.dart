@@ -161,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
     switch (state) {
       case AuthAuthenticated(:final user):
         _showSnackBar(context, 'Вітаємо вас на роботі!');
-        if (user.role == UserRole.seller) {
+        if (user.role == UserRole.cashier) {
           unawaited(context.router.replace(const SellerRoute()));
         } else {
           unawaited(context.router.replace(const AdminRoute()));

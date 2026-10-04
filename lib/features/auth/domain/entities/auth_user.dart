@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum UserRole { seller, admin, manager }
+enum UserRole { cashier, admin, manager }
 
 class AuthUser extends Equatable {
   const AuthUser({required this.username, required this.role});

@@ -30,7 +30,7 @@ void main() {
       build: () {
         when(() => repository.restoreSession()).thenAnswer(
           (_) async =>
-              const AuthUser(username: 'savedUser', role: UserRole.seller),
+              const AuthUser(username: 'savedUser', role: UserRole.cashier),
         );
         return authBloc;
       },
@@ -38,7 +38,7 @@ void main() {
       expect: () => [
         const AuthLoading(operation: AuthOperation.restore),
         const AuthAuthenticated(
-          user: AuthUser(username: 'savedUser', role: UserRole.seller),
+          user: AuthUser(username: 'savedUser', role: UserRole.cashier),
         ),
       ],
       verify: (_) {
@@ -90,7 +90,7 @@ void main() {
             password: any(named: 'password'),
           ),
         ).thenAnswer(
-          (_) async => const AuthUser(username: 'test', role: UserRole.seller),
+          (_) async => const AuthUser(username: 'test', role: UserRole.cashier),
         );
         return authBloc;
       },
@@ -100,7 +100,7 @@ void main() {
       expect: () => [
         const AuthLoading(operation: AuthOperation.login),
         const AuthAuthenticated(
-          user: AuthUser(username: 'test', role: UserRole.seller),
+          user: AuthUser(username: 'test', role: UserRole.cashier),
         ),
       ],
       verify: (_) {
@@ -247,7 +247,7 @@ void main() {
     );
 
     blocTest<AuthBloc, AuthState>(
-      'emits [AuthLoading(adminLogin), AuthFailure] when role is seller',
+      'emits [AuthLoading(adminLogin), AuthFailure] when role is cashier',
       build: () {
         when(
           () => repository.loginAsAdmin(
@@ -258,7 +258,7 @@ void main() {
         return authBloc;
       },
       seed: () => const AuthAuthenticated(
-        user: AuthUser(username: 'seller', role: UserRole.seller),
+        user: AuthUser(username: 'cashier', role: UserRole.cashier),
       ),
       act: (bloc) => bloc.add(const AuthAdminLoginRequested()),
       expect: () => [
@@ -305,7 +305,7 @@ void main() {
         return authBloc;
       },
       seed: () => const AuthAuthenticated(
-        user: AuthUser(username: 'test', role: UserRole.seller),
+        user: AuthUser(username: 'test', role: UserRole.cashier),
       ),
       act: (bloc) => bloc.add(const AuthLogoutRequested()),
       expect: () => [
@@ -324,7 +324,7 @@ void main() {
         return authBloc;
       },
       seed: () => const AuthAuthenticated(
-        user: AuthUser(username: 'test', role: UserRole.seller),
+        user: AuthUser(username: 'test', role: UserRole.cashier),
       ),
       act: (bloc) => bloc.add(const AuthLogoutRequested()),
       expect: () => [
@@ -342,7 +342,7 @@ void main() {
         return authBloc;
       },
       seed: () => const AuthAuthenticated(
-        user: AuthUser(username: 'test', role: UserRole.seller),
+        user: AuthUser(username: 'test', role: UserRole.cashier),
       ),
       act: (bloc) => bloc.add(const AuthSessionExpired()),
       expect: () => [
@@ -376,7 +376,7 @@ void main() {
         return authBloc;
       },
       seed: () => const AuthAuthenticated(
-        user: AuthUser(username: 'test', role: UserRole.seller),
+        user: AuthUser(username: 'test', role: UserRole.cashier),
       ),
       act: (bloc) {
         bloc
@@ -404,7 +404,7 @@ void main() {
         return authBloc;
       },
       seed: () => const AuthAuthenticated(
-        user: AuthUser(username: 'test', role: UserRole.seller),
+        user: AuthUser(username: 'test', role: UserRole.cashier),
       ),
       act: (bloc) =>
           bloc.add(const AuthSessionExpired(failedToken: 'stale-access-token')),
@@ -424,7 +424,7 @@ void main() {
         return authBloc;
       },
       seed: () => const AuthAuthenticated(
-        user: AuthUser(username: 'test', role: UserRole.seller),
+        user: AuthUser(username: 'test', role: UserRole.cashier),
       ),
       act: (bloc) => bloc.add(
         const AuthSessionExpired(failedToken: 'current-access-token'),
@@ -452,7 +452,7 @@ void main() {
           ),
         ).thenAnswer((_) async {
           await Future<void>.delayed(const Duration(milliseconds: 50));
-          return const AuthUser(username: 'test', role: UserRole.seller);
+          return const AuthUser(username: 'test', role: UserRole.cashier);
         });
         when(() => repository.logout()).thenAnswer((_) async {});
         return authBloc;
@@ -482,7 +482,7 @@ void main() {
             password: any(named: 'password'),
           ),
         ).thenAnswer(
-          (_) async => const AuthUser(username: 'test', role: UserRole.seller),
+          (_) async => const AuthUser(username: 'test', role: UserRole.cashier),
         );
         return authBloc;
       },
@@ -495,7 +495,7 @@ void main() {
         const AuthLoading(operation: AuthOperation.restore),
         const AuthLoading(operation: AuthOperation.login),
         const AuthAuthenticated(
-          user: AuthUser(username: 'test', role: UserRole.seller),
+          user: AuthUser(username: 'test', role: UserRole.cashier),
         ),
       ],
     );
@@ -510,7 +510,7 @@ void main() {
           ),
         ).thenAnswer((_) async {
           await Future<void>.delayed(const Duration(milliseconds: 50));
-          return const AuthUser(username: 'test', role: UserRole.seller);
+          return const AuthUser(username: 'test', role: UserRole.cashier);
         });
         return authBloc;
       },
@@ -524,7 +524,7 @@ void main() {
       expect: () => [
         const AuthLoading(operation: AuthOperation.login),
         const AuthAuthenticated(
-          user: AuthUser(username: 'test', role: UserRole.seller),
+          user: AuthUser(username: 'test', role: UserRole.cashier),
         ),
       ],
       verify: (_) {
@@ -543,7 +543,7 @@ void main() {
         return authBloc;
       },
       seed: () => const AuthAuthenticated(
-        user: AuthUser(username: 'test', role: UserRole.seller),
+        user: AuthUser(username: 'test', role: UserRole.cashier),
       ),
       act: (bloc) {
         bloc

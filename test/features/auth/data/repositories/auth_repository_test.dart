@@ -69,7 +69,7 @@ void main() {
   }
 
   group('F9: role parsing', () {
-    test('maps cashier to seller', () async {
+    test('maps cashier to cashier', () async {
       stubLogin(
         _resp(
           bearer: 'Bearer tok',
@@ -84,7 +84,7 @@ void main() {
         ),
       );
       final user = await repo.login(username: 'cashier', password: 'p');
-      expect(user.role, UserRole.seller);
+      expect(user.role, UserRole.cashier);
     });
 
     test('maps admin to admin', () async {
@@ -150,7 +150,7 @@ void main() {
 
       final user = await repo.login(username: 'a', password: 'p');
 
-      expect(user.role, UserRole.seller);
+      expect(user.role, UserRole.cashier);
       expect(prefs.getInt('outlet_id'), 5);
       verify(
         () => apiClient.get(
@@ -309,7 +309,7 @@ void main() {
       final user = await repo.login(username: 'cashier', password: 'pw');
 
       expect(user.username, 'cashier');
-      expect(user.role, UserRole.seller);
+      expect(user.role, UserRole.cashier);
       verify(
         () =>
             tokenStorage.saveSession(accessToken: 'token-1', refreshToken: 'r'),
