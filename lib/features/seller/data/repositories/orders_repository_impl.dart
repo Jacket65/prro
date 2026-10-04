@@ -83,11 +83,17 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
   }) {
     final index = _products.indexWhere((p) => p.lineId == lineId);
     if (index == -1) return;
-    final updated = _products[index].copyWith(
-      selectedOptions: options,
-      selectedBean: bean,
-      quantity: quantity,
-    );
+    // Generated `copyWith` clears a nullable field when it is passed explicitly
+    // null, so only pass what the caller set: `bean: null` drops the line's
+    // bean, and `quantity` (non-nullable) can only be replaced, never cleared.
+    final line = _products[index];
+    final updated = quantity == null
+        ? line.copyWith(selectedOptions: options, selectedBean: bean)
+        : line.copyWith(
+            selectedOptions: options,
+            selectedBean: bean,
+            quantity: quantity,
+          );
     // Options unchanged → just replace in place.
     if (updated.lineId == lineId) {
       _products[index] = updated;

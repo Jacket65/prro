@@ -1,25 +1,54 @@
 import 'package:decimal/decimal.dart';
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:prro/core/domain/bean.dart';
 import 'package:prro/core/domain/drink_option.dart';
 import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/utils/json.dart';
 
-sealed class Item extends Equatable {
-  const Item();
+part 'catalog_item.freezed.dart';
+
+/// Anything the catalog grid can render: a directly-orderable [Product], a
+/// [ProductGroup] that opens a variant picker, or a [Category] that drills
+/// down.
+///
+/// Sealed so a consumer can switch over the three cases exhaustively
+/// (`show_item.dart`). It carries no equality of its own — that lives on the
+/// three cases, which compare structurally.
+sealed class Item {
+  const Item._();
 }
 
-final class Product extends Item {
-  const Product({
-    required this.id,
-    required this.quantity,
-    required this.name,
-    required this.price,
-    required this.imageUrl,
-    this.unit,
-    this.selectedOptions = const [],
-    this.selectedBean,
-  });
+/// An orderable variant of a product.
+///
+/// Decoding stays hand-written: a fresh catalog variant starts at one
+/// `unitStep(unit)`, a cross-field default no per-field converter can express.
+@Freezed(toJson: false)
+abstract class Product extends Item with _$Product {
+  const factory Product({
+    required String id,
+    required String name,
+
+    /// Quantity on the order line. Decimal because weight goods sell
+    /// fractionally (e.g. `0.250` kg). Stepped by [MeasureUnit.step]; minimum
+    /// is one step.
+    required Decimal quantity,
+
+    /// Backend ships the price as a decimal STRING ("45.50"); some legacy
+    /// paths still ship a number, so the factory accepts both.
+    required double price,
+    required String imageUrl,
+
+    /// Measure unit of the variant (id/name/step). `null` → piece (step 1).
+    MeasureUnit? unit,
+
+    /// Options the cashier picked for this cart line (empty for catalog tiles).
+    @Default(<SelectedOption>[]) List<SelectedOption> selectedOptions,
+
+    /// Coffee bean picked for this line, if the drink supports bean selection.
+    Bean? selectedBean,
+  }) = _Product;
+
+  const Product._() : super._();
 
   factory Product.fromJson(Map<String, dynamic> json) {
     final unit = json['unit'] is Map
@@ -33,33 +62,13 @@ final class Product extends Item {
 
     return Product(
       id: json['id'].toString(),
-      name: (json['name'] ?? '').toString(),
-      // Backend ships price as a decimal STRING ("45.50"); some legacy paths
-      // still ship a number. parseDouble handles both.
+      name: stringOr(json['name'], ''),
       price: parseDouble(json['price']),
-      imageUrl: (json['image_url'] ?? '').toString(),
+      imageUrl: stringOr(json['image_url'], ''),
       quantity: quantity,
       unit: unit,
     );
   }
-
-  final String id;
-  final String name;
-  final double price;
-  final String imageUrl;
-
-  /// Quantity on the order line. Decimal because weight goods sell fractionally
-  /// (e.g. `0.250` kg). Stepped by [MeasureUnit.step]; minimum is one step.
-  final Decimal quantity;
-
-  /// Measure unit of the variant (id/name/step). `null` → piece (step 1).
-  final MeasureUnit? unit;
-
-  /// Options the cashier picked for this cart line (empty for catalog tiles).
-  final List<SelectedOption> selectedOptions;
-
-  /// Coffee bean picked for this line, if the drink supports bean selection.
-  final Bean? selectedBean;
 
   /// Stable identity of a cart line: same variant with different options/bean
   /// is a distinct line. Options are sorted by id so order of selection is
@@ -78,94 +87,63 @@ final class Product extends Item {
   double get effectiveUnitPrice =>
       price +
       selectedOptions.fold(0.0, (sum, o) => sum + o.priceDelta * o.quantity);
-
-  Product copyWith({
-    String? id,
-    String? name,
-    double? price,
-    String? imageUrl,
-    Decimal? quantity,
-    MeasureUnit? unit,
-    List<SelectedOption>? selectedOptions,
-    Bean? selectedBean,
-  }) {
-    return Product(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      price: price ?? this.price,
-      imageUrl: imageUrl ?? this.imageUrl,
-      quantity: quantity ?? this.quantity,
-      unit: unit ?? this.unit,
-      selectedOptions: selectedOptions ?? this.selectedOptions,
-      selectedBean: selectedBean ?? this.selectedBean,
-    );
-  }
-
-  @override
-  List<Object?> get props => [
-    id,
-    name,
-    price,
-    imageUrl,
-    quantity,
-    unit,
-    selectedOptions,
-    selectedBean,
-  ];
 }
 
 /// Abstract product (e.g. "Американо") that owns one or more orderable variants
 /// Tapping a [ProductGroup] opens a variant picker, not navigate. Variants are
 /// carried inline (served by `GET /categories/:id/products`), so the picker
 /// needs no extra request.
-final class ProductGroup extends Item {
-  const ProductGroup({
-    required this.id,
-    required this.name,
-    this.variants = const [],
-  });
+///
+/// Decoding stays hand-written for symmetry with the other two cases.
+@Freezed(toJson: false)
+abstract class ProductGroup extends Item with _$ProductGroup {
+  const factory ProductGroup({
+    required int id,
+    required String name,
+    @Default(<Product>[]) List<Product> variants,
+  }) = _ProductGroup;
+
+  const ProductGroup._() : super._();
 
   factory ProductGroup.fromJson(Map<String, dynamic> json) {
     return ProductGroup(
       id: json['id'] as int,
-      name: (json['name'] ?? '').toString(),
+      name: stringOr(json['name'], ''),
       variants: (json['variants'] as List<dynamic>? ?? const [])
           .whereType<Map<dynamic, dynamic>>()
           .map((v) => Product.fromJson(v.cast<String, dynamic>()))
           .toList(),
     );
   }
-
-  final int id;
-  final String name;
-  final List<Product> variants;
-
-  @override
-  List<Object> get props => [id, name, variants];
 }
 
-final class Category extends Item {
-  const Category({required this.id, required this.name, this.items = const []});
+/// A category of the catalog, holding nested products and categories.
+///
+/// Decoding stays hand-written: an item is a [Product] or a nested [Category]
+/// depending on field *presence* (`containsKey('price')`), not on a named
+/// discriminator, so there is no union codegen to lean on.
+@Freezed(toJson: false)
+abstract class Category extends Item with _$Category {
+  const factory Category({
+    required int id,
+    required String name,
+    @Default(<Item>[]) List<Item> items,
+  }) = _Category;
+
+  const Category._() : super._();
 
   factory Category.fromJson(Map<String, dynamic> json) {
+    final items = (json['items'] as List<dynamic>? ?? const [])
+        .map<Item>((itemJson) {
+      final itemMap = (itemJson as Map).cast<String, dynamic>();
+      return itemMap.containsKey('price')
+          ? Product.fromJson(itemMap)
+          : Category.fromJson(itemMap);
+    }).toList();
     return Category(
       id: json['id'] as int,
-      name: (json['name'] ?? '').toString(),
-      items: (json['items'] as List<dynamic>? ?? []).map<Item>((itemJson) {
-        final itemMap = (itemJson as Map).cast<String, dynamic>();
-        if (itemMap.containsKey('price')) {
-          return Product.fromJson(itemMap);
-        } else {
-          return Category.fromJson(itemMap);
-        }
-      }).toList(),
+      name: stringOr(json['name'], ''),
+      items: items,
     );
   }
-
-  final int id;
-  final String name;
-  final List<Item> items;
-
-  @override
-  List<Object?> get props => [id, name, items];
 }

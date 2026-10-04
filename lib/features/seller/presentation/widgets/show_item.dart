@@ -16,14 +16,11 @@ class ShowItem<T extends Item> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final item = this.item;
-    if (item is Product) {
-      return _ProductTile(product: item);
-    } else if (item is ProductGroup) {
-      return _ProductGroupTile(group: item);
-    } else if (item is Category) {
-      return _CategoryTile(category: item);
-    }
-    return const SizedBox.shrink();
+    return switch (item) {
+      Product() => _ProductTile(product: item),
+      ProductGroup() => _ProductGroupTile(group: item),
+      Category() => _CategoryTile(category: item),
+    };
   }
 }
 
