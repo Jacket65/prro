@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
+import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:prro/core/domain/catalog_item.dart';
@@ -244,5 +245,93 @@ void main() {
         await Future<void>.delayed(Duration.zero);
       },
     );
+  });
+
+  group('state equality', () {
+    Product product(String id) => Product(
+          id: id,
+          quantity: Decimal.one,
+          name: 'Кава',
+          price: 45,
+          imageUrl: '',
+        );
+
+    test('OrdersError compares the cart, not just the message', () {
+      final a = OrdersError(
+        message: 'boom',
+        products: [product('p1')],
+        total: 45,
+      );
+
+      expect(a, a);
+      expect(
+        a,
+        isNot(
+          OrdersError(
+            message: 'boom',
+            products: [product('p2')],
+            total: 45,
+          ),
+        ),
+      );
+      expect(
+        a,
+        isNot(
+          const OrdersError(
+            message: 'boom',
+            products: [],
+            total: 99,
+          ),
+        ),
+      );
+    });
+
+    test('DeleteProductLine compares by value, not by identity', () {
+      expect(
+        DeleteProductLine(product('p1')),
+        DeleteProductLine(product('p1')),
+      );
+      expect(
+        DeleteProductLine(product('p1')),
+        isNot(DeleteProductLine(product('p2'))),
+      );
+    });
+
+    test('OrdersPaymentSuccess compares the receipt structurally', () {
+      expect(
+        OrdersPaymentSuccess(_receipt()),
+        OrdersPaymentSuccess(_receipt()),
+      );
+      expect(
+        OrdersPaymentSuccess(_receipt()),
+        isNot(
+          OrdersPaymentSuccess(
+            OrderReceipt(
+              orderId: '2',
+              lines: [],
+              totalKopecks: 100,
+              tenderedKopecks: 100,
+              changeKopecks: 0,
+              method: PaymentMethod.cash,
+              status: 'paid',
+              issuedAt: DateTime(2024),
+              storeName: 'Store',
+              cashierName: 'Cashier',
+            ),
+          ),
+        ),
+      );
+    });
+
+    test('a different case is never equal', () {
+      expect(
+        const OrdersInitial(),
+        isNot(const OrdersLoading()),
+      );
+      expect(
+        const OrdersLoading(),
+        const OrdersLoading(),
+      );
+    });
   });
 }

@@ -1,6 +1,10 @@
+import 'package:decimal/decimal.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:prro/core/domain/bean.dart';
+import 'package:prro/core/domain/catalog_item.dart';
+import 'package:prro/core/domain/drink_option.dart';
 import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
@@ -146,5 +150,88 @@ void main() {
         expect(receipt.totalKopecks, 4500);
       },
     );
+  });
+
+  group('updateOptions', () {
+    Product product({Bean? bean, List<SelectedOption> options = const []}) =>
+        Product(
+          id: 'p1',
+          quantity: Decimal.one,
+          name: 'Кава',
+          price: 45,
+          imageUrl: '',
+          selectedBean: bean,
+          selectedOptions: options,
+        );
+
+    List<Product> products() => repo.products;
+
+    test('replaces the options of a line', () {
+      final line = product();
+      repo.addProduct(line);
+      const options = [
+        SelectedOption(optionId: 2, name: 'Молоко'),
+      ];
+
+      repo.updateOptions(line.lineId, options);
+
+      expect(products().single.selectedOptions, options);
+      expect(products().single.lineId, 'p1#2x1;');
+    });
+
+    test('omitting bean drops the bean of the line', () {
+      final line = product(bean: const Bean(id: 3, name: 'Колумбія'));
+      repo.addProduct(line);
+      expect(products().single.selectedBean, isNotNull);
+
+      repo.updateOptions(line.lineId, const []);
+
+      expect(products().single.selectedBean, isNull);
+      expect(products().single.lineId, 'p1');
+    });
+
+    test('passing a bean sets it on the line', () {
+      final line = product();
+      repo
+        ..addProduct(line)
+        ..updateOptions(
+          line.lineId,
+          const [],
+          bean: const Bean(id: 4, name: 'x'),
+        );
+
+      expect(products().single.selectedBean?.id, 4);
+    });
+
+    test('a quantity replaces the line quantity, null keeps it', () {
+      final line = product();
+      repo
+        ..addProduct(line)
+        ..updateOptions(line.lineId, const [], quantity: Decimal.fromInt(3));
+      expect(products().single.quantity, Decimal.fromInt(3));
+
+      repo.updateOptions(products().single.lineId, const []);
+      expect(products().single.quantity, Decimal.fromInt(3));
+    });
+
+    test('changing the options merges into an identical existing line', () {
+      const options = [SelectedOption(optionId: 2, name: 'Молоко')];
+      final plain = product();
+      repo
+        ..addProduct(plain)
+        ..addProduct(product(options: options))
+        ..updateOptions(plain.lineId, options);
+
+      expect(products().length, 1);
+      expect(products().single.selectedOptions, options);
+    });
+
+    test('an unknown lineId is ignored', () {
+      repo
+        ..addProduct(product())
+        ..updateOptions('nope', const []);
+
+      expect(products().length, 1);
+    });
   });
 }
