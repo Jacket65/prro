@@ -15,6 +15,16 @@ class PaymentConfig {
   /// Full callback URI used when launching the PrivatBank Terminal.
   static String get callbackUri => '$callbackScheme://$callbackHost';
 
+  /// Whether [uri] is a payment callback this app launched the terminal with.
+  ///
+  /// The single definition of the rule: both sides of the flow ask this, the
+  /// listener before emitting (`DeepLinkService`) and the orchestrator on
+  /// receipt (`TerminalPaymentService`). Keeping one copy means a change to
+  /// [callbackScheme] or [callbackHost] cannot leave the two disagreeing about
+  /// which URIs count.
+  static bool isCallback(Uri uri) =>
+      uri.scheme == callbackScheme && uri.host == callbackHost;
+
   /// Payment timeout duration.
   static const Duration paymentTimeout = Duration(seconds: 120);
 

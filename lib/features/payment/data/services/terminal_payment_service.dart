@@ -247,7 +247,7 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
   ///   without a usable transaction id.
   /// - [InvalidCallbackException] for any other malformed / untrusted callback.
   String _validateCallback(Uri uri, String sessionId) {
-    if (!_isPaymentCallback(uri)) {
+    if (!PaymentConfig.isCallback(uri)) {
       throw const InvalidCallbackException(
         'Callback URI does not match the expected payment scheme/host.',
       );
@@ -321,9 +321,4 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
 
   /// Whitelist for transaction id format to reject obviously malformed values.
   final RegExp _transactionIdPattern = RegExp(r'^[A-Za-z0-9_-]{6,64}$');
-
-  /// Defensive check mirroring [DeepLinkService._isPaymentCallback].
-  bool _isPaymentCallback(Uri uri) =>
-      uri.scheme == PaymentConfig.callbackScheme &&
-      uri.host == PaymentConfig.callbackHost;
 }

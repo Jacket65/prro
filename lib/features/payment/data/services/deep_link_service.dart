@@ -65,7 +65,7 @@ class DeepLinkService implements DeepLinkServiceI {
 
   void _handleUri(Uri uri) {
     log('[DeepLinkService] Incoming link: $uri');
-    if (!_isPaymentCallback(uri)) {
+    if (!PaymentConfig.isCallback(uri)) {
       log(
         '[DeepLinkService] Ignored — expected '
         '${PaymentConfig.callbackScheme}://${PaymentConfig.callbackHost}, '
@@ -97,11 +97,5 @@ class DeepLinkService implements DeepLinkServiceI {
     _initialized = false;
     await _subscription?.cancel();
     _subscription = null;
-  }
-
-  /// Checks if the URI is a payment callback (matches our configured scheme/host).
-  bool _isPaymentCallback(Uri uri) {
-    return uri.scheme == PaymentConfig.callbackScheme &&
-        uri.host == PaymentConfig.callbackHost;
   }
 }
