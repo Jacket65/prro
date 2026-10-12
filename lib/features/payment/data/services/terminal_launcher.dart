@@ -39,10 +39,12 @@ class TerminalLauncher implements TerminalLauncherI {
     );
     final uri = Uri.parse(uriString);
 
-    // Console log for debugging
-    log('[TerminalLauncher] Attempting to launch URI: $uriString');
+    // Console log for debugging. The URI itself is deliberately not logged: it
+    // carries the terminal JWT (a bearer credential for the charge).
+    // `PaymentConfig.buildTerminalUri` already logs the redacted form.
     log(
-      '[TerminalLauncher] Terminal scheme: ${PaymentConfig.terminalUriScheme}',
+      '[TerminalLauncher] Attempting to launch terminal '
+      '(${PaymentConfig.terminalUriScheme} scheme)',
     );
     try {
       final launched = await launchUrl(

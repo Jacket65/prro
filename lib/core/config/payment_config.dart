@@ -36,6 +36,34 @@ class PaymentConfig {
   /// Terminal pay action path.
   static const String terminalPayPath = 'pay';
 
+  /// Placeholder written in place of the PrivatBank JWT in every log line.
+  ///
+  /// The token is a bearer credential for a card charge, so a full copy in a
+  /// log line is a credential leak — the same rule `TerminalToken.toString`
+  /// applies. Every log line that mentions a terminal URI goes through
+  /// [redactedTerminalUri] instead of formatting the URI directly.
+  static const String redactedToken = '***';
+
+  /// Log-safe rendering of a terminal launch [uri].
+  ///
+  /// Keeps only the fields that identify a charge in a log — scheme, pay
+  /// action, amount, currency, order id, merchant id — and replaces the JWT
+  /// with [redactedToken]. Assembled by hand rather than from `uri.toString()`
+  /// so a caller cannot re-emit the credential by formatting the original, and
+  /// so the placeholder is never percent-encoded back into a token-looking
+  /// query value.
+  static String redactedTerminalUri(Uri uri) {
+    final query = uri.queryParameters;
+    final fields = <String>[
+      if (query['amount'] != null) 'amount=${query['amount']}',
+      if (query['currency'] != null) 'currency=${query['currency']}',
+      if (query['orderId'] != null) 'orderId=${query['orderId']}',
+      if (query['merchantId'] != null) 'merchantId=${query['merchantId']}',
+      'token: $redactedToken',
+    ];
+    return '$terminalUriScheme://$terminalPayPath?${fields.join('&')}';
+  }
+
   /// Builds the terminal launch URI with the given payment details.
   static String buildTerminalUri({
     required String jwtToken,
@@ -57,7 +85,9 @@ class PaymentConfig {
       },
     );
     final uriString = uri.toString();
-    log('[PaymentConfig] Built terminal URI: $uriString');
+    // Only the redacted form may reach the log: [jwtToken] authorizes a charge
+    // against the terminal, so a full URI in a log line leaks the credential.
+    log('[PaymentConfig] Built terminal URI: ${redactedTerminalUri(uri)}');
     return uriString;
   }
 }
