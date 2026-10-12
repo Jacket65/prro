@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:prro/core/config/network_timeouts.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/features/payment/data/models/payment_request.dart';
@@ -47,6 +48,7 @@ void main() {
       () => apiClient.post(
         any<String>(),
         data: any<dynamic>(named: 'data'),
+        timeout: any(named: 'timeout'),
       ),
     ).thenAnswer(
       (inv) async => Response<dynamic>(
@@ -71,6 +73,7 @@ void main() {
         () => apiClient.post(
           any<String>(),
           data: any<dynamic>(named: 'data'),
+          timeout: any(named: 'timeout'),
         ),
       ).thenThrow(_endpointMissing(status: 404));
 
@@ -98,6 +101,7 @@ void main() {
         () => apiClient.post(
           any<String>(),
           data: any<dynamic>(named: 'data'),
+          timeout: any(named: 'timeout'),
         ),
       ).thenThrow(_endpointMissing(status: 501));
 
@@ -112,6 +116,7 @@ void main() {
         () => apiClient.post(
           any<String>(),
           data: any<dynamic>(named: 'data'),
+          timeout: any(named: 'timeout'),
         ),
       ).thenThrow(
         DioException(
@@ -143,6 +148,7 @@ void main() {
         () => apiClient.post(
           '/retail-outlets/7/payments/create',
           data: any<dynamic>(named: 'data'),
+          timeout: NetworkTimeouts.payment,
         ),
       ).called(1);
     });
@@ -154,6 +160,7 @@ void main() {
         () => apiClient.post(
           any<String>(),
           data: any<dynamic>(named: 'data'),
+          timeout: any(named: 'timeout'),
         ),
       ).thenThrow(_endpointMissing(status: 501));
 
@@ -169,6 +176,7 @@ void main() {
         () => apiClient.post(
           any<String>(),
           data: any<dynamic>(named: 'data'),
+          timeout: any(named: 'timeout'),
         ),
       ).thenThrow(_endpointMissing(status: 404));
 

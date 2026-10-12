@@ -151,12 +151,13 @@ class ApiClient implements ApiClientI {
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   }) {
     return dio.get(
       path,
       queryParameters: queryParameters,
       cancelToken: cancelToken,
-      options: _mergeHeaders(null, headers),
+      options: _mergeOptions(null, headers, timeout),
     );
   }
 
@@ -166,11 +167,12 @@ class ApiClient implements ApiClientI {
     dynamic data,
     String? idempotencyKey,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   }) {
     return dio.post(
       path,
       data: data,
-      options: _mergeHeaders(idempotencyKey, headers),
+      options: _mergeOptions(idempotencyKey, headers, timeout),
     );
   }
 
@@ -180,11 +182,12 @@ class ApiClient implements ApiClientI {
     dynamic data,
     String? idempotencyKey,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   }) {
     return dio.patch(
       path,
       data: data,
-      options: _mergeHeaders(idempotencyKey, headers),
+      options: _mergeOptions(idempotencyKey, headers, timeout),
     );
   }
 
@@ -194,11 +197,12 @@ class ApiClient implements ApiClientI {
     dynamic data,
     String? idempotencyKey,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   }) {
     return dio.put(
       path,
       data: data,
-      options: _mergeHeaders(idempotencyKey, headers),
+      options: _mergeOptions(idempotencyKey, headers, timeout),
     );
   }
 
@@ -208,25 +212,34 @@ class ApiClient implements ApiClientI {
     dynamic data,
     String? idempotencyKey,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   }) {
     return dio.delete(
       path,
       data: data,
-      options: _mergeHeaders(idempotencyKey, headers),
+      options: _mergeOptions(idempotencyKey, headers, timeout),
     );
   }
 
-  Options? _mergeHeaders(
+  /// Builds the request options for one call. Returns `null` only when the
+  /// call is fully unannotated (no headers, no idempotency key, no explicit
+  /// timeout) so that dio's instance-level options apply untouched.
+  Options? _mergeOptions(
     String? idempotencyKey,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   ) {
-    final map = <String, dynamic>{};
-    if (idempotencyKey != null) {
-      map['Idempotency-Key'] = idempotencyKey;
-    }
-    if (headers != null) {
-      map.addAll(headers);
-    }
-    return map.isEmpty ? null : Options(headers: map);
+    final map = <String, dynamic>{
+      'Idempotency-Key': ?idempotencyKey,
+      ...?headers,
+    };
+    if (map.isEmpty && timeout == null) return null;
+    return Options(
+      headers: map.isEmpty ? null : map,
+      // Both bounds, matching the instance defaults they override: connect
+      // for reaching the server, receive for the response.
+      connectTimeout: timeout,
+      receiveTimeout: timeout,
+    );
   }
 }

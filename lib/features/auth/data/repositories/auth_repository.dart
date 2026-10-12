@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/config/network_timeouts.dart';
 import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
@@ -115,12 +116,15 @@ class AuthRepositoryImpl implements AuthRepositoryI {
     try {
       final Response<dynamic> response;
       try {
-        response = await apiClient
-            .post(
-              '/auth/login',
-              data: {'login': username, 'password': password},
-            )
-            .timeout(const Duration(seconds: 15));
+        // The timeout travels into dio's own options. A call-site
+        // `.timeout(...)` would sit on top of the instance-wide 10 s
+        // `receiveTimeout`, so dio would fail first and the manual wrapper
+        // would never be the thing that fires.
+        response = await apiClient.post(
+          '/auth/login',
+          data: {'login': username, 'password': password},
+          timeout: NetworkTimeouts.auth,
+        );
       } on DioException catch (e) {
         throw ApiException.fromDio(e);
       }
@@ -225,12 +229,11 @@ class AuthRepositoryImpl implements AuthRepositoryI {
   /// the caller maps that to [AuthErrorCode.invalidCredentials].
   Future<int?> _firstOutletId(String accessToken) async {
     try {
-      final response = await apiClient
-          .get(
-            '/retail-outlets/',
-            headers: {'Authorization': 'Bearer $accessToken'},
-          )
-          .timeout(const Duration(seconds: 15));
+      final response = await apiClient.get(
+        '/retail-outlets/',
+        headers: {'Authorization': 'Bearer $accessToken'},
+        timeout: NetworkTimeouts.auth,
+      );
       final ids = unwrapList<int?>(
         response.data,
         (m) => m['id'] is int ? m['id'] as int : null,

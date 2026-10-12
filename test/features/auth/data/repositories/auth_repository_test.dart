@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:prro/core/config/network_timeouts.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/security/token_storage_i.dart';
 import 'package:prro/features/auth/data/repositories/auth_repository.dart';
@@ -74,7 +75,11 @@ void main() {
 
   void stubLogin(Response<dynamic> response) {
     when(
-      () => apiClient.post(any<String>(), data: any<dynamic>(named: 'data')),
+      () => apiClient.post(
+        any<String>(),
+        data: any<dynamic>(named: 'data'),
+        timeout: any(named: 'timeout'),
+      ),
     ).thenAnswer((_) async => response);
   }
 
@@ -153,7 +158,11 @@ void main() {
         ),
       );
       when(
-        () => apiClient.get(any<String>(), headers: any(named: 'headers')),
+        () => apiClient.get(
+          any<String>(),
+          headers: any(named: 'headers'),
+          timeout: any(named: 'timeout'),
+        ),
       ).thenAnswer(
         (_) async => Response<dynamic>(
           requestOptions: RequestOptions(path: '/retail-outlets/'),
@@ -175,6 +184,7 @@ void main() {
         () => apiClient.get(
           '/retail-outlets/',
           headers: {'Authorization': 'Bearer tok'},
+          timeout: NetworkTimeouts.auth,
         ),
       ).called(1);
     });
@@ -189,7 +199,11 @@ void main() {
         ),
       );
       when(
-        () => apiClient.get(any<String>(), headers: any(named: 'headers')),
+        () => apiClient.get(
+          any<String>(),
+          headers: any(named: 'headers'),
+          timeout: any(named: 'timeout'),
+        ),
       ).thenAnswer(
         (_) async => Response<dynamic>(
           requestOptions: RequestOptions(path: '/retail-outlets/'),
@@ -218,7 +232,11 @@ void main() {
         ),
       );
       when(
-        () => apiClient.get(any<String>(), headers: any(named: 'headers')),
+        () => apiClient.get(
+          any<String>(),
+          headers: any(named: 'headers'),
+          timeout: any(named: 'timeout'),
+        ),
       ).thenAnswer(
         (_) async => Response<dynamic>(
           requestOptions: RequestOptions(path: '/retail-outlets/'),
@@ -252,7 +270,11 @@ void main() {
           ),
         );
         when(
-          () => apiClient.get(any<String>(), headers: any(named: 'headers')),
+          () => apiClient.get(
+            any<String>(),
+            headers: any(named: 'headers'),
+            timeout: any(named: 'timeout'),
+          ),
         ).thenThrow(
           DioException(
             requestOptions: RequestOptions(path: '/retail-outlets/'),
@@ -285,7 +307,11 @@ void main() {
           ),
         );
         when(
-          () => apiClient.get(any<String>(), headers: any(named: 'headers')),
+          () => apiClient.get(
+            any<String>(),
+            headers: any(named: 'headers'),
+            timeout: any(named: 'timeout'),
+          ),
         ).thenAnswer(
           (_) async => Response<dynamic>(
             requestOptions: RequestOptions(path: '/retail-outlets/'),
@@ -338,7 +364,11 @@ void main() {
       expect(prefs.getInt('user_id'), 42);
       expect(prefs.getString('user_role'), 'cashier');
       verifyNever(
-        () => apiClient.get(any<String>(), headers: any(named: 'headers')),
+        () => apiClient.get(
+          any<String>(),
+          headers: any(named: 'headers'),
+          timeout: any(named: 'timeout'),
+        ),
       );
     });
 
@@ -518,8 +548,11 @@ void main() {
           type: DioExceptionType.badResponse,
         );
         when(
-          () =>
-              apiClient.post(any<String>(), data: any<dynamic>(named: 'data')),
+          () => apiClient.post(
+            any<String>(),
+            data: any<dynamic>(named: 'data'),
+            timeout: any(named: 'timeout'),
+          ),
         ).thenThrow(dioErr);
 
         expect(

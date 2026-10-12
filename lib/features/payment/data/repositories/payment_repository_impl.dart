@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/config/network_timeouts.dart';
 import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
@@ -35,6 +36,7 @@ class PaymentRepositoryImpl implements PaymentRepositoryI {
       final response = await _apiClient.post(
         '/retail-outlets/${requireOutletId(_prefs)}/payments/create',
         data: request.toJson(),
+        timeout: NetworkTimeouts.payment,
       );
       return TerminalToken.fromJson(unwrapPayload(response.data)!);
     } on DioException catch (e) {
@@ -57,6 +59,7 @@ class PaymentRepositoryImpl implements PaymentRepositoryI {
       final response = await _apiClient.post(
         '/retail-outlets/${requireOutletId(_prefs)}/payments/check',
         data: {'transaction_id': transactionId},
+        timeout: NetworkTimeouts.payment,
       );
       return PaymentResult.fromJson(unwrapPayload(response.data)!);
     } on DioException catch (e) {

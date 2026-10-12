@@ -1,5 +1,16 @@
 import 'package:dio/dio.dart';
 
+/// HTTP surface of the app.
+///
+/// Every verb takes an optional [Duration] `timeout` that bounds that single
+/// request, overriding the client's default connect/receive timeout. Omit it
+/// to keep the default (`NetworkTimeouts.standard`) — an unannotated call is
+/// unaffected by this parameter existing.
+///
+/// The bound has to travel *down* to dio: a call-site `.timeout()` sits on top
+/// of dio's own `receiveTimeout`, so when the default is smaller dio fails
+/// first and the manual wrapper is dead code. Mock transports accept and
+/// ignore the parameter (they have no network).
 abstract interface class ApiClientI {
   /// Emits when the session can no longer be recovered (refresh failed): the
   /// app should clear state and return to the login screen.
@@ -15,6 +26,7 @@ abstract interface class ApiClientI {
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   });
 
   /// POST. State-changing POSTs require an `Idempotency-Key`; pass
@@ -25,6 +37,7 @@ abstract interface class ApiClientI {
     dynamic data,
     String? idempotencyKey,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   });
 
   /// PATCH. Same idempotency rules as [post].
@@ -33,6 +46,7 @@ abstract interface class ApiClientI {
     dynamic data,
     String? idempotencyKey,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   });
 
   /// PUT. Same idempotency rules as [post].
@@ -41,6 +55,7 @@ abstract interface class ApiClientI {
     dynamic data,
     String? idempotencyKey,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   });
 
   /// DELETE. [data] is rarely sent, but allowed (some backends read a body).
@@ -50,5 +65,6 @@ abstract interface class ApiClientI {
     dynamic data,
     String? idempotencyKey,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   });
 }

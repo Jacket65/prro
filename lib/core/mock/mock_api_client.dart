@@ -15,6 +15,11 @@ import 'package:prro/features/admin/data/models/admin_models.dart';
 ///
 /// This class is a transport only — it returns tokens in responses but never
 /// persists them. The repository owns session persistence.
+///
+/// The `timeout` parameter of [ApiClientI] is accepted and deliberately
+/// ignored: there is no network to bound, and the fake latency already lives
+/// in [MockBackend.latency]. Only the real transport translates it into dio
+/// options.
 class MockApiClient implements ApiClientI {
   MockApiClient({required this.mockBackend});
 
@@ -68,6 +73,7 @@ class MockApiClient implements ApiClientI {
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   }) async {
     try {
       if (path.contains('/auth/me')) {
@@ -197,6 +203,7 @@ class MockApiClient implements ApiClientI {
     dynamic data,
     String? idempotencyKey,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   }) async {
     try {
       // `POST /orders/{id}/confirm` — flips a pending (terminal) order to
@@ -433,6 +440,7 @@ class MockApiClient implements ApiClientI {
     dynamic data,
     String? idempotencyKey,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   }) async {
     try {
       if (path.contains('/categories/')) {
@@ -492,6 +500,7 @@ class MockApiClient implements ApiClientI {
     dynamic data,
     String? idempotencyKey,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   }) async {
     try {
       if (path.contains('/variants') && path.contains('/recipe')) {
@@ -529,6 +538,7 @@ class MockApiClient implements ApiClientI {
     dynamic data,
     String? idempotencyKey,
     Map<String, dynamic>? headers,
+    Duration? timeout,
   }) async {
     try {
       if (path.contains('/categories/')) {
