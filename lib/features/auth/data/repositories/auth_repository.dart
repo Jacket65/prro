@@ -7,6 +7,7 @@ import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/core/network/unwrap.dart';
+import 'package:prro/core/security/access_token_expiry.dart';
 import 'package:prro/core/security/token_storage_i.dart';
 import 'package:prro/features/auth/domain/entities/auth_user.dart';
 import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart';
@@ -53,6 +54,22 @@ class AuthRepositoryImpl implements AuthRepositoryI {
   Future<AuthUser?> restoreSession() async {
     final valid = await tokenStorage.hasValidSession();
     if (!valid) return null;
+
+    // Presence is not validity. An access token whose `exp` has passed would
+    // be accepted here, enter a guarded route, and 401 on its first request —
+    // tearing the session down mid-navigation instead of at restore, where the
+    // app can still show the login screen cleanly. Returning `null` routes to
+    // `AuthUnauthenticated(noSession)` and the initial route is already
+    // `LoginRoute`, so nothing new is exposed.
+    //
+    // `unknown` (non-JWT mock tokens, a missing/malformed `exp`) deliberately
+    // falls through to the previous presence-only behaviour: the expiry is a
+    // hard signal when present, never a verdict when it is not.
+    final accessToken = await tokenStorage.getAccessToken();
+    if (accessToken != null &&
+        checkAccessTokenExpiry(accessToken) == AccessTokenExpiry.expired) {
+      return null;
+    }
 
     final username = prefs.getString('username');
     if (username == null || username.isEmpty) return null;

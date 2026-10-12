@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -13,6 +15,14 @@ class MockApiClient extends Mock implements ApiClientI {}
 class MockTokenStorage extends Mock implements TokenStorageI {}
 
 class _FakeRequestOptions extends Fake implements RequestOptions {}
+
+/// Builds an unsigned JWT-shaped token with the given claims, so restore's
+/// expiry check sees the same shape a real backend issues.
+String _jwt(Map<String, dynamic> claims) {
+  String segment(Map<String, dynamic> map) =>
+      base64Url.encode(utf8.encode(jsonEncode(map))).replaceAll('=', '');
+  return '${segment({'alg': 'HS256', 'typ': 'JWT'})}.${segment(claims)}.sig';
+}
 
 Response<dynamic> _resp({
   int status = 200,
@@ -66,6 +76,15 @@ void main() {
     when(
       () => apiClient.post(any<String>(), data: any<dynamic>(named: 'data')),
     ).thenAnswer((_) async => response);
+  }
+
+  void stubRestore({String? accessToken}) {
+    when(() => tokenStorage.hasValidSession()).thenAnswer(
+      (_) async => accessToken != null && accessToken.isNotEmpty,
+    );
+    when(() => tokenStorage.getAccessToken()).thenAnswer(
+      (_) async => accessToken,
+    );
   }
 
   group('F9: role parsing', () {
@@ -429,6 +448,55 @@ void main() {
         verify(() => tokenStorage.clear()).called(1);
       },
     );
+  });
+
+  group('restoreSession', () {
+    test('an expired access token restores no session', () async {
+      stubRestore(accessToken: _jwt({'exp': 1000}));
+      await prefs.setString('username', 'cashier');
+      await prefs.setString('user_role', 'cashier');
+
+      expect(await repo.restoreSession(), isNull);
+    });
+
+    test('a token with a future exp restores the stored user', () async {
+      stubRestore(
+        accessToken: _jwt({
+          'exp': DateTime.now()
+              .add(const Duration(hours: 1))
+              .millisecondsSinceEpoch ~/
+              1000,
+        }),
+      );
+      await prefs.setString('username', 'cashier');
+      await prefs.setString('user_role', 'cashier');
+
+      final user = await repo.restoreSession();
+
+      expect(user?.username, 'cashier');
+      expect(user?.role, UserRole.cashier);
+    });
+
+    test('a non-JWT token falls through to presence-only validity', () async {
+      // Mock-mode tokens are opaque: the expiry is unknown, so the previous
+      // behaviour must apply unchanged or every mock session breaks.
+      stubRestore(accessToken: 'mock_token_1767000000000');
+      await prefs.setString('username', 'cashier');
+      await prefs.setString('user_role', 'admin');
+
+      final user = await repo.restoreSession();
+
+      expect(user?.username, 'cashier');
+      expect(user?.role, UserRole.admin);
+    });
+
+    test('no stored token restores no session', () async {
+      stubRestore();
+      await prefs.setString('username', 'cashier');
+      await prefs.setString('user_role', 'cashier');
+
+      expect(await repo.restoreSession(), isNull);
+    });
   });
 
   group('F1: invalid credentials mapping', () {
