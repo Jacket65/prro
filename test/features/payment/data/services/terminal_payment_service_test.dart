@@ -9,6 +9,7 @@ import 'package:prro/features/payment/data/models/payment_token.dart';
 import 'package:prro/features/payment/data/services/deep_link_service.dart';
 import 'package:prro/features/payment/data/services/terminal_launcher.dart';
 import 'package:prro/features/payment/data/services/terminal_payment_service.dart';
+import 'package:prro/features/payment/domain/payment_exceptions.dart';
 import 'package:prro/features/payment/domain/repositories/payment_repository_i.dart';
 import 'package:prro/features/payment/domain/repositories/terminal_payment_service_i.dart';
 import 'package:talker/talker.dart';
@@ -128,6 +129,35 @@ void main() {
         ),
       ).called(1);
       verify(() => mockRepository.verifyPayment('txn_12345')).called(1);
+    });
+
+    test('startPayment propagates TerminalPaymentEndpointUnavailableException '
+        'unchanged — an absent route is not rewritten as an unexpected error',
+        () async {
+      const request = CreatePaymentRequest(
+        amount: 15000,
+        currency: 'UAH',
+        description: 'Test payment',
+        orderId: 'test_order',
+      );
+
+      when(
+        () => mockRepository.createPaymentToken(request),
+      ).thenThrow(const TerminalPaymentEndpointUnavailableException());
+      when(
+        () => mockDeepLinkService.onDeepLink,
+      ).thenAnswer((_) => const Stream.empty());
+
+      await expectLater(
+        () => service.startPayment(request),
+        throwsA(
+          isA<TerminalPaymentEndpointUnavailableException>().having(
+            (e) => e.reason,
+            'reason',
+            PaymentFailureReason.terminalEndpointUnavailable,
+          ),
+        ),
+      );
     });
 
     test('startPayment throws TerminalLaunchFailedException '

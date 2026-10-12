@@ -24,6 +24,15 @@ enum PaymentFailureReason {
   /// A repository/network error occurred while preparing or confirming payment.
   network,
 
+  /// The backend does not expose the terminal payment endpoints, so a card
+  /// payment cannot be attempted at all (the route is absent/unimplemented).
+  ///
+  /// Distinct from [terminalUnavailable]: the terminal *app* may be installed
+  /// and healthy while the backend cannot start or verify a charge, so the
+  /// cashier must be told the method is unavailable instead of seeing a
+  /// generic server error.
+  terminalEndpointUnavailable,
+
   /// A second payment was started while one is already active.
   alreadyInProgress,
 

@@ -91,6 +91,32 @@ class TerminalLaunchFailedException implements TerminalPaymentException {
   String toString() => 'TerminalLaunchFailedException: $message';
 }
 
+/// Exception thrown when the backend cannot take a terminal payment because it
+/// does not expose the payment endpoints.
+///
+/// Raised by `PaymentRepositoryImpl` when the route is absent (a well-formed
+/// request answered 404) or explicitly unimplemented (501). It is deliberately
+/// *not* an [PaymentOperationException] with a generic message: the seller must
+/// be able to tell "the server does not do card payments" from "something went
+/// wrong", because the first one has a different next action (take cash).
+///
+/// The route, the method and the dialog option all stay in place — the backend
+/// only has to implement the endpoint for this to stop firing.
+class TerminalPaymentEndpointUnavailableException
+    implements TerminalPaymentException {
+  const TerminalPaymentEndpointUnavailableException([
+    this.message = 'Оплата терміналом недоступна: сервер не підтримує '
+        'такий спосіб оплати. Оберіть готівку.',
+  ]);
+  @override
+  final String message;
+  @override
+  PaymentFailureReason get reason =>
+      PaymentFailureReason.terminalEndpointUnavailable;
+  @override
+  String toString() => 'TerminalPaymentEndpointUnavailableException: $message';
+}
+
 /// Exception thrown when the payment callback times out.
 class PaymentCallbackTimeoutException implements TerminalPaymentException {
   const PaymentCallbackTimeoutException(this.message);
