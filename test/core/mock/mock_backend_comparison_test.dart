@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/order.dart';
@@ -73,7 +74,7 @@ void main() {
           items: [
             OrderLineDto(
               productId: variant.id,
-              quantity: 1,
+              quantity: Decimal.one,
               options: [
                 const SelectedOptionDto(optionId: 1),
                 const SelectedOptionDto(optionId: 1),
@@ -111,7 +112,7 @@ void main() {
             items: [
               OrderLineDto(
                 productId: espresso.id,
-                quantity: 1,
+                quantity: Decimal.one,
                 options: [const SelectedOptionDto(optionId: 99999)],
               ),
             ],
@@ -139,7 +140,7 @@ void main() {
             items: [
               OrderLineDto(
                 productId: espresso.id,
-                quantity: 1,
+                quantity: Decimal.one,
                 options: [const SelectedOptionDto(optionId: 2)],
               ),
             ],
@@ -179,7 +180,11 @@ void main() {
         await expectLater(
           backend.placeOrder(
             items: [
-              OrderLineDto(productId: espresso.id, quantity: 1, options: []),
+              OrderLineDto(
+              productId: espresso.id,
+              quantity: Decimal.one,
+              options: [],
+            ),
             ],
             payment: const PaymentDto(
               method: PaymentMethod.cash,
@@ -203,7 +208,11 @@ void main() {
         await expectLater(
           backend.placeOrder(
             items: [
-              OrderLineDto(productId: espresso.id, quantity: 1, options: []),
+              OrderLineDto(
+              productId: espresso.id,
+              quantity: Decimal.one,
+              options: [],
+            ),
             ],
             payment: const PaymentDto(
               method: PaymentMethod.terminal,
@@ -226,7 +235,11 @@ void main() {
 
         final receipt1 = await backend.placeOrder(
           items: [
-            OrderLineDto(productId: espresso.id, quantity: 1, options: []),
+            OrderLineDto(
+              productId: espresso.id,
+              quantity: Decimal.one,
+              options: [],
+            ),
           ],
           payment: const PaymentDto(
             method: PaymentMethod.cash,
@@ -237,7 +250,11 @@ void main() {
 
         final receipt2 = await backend.placeOrder(
           items: [
-            OrderLineDto(productId: espresso.id, quantity: 2, options: []),
+            OrderLineDto(
+              productId: espresso.id,
+              quantity: Decimal.fromInt(2),
+              options: [],
+            ),
           ],
           payment: const PaymentDto(
             method: PaymentMethod.cash,

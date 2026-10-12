@@ -2,6 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:prro/core/mock/mock_api_client.dart';
 import 'package:prro/core/mock/mock_backend.dart';
 
+// The mock's accounts, mirrored from MockApiClient's table: the checker
+// validates the password exactly, so a test that logs in has to use it.
+const _adminPassword = 'admin123';
+const _cashierPassword = 'cashier123';
+const _managerPassword = 'manager123';
+
 void main() {
   late MockBackend mockBackend;
   late MockApiClient client;
@@ -15,7 +21,7 @@ void main() {
     test('returns 200 with user data for valid admin credentials', () async {
       final response = await client.post(
         '/auth/login',
-        data: {'login': 'admin', 'password': 'any'},
+        data: {'login': 'admin', 'password': _adminPassword},
       );
 
       expect(response.statusCode, 200);
@@ -31,7 +37,7 @@ void main() {
     test('returns 200 with user data for valid cashier credentials', () async {
       final response = await client.post(
         '/auth/login',
-        data: {'login': 'cashier', 'password': 'any'},
+        data: {'login': 'cashier', 'password': _cashierPassword},
       );
 
       expect(response.statusCode, 200);
@@ -44,7 +50,7 @@ void main() {
     test('returns 200 with user data for valid manager credentials', () async {
       final response = await client.post(
         '/auth/login',
-        data: {'login': 'manager', 'password': 'any'},
+        data: {'login': 'manager', 'password': _managerPassword},
       );
 
       expect(response.statusCode, 200);
@@ -57,7 +63,7 @@ void main() {
     test('returns 400 when login is empty', () async {
       final response = await client.post(
         '/auth/login',
-        data: {'login': '', 'password': 'any'},
+        data: {'login': '', 'password': _cashierPassword},
       );
 
       expect(response.statusCode, 400);
@@ -79,12 +85,32 @@ void main() {
     test('returns 401 for unknown user', () async {
       final response = await client.post(
         '/auth/login',
-        data: {'login': 'unknown', 'password': 'any'},
+        data: {'login': 'unknown', 'password': _cashierPassword},
       );
 
       expect(response.statusCode, 401);
       final data = response.data as Map<String, dynamic>;
       expect(data['code'], 'UNAUTHORIZED');
+    });
+
+    test('returns 401 for a known user with a wrong password', () async {
+      final response = await client.post(
+        '/auth/login',
+        data: {'login': 'admin', 'password': 'any'},
+      );
+
+      expect(response.statusCode, 401);
+      final data = response.data as Map<String, dynamic>;
+      expect(data['code'], 'UNAUTHORIZED');
+    });
+
+    test('returns 401 for a near-miss password', () async {
+      final response = await client.post(
+        '/auth/login',
+        data: {'login': 'cashier', 'password': '${_cashierPassword}x'},
+      );
+
+      expect(response.statusCode, 401);
     });
 
     test('returns 401 when password is empty for known user', () async {
@@ -99,7 +125,7 @@ void main() {
     test('Authorization header contains bearer token', () async {
       final response = await client.post(
         '/auth/login',
-        data: {'login': 'admin', 'password': 'any'},
+        data: {'login': 'admin', 'password': _adminPassword},
       );
 
       final authHeader = response.headers.value('Authorization');
@@ -120,7 +146,7 @@ void main() {
     test('returns user data after login', () async {
       await client.post(
         '/auth/login',
-        data: {'login': 'admin', 'password': 'any'},
+        data: {'login': 'admin', 'password': _adminPassword},
       );
 
       final response = await client.get('/auth/me');
@@ -137,7 +163,7 @@ void main() {
     test('returns 204 and clears session', () async {
       await client.post(
         '/auth/login',
-        data: {'login': 'admin', 'password': 'any'},
+        data: {'login': 'admin', 'password': _adminPassword},
       );
 
       final response = await client.post('/auth/logout');

@@ -115,7 +115,10 @@ class OrdersRepositoryMock implements OrdersRepositoryI {
         items: _products.map((p) {
           return OrderLineDto(
             productId: p.id,
-            quantity: p.quantity.toDouble().toInt(),
+            // As the client sends it: the raw decimal quantity. Converting
+            // through `toDouble().toInt()` used to truncate a 0.250 kg line to
+            // 0, which the backend then rejected as a non-positive quantity.
+            quantity: p.quantity,
             options: [
               ...p.selectedOptions.map(
                 (o) => SelectedOptionDto(

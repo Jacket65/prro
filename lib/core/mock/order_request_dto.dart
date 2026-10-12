@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:prro/core/domain/order.dart';
 
 // ── Request DTOs (cart → backend) ────────────────────────────────────────────
@@ -17,8 +18,19 @@ class OrderLineDto {
     required this.quantity,
     this.options = const [],
   });
+
+  /// The variant id, exactly as the client sends it: `"7"`.
   final String productId;
-  final int quantity;
+
+  /// The wire quantity, which the backend serializes as a decimal **string**
+  /// (`"2"` for pieces, `"0.250"` for weight goods).
+  ///
+  /// Held as a [Decimal] rather than an `int` because a 250 g line is a real
+  /// order line: an `int` field silently truncates it to zero, which the mock
+  /// then rejects as "Кількість має бути додатньою." — a weight-goods sale
+  /// could not be ordered at all in mock mode.
+  final Decimal quantity;
+
   final List<SelectedOptionDto> options;
 }
 

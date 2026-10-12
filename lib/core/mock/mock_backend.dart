@@ -309,7 +309,7 @@ class MockBackend {
       if (info == null) {
         throw MockBackendException('Невідомий товар: ${line.productId}.');
       }
-      if (line.quantity <= 0) {
+      if (line.quantity <= Decimal.zero) {
         throw const MockBackendException('Кількість має бути додатньою.');
       }
       // Add the surcharge of each picked option (× portions) to the unit price,
@@ -333,7 +333,16 @@ class MockBackend {
         optionNames.add(portions > 1 ? '${o.name} ×$portions' : o.name);
       }
       final unitKopecks = info.priceKopecks + optionsKopecks;
-      final subtotal = unitKopecks * line.quantity;
+      // Exact decimal arithmetic with no float step: prices come in whole
+      // kopecks and quantity can carry up to three decimals (kg goods), so the
+      // product may land on a fraction of a kopeck. Money stays int kopecks
+      // everywhere in this app, so the line total is rounded once, at the end
+      // of the multiplication, with `Decimal` rounding (not `round()` on a
+      // double, which would drift).
+      final subtotal = (Decimal.fromInt(unitKopecks) * line.quantity)
+          .round()
+          .toBigInt()
+          .toInt();
       totalKopecks += subtotal;
       receiptLines.add(
         ReceiptLine(
@@ -701,41 +710,25 @@ class MockBackend {
     return variant.recipe;
   }
 
+  /// Mirrors `PUT /variants/{id}/recipe`, which the backend answers with 200
+  /// and **does not persist**.
+  ///
+  /// The mock writes nothing for the same reason: the handler is a stub, so a
+  /// re-read returns whatever the server already had. Persisting here would
+  /// hide exactly that drift — the admin would see an edit accepted, the next
+  /// reload would silently revert it, and nothing in the app would look wrong
+  /// until someone tested against the real backend. The variant-detail screen
+  /// knows: it re-reads after saving and shows the server's answer.
   Future<void> replaceAdminRecipe({
     required int variantId,
     required List<RecipeIngredient> ingredients,
   }) async {
     await _network();
-    final found = _findAdminVariant(variantId);
-    final cat = found.$1;
-    final product = found.$2;
-    final variant = found.$3;
-    final newVariant = _AdminVariant(
-      id: variant.id,
-      name: variant.name,
-      priceKopecks: variant.priceKopecks,
-      recipe: ingredients,
-    );
-    final newProducts = [
-      for (final p in cat.products)
-        if (p.id == product.id)
-          _AdminProduct(
-            id: p.id,
-            name: p.name,
-            variants: [
-              for (final v in p.variants)
-                if (v.id == variantId) newVariant else v,
-            ],
-          )
-        else
-          p,
-    ];
-    _adminCatalog[_adminCatalog.indexOf(cat)] = _AdminCategory(
-      id: cat.id,
-      outletId: cat.outletId,
-      name: cat.name,
-      products: newProducts,
-    );
+    // The variant must exist, exactly as the real route resolves it before it
+    // would (or would not) write anything.
+    _findAdminVariant(variantId);
+    log('[MOCK /variants/$variantId/recipe] 200, stored by the server as a '
+        'no-op');
   }
 
   // ── Ingredients (global, per outlet) ──

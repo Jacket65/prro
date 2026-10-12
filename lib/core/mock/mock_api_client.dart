@@ -29,16 +29,31 @@ class MockApiClient implements ApiClientI {
 
   Map<String, dynamic>? _lastUser;
 
-  static const _users = <Map<String, dynamic>>[
-    {
-      'first_name': 'Олена',
-      'id': 1,
-      'last_name': 'Касір',
-      'login': 'cashier',
-      'outlet_id': 1,
-      'role': 'cashier',
-    },
-    {
+  /// The mock's accounts, `login → password` — the plaintext stand-in for what
+  /// the real backend hashes.
+  ///
+  /// The password is checked exactly, because a login screen cannot be
+  /// exercised against a checker that accepts any non-empty string: a wrong
+  /// password would look like a correct one and every 401 path would look
+  /// dead. Demo logins: `cashier` / `cashier123`, `admin` / `admin123`,
+  /// `manager` / `manager123`.
+  static const _users = <String, String>{
+    'cashier': 'cashier123',
+    'admin': 'admin123',
+    'manager': 'manager123',
+  };
+
+  Map<String, dynamic>? _matchUser(String login, String password) {
+    // The real `/auth/login` rejects an empty password before it hashes
+    // anything, so an empty one never matches even for a known login.
+    if (password.isEmpty) return null;
+    final expected = _users[login];
+    if (expected == null || expected != password) return null;
+    return _profileOf(login);
+  }
+
+  static Map<String, dynamic> _profileOf(String login) => switch (login) {
+    'admin' => const {
       'first_name': 'Іван',
       'id': 2,
       'last_name': 'Адмін',
@@ -46,7 +61,7 @@ class MockApiClient implements ApiClientI {
       'outlet_id': 1,
       'role': 'admin',
     },
-    {
+    'manager' => const {
       'first_name': 'Марія',
       'id': 3,
       'last_name': 'Менеджер',
@@ -54,18 +69,50 @@ class MockApiClient implements ApiClientI {
       'outlet_id': 1,
       'role': 'manager',
     },
-  ];
-
-  Map<String, dynamic>? _matchUser(String login, String password) {
-    if (password.isEmpty) return null;
-    for (final u in _users) {
-      if (u['login'] == login) return u;
-    }
-    return null;
-  }
+    _ => const {
+      'first_name': 'Олена',
+      'id': 1,
+      'last_name': 'Касір',
+      'login': 'cashier',
+      'outlet_id': 1,
+      'role': 'cashier',
+    },
+  };
 
   @override
   Stream<String?> get onUnauthorized => _unauthorized.stream;
+
+  DioException _wrapped(Object error, String path) {
+    log('[MOCK API] Error on $path: $error');
+    return DioException(
+      requestOptions: RequestOptions(path: path),
+      message: error.toString(),
+    );
+  }
+
+  /// Answers a path this mock has no route for.
+  ///
+  /// A silent `200 {}` made a typo'd or unimplemented endpoint look like a
+  /// working one that simply returned nothing, which is how a client could
+  /// drift from the backend without anyone noticing. Gin answers an
+  /// unregistered route with a bare 404 and no error envelope, so the mock does
+  /// the same and throws: the repositories already branch on a 404 for exactly
+  /// their absent routes, and the response body keeps the path diagnosable.
+  Never _unhandled(String verb, String path) {
+    log('[MOCK API] No route for $verb $path');
+    throw DioException(
+      requestOptions: RequestOptions(path: path),
+      response: Response<dynamic>(
+        requestOptions: RequestOptions(path: path),
+        data: {
+          'code': 'NOT_FOUND',
+          'message': 'Мок не реалізує цей маршрут: $verb $path',
+        },
+        statusCode: 404,
+      ),
+      type: DioExceptionType.badResponse,
+    );
+  }
 
   @override
   Future<Response<dynamic>> get(
@@ -182,18 +229,11 @@ class MockApiClient implements ApiClientI {
         );
       }
 
-      log('[MOCK API] Unhandled GET path: $path');
-      return Response<dynamic>(
-        requestOptions: RequestOptions(path: path),
-        data: {'data': const <List<dynamic>>[]},
-        statusCode: 200,
-      );
+      _unhandled('GET', path);
+    } on DioException {
+      rethrow;
     } catch (e) {
-      log('[MOCK API] Error in GET $path: $e');
-      throw DioException(
-        requestOptions: RequestOptions(path: path),
-        message: e.toString(),
-      );
+      throw _wrapped(e, path);
     }
   }
 
@@ -259,28 +299,43 @@ class MockApiClient implements ApiClientI {
       if (path.contains('/orders')) {
         final orderData = data as Map<String, dynamic>?;
         if (orderData != null) {
+          // `products[]`, the shape `OrdersRepositoryImpl` actually sends:
+          // `{id, quantity (decimal string), options[]}` with
+          // `payment.amount` as a UAH decimal string. Reading `items[]` instead
+          // left the real payload unexercised in mock mode — every line came
+          // through empty, and the only sales that ever worked were the ones a
+          // test built by hand.
           final items =
-              (orderData['items'] as List<dynamic>?)?.map((item) {
-                final itemMap = item as Map<String, dynamic>;
-                return OrderLineDto(
-                  productId: itemMap['product_id'] as String,
-                  quantity: itemMap['quantity'] as int,
-                  options:
-                      (itemMap['options'] as List<dynamic>?)?.map((opt) {
-                        final optMap = opt as Map<String, dynamic>;
-                        return SelectedOptionDto(
-                          optionId: optMap['option_id'] as int,
-                          quantity: optMap['quantity'] as int? ?? 1,
-                        );
-                      }).toList() ??
-                      <SelectedOptionDto>[],
-                );
-              }).toList() ??
-              <OrderLineDto>[];
+              ((orderData['products'] as List<dynamic>?) ??
+                      const <dynamic>[])
+                  .map((item) {
+                    final itemMap = item as Map<String, dynamic>;
+                    return OrderLineDto(
+                      productId: itemMap['id'].toString(),
+                      quantity: parseDecimal(itemMap['quantity']),
+                      options:
+                          ((itemMap['options'] as List<dynamic>?) ??
+                                  const <dynamic>[])
+                              .map((opt) {
+                                final optMap = opt as Map<String, dynamic>;
+                                return SelectedOptionDto(
+                                  optionId: parseInt(optMap['option_id']),
+                                  quantity: parseInt(
+                                    optMap['quantity'],
+                                    fallback: 1,
+                                  ),
+                                );
+                              })
+                              .toList(),
+                    );
+                  })
+                  .toList();
 
           final paymentData = orderData['payment'] as Map<String, dynamic>?;
           final paymentMethod = paymentData?['method'] as String? ?? 'cash';
-          final tenderedKopecks = paymentData?['tendered'] as int? ?? 0;
+          final tenderedKopecks = kopecksFromString(
+            stringOr(paymentData?['amount'], '0'),
+          );
 
           final receipt = await mockBackend.placeOrder(
             items: items,
@@ -419,18 +474,11 @@ class MockApiClient implements ApiClientI {
         );
       }
 
-      log('[MOCK API] Unhandled POST path: $path');
-      return Response<dynamic>(
-        requestOptions: RequestOptions(path: path),
-        data: <String, dynamic>{},
-        statusCode: 200,
-      );
+      _unhandled('POST', path);
+    } on DioException {
+      rethrow;
     } catch (e) {
-      log('[MOCK API] Error in POST $path: $e');
-      throw DioException(
-        requestOptions: RequestOptions(path: path),
-        message: e.toString(),
-      );
+      throw _wrapped(e, path);
     }
   }
 
@@ -479,18 +527,11 @@ class MockApiClient implements ApiClientI {
           statusCode: 200,
         );
       }
-      log('[MOCK API] PATCH $path with data: $data');
-      return Response<dynamic>(
-        requestOptions: RequestOptions(path: path),
-        data: data,
-        statusCode: 200,
-      );
+      _unhandled('PATCH', path);
+    } on DioException {
+      rethrow;
     } catch (e) {
-      log('[MOCK API] Error in PATCH $path: $e');
-      throw DioException(
-        requestOptions: RequestOptions(path: path),
-        message: e.toString(),
-      );
+      throw _wrapped(e, path);
     }
   }
 
@@ -517,18 +558,11 @@ class MockApiClient implements ApiClientI {
           statusCode: 200,
         );
       }
-      log('[MOCK API] PUT $path with data: $data');
-      return Response<dynamic>(
-        requestOptions: RequestOptions(path: path),
-        data: data ?? <String, dynamic>{},
-        statusCode: 200,
-      );
+      _unhandled('PUT', path);
+    } on DioException {
+      rethrow;
     } catch (e) {
-      log('[MOCK API] Error in PUT $path: $e');
-      throw DioException(
-        requestOptions: RequestOptions(path: path),
-        message: e.toString(),
-      );
+      throw _wrapped(e, path);
     }
   }
 
@@ -544,24 +578,30 @@ class MockApiClient implements ApiClientI {
       if (path.contains('/categories/')) {
         final id = _extractIdAfter(path, 'categories');
         await mockBackend.deleteAdminCategory(id: id!);
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          statusCode: 204,
+        );
       } else if (path.contains('/products/')) {
         final id = _extractIdAfter(path, 'products');
         await mockBackend.deleteAdminProduct(id: id!);
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          statusCode: 204,
+        );
       } else if (path.contains('/variants/')) {
         final id = _extractIdAfter(path, 'variants');
         await mockBackend.deleteAdminVariant(id: id!);
+        return Response<dynamic>(
+          requestOptions: RequestOptions(path: path),
+          statusCode: 204,
+        );
       }
-      log('[MOCK API] DELETE $path');
-      return Response<dynamic>(
-        requestOptions: RequestOptions(path: path),
-        statusCode: 204,
-      );
+      _unhandled('DELETE', path);
+    } on DioException {
+      rethrow;
     } catch (e) {
-      log('[MOCK API] Error in DELETE $path: $e');
-      throw DioException(
-        requestOptions: RequestOptions(path: path),
-        message: e.toString(),
-      );
+      throw _wrapped(e, path);
     }
   }
 
@@ -625,16 +665,16 @@ class MockApiClient implements ApiClientI {
                 'variant_id': line.productId,
                 'name': line.name,
                 'quantity': line.quantity,
-                'unit_price': (line.unitPriceKopecks / 100).toString(),
-                'line_total': (line.subtotalKopecks / 100).toString(),
+                'unit_price': formatAmount(line.unitPriceKopecks),
+                'line_total': formatAmount(line.subtotalKopecks),
               },
             )
             .toList(),
-        'total_price': (receipt.totalKopecks / 100).toString(),
+        'total_price': formatAmount(receipt.totalKopecks),
         'payment': <String, String>{
           'method': receipt.method.wire,
-          'tendered': (receipt.tenderedKopecks / 100).toString(),
-          'change': (receipt.changeKopecks / 100).toString(),
+          'tendered': formatAmount(receipt.tenderedKopecks),
+          'change': formatAmount(receipt.changeKopecks),
         },
         'status': receipt.status,
         'created_at': receipt.issuedAt.toIso8601String(),
