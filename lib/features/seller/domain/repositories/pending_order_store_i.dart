@@ -16,6 +16,7 @@ final class PendingOrder {
     required this.orderId,
     required this.idempotencyKey,
     required this.createdAt,
+    required this.username,
   });
 
   /// The order the terminal charge was started for.
@@ -31,6 +32,15 @@ final class PendingOrder {
   /// that); it exists so the record can be diagnosed after the fact.
   final DateTime createdAt;
 
+  /// Who was signed in when the order was placed.
+  ///
+  /// Not decoration. A card order is confirmable by whoever holds a valid
+  /// session, so this is what stops one seller's interrupted sale from being
+  /// finished (or re-confirmed) by the next one on a shared device. It is
+  /// stamped by the store from the session it was written under rather than
+  /// passed down, so no caller can forget it.
+  final String username;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -38,15 +48,17 @@ final class PendingOrder {
           runtimeType == other.runtimeType &&
           orderId == other.orderId &&
           idempotencyKey == other.idempotencyKey &&
-          createdAt == other.createdAt;
+          createdAt == other.createdAt &&
+          username == other.username;
 
   @override
-  int get hashCode => Object.hash(orderId, idempotencyKey, createdAt);
+  int get hashCode => Object.hash(orderId, idempotencyKey, createdAt, username);
 
   @override
   String toString() =>
       'PendingOrder(orderId: $orderId, '
-      'idempotencyKey: $idempotencyKey, createdAt: $createdAt)';
+      'idempotencyKey: $idempotencyKey, createdAt: $createdAt, '
+      'username: $username)';
 }
 
 /// Persistence for the single [PendingOrder] of the current session.
@@ -60,12 +72,19 @@ abstract interface class PendingOrderStoreI {
   ///
   /// A suspended or completed order must never overwrite an entry that is
   /// still needed, so callers only invoke this for an interrupted card order.
+  ///
+  /// The record is stamped with the signed-in username by the implementation;
+  /// [read] then refuses to hand back an entry that belongs to someone else.
   Future<void> save({
     required String orderId,
     required String idempotencyKey,
   });
 
   /// The recorded pending order, or `null` when there is none.
+  ///
+  /// Returns `null` for a record that belongs to a different user, and drops
+  /// it: a new sign-in on a shared device must not inherit the previous
+  /// seller's unfinished sale.
   PendingOrder? read();
 
   /// Drops the record. Safe to call when there is nothing to drop.

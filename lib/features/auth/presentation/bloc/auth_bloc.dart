@@ -43,16 +43,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   /// their order.
   final PendingOrderStoreI pendingOrderStore;
 
-  /// Drops the previous session's cart and its pending card order. Called
-  /// *before* the new session's first screen can render and *before* the
-  /// teardown emits [AuthUnauthenticated], so no state in between can observe
-  /// the old lines.
+  /// Drops the previous session's cart. Called *before* the new session's
+  /// first screen can render, so no state in between can observe the old
+  /// lines — a login and a session teardown are both session boundaries.
   ///
-  /// Awaited rather than fire-and-forget: the resume UI reads the store on
-  /// mount, and a store write that lands after that read would show the new
-  /// seller a pending order that is no longer theirs.
+  /// The pending card order is deliberately **not** cleared here. The scenario
+  /// the resume exists for is a process death mid-charge, and the next thing
+  /// that happens is almost always a cold start that lands on the login
+  /// screen; deleting the record on sign-in would destroy it before the seller
+  /// could ever use it, leaving an order that may already have been charged
+  /// and that nothing else can find. Ownership is enforced by the store
+  /// instead: it drops a record that belongs to a different username, so a
+  /// device handed over at the login screen cannot inherit the previous
+  /// seller's unfinished sale.
   Future<void> _resetSessionState() async {
     ordersRepository.resetForNewSession();
+  }
+
+  /// Drops everything the session that is ending owned — the cart and the
+  /// interrupted card order it may have left behind.
+  ///
+  /// Used for an explicit logout and a session expiry, where nobody is coming
+  /// back to finish the order, and never for a sign-in.
+  Future<void> _tearDownSession() async {
+    await _resetSessionState();
     try {
       await pendingOrderStore.clear();
     } on Object catch (e) {
@@ -125,6 +139,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final previousStatus = _statusOf(state);
     // A login is a new session: whatever the previous seller left in the cart
     // must not survive it, whichever way that session ended (or never ended).
+    // The interrupted card order is deliberately *not* cleared — see
+    // [_resetSessionState] for why a sign-in is not a teardown.
     await _resetSessionState();
     emit(const AuthLoading(operation: AuthOperation.login));
 
@@ -167,7 +183,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final previousStatus = _statusOf(state);
     // Same session boundary as a seller login — including the re-login from an
     // already-authenticated session, where the cart being carried is exactly
-    // the case that leaked (F8).
+    // the case that leaked (F8). The card order stays; ownership is the store's
+    // job (see [_resetSessionState]).
     await _resetSessionState();
     emit(const AuthLoading(operation: AuthOperation.adminLogin));
 
@@ -218,7 +235,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     if (!_isCurrentGeneration(gen)) return;
 
-    await _resetSessionState();
+    await _tearDownSession();
     emit(const AuthUnauthenticated(reason: AuthUnauthenticatedReason.logout));
   }
 
@@ -248,11 +265,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     if (!_isCurrentGeneration(gen)) return;
 
-    // The session-expiry teardown the cart reset was missing: the seller
-    // screen's own clear only ran on the logout button or when no shift was
-    // open, and an expiry often leaves the previous shift open, so neither
-    // fired and the next login inherited the lines.
-    await _resetSessionState();
+    // The teardown the cart reset was missing: the seller screen's own clear
+    // only ran on the logout button or when no shift was open, and an expiry
+    // often leaves the previous shift open, so neither fired and the next login
+    // inherited the lines. An interrupted card order goes the same way — nobody
+    // is coming back to finish it.
+    await _tearDownSession();
 
     emit(
       const AuthUnauthenticated(

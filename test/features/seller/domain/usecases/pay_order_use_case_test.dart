@@ -477,6 +477,23 @@ void main() {
 
       verifyNever(() => pendingOrderStore.clear());
     });
+
+    test('a cancelled charge clears the record — no money moved', () async {
+      when(
+        () => terminal.afterOrderCreated(any(), any()),
+      ).thenThrow(const PaymentCancelledException());
+
+      await expectLater(
+        () => useCase(req(PaymentMethod.terminal)),
+        throwsA(isA<PaymentCancelledException>()),
+      );
+
+      // Cancellation is the one failure that means the charge definitively did
+      // not happen, and the cart survives it (the seller gets the editable form
+      // back and re-pays), so leaving the record would offer to confirm an
+      // order that was never charged.
+      verify(() => pendingOrderStore.clear()).called(1);
+    });
   });
 
   group('active handler lifecycle', () {

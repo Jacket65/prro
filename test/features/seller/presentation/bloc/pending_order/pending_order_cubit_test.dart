@@ -12,12 +12,14 @@ class MockFinishPendingOrderUseCase extends Mock
 
 class MockPendingOrderStore extends Mock implements PendingOrderStoreI {}
 
-PendingOrder _pending({String orderId = '1042'}) => PendingOrder(
-  orderId: orderId,
-  idempotencyKey: 'key-42',
-  // Any instant: the cubit carries it through, never compares it.
-  createdAt: DateTime(2026, 1, 1, 12),
-);
+PendingOrder _pending({String orderId = '1042', String username = 'cashier'}) =>
+    PendingOrder(
+      orderId: orderId,
+      idempotencyKey: 'key-42',
+      // Any instant: the cubit carries it through, never compares it.
+      createdAt: DateTime(2026, 1, 1, 12),
+      username: username,
+    );
 
 void main() {
   setUpAll(() {

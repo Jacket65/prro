@@ -88,59 +88,77 @@ class _SellerScreenState extends State<SellerScreen> {
         builder: (context) {
           // When there is no open shift, clear the cart so nothing carries over
           // into the next shift (covers close as well as expiry).
-          return BlocListener<ShiftCubit, ShiftState>(
-            listenWhen: (prev, curr) => curr is ShiftNone,
+          return BlocListener<OrdersBloc, OrdersState>(
+            // The banner resolves once, on mount, so an interruption that
+            // happens *during* this session would otherwise stay invisible: a
+            // failed terminal confirm returns the pending receipt, which
+            // `OrdersBloc` reports as payment success — the sale looks done
+            // while the order is still `pending` and history will never list
+            // it. Re-resolving here is what makes it recoverable without
+            // leaving and re-entering the screen.
+            listenWhen: (prev, curr) => curr is OrdersPaymentSuccess,
             listener: (context, state) {
-              context.read<OrdersBloc>().add(const ClearProducts());
+              final receipt = (state as OrdersPaymentSuccess).receipt;
+              if (receipt.status != 'completed') {
+                unawaited(context.read<PendingOrderCubit>().load());
+              }
             },
-            child: Scaffold(
-              backgroundColor: theme.scaffoldBackgroundColor,
-              appBar: ResponsiveSellerAppBar(
-                onLogout: () => _logout(context),
-                onCloseShift: () => _closeShift(context),
-                theme: theme,
-                shiftMenuBuilder: (context, {required isNarrow}) =>
-                    BlocBuilder<ShiftCubit, ShiftState>(
-                      builder: (context, state) {
-                        if (state is! ShiftOpen) return const SizedBox.shrink();
-                        return CustomPopupMenu(
-                          name: isNarrow ? '' : 'Меню',
-                          icon: Icons.menu,
-                          widgets: [
-                            PopupMenuItem<void>(
-                              child: const Text('Історія замовлень'),
-                              onTap: () {
-                                WidgetsBinding.instance.addPostFrameCallback((
-                                  _,
-                                ) {
-                                  if (context.mounted) {
-                                    unawaited(
-                                      context.router.push(
-                                        const SellerShiftsHistoryRoute(),
-                                      ),
-                                    );
-                                  }
-                                });
-                              },
-                            ),
-                            PopupMenuItem<void>(
-                              child: const Text('Закрити зміну'),
-                              onTap: () => _closeShift(context),
-                            ),
-                          ],
-                        );
-                      },
+            child: BlocListener<ShiftCubit, ShiftState>(
+              listenWhen: (prev, curr) => curr is ShiftNone,
+              listener: (context, state) {
+                context.read<OrdersBloc>().add(const ClearProducts());
+              },
+              child: Scaffold(
+                backgroundColor: theme.scaffoldBackgroundColor,
+                appBar: ResponsiveSellerAppBar(
+                  onLogout: () => _logout(context),
+                  onCloseShift: () => _closeShift(context),
+                  theme: theme,
+                  shiftMenuBuilder: (context, {required isNarrow}) =>
+                      BlocBuilder<ShiftCubit, ShiftState>(
+                        builder: (context, state) {
+                          if (state is! ShiftOpen) {
+                            return const SizedBox.shrink();
+                          }
+                          return CustomPopupMenu(
+                            name: isNarrow ? '' : 'Меню',
+                            icon: Icons.menu,
+                            widgets: [
+                              PopupMenuItem<void>(
+                                child: const Text('Історія замовлень'),
+                                onTap: () {
+                                  WidgetsBinding.instance.addPostFrameCallback((
+                                    _,
+                                  ) {
+                                    if (context.mounted) {
+                                      unawaited(
+                                        context.router.push(
+                                          const SellerShiftsHistoryRoute(),
+                                        ),
+                                      );
+                                    }
+                                  });
+                                },
+                              ),
+                              PopupMenuItem<void>(
+                                child: const Text('Закрити зміну'),
+                                onTap: () => _closeShift(context),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                ),
+                body: BlocBuilder<ShiftCubit, ShiftState>(
+                  builder: (context, state) => switch (state) {
+                    ShiftOpen() => const ResponsiveSellerLayout(),
+                    ShiftNone() => const _OpenShiftGate(),
+                    ShiftError(:final message) => _ShiftErrorView(
+                      message: message,
                     ),
-              ),
-              body: BlocBuilder<ShiftCubit, ShiftState>(
-                builder: (context, state) => switch (state) {
-                  ShiftOpen() => const ResponsiveSellerLayout(),
-                  ShiftNone() => const _OpenShiftGate(),
-                  ShiftError(:final message) => _ShiftErrorView(
-                    message: message,
-                  ),
-                  _ => const Center(child: CircularProgressIndicator()),
-                },
+                    _ => const Center(child: CircularProgressIndicator()),
+                  },
+                ),
               ),
             ),
           );

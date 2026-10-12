@@ -116,6 +116,21 @@ class PayOrderUseCase {
         }
         return receipt;
       } on PaymentCancelledException {
+        // The one failure that means money demonstrably did not move, so
+        // there is nothing to resume. Leaving the record behind would offer to
+        // confirm an order that was never charged — and since cancellation
+        // keeps the cart, the next attempt is a fresh order, so order #1 would
+        // sit `pending` with a live "finish me" offer for a sale with no
+        // payment behind it.
+        try {
+          await _pendingOrderStore.clear();
+        } on Object catch (e) {
+          // Never mask the cancellation behind a storage failure.
+          developer.log(
+            '[PAYMENT] pending order not cleared on cancel: $e',
+            name: 'payment',
+          );
+        }
         rethrow;
       } on PaymentException {
         rethrow;

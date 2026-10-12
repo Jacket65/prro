@@ -38,10 +38,12 @@ OrderDetail _detail({
 PendingOrder _pending({
   String orderId = '1042',
   String idempotencyKey = 'key-42',
+  String username = 'cashier',
 }) => PendingOrder(
   orderId: orderId,
   idempotencyKey: idempotencyKey,
   createdAt: DateTime(2026, 1, 1, 12),
+  username: username,
 );
 
 OrderReceipt _receipt() => OrderReceipt(

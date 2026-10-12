@@ -763,7 +763,7 @@ void main() {
 
   group('session boundaries clear the pending card order', () {
     blocTest<AuthBloc, AuthState>(
-      'a login clears the pending order before the session starts',
+      'a login keeps the pending order so a resume survives the re-login',
       build: () {
         when(
           () => repository.login(
@@ -775,14 +775,37 @@ void main() {
         );
         return authBloc;
       },
+      // The resume scenario *is* a cold start that lands on login: deleting the
+      // record at sign-in would destroy the only handle on an order that may
+      // already have been charged. Ownership is the store's job instead.
       act: (bloc) => bloc.add(
         const AuthLoginRequested(username: 'test', password: '1234'),
       ),
-      verify: (_) => verify(() => pendingOrderStore.clear()).called(1),
+      verify: (_) {
+        verify(() => ordersRepository.resetForNewSession()).called(1);
+        verifyNever(() => pendingOrderStore.clear());
+      },
     );
 
     blocTest<AuthBloc, AuthState>(
-      'an admin login clears the pending order',
+      'a failed login leaves the pending order untouched',
+      build: () {
+        when(
+          () => repository.login(
+            username: any(named: 'username'),
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(const AuthException(AuthErrorCode.invalidCredentials));
+        return authBloc;
+      },
+      act: (bloc) => bloc.add(
+        const AuthLoginRequested(username: 'test', password: 'wrong'),
+      ),
+      verify: (_) => verifyNever(() => pendingOrderStore.clear()),
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'an admin login keeps the pending order',
       build: () {
         when(
           () => repository.loginAsAdmin(
@@ -800,7 +823,7 @@ void main() {
       act: (bloc) => bloc.add(
         const AuthAdminLoginRequested(username: 'admin', password: '1234'),
       ),
-      verify: (_) => verify(() => pendingOrderStore.clear()).called(1),
+      verify: (_) => verifyNever(() => pendingOrderStore.clear()),
     );
 
     blocTest<AuthBloc, AuthState>(
