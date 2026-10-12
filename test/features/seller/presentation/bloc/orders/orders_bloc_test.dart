@@ -26,6 +26,12 @@ class FakeOrdersRepository extends Fake implements OrdersRepositoryI {
 
   @override
   void clearProducts() => clearProductsCallCount++;
+
+  @override
+  void resetForNewSession() {
+    clearProductsCallCount++;
+    products = [];
+  }
 }
 
 OrderReceipt _receipt() => OrderReceipt(
@@ -39,6 +45,14 @@ OrderReceipt _receipt() => OrderReceipt(
   issuedAt: DateTime(2024),
   storeName: 'Store',
   cashierName: 'Cashier',
+);
+
+Product product(String id) => Product(
+  id: id,
+  quantity: Decimal.one,
+  name: 'Кава',
+  price: 45,
+  imageUrl: '',
 );
 
 void main() {
@@ -102,6 +116,34 @@ void main() {
     act: (b) => b.add(request),
     expect: () => [isA<OrdersPaymentProcessing>(), isA<OrdersUpdated>()],
     verify: (_) => expect(fakeRepo.clearProductsCallCount, 0),
+  );
+
+  // F8: the repository is a process-wide singleton, so the *next* session's
+  // bloc is a brand-new object over the *same* cart. Clearing the cart in the
+  // bloc is therefore not enough — the reset has to happen at the session
+  // boundary (AuthBloc, R2). This test pins the observable consequence: after
+  // a session-end reset, a freshly built bloc starts at OrdersInitial.
+  test(
+    'a new session after a cart reset starts from OrdersInitial, not the '
+    "previous cashier's cart",
+    () {
+      // The previous session's cart, as the old code left it.
+      final previousCart = <Product>[product('p1')];
+
+      // Session end (AuthBloc): the shared repository drops the cart.
+      fakeRepo
+        ..products = previousCart
+        ..resetForNewSession();
+
+      // The next login builds a fresh bloc over the same repository.
+      final nextSession = OrdersBloc(
+        ordersRepository: fakeRepo,
+        payOrder: mockPayOrder,
+      );
+
+      expect(nextSession.state, const OrdersInitial());
+      expect(fakeRepo.products, isEmpty);
+    },
   );
 
   blocTest<OrdersBloc, OrdersState>(
@@ -248,14 +290,6 @@ void main() {
   });
 
   group('state equality', () {
-    Product product(String id) => Product(
-          id: id,
-          quantity: Decimal.one,
-          name: 'Кава',
-          price: 45,
-          imageUrl: '',
-        );
-
     test('OrdersError compares the cart, not just the message', () {
       final a = OrdersError(
         message: 'boom',

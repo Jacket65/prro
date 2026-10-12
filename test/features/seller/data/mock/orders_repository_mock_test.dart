@@ -39,12 +39,17 @@ void main() {
       expect(initialShifts.items, isNotEmpty);
       final activeShift = initialShifts.items.first;
 
-      // 3. Place order
+      // 3. Place order — an over-tender (the customer hands over 50.00 for a
+      // 35.00 line). The mock backend must compute the change from the
+      // difference, exactly like the real one (see R5).
       final receipt = await ordersRepository.placeOrder(
         method: PaymentMethod.cash,
-        tenderedKopecks: 3500,
+        tenderedKopecks: 5000,
         idempotencyKey: 'test-key-${DateTime.now().millisecondsSinceEpoch}',
       );
+
+      expect(receipt.tenderedKopecks, 5000);
+      expect(receipt.changeKopecks, 1500);
 
       // 4. History service check: order must be added
       final updatedOrders = await historyRepository.getShiftOrders(

@@ -14,11 +14,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class MockApiClient extends Mock implements ApiClientI {}
 
+/// The cart total the fixtures below are built around: one 45.00 line.
+const _totalKopecks = 4500;
+
+/// Over-tender: the customer hands over more than the total. This is the
+/// realistic cash case and the one the old fixtures never exercised (they used
+/// tendered == total, which hides the distinction between "amount to charge"
+/// and "amount handed over"). The wire contract is: `payment.amount` carries
+/// the **tendered** amount, the backend computes `change = tendered − total`
+/// and books the cash movement for the **total** (verified backend behaviour,
+/// `order.go:79-103, 236-247`).
+const _overTenderKopecks = 5000;
+
+const _exactTenderKopecks = 4500;
+
+/// Formats kopecks as the decimal string the backend uses on the wire.
+String _money(int kopecks) => (kopecks / 100).toStringAsFixed(2);
+
 Response<dynamic> _orderResponse(
   String path, {
   Map<String, dynamic>? overrides,
   String status = 'completed',
   String method = 'cash',
+  int tenderedKopecks = _exactTenderKopecks,
 }) {
   return Response<dynamic>(
     requestOptions: RequestOptions(path: path),
@@ -27,8 +45,12 @@ Response<dynamic> _orderResponse(
       'data': {
         'order_id': 11,
         'items': const <dynamic>[],
-        'total_price': '45.00',
-        'payment': {'method': method, 'tendered': '45.00', 'change': '0.00'},
+        'total_price': _money(_totalKopecks),
+        'payment': {
+          'method': method,
+          'tendered': _money(tenderedKopecks),
+          'change': _money(tenderedKopecks - _totalKopecks),
+        },
         'status': status,
         'created_at': '2026-01-01T00:00:00Z',
         ...?overrides,
@@ -66,6 +88,23 @@ void main() {
   late MockApiClient apiClient;
   late OrdersRepositoryImpl repo;
 
+  /// Re-stubs the default response with a specific tendered amount, so the
+  /// fixture always mirrors what the caller handed over.
+  void stubResponseWithTendered(int tenderedKopecks) {
+    when(
+      () => apiClient.post(
+        any<String>(),
+        data: any<dynamic>(named: 'data'),
+        idempotencyKey: any(named: 'idempotencyKey'),
+      ),
+    ).thenAnswer(
+      (inv) async => _orderResponse(
+        inv.positionalArguments.first as String,
+        tenderedKopecks: tenderedKopecks,
+      ),
+    );
+  }
+
   setUp(() async {
     apiClient = MockApiClient();
     SharedPreferences.setMockInitialValues({
@@ -100,13 +139,19 @@ void main() {
     test('carries top-level type=cash for cash orders', () async {
       await repo.placeOrder(
         method: PaymentMethod.cash,
-        tenderedKopecks: 4500,
+        tenderedKopecks: _overTenderKopecks,
         idempotencyKey: 'k1',
       );
 
       final body = capturedBody();
       expect(body['type'], 'cash');
-      expect(body['payment'], {'method': 'cash', 'amount': '45.00'});
+      // `payment.amount` is the TENDERED amount, not the cart total: the
+      // backend derives the charge from the order lines and returns the
+      // change, so the client must never pre-trim the tendered figure.
+      expect(body['payment'], {
+        'method': 'cash',
+        'amount': _money(_overTenderKopecks),
+      });
       expect(body['products'], isA<List<dynamic>>());
     });
 
@@ -114,13 +159,16 @@ void main() {
         'validates oneof=cash card)', () async {
       await repo.placeOrder(
         method: PaymentMethod.terminal,
-        tenderedKopecks: 4500,
+        tenderedKopecks: _overTenderKopecks,
         idempotencyKey: 'k2',
       );
 
       final body = capturedBody();
       expect(body['type'], 'card');
-      expect(body['payment'], {'method': 'card', 'amount': '45.00'});
+      expect(body['payment'], {
+        'method': 'card',
+        'amount': _money(_overTenderKopecks),
+      });
     });
 
     test(
@@ -128,7 +176,7 @@ void main() {
       () async {
         await repo.placeOrder(
           method: PaymentMethod.cash,
-          tenderedKopecks: 4500,
+          tenderedKopecks: _overTenderKopecks,
           idempotencyKey: 'k3',
         );
 
@@ -141,6 +189,33 @@ void main() {
         ).called(1);
       },
     );
+
+    test('an over-tender returns the parsed tendered amount and the server '
+        'change', () async {
+      stubResponseWithTendered(_overTenderKopecks);
+
+      final receipt = await repo.placeOrder(
+        method: PaymentMethod.cash,
+        tenderedKopecks: _overTenderKopecks,
+        idempotencyKey: 'k-over',
+      );
+
+      expect(receipt.totalKopecks, _totalKopecks);
+      expect(receipt.tenderedKopecks, _overTenderKopecks);
+      expect(receipt.changeKopecks, 500);
+    });
+
+    test('an exact tender returns zero change', () async {
+      final receipt = await repo.placeOrder(
+        method: PaymentMethod.cash,
+        tenderedKopecks: _exactTenderKopecks,
+        idempotencyKey: 'k-exact',
+      );
+
+      expect(receipt.totalKopecks, _totalKopecks);
+      expect(receipt.tenderedKopecks, _exactTenderKopecks);
+      expect(receipt.changeKopecks, 0);
+    });
 
     test('a 404 becomes ShiftClosedException, not a bare ApiException',
         () async {
@@ -155,7 +230,7 @@ void main() {
       await expectLater(
         () => repo.placeOrder(
           method: PaymentMethod.cash,
-          tenderedKopecks: 4500,
+          tenderedKopecks: _overTenderKopecks,
           idempotencyKey: 'k5',
         ),
         throwsA(isA<ShiftClosedException>()),
@@ -175,7 +250,7 @@ void main() {
       await expectLater(
         () => repo.placeOrder(
           method: PaymentMethod.terminal,
-          tenderedKopecks: 4500,
+          tenderedKopecks: _overTenderKopecks,
           idempotencyKey: 'k6',
         ),
         throwsA(isA<ShiftClosedException>()),
@@ -194,7 +269,7 @@ void main() {
       await expectLater(
         () => repo.placeOrder(
           method: PaymentMethod.cash,
-          tenderedKopecks: 4500,
+          tenderedKopecks: _overTenderKopecks,
           idempotencyKey: 'k7',
         ),
         throwsA(
@@ -211,7 +286,7 @@ void main() {
       expect(
         () => repo.placeOrder(
           method: PaymentMethod.cash,
-          tenderedKopecks: 4500,
+          tenderedKopecks: _overTenderKopecks,
           idempotencyKey: 'k4',
         ),
         throwsA(isA<ApiException>()),
@@ -234,7 +309,11 @@ void main() {
         ).called(1);
         expect(receipt.orderId, '11');
         expect(receipt.status, 'completed');
-        expect(receipt.totalKopecks, 4500);
+        expect(receipt.totalKopecks, _totalKopecks);
+        // The confirm receipt keeps the tendered/change pair the card order was
+        // created with, so the printed receipt matches the sale.
+        expect(receipt.tenderedKopecks, _exactTenderKopecks);
+        expect(receipt.changeKopecks, 0);
       },
     );
   });

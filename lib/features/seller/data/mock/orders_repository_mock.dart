@@ -64,6 +64,12 @@ class OrdersRepositoryMock implements OrdersRepositoryI {
   @override
   void clearProducts() => _products.clear();
 
+  /// Kept identical to the prod implementation (see
+  /// [OrdersRepositoryI.resetForNewSession]): the cart is the whole of the
+  /// session-scoped state, so the mock must reset exactly like production.
+  @override
+  void resetForNewSession() => _products.clear();
+
   @override
   void updateOptions(
     String lineId,

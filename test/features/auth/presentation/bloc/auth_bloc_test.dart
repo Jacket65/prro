@@ -7,21 +7,31 @@ import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_event.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_state.dart';
+import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 
 class MockAuthRepository extends Mock implements AuthRepositoryI {}
 
 class MockTokenStorage extends Mock implements TokenStorageI {}
 
+class MockOrdersRepository extends Mock implements OrdersRepositoryI {}
+
 void main() {
   late AuthBloc authBloc;
   late MockAuthRepository repository;
   late MockTokenStorage tokenStorage;
+  late MockOrdersRepository ordersRepository;
 
   setUp(() {
     repository = MockAuthRepository();
     tokenStorage = MockTokenStorage();
+    ordersRepository = MockOrdersRepository();
     when(() => tokenStorage.getAccessToken()).thenAnswer((_) async => null);
-    authBloc = AuthBloc(authRepository: repository, tokenStorage: tokenStorage);
+    when(() => ordersRepository.resetForNewSession()).thenReturn(null);
+    authBloc = AuthBloc(
+      authRepository: repository,
+      tokenStorage: tokenStorage,
+      ordersRepository: ordersRepository,
+    );
   });
 
   group('AuthStarted', () {
@@ -599,6 +609,148 @@ void main() {
           () => repository.loginAsAdmin(username: 'admin', password: '1234'),
         ).called(1);
       },
+    );
+  });
+
+  // F8: the cart lives in a process-wide repository, so a session boundary is
+  // the only thing that can stop the previous cashier's lines from reaching
+  // the next login. The seller UI used to own that clear (logout button, the
+  // "no open shift" gate), which left session expiry handing the cart over
+  // whenever the previous shift was still open.
+  group('session boundaries reset the seller cart', () {
+    blocTest<AuthBloc, AuthState>(
+      'a login resets the cart before the session starts',
+      build: () {
+        when(
+          () => repository.login(
+            username: any(named: 'username'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer(
+          (_) async => const AuthUser(username: 'test', role: UserRole.cashier),
+        );
+        return authBloc;
+      },
+      act: (bloc) => bloc.add(
+        const AuthLoginRequested(username: 'test', password: '1234'),
+      ),
+      expect: () => [
+        const AuthLoading(operation: AuthOperation.login),
+        const AuthAuthenticated(
+          user: AuthUser(username: 'test', role: UserRole.cashier),
+        ),
+      ],
+      verify: (_) {
+        verify(() => ordersRepository.resetForNewSession()).called(1);
+      },
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'an admin login resets the cart too (the re-login case that leaked)',
+      build: () {
+        when(
+          () => repository.loginAsAdmin(
+            username: any(named: 'username'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer(
+          (_) async => const AuthUser(username: 'admin', role: UserRole.admin),
+        );
+        return authBloc;
+      },
+      seed: () => const AuthAuthenticated(
+        user: AuthUser(username: 'cashier', role: UserRole.cashier),
+      ),
+      act: (bloc) => bloc.add(
+        const AuthAdminLoginRequested(username: 'admin', password: '1234'),
+      ),
+      verify: (_) {
+        verify(() => ordersRepository.resetForNewSession()).called(1);
+      },
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'session expiry resets the cart before going unauthenticated',
+      build: () {
+        when(() => repository.logout()).thenAnswer((_) async {});
+        return authBloc;
+      },
+      seed: () => const AuthAuthenticated(
+        user: AuthUser(username: 'test', role: UserRole.cashier),
+      ),
+      act: (bloc) => bloc.add(const AuthSessionExpired()),
+      expect: () => [
+        const AuthLoading(operation: AuthOperation.sessionExpiry),
+        const AuthUnauthenticated(
+          reason: AuthUnauthenticatedReason.sessionExpired,
+        ),
+      ],
+      verify: (_) {
+        // Exactly once, and paired with the logout teardown.
+        verify(() => ordersRepository.resetForNewSession()).called(1);
+        verify(() => repository.logout()).called(1);
+      },
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'an explicit logout resets the cart',
+      build: () {
+        when(() => repository.logout()).thenAnswer((_) async {});
+        return authBloc;
+      },
+      seed: () => const AuthAuthenticated(
+        user: AuthUser(username: 'test', role: UserRole.cashier),
+      ),
+      act: (bloc) => bloc.add(const AuthLogoutRequested()),
+      verify: (_) {
+        verify(() => ordersRepository.resetForNewSession()).called(1);
+      },
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'a failed login still leaves no cart behind',
+      build: () {
+        when(
+          () => repository.login(
+            username: any(named: 'username'),
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(const AuthException(AuthErrorCode.invalidCredentials));
+        return authBloc;
+      },
+      act: (bloc) => bloc.add(
+        const AuthLoginRequested(username: 'test', password: 'wrong'),
+      ),
+      expect: () => [
+        const AuthLoading(operation: AuthOperation.login),
+        const AuthFailure(
+          operation: AuthOperation.login,
+          previousStatus: AuthStatus.initial,
+          error: AuthException(AuthErrorCode.invalidCredentials),
+        ),
+      ],
+      verify: (_) {
+        verify(() => ordersRepository.resetForNewSession()).called(1);
+      },
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'session restore does not reset the cart (same session continuing)',
+      build: () {
+        when(() => repository.restoreSession()).thenAnswer(
+          (_) async =>
+              const AuthUser(username: 'saved', role: UserRole.cashier),
+        );
+        return authBloc;
+      },
+      act: (bloc) => bloc.add(const AuthStarted()),
+      expect: () => [
+        const AuthLoading(operation: AuthOperation.restore),
+        const AuthAuthenticated(
+          user: AuthUser(username: 'saved', role: UserRole.cashier),
+        ),
+      ],
+      verify: (_) => verifyNever(() => ordersRepository.resetForNewSession()),
     );
   });
 }

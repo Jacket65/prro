@@ -15,7 +15,20 @@ abstract interface class OrdersRepositoryI {
   void removeProduct(Product product);
 
   void deleteProductLine(Product product);
+
+  /// Drops the whole cart. Used by the seller UI (cart emptied, failed order)
+  /// and must also be safe to call when the session is being torn down.
   void clearProducts();
+
+  /// Drops the cart **and any per-session residue** it carries, e.g. an order
+  /// placed against a shift that is no longer this seller's.
+  ///
+  /// The repository is a process-wide singleton, so without this the previous
+  /// cashier's lines survive into the next login (see F8). Called at the start
+  /// of every login and on every session end (logout, session expiry, the
+  /// admin re-login) — the two moments the *next* seller must not inherit
+  /// anything.
+  void resetForNewSession();
 
   /// Replaces the selected options, bean and (if given) [quantity] of the cart
   /// line identified by [lineId]. Changing options/bean changes the line

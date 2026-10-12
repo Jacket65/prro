@@ -74,6 +74,13 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
   @override
   void clearProducts() => _products.clear();
 
+  /// See [OrdersRepositoryI.resetForNewSession]. The cart is the only
+  /// session-scoped state this singleton holds, so the reset is the clear —
+  /// the point is *when* it runs (every login and every session end), not a
+  /// second, subtly different clear path that can drift from this one.
+  @override
+  void resetForNewSession() => _products.clear();
+
   @override
   void updateOptions(
     String lineId,

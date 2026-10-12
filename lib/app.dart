@@ -12,6 +12,7 @@ import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_event.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_state.dart';
+import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 import 'package:prro/features/shift/domain/repositories/shift_repository_i.dart';
 import 'package:prro/features/shift/presentation/cubit/shift_cubit.dart';
 
@@ -51,6 +52,9 @@ class _MyAppState extends State<MyApp> {
         final bloc = AuthBloc(
           authRepository: getIt<AuthRepositoryI>(),
           tokenStorage: getIt<TokenStorageI>(),
+          // Owns the seller-cart reset at every session boundary (login start
+          // and session end); see F8.
+          ordersRepository: getIt<OrdersRepositoryI>(),
         )..add(const AuthStarted());
         widget.router.adminGuard.authBloc = bloc;
         return bloc;
