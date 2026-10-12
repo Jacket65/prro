@@ -186,7 +186,11 @@ class OrderHistoryRepositoryMock implements OrderHistoryRepositoryI {
     final detail = OrderDetail(
       orderId: orderId,
       shiftId: shiftId,
-      status: 'paid',
+      // The receipt's own status, not a blanket 'paid': a terminal order is
+      // created `pending` and only `completed` once confirmed, and the resume
+      // flow (FinishPendingOrderUseCase) branches on exactly this. Reporting
+      // 'paid' here would make an unconfirmed card order look settled.
+      status: receipt.status.isEmpty ? 'pending' : receipt.status,
       createdAt: receipt.issuedAt,
       totalKopecks: receipt.totalKopecks,
       items: receipt.lines.map((l) {

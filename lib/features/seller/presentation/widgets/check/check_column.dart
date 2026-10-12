@@ -4,6 +4,7 @@ import 'package:prro/features/seller/presentation/widgets/check/check_bottom_but
 import 'package:prro/features/seller/presentation/widgets/check/check_pay_button.dart';
 import 'package:prro/features/seller/presentation/widgets/check/check_price.dart';
 import 'package:prro/features/seller/presentation/widgets/check/check_top_bar_with_time.dart';
+import 'package:prro/features/seller/presentation/widgets/check/pending_order_banner.dart';
 
 class CheckColumn extends StatelessWidget {
   const CheckColumn({super.key});
@@ -20,6 +21,9 @@ class CheckColumn extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               CheckTopBar(),
+              // Inside this column, not the layout, so it shows in both the
+              // narrow and the wide arrangement.
+              PendingOrderBanner(),
               Expanded(child: CheckBody()),
               CheckPrice(),
               CheckBottomButtons(),

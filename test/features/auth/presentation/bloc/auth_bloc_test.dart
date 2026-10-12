@@ -8,6 +8,7 @@ import 'package:prro/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_event.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_state.dart';
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
+import 'package:prro/features/seller/domain/repositories/pending_order_store_i.dart';
 
 class MockAuthRepository extends Mock implements AuthRepositoryI {}
 
@@ -15,22 +16,28 @@ class MockTokenStorage extends Mock implements TokenStorageI {}
 
 class MockOrdersRepository extends Mock implements OrdersRepositoryI {}
 
+class MockPendingOrderStore extends Mock implements PendingOrderStoreI {}
+
 void main() {
   late AuthBloc authBloc;
   late MockAuthRepository repository;
   late MockTokenStorage tokenStorage;
   late MockOrdersRepository ordersRepository;
+  late MockPendingOrderStore pendingOrderStore;
 
   setUp(() {
     repository = MockAuthRepository();
     tokenStorage = MockTokenStorage();
     ordersRepository = MockOrdersRepository();
+    pendingOrderStore = MockPendingOrderStore();
     when(() => tokenStorage.getAccessToken()).thenAnswer((_) async => null);
     when(() => ordersRepository.resetForNewSession()).thenReturn(null);
+    when(() => pendingOrderStore.clear()).thenAnswer((_) async {});
     authBloc = AuthBloc(
       authRepository: repository,
       tokenStorage: tokenStorage,
       ordersRepository: ordersRepository,
+      pendingOrderStore: pendingOrderStore,
     );
   });
 
@@ -751,6 +758,88 @@ void main() {
         ),
       ],
       verify: (_) => verifyNever(() => ordersRepository.resetForNewSession()),
+    );
+  });
+
+  group('session boundaries clear the pending card order', () {
+    blocTest<AuthBloc, AuthState>(
+      'a login clears the pending order before the session starts',
+      build: () {
+        when(
+          () => repository.login(
+            username: any(named: 'username'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer(
+          (_) async => const AuthUser(username: 'test', role: UserRole.cashier),
+        );
+        return authBloc;
+      },
+      act: (bloc) => bloc.add(
+        const AuthLoginRequested(username: 'test', password: '1234'),
+      ),
+      verify: (_) => verify(() => pendingOrderStore.clear()).called(1),
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'an admin login clears the pending order',
+      build: () {
+        when(
+          () => repository.loginAsAdmin(
+            username: any(named: 'username'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer(
+          (_) async => const AuthUser(username: 'admin', role: UserRole.admin),
+        );
+        return authBloc;
+      },
+      seed: () => const AuthAuthenticated(
+        user: AuthUser(username: 'cashier', role: UserRole.cashier),
+      ),
+      act: (bloc) => bloc.add(
+        const AuthAdminLoginRequested(username: 'admin', password: '1234'),
+      ),
+      verify: (_) => verify(() => pendingOrderStore.clear()).called(1),
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'session expiry clears the pending order',
+      build: () {
+        when(() => repository.logout()).thenAnswer((_) async {});
+        return authBloc;
+      },
+      seed: () => const AuthAuthenticated(
+        user: AuthUser(username: 'test', role: UserRole.cashier),
+      ),
+      act: (bloc) => bloc.add(const AuthSessionExpired()),
+      verify: (_) => verify(() => pendingOrderStore.clear()).called(1),
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'an explicit logout clears the pending order',
+      build: () {
+        when(() => repository.logout()).thenAnswer((_) async {});
+        return authBloc;
+      },
+      seed: () => const AuthAuthenticated(
+        user: AuthUser(username: 'test', role: UserRole.cashier),
+      ),
+      act: (bloc) => bloc.add(const AuthLogoutRequested()),
+      verify: (_) => verify(() => pendingOrderStore.clear()).called(1),
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'session restore keeps the pending order (same session continuing)',
+      build: () {
+        when(() => repository.restoreSession()).thenAnswer(
+          (_) async =>
+              const AuthUser(username: 'saved', role: UserRole.cashier),
+        );
+        return authBloc;
+      },
+      act: (bloc) => bloc.add(const AuthStarted()),
+      verify: (_) => verifyNever(() => pendingOrderStore.clear()),
     );
   });
 }

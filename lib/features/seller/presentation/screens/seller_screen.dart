@@ -10,11 +10,15 @@ import 'package:prro/features/auth/presentation/bloc/auth_event.dart';
 import 'package:prro/features/seller/domain/repositories/balance_repository_i.dart';
 import 'package:prro/features/seller/domain/repositories/items_repository_i.dart';
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
+import 'package:prro/features/seller/domain/repositories/pending_order_store_i.dart';
+import 'package:prro/features/seller/domain/usecases/finish_pending_order_use_case.dart';
 import 'package:prro/features/seller/domain/usecases/pay_order_use_case.dart';
 import 'package:prro/features/seller/presentation/bloc/balance/balance_cubit.dart';
 import 'package:prro/features/seller/presentation/bloc/items_tiles/items_tiles_bloc.dart';
 import 'package:prro/features/seller/presentation/bloc/orders/orders_bloc.dart';
+import 'package:prro/features/seller/presentation/bloc/pending_order/pending_order_cubit.dart';
 import 'package:prro/features/seller/presentation/bloc/search/catalog_search_cubit.dart';
+import 'package:prro/features/seller/presentation/widgets/check/pending_order_banner.dart';
 import 'package:prro/features/seller/presentation/widgets/custom_popup_menu.dart';
 import 'package:prro/features/seller/presentation/widgets/logout_confirmation_dialog.dart';
 import 'package:prro/features/seller/presentation/widgets/responsive_seller_app_bar.dart';
@@ -63,6 +67,19 @@ class _SellerScreenState extends State<SellerScreen> {
           create: (context) {
             final cubit = BalanceCubit(getIt<BalanceRepositoryI>());
             unawaited(cubit.fetchBalance());
+            return cubit;
+          },
+        ),
+        // One instance for the whole screen: the resume banner is shown both in
+        // the check column (shift open) and in the open-shift gate (shift
+        // closed), and two instances would resolve the same order twice.
+        BlocProvider(
+          create: (context) {
+            final cubit = PendingOrderCubit(
+              getIt<FinishPendingOrderUseCase>(),
+              getIt<PendingOrderStoreI>(),
+            );
+            unawaited(cubit.load());
             return cubit;
           },
         ),
@@ -153,6 +170,11 @@ class _SellerScreenState extends State<SellerScreen> {
 }
 
 /// Shown when there is no open shift — blocks sales and offers to open one.
+///
+/// The pending-card-order banner is also mounted here, not only in the check
+/// column: a shift that is closed is precisely the case where its confirm 404s,
+/// so a check-column-only banner would hide the entry exactly when it needs
+/// resolving and leave it in storage until some shift reopened.
 class _OpenShiftGate extends StatelessWidget {
   const _OpenShiftGate();
 
@@ -173,6 +195,8 @@ class _OpenShiftGate extends StatelessWidget {
             'Щоб почати продаж, відкрийте зміну.',
             style: TextStyle(color: Colors.grey),
           ),
+          const SizedBox(height: 16),
+          const PendingOrderBanner(),
           const SizedBox(height: 24),
           FilledButton.icon(
             icon: const Icon(Icons.play_arrow),

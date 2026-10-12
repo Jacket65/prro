@@ -67,6 +67,7 @@ import 'package:prro/features/seller/data/mock/items_repository_mock.dart'
     as _i972;
 import 'package:prro/features/seller/data/mock/orders_repository_mock.dart'
     as _i411;
+import 'package:prro/features/seller/data/pending_order_store.dart' as _i97;
 import 'package:prro/features/seller/data/repositories/balance_repository.dart'
     as _i445;
 import 'package:prro/features/seller/data/repositories/items_repository.dart'
@@ -83,6 +84,10 @@ import 'package:prro/features/seller/domain/repositories/items_repository_i.dart
     as _i691;
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart'
     as _i876;
+import 'package:prro/features/seller/domain/repositories/pending_order_store_i.dart'
+    as _i1025;
+import 'package:prro/features/seller/domain/usecases/finish_pending_order_use_case.dart'
+    as _i887;
 import 'package:prro/features/seller/domain/usecases/pay_order_use_case.dart'
     as _i367;
 import 'package:prro/features/shift/data/mock/shift_repository_mock.dart'
@@ -145,6 +150,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i132.BalanceRepositoryI>(
       () => _i445.BalanceRepository(),
       registerFor: {_prod},
+    );
+    gh.lazySingleton<_i1025.PendingOrderStoreI>(
+      () => _i97.PendingOrderStore(gh<_i460.SharedPreferences>()),
     );
     gh.singleton<_i876.OrdersRepositoryI>(
       () => _i411.OrdersRepositoryMock(
@@ -248,8 +256,16 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i367.PayOrderUseCase>(
       () => _i367.PayOrderUseCase(
         ordersRepository: gh<_i876.OrdersRepositoryI>(),
+        pendingOrderStore: gh<_i1025.PendingOrderStoreI>(),
         cash: gh<_i131.CashPaymentHandler>(),
         terminal: gh<_i1000.TerminalPaymentHandler>(),
+      ),
+    );
+    gh.factory<_i887.FinishPendingOrderUseCase>(
+      () => _i887.FinishPendingOrderUseCase(
+        pendingOrderStore: gh<_i1025.PendingOrderStoreI>(),
+        orderHistoryRepository: gh<_i766.OrderHistoryRepositoryI>(),
+        ordersRepository: gh<_i876.OrdersRepositoryI>(),
       ),
     );
     return this;

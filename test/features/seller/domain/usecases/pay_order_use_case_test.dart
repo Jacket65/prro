@@ -10,6 +10,7 @@ import 'package:prro/features/seller/domain/payment/handlers/terminal_payment_ha
 import 'package:prro/features/seller/domain/payment/pay_order_request.dart';
 import 'package:prro/features/seller/domain/payment/payment_method_handler.dart';
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
+import 'package:prro/features/seller/domain/repositories/pending_order_store_i.dart';
 import 'package:prro/features/seller/domain/usecases/pay_order_use_case.dart';
 
 class MockCashHandler extends Mock implements CashPaymentHandler {}
@@ -17,6 +18,8 @@ class MockCashHandler extends Mock implements CashPaymentHandler {}
 class MockTerminalHandler extends Mock implements TerminalPaymentHandler {}
 
 class MockOrdersRepository extends Mock implements OrdersRepositoryI {}
+
+class MockPendingOrderStore extends Mock implements PendingOrderStoreI {}
 
 OrderReceipt _receipt({String status = 'pending'}) => OrderReceipt(
   orderId: '1',
@@ -54,13 +57,22 @@ void main() {
   late MockCashHandler cash;
   late MockTerminalHandler terminal;
   late MockOrdersRepository repo;
+  late MockPendingOrderStore pendingOrderStore;
   late PayOrderUseCase useCase;
 
   setUp(() {
     cash = MockCashHandler();
     terminal = MockTerminalHandler();
     repo = MockOrdersRepository();
+    pendingOrderStore = MockPendingOrderStore();
 
+    when(() => pendingOrderStore.clear()).thenAnswer((_) async {});
+    when(
+      () => pendingOrderStore.save(
+        orderId: any(named: 'orderId'),
+        idempotencyKey: any(named: 'idempotencyKey'),
+      ),
+    ).thenAnswer((_) async {});
     when(() => cash.method).thenReturn(PaymentMethod.cash);
     when(() => terminal.method).thenReturn(PaymentMethod.terminal);
     when(() => cash.pay(any())).thenAnswer((_) async {});
@@ -86,6 +98,7 @@ void main() {
 
     useCase = PayOrderUseCase(
       ordersRepository: repo,
+      pendingOrderStore: pendingOrderStore,
       cash: cash,
       terminal: terminal,
     );
@@ -245,48 +258,55 @@ void main() {
       ).thenThrow(error);
     }
 
-    test('a closed shift becomes the actionable message, not the generic one',
-        () async {
-      // The repository can no longer carry this wording: everything it throws
-      // is caught by the boundary catch-all below, so the seller would only
-      // ever see the generic failure.
-      placeOrderThrows(const ShiftClosedException());
+    test(
+      'a closed shift becomes the actionable message, not the generic one',
+      () async {
+        // The repository can no longer carry this wording: everything it throws
+        // is caught by the boundary catch-all below, so the seller would only
+        // ever see the generic failure.
+        placeOrderThrows(const ShiftClosedException());
 
-      await expectLater(
-        () => useCase(req(PaymentMethod.cash)),
-        throwsA(
-          isA<PaymentException>()
-              .having(
-                (e) => e.message,
-                'message',
-                'Зміну закрито — відкрийте зміну, щоб продавати.',
-              )
-              .having(
-                (e) => e.reason,
-                'reason',
-                PaymentFailureReason.verificationFailed,
-              ),
-        ),
-      );
-    });
+        await expectLater(
+          () => useCase(req(PaymentMethod.cash)),
+          throwsA(
+            isA<PaymentException>()
+                .having(
+                  (e) => e.message,
+                  'message',
+                  'Зміну закрито — відкрийте зміну, щоб продавати.',
+                )
+                .having(
+                  (e) => e.reason,
+                  'reason',
+                  PaymentFailureReason.verificationFailed,
+                ),
+          ),
+        );
+      },
+    );
 
-    test('no money moved: the finalize hook never runs on a closed shift',
-        () async {
-      placeOrderThrows(const ShiftClosedException());
+    test(
+      'no money moved: the finalize hook never runs on a closed shift',
+      () async {
+        placeOrderThrows(const ShiftClosedException());
 
-      await expectLater(
-        () => useCase(req(PaymentMethod.terminal)),
-        throwsA(isA<PaymentException>()),
-      );
+        await expectLater(
+          () => useCase(req(PaymentMethod.terminal)),
+          throwsA(isA<PaymentException>()),
+        );
 
-      verifyNever(() => terminal.afterOrderCreated(any(), any()));
-      verifyNever(() => cash.afterOrderCreated(any(), any()));
-    });
+        verifyNever(() => terminal.afterOrderCreated(any(), any()));
+        verifyNever(() => cash.afterOrderCreated(any(), any()));
+      },
+    );
 
     test('an ApiException still maps to the generic message', () async {
       placeOrderThrows(
-        const ApiException('Сесія прострочена. Увійдіть знову.',
-            code: 'token_error', statusCode: 401),
+        const ApiException(
+          'Сесія прострочена. Увійдіть знову.',
+          code: 'token_error',
+          statusCode: 401,
+        ),
       );
 
       await expectLater(
@@ -351,6 +371,112 @@ void main() {
         );
       },
     );
+  });
+
+  group('pending card order record', () {
+    test(
+      'a placed terminal order is recorded before the charge hook runs',
+      () async {
+        final order = _receipt();
+        when(
+          () => repo.placeOrder(
+            method: any(named: 'method'),
+            tenderedKopecks: any(named: 'tenderedKopecks'),
+            idempotencyKey: any(named: 'idempotencyKey'),
+          ),
+        ).thenAnswer((_) async => order);
+        // The record has to exist before anything else can fail; the terminal
+        // charge is the most likely place for the process to die, so the record
+        // is written between placeOrder and the charge.
+        final steps = <String>[];
+        when(
+          () => pendingOrderStore.save(orderId: '1', idempotencyKey: 'key'),
+        ).thenAnswer((_) async => steps.add('saved'));
+        when(() => terminal.afterOrderCreated(any(), any())).thenAnswer((_) {
+          steps.add('charge');
+          return Future.value(_receipt(status: 'completed'));
+        });
+
+        await useCase(req(PaymentMethod.terminal));
+
+        expect(steps, ['saved', 'charge']);
+      },
+    );
+
+    test('a completed receipt clears the record', () async {
+      when(
+        () => terminal.afterOrderCreated(any(), any()),
+      ).thenAnswer((_) async => _receipt(status: 'completed'));
+
+      await useCase(req(PaymentMethod.terminal));
+
+      verify(() => pendingOrderStore.clear()).called(1);
+    });
+
+    test(
+      'a still-pending receipt keeps the record so a resume can be offered',
+      () async {
+        // The terminal handler falls back to the pending receipt when confirm
+        // fails, preferring that over failing an already-paid sale.
+        when(
+          () => terminal.afterOrderCreated(any(), any()),
+        ).thenAnswer((inv) async => inv.positionalArguments[0] as OrderReceipt);
+
+        final receipt = await useCase(req(PaymentMethod.terminal));
+
+        expect(receipt.status, 'pending');
+        verifyNever(() => pendingOrderStore.clear());
+      },
+    );
+
+    test('a cash order is never recorded', () async {
+      await useCase(req(PaymentMethod.cash));
+
+      verifyNever(
+        () => pendingOrderStore.save(
+          orderId: any(named: 'orderId'),
+          idempotencyKey: any(named: 'idempotencyKey'),
+        ),
+      );
+    });
+
+    test(
+      'a closed shift writes no record — the charge never started',
+      () async {
+        when(
+          () => repo.placeOrder(
+            method: any(named: 'method'),
+            tenderedKopecks: any(named: 'tenderedKopecks'),
+            idempotencyKey: any(named: 'idempotencyKey'),
+          ),
+        ).thenThrow(const ShiftClosedException());
+
+        await expectLater(
+          () => useCase(req(PaymentMethod.terminal)),
+          throwsA(isA<PaymentException>()),
+        );
+
+        verifyNever(
+          () => pendingOrderStore.save(
+            orderId: any(named: 'orderId'),
+            idempotencyKey: any(named: 'idempotencyKey'),
+          ),
+        );
+      },
+    );
+
+    test('a failed confirm still clears nothing but keeps the sale', () async {
+      when(
+        () => terminal.afterOrderCreated(any(), any()),
+      ).thenAnswer((inv) async => inv.positionalArguments[0] as OrderReceipt);
+
+      await expectLater(
+        () => useCase(req(PaymentMethod.terminal)),
+        returnsNormally,
+      );
+
+      verifyNever(() => pendingOrderStore.clear());
+    });
   });
 
   group('active handler lifecycle', () {
