@@ -121,8 +121,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             : () {
                                 context.read<AuthBloc>().add(
                                   const AuthLoginRequested(
-                                    username: 'cashier',
-                                    password: '1',
+                                    username: 'cashier1',
+                                    password: 'cashier123',
                                   ),
                                 );
                                 _clearTextFields();
@@ -138,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 context.read<AuthBloc>().add(
                                   const AuthAdminLoginRequested(
                                     username: 'admin',
-                                    password: '1',
+                                    password: 'admin123',
                                   ),
                                 );
                                 _clearTextFields();

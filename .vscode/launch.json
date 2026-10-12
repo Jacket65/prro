@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "PRRO Linux (real backend)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "deviceId": "linux",
+            "flutterMode": "debug",
+            "toolArgs": [
+                "--dart-define=BACKEND_TYPE=real",
+                "--dart-define=API_BASE_URL=http://localhost:8080/api/v1"
+            ]
+        }
+    ]
+}
