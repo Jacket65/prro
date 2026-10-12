@@ -65,6 +65,10 @@ void main() {
             );
         final variant = americano.variants.first;
 
+        // Over-tender: the customer pays 50.00 for a 45.00 line, so the change
+        // is the difference. The mock backend must mirror the real one, which
+        // books the cash movement for the *total* and returns the change
+        // separately (see R5).
         final receipt = await backend.placeOrder(
           items: [
             OrderLineDto(
@@ -78,17 +82,19 @@ void main() {
           ],
           payment: const PaymentDto(
             method: PaymentMethod.cash,
-            tenderedKopecks: 4500,
+            tenderedKopecks: 5000,
           ),
           idempotencyKey: 'test-beans-1',
         );
 
         expect(receipt.lines.length, 1);
         expect(receipt.lines.first.name, contains('Американо'));
+        expect(receipt.tenderedKopecks, 5000);
         expect(
           receipt.changeKopecks,
-          equals(4500 - receipt.lines.first.subtotalKopecks),
+          equals(5000 - receipt.lines.first.subtotalKopecks),
         );
+        expect(receipt.changeKopecks, greaterThan(0));
       });
 
       test('throws for invalid bean option in options array', () async {

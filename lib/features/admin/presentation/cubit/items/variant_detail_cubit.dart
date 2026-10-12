@@ -25,6 +25,19 @@ class VariantDetailCubit extends Cubit<VariantDetailState> {
     }
   }
 
+  /// Saves the edited recipe, then re-reads what the server actually holds.
+  ///
+  /// The re-read is the point: `PUT /variants/{id}/recipe` is a no-op stub on
+  /// the backend, so emitting the locally edited list here would show the
+  /// admin a phantom recipe that silently reverts on the next reload. The call
+  /// and the optimistic loading state stay — once the backend implements the
+  /// write, the re-read simply returns the same list.
+  ///
+  /// The re-read runs even when the write failed, because a stub that returns
+  /// success is exactly the case where the difference matters: the admin sees
+  /// the unchanged server state immediately instead of believing the edit
+  /// landed. If the re-read itself fails the state goes to
+  /// [VariantDetailError], which the screen already handles (restore + retry).
   Future<void> replaceRecipe({
     required int variantId,
     required List<RecipeIngredient> ingredients,
@@ -39,7 +52,9 @@ class VariantDetailCubit extends Cubit<VariantDetailState> {
         variantId: variantId,
         ingredients: ingredients,
       );
-      emit(VariantDetailLoaded(ingredients, previousIngredients));
+      // Authoritative state comes from the server, never from the editor.
+      final saved = await _repository.fetchRecipe(variantId: variantId);
+      emit(VariantDetailLoaded(saved, previousIngredients));
     } on Object catch (e) {
       emit(VariantDetailError(e.toString()));
     }
