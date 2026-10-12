@@ -211,6 +211,37 @@ void main() {
         const terminal.PaymentAlreadyInProgressException('in progress'),
       );
     });
+
+    test('TerminalPaymentEndpointUnavailableException keeps its reason and '
+        'cause, so the seller sees an honest "card unavailable" outcome',
+        () async {
+      when(() => service.startPayment(any())).thenThrow(
+        const terminal.TerminalPaymentEndpointUnavailableException(),
+      );
+
+      await expectLater(
+        () => handler.afterOrderCreated(_receipt(), request),
+        throwsA(
+          isA<PaymentException>()
+              .having(
+                (e) => e.reason,
+                'reason',
+                PaymentFailureReason.terminalEndpointUnavailable,
+              )
+              .having(
+                (e) => e.message,
+                'message',
+                contains('Оплата терміналом недоступна'),
+              )
+              .having(
+                (e) => e.cause,
+                'cause',
+                isA<terminal.TerminalPaymentEndpointUnavailableException>(),
+              ),
+        ),
+      );
+      verifyNever(() => ordersRepository.confirmOrder(any()));
+    });
   });
 
   test('terminal TerminalPaymentCancelledException maps to app '
