@@ -57,13 +57,24 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
 
   // ── Products ──
   @override
-  Future<List<AdminProduct>> fetchProducts({required int categoryId}) =>
-      dioGuard(() async {
-        final response = await _apiClient.get(
-          '/categories/$categoryId/products',
-        );
-        return unwrapList(response.data, AdminProduct.fromJson);
-      });
+  Future<List<AdminProduct>> fetchProducts({
+    required int categoryId,
+    int? limit,
+    int? offset,
+  }) => dioGuard(() async {
+    final response = await _apiClient.get(
+      '/categories/$categoryId/products',
+      // Absent pagination leaves the call exactly as it was: no parameter map
+      // at all. The map only appears once a caller actually paginates.
+      queryParameters: (limit != null || offset != null)
+          ? {
+              'limit': ?limit,
+              'offset': ?offset,
+            }
+          : null,
+    );
+    return unwrapList(response.data, AdminProduct.fromJson);
+  });
 
   @override
   Future<AdminProduct> createProduct({

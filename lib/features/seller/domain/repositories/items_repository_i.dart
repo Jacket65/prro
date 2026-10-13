@@ -10,15 +10,26 @@ abstract interface class ItemsRepositoryI {
 
   /// Abstract products inside a category. Returned as [Category]-typed [Item]s
   /// because they are navigable (have no own price).
-  Future<List<Item>> getProducts(int categoryId);
+  ///
+  /// [limit]/[offset] are sent as query parameters when set. They are inert
+  /// today — the backend ignores unknown parameters, so no UI pagination is
+  /// built on them until the backend ships it (backend gap; see
+  /// docs/backend_gaps.md).
+  Future<List<Item>> getProducts(int categoryId, {int? limit, int? offset});
 
   /// Searches products of the current outlet by name
   /// (`GET /retail-outlets/{id}/products?q=...`). Same response shape as
   /// [getProducts] (products with inline variants), so results render with the
   /// existing tiles. Pass a [cancelToken] to abort a superseded search.
+  ///
+  /// [limit]/[offset] are inert today exactly like on [getProducts]: sent when
+  /// set, ignored by the backend, and not passed by any caller until UI
+  /// pagination is possible.
   Future<List<Item>> searchProducts({
     required String query,
     int? categoryId,
+    int? limit,
+    int? offset,
     CancelToken? cancelToken,
   });
 

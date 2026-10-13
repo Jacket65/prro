@@ -43,9 +43,19 @@ class ItemsRepository implements ItemsRepositoryI {
   }
 
   @override
-  Future<List<Item>> getProducts(int categoryId) async {
+  @override
+  Future<List<Item>> getProducts(
+    int categoryId, {
+    int? limit,
+    int? offset,
+  }) async {
     try {
-      final response = await _apiClient.get('/categories/$categoryId/products');
+      final response = await _apiClient.get(
+        '/categories/$categoryId/products',
+        // Absent pagination leaves the call exactly as it was: no parameter
+        // map at all. The map only appears once a caller actually paginates.
+        queryParameters: _pagination(limit, offset),
+      );
       return _flattenProducts(unwrapList(response.data, ProductGroup.fromJson));
     } on Object catch (e, stackTrace) {
       log('Error in getProducts: $e', stackTrace: stackTrace);
@@ -57,6 +67,8 @@ class ItemsRepository implements ItemsRepositoryI {
   Future<List<Item>> searchProducts({
     required String query,
     int? categoryId,
+    int? limit,
+    int? offset,
     CancelToken? cancelToken,
   }) async {
     final outletId = _outlets.idOrNull();
@@ -68,10 +80,20 @@ class ItemsRepository implements ItemsRepositoryI {
       queryParameters: {
         if (query.isNotEmpty) 'q': query,
         'category_id': categoryId,
+        'limit': ?limit,
+        'offset': ?offset,
       },
       cancelToken: cancelToken,
     );
     return _flattenProducts(unwrapList(response.data, ProductGroup.fromJson));
+  }
+
+  /// The inactive pagination parameters as a query map, or `null` when none is
+  /// set (so the wire call is byte-for-byte the pre-pagination one).
+  Map<String, dynamic>? _pagination(int? limit, int? offset) {
+    final pagination = {'limit': ?limit, 'offset': ?offset};
+    // No pagination at all → leave the wire call exactly as it was.
+    return (limit == null && offset == null) ? null : pagination;
   }
 
   /// Products arrive with their variants inline (single request, no N+1).

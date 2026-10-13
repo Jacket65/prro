@@ -32,7 +32,11 @@ class AdminCatalogRepositoryMock implements AdminCatalogRepositoryI {
       _mockBackend.deleteAdminCategory(id: id);
 
   @override
-  Future<List<AdminProduct>> fetchProducts({required int categoryId}) async =>
+  Future<List<AdminProduct>> fetchProducts({
+    required int categoryId,
+    int? limit,
+    int? offset,
+  }) async =>
       // AdminProduct list is derived from variants in the mock backend; expose
       // thep arent products by reading the catalog shape through variants.
       await _mockBackend

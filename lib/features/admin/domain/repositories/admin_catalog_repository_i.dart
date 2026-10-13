@@ -17,7 +17,17 @@ abstract interface class AdminCatalogRepositoryI {
   Future<void> deleteCategory({required int id});
 
   // ── Products (scoped by category) ──
-  Future<List<AdminProduct>> fetchProducts({required int categoryId});
+  /// Abstract products inside a category.
+  ///
+  /// [limit]/[offset] are sent as query parameters when set. They are inert
+  /// today — the backend ignores unknown parameters, so no UI pagination is
+  /// built on them until the backend ships it (backend gap; see
+  /// docs/backend_gaps.md).
+  Future<List<AdminProduct>> fetchProducts({
+    required int categoryId,
+    int? limit,
+    int? offset,
+  });
   Future<AdminProduct> createProduct({
     required int categoryId,
     required String name,

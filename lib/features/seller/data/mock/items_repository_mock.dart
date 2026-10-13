@@ -17,15 +17,19 @@ class ItemsRepositoryMock implements ItemsRepositoryI {
   Future<List<Item>> getCategories() => _backend.getCategories();
 
   @override
-  Future<List<Item>> getProducts(int categoryId) =>
+  Future<List<Item>> getProducts(int categoryId, {int? limit, int? offset}) =>
       _backend.getProducts(categoryId);
 
   @override
   Future<List<Item>> searchProducts({
     required String query,
     int? categoryId,
+    int? limit,
+    int? offset,
     CancelToken? cancelToken,
   }) async {
+    // limit/offset are accepted for interface parity and ignored: the mock
+    // serves the full list, exactly as the real backend does today.
     if (cancelToken?.isCancelled == true) {
       throw DioException(
         requestOptions: RequestOptions(),
