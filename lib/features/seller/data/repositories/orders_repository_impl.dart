@@ -77,63 +77,56 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
     required PaymentMethod method,
     required int tenderedKopecks,
     required String idempotencyKey,
-  }) async {
-    final outletId = requireOutletId(_prefs);
-    // Backend expects quantities/amounts as decimal STRINGS. The selected bean
-    // is just another option, so it folds into the line's `options` array.
-    final productsJson = _cart.products.map((p) {
-      final options = <Map<String, dynamic>>[
-        for (final o in p.selectedOptions)
-          {'option_id': o.optionId, 'quantity': o.quantity},
-        if (p.selectedBean != null)
-          {'option_id': p.selectedBean!.id, 'quantity': 1},
-      ];
-      return {
-        'id': int.tryParse(p.id) ?? p.id,
-        // Decimal string at the unit's precision ("0.250" for kg, "2" for pcs).
-        'quantity': p.quantity.toStringAsFixed(unitScale(p.unit)),
-        if (options.isNotEmpty) 'options': options,
-      };
-    }).toList();
+  }) => dioGuard(
+    () async {
+      final outletId = requireOutletId(_prefs);
+      // Backend expects quantities/amounts as decimal STRINGS. The selected
+      // bean is just another option, so it folds into the line's `options`
+      // array.
+      final productsJson = _cart.products.map((p) {
+        final options = <Map<String, dynamic>>[
+          for (final o in p.selectedOptions)
+            {'option_id': o.optionId, 'quantity': o.quantity},
+          if (p.selectedBean != null)
+            {'option_id': p.selectedBean!.id, 'quantity': 1},
+        ];
+        return {
+          'id': int.tryParse(p.id) ?? p.id,
+          // Decimal string at the unit's precision ("0.250" for kg, "2" for
+          // pcs).
+          'quantity': p.quantity.toStringAsFixed(unitScale(p.unit)),
+          if (options.isNotEmpty) 'options': options,
+        };
+      }).toList();
 
-    final body = {
-      // `type` is required by the backend (`oneof=cash card`); `terminal`
-      // travels as `card` and produces a `pending` order that the terminal
-      // flow confirms afterwards.
-      'type': method.wire,
-      'products': productsJson,
-      'payment': {
-        'method': method.wire,
-        'amount': formatAmount(tenderedKopecks),
-      },
-    };
-
-    try {
       final response = await _apiClient.post(
         '/retail-outlets/$outletId/orders',
-        data: body,
+        data: {
+          // `type` is required by the backend (`oneof=cash card`); `terminal`
+          // travels as `card` and produces a `pending` order that the terminal
+          // flow confirms afterwards.
+          'type': method.wire,
+          'products': productsJson,
+          'payment': {
+            'method': method.wire,
+            'amount': formatAmount(tenderedKopecks),
+          },
+        },
         idempotencyKey: idempotencyKey,
       );
       return _receipt(response);
-    } on DioException catch (e) {
-      // The seller's shift can be closed from another device while the screen
-      // is still open: the backend answers 404 (no open shift) instead of 409.
-      // Report the fact; `PayOrderUseCase` turns it into the wording the seller
-      // sees, since a message thrown from here never reaches the UI.
-      if (e.response?.statusCode == 404) {
-        throw const ShiftClosedException();
-      }
-      throw ApiException.fromDio(e);
-    }
-  }
+    },
+    // A 404 from the order route means the seller's shift was closed on
+    // another device (the backend has no open-shift 409 for this). Report the
+    // fact; `PayOrderUseCase` turns it into the wording the seller sees, since
+    // a message thrown from here never reaches the UI.
+    onError: (e) =>
+        e.response?.statusCode == 404 ? const ShiftClosedException() : null,
+  );
 
   @override
-  Future<OrderReceipt> confirmOrder(int orderId) async {
-    try {
-      final response = await _apiClient.post('/orders/$orderId/confirm');
-      return _receipt(response);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
-    }
-  }
+  Future<OrderReceipt> confirmOrder(int orderId) => dioGuard(() async {
+    final response = await _apiClient.post('/orders/$orderId/confirm');
+    return _receipt(response);
+  });
 }
