@@ -412,13 +412,24 @@ class _TerminalField extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Row(
-            children: [
-              Icon(Icons.credit_card, color: Colors.blue),
-              SizedBox(width: 8),
-              Text('Оплата через термінал', style: TextStyle(fontSize: 16)),
-            ],
+          // Flexible on narrower surfaces (a phone in portrait): the label
+          // ellipsizes instead of overflowing the row.
+          const Flexible(
+            child: Row(
+              children: [
+                Icon(Icons.credit_card, color: Colors.blue),
+                SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    'Оплата через термінал',
+                    style: TextStyle(fontSize: 16),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
+          const SizedBox(width: 8),
           Text(
             formatUah(totalKopecks),
             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),

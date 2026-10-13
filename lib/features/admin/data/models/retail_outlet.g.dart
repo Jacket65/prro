@@ -12,7 +12,7 @@ _RetailOutlet _$RetailOutletFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       address: json['address'] as String?,
       city: json['city'] as String?,
-      isActive: json['isActive'] as bool?,
+      isActive: json['is_active'] as bool?,
     );
 
 Map<String, dynamic> _$RetailOutletToJson(_RetailOutlet instance) =>
@@ -21,5 +21,5 @@ Map<String, dynamic> _$RetailOutletToJson(_RetailOutlet instance) =>
       'name': instance.name,
       'address': instance.address,
       'city': instance.city,
-      'isActive': instance.isActive,
+      'is_active': instance.isActive,
     };

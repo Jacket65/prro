@@ -16,7 +16,10 @@ abstract class RetailOutlet with _$RetailOutlet {
     required String name,
     String? address,
     String? city,
-    bool? isActive,
+
+    /// The wire key is snake_case like the rest of the Go backend's fields
+    /// (`is_active`), which the mock emits too.
+    @JsonKey(name: 'is_active') bool? isActive,
   }) = _RetailOutlet;
 
   factory RetailOutlet.fromJson(Map<String, dynamic> json) =>

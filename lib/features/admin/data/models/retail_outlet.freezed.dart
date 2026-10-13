@@ -16,7 +16,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RetailOutlet {
 
- int get id; String get name; String? get address; String? get city; bool? get isActive;
+ int get id; String get name; String? get address; String? get city;/// The wire key is snake_case like the rest of the Go backend's fields
+/// (`is_active`), which the mock emits too.
+@JsonKey(name: 'is_active') bool? get isActive;
 /// Create a copy of RetailOutlet
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +56,7 @@ abstract mixin class $RetailOutletCopyWith<$Res>  {
   factory $RetailOutletCopyWith(RetailOutlet value, $Res Function(RetailOutlet) _then) = _$RetailOutletCopyWithImpl;
 @useResult
 $Res call({
- int id, String name, String? address, String? city, bool? isActive
+ int id, String name, String? address, String? city,@JsonKey(name: 'is_active') bool? isActive
 });
 
 
@@ -163,7 +165,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  String? address,  String? city,  bool? isActive)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  String? address,  String? city, @JsonKey(name: 'is_active')  bool? isActive)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RetailOutlet() when $default != null:
 return $default(_that.id,_that.name,_that.address,_that.city,_that.isActive);case _:
@@ -184,7 +186,7 @@ return $default(_that.id,_that.name,_that.address,_that.city,_that.isActive);cas
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  String? address,  String? city,  bool? isActive)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  String? address,  String? city, @JsonKey(name: 'is_active')  bool? isActive)  $default,) {final _that = this;
 switch (_that) {
 case _RetailOutlet():
 return $default(_that.id,_that.name,_that.address,_that.city,_that.isActive);case _:
@@ -204,7 +206,7 @@ return $default(_that.id,_that.name,_that.address,_that.city,_that.isActive);cas
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  String? address,  String? city,  bool? isActive)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  String? address,  String? city, @JsonKey(name: 'is_active')  bool? isActive)?  $default,) {final _that = this;
 switch (_that) {
 case _RetailOutlet() when $default != null:
 return $default(_that.id,_that.name,_that.address,_that.city,_that.isActive);case _:
@@ -219,14 +221,16 @@ return $default(_that.id,_that.name,_that.address,_that.city,_that.isActive);cas
 @JsonSerializable()
 
 class _RetailOutlet implements RetailOutlet {
-  const _RetailOutlet({required this.id, required this.name, this.address, this.city, this.isActive});
+  const _RetailOutlet({required this.id, required this.name, this.address, this.city, @JsonKey(name: 'is_active') this.isActive});
   factory _RetailOutlet.fromJson(Map<String, dynamic> json) => _$RetailOutletFromJson(json);
 
 @override final  int id;
 @override final  String name;
 @override final  String? address;
 @override final  String? city;
-@override final  bool? isActive;
+/// The wire key is snake_case like the rest of the Go backend's fields
+/// (`is_active`), which the mock emits too.
+@override@JsonKey(name: 'is_active') final  bool? isActive;
 
 /// Create a copy of RetailOutlet
 /// with the given fields replaced by the non-null parameter values.
@@ -263,7 +267,7 @@ abstract mixin class _$RetailOutletCopyWith<$Res> implements $RetailOutletCopyWi
   factory _$RetailOutletCopyWith(_RetailOutlet value, $Res Function(_RetailOutlet) _then) = __$RetailOutletCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String name, String? address, String? city, bool? isActive
+ int id, String name, String? address, String? city,@JsonKey(name: 'is_active') bool? isActive
 });
 
 
