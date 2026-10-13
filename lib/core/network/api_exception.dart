@@ -79,3 +79,24 @@ class ApiException implements Exception {
   @override
   String toString() => message;
 }
+
+/// Runs one API call and normalizes its transport failure into the app's
+/// single error type.
+///
+/// Repositories are the boundary: a call inside the guard returns its parsed
+/// value or throws [ApiException], and nothing above the repository needs to
+/// know `dio` exists. The guard deliberately catches **only** [DioException]:
+/// an [ApiException] a call body raises itself (e.g. the recipe-stub check)
+/// travels through untouched, so body-level failures keep their own wording.
+///
+/// It replaces the per-call `try { … } on DioException catch (e) { throw
+/// ApiException.fromDio(e); }` that every repository repeated: the translation
+/// exists in exactly one place, and a call site cannot accidentally swallow or
+/// reword it.
+Future<T> dioGuard<T>(Future<T> Function() call) async {
+  try {
+    return await call();
+  } on DioException catch (e) {
+    throw ApiException.fromDio(e);
+  }
+}
