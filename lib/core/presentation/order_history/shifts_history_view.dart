@@ -53,9 +53,19 @@ class ShiftsHistoryView extends StatelessWidget {
                       ),
                     );
                   }
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    unawaited(context.read<ShiftsHistoryCubit>().loadMore());
-                  });
+                  // Only schedule when no page is already being fetched.
+                  // Without the guard, every rebuild (the loading state
+                  // itself triggers one) re-arms the callback, so the trailing
+                  // row keeps scheduling loadMore calls for the current page.
+                  // Only schedule when no page is already being fetched.
+                  // Without the guard, every rebuild (the loading state
+                  // itself triggers one) re-arms the callback, so the trailing
+                  // row keeps scheduling loadMore calls for the current page.
+                  if (!state.isLoadingMore) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      unawaited(context.read<ShiftsHistoryCubit>().loadMore());
+                    });
+                  }
                   return const Padding(
                     padding: EdgeInsets.all(16),
                     child: Center(child: CircularProgressIndicator()),

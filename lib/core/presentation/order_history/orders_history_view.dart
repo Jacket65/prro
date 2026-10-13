@@ -56,11 +56,17 @@ class OrdersHistoryView extends StatelessWidget {
                           ),
                         );
                       }
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        unawaited(
-                          context.read<OrdersHistoryCubit>().loadMore(),
-                        );
-                      });
+                      // Only schedule when no page is already being fetched
+                      // (same guard as the shifts view): without it every
+                      // rebuild — the loading state itself causes one — re-arms
+                      // the callback for the current page.
+                      if (!state.isLoadingMore) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          unawaited(
+                            context.read<OrdersHistoryCubit>().loadMore(),
+                          );
+                        });
+                      }
                       return const Padding(
                         padding: EdgeInsets.all(16),
                         child: Center(child: CircularProgressIndicator()),
