@@ -350,7 +350,7 @@ class MockApiClient implements ApiClientI {
       } else if (path.contains('/auth/refresh')) {
         log('[MOCK API] Token refresh');
 
-        if (MockBackend.forceRefreshFailure) {
+        if (mockBackend.forceRefreshFailure) {
           return Response(
             requestOptions: RequestOptions(path: path),
             statusCode: 401,

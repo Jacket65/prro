@@ -271,14 +271,14 @@ void main() {
 
     group('Error simulation', () {
       test('simulateError causes MockBackendException', () async {
-        MockBackend.simulateError = true;
+        backend.simulateError = true;
         try {
           await expectLater(
             backend.getCategories(),
             throwsA(isA<MockBackendException>()),
           );
         } finally {
-          MockBackend.simulateError = false;
+          backend.simulateError = false;
         }
       });
     });
