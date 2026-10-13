@@ -41,6 +41,9 @@ class ShiftCubit extends Cubit<ShiftState> {
     }
   }
 
+  /// Closes the shift. Only the real close becomes
+  /// [ShiftNone] with [ShiftNoneCause.closedByUser]; a failure stays
+  /// [ShiftError] so the dialog does not pop on a close that never happened.
   Future<void> closeShift({
     required String cashEnd,
     required String idempotencyKey,
@@ -51,13 +54,16 @@ class ShiftCubit extends Cubit<ShiftState> {
         cashEnd: cashEnd,
         idempotencyKey: idempotencyKey,
       );
-      emit(const ShiftNone());
+      emit(const ShiftNone(cause: ShiftNoneCause.closedByUser));
     } on Object catch (e) {
       emit(ShiftError(e.toString()));
     }
   }
 
+  /// Drops the state without closing anything: called when the session ends
+  /// (logout, expiry, re-login), so the cause says "session reset" and the
+  /// close dialog must not read it as a successful close.
   void reset() {
-    emit(const ShiftNone());
+    emit(const ShiftNone(cause: ShiftNoneCause.sessionReset));
   }
 }

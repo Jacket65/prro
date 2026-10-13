@@ -514,29 +514,65 @@ case _:
 mixin _$ShiftNone {
 
 
+/// Create a copy of ShiftNone
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ShiftNoneCopyWith<ShiftNone> get copyWith => _$ShiftNoneCopyWithImpl<ShiftNone>(this as ShiftNone, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is ShiftNone);
+  final _this = this as ShiftNone;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ShiftNone&&(identical(other.cause, _this.cause) || other.cause == _this.cause));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode {
+  final _this = this as ShiftNone;
+  return Object.hash(runtimeType,_this.cause);
+}
 
 @override
 String toString() {
-    return 'ShiftNone()';
+  final _this = this as ShiftNone;
+  return 'ShiftNone(cause: ${_this.cause})';
 }
 
 
 }
 
 /// @nodoc
-class $ShiftNoneCopyWith<$Res>  {
-$ShiftNoneCopyWith(ShiftNone _, $Res Function(ShiftNone) __);
+abstract mixin class $ShiftNoneCopyWith<$Res>  {
+  factory $ShiftNoneCopyWith(ShiftNone value, $Res Function(ShiftNone) _then) = _$ShiftNoneCopyWithImpl;
+@useResult
+$Res call({
+ ShiftNoneCause cause
+});
+
+
+
+
+}
+/// @nodoc
+class _$ShiftNoneCopyWithImpl<$Res>
+    implements $ShiftNoneCopyWith<$Res> {
+  _$ShiftNoneCopyWithImpl(this._self, this._then);
+
+  final ShiftNone _self;
+  final $Res Function(ShiftNone) _then;
+
+/// Create a copy of ShiftNone
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? cause = null,}) {
+  return _then(ShiftNone(
+cause: null == cause ? _self.cause : cause // ignore: cast_nullable_to_non_nullable
+as ShiftNoneCause,
+  ));
+}
+
 }
 
 
