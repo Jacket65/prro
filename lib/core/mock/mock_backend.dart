@@ -138,7 +138,7 @@ class MockBackend {
   Product _variantToProduct(_CatalogProduct p, _CatalogVariant v) => Product(
     id: v.id.toString(),
     name: p.variants.length > 1 ? '${p.name} ${v.name}' : p.name,
-    price: v.priceKopecks / 100.0,
+    price: uahFromKopecks(v.priceKopecks),
     imageUrl: '',
     quantity: v.unit != null ? v.unit!.step : Decimal.one,
     unit: v.unit,
@@ -167,7 +167,7 @@ class MockBackend {
           (o) => DrinkOption(
             id: o.id,
             name: o.name,
-            priceDelta: o.priceDeltaKopecks / 100.0,
+            priceDelta: uahFromKopecks(o.priceDeltaKopecks),
           ),
         )
         .toList(),
@@ -543,29 +543,20 @@ class MockBackend {
     return AdminProduct(id: id, name: name, categoryId: categoryId);
   }
 
+  /// Mirrors `PATCH /products/{id}` (`handle_product.go:38-51`): the route is
+  /// registered (routes.go:86) but the handler saves a partial `Product`
+  /// (id + name), GORM zeroes `category_id` and the insert violates the FK
+  /// (23503), so the server answers 500 and leaves the row untouched. The
+  /// mock fails the same way and writes nothing — a caller sees the same
+  /// 'Помилка сервера.' the client renders for `internal_error`.
   Future<AdminProduct> updateAdminProduct({
     required int id,
     required String name,
   }) async {
     await _network();
-    final cat = _findAdminProduct(id).$1;
-    final product = _findAdminProduct(id).$2;
-    final newProduct = _AdminProduct(
-      id: product.id,
-      name: name,
-      variants: product.variants,
-    );
-    final newProducts = [
-      for (final p in cat.products)
-        if (p.id == id) newProduct else p,
-    ];
-    _adminCatalog[_adminCatalog.indexOf(cat)] = _AdminCategory(
-      id: cat.id,
-      outletId: cat.outletId,
-      name: cat.name,
-      products: newProducts,
-    );
-    return AdminProduct(id: id, name: name, categoryId: cat.id);
+    // An unknown id is rejected before the broken save is ever attempted.
+    _findAdminProduct(id);
+    throw const MockBackendException('Помилка сервера.');
   }
 
   Future<void> deleteAdminProduct({required int id}) async {
@@ -635,71 +626,28 @@ class MockBackend {
     );
   }
 
+  /// Mirrors `PATCH /variants/{id}`: the route is commented out of the router
+  /// (routes.go:106), so Gin answers a bare 404 for ANY variant id — the
+  /// handler never runs, so neither does this. `ApiException._friendly`
+  /// renders that bare 404 as 'Помилка сервера (404).', which is the sentence
+  /// the caller sees, and the store is left untouched.
   Future<AdminVariant> updateAdminVariant({
     required int id,
     required String name,
     required int priceKopecks,
   }) async {
     await _network();
-    final found = _findAdminVariant(id);
-    final cat = found.$1;
-    final product = found.$2;
-    final variant = found.$3;
-    final newVariant = _AdminVariant(
-      id: variant.id,
-      name: name,
-      priceKopecks: priceKopecks,
-      recipe: variant.recipe,
-    );
-    final newProducts = [
-      for (final p in cat.products)
-        if (p.id == product.id)
-          _AdminProduct(
-            id: p.id,
-            name: p.name,
-            variants: [
-              for (final v in p.variants)
-                if (v.id == id) newVariant else v,
-            ],
-          )
-        else
-          p,
-    ];
-    _adminCatalog[_adminCatalog.indexOf(cat)] = _AdminCategory(
-      id: cat.id,
-      outletId: cat.outletId,
-      name: cat.name,
-      products: newProducts,
-    );
-    return AdminVariant(
-      id: id,
-      name: name,
-      priceKopecks: priceKopecks,
-      productId: product.id,
-    );
+    throw const MockBackendException('Помилка сервера (404).');
   }
 
+  /// Mirrors `DELETE /variants/{id}`: the route is commented out of the
+  /// router (routes.go:107), so Gin answers a bare 404 for ANY variant id and
+  /// nothing is deleted — the handler never runs. The caller sees the same
+  /// 'Помилка сервера (404).' the client renders for a bare 404, and the store
+  /// is left untouched.
   Future<void> deleteAdminVariant({required int id}) async {
     await _network();
-    final found = _findAdminVariant(id);
-    final cat = found.$1;
-    final product = found.$2;
-    _adminCatalog[_adminCatalog.indexOf(cat)] = _AdminCategory(
-      id: cat.id,
-      outletId: cat.outletId,
-      name: cat.name,
-      products: [
-        for (final p in cat.products)
-          if (p.id == product.id)
-            _AdminProduct(
-              id: p.id,
-              name: p.name,
-              variants: p.variants.where((v) => v.id != id).toList(),
-            )
-          else
-            p,
-      ],
-    );
+    throw const MockBackendException('Помилка сервера (404).');
   }
 
   // ── Recipe (scoped by variant) ──
@@ -727,8 +675,10 @@ class MockBackend {
     // The variant must exist, exactly as the real route resolves it before it
     // would (or would not) write anything.
     _findAdminVariant(variantId);
-    log('[MOCK /variants/$variantId/recipe] 200, stored by the server as a '
-        'no-op');
+    log(
+      '[MOCK /variants/$variantId/recipe] 200, stored by the server as a '
+      'no-op',
+    );
   }
 
   // ── Ingredients (global, per outlet) ──

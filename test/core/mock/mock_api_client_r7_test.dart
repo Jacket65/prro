@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:prro/core/mock/mock_api_client.dart';
 import 'package:prro/core/mock/mock_backend.dart';
+import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/features/admin/data/models/catalog.dart';
 
 void main() {
@@ -23,7 +24,7 @@ void main() {
       );
 
   /// Runs [run] and returns whatever it threw, or `null` when it did not.
-  Future<Object?> errorOf(Future<Response<dynamic>> Function() run) async {
+  Future<Object?> errorOf(Future<Object?> Function() run) async {
     try {
       await run();
       return null;
@@ -194,14 +195,13 @@ void main() {
     test('every modelled route still succeeds', () async {
       // The assertion is only safe if the routes the client really uses keep
       // passing through it — otherwise a 404 just became a different wall.
+      // /auth/me is not one of them: no client interface calls it, so it is
+      // pinned as unrouted in `mock_api_client_test.dart` instead.
       final login = await post('/auth/login', {
         'login': 'admin',
         'password': 'admin123',
       });
       expect(login.statusCode, 200);
-
-      final me = await client.get('/auth/me');
-      expect(me.statusCode, 200);
 
       final outlets = await client.get('/retail-outlets/');
       expect(outlets.statusCode, 200);
@@ -250,6 +250,12 @@ void main() {
     // the mock must not persist either: otherwise the admin screen looks like
     // it saved while the server quietly reverts, and only a run against the
     // real backend would expose it.
+    //
+    // The transport branch that used to serve the route is gone (it was
+    // unreachable in the mock environment and answered undecodably), so the
+    // no-op itself is pinned against `MockBackend` — the layer the
+    // repository-level mock actually reaches — and the transport below is
+    // pinned as unrouted.
     Future<int> createVariantWithRecipe() async {
       final product = await backend.createAdminProduct(
         categoryId: 1,
@@ -266,25 +272,7 @@ void main() {
       return variant.id;
     }
 
-    test('PUT succeeds and leaves the stored recipe alone', () async {
-      final variantId = await createVariantWithRecipe();
-
-      final response = await client.put(
-        '/variants/$variantId/recipe',
-        data: {
-          'ingredients': [
-            {'ingredient_id': 2, 'name': 'Молоко', 'quantity': '120'},
-          ],
-        },
-      );
-
-      expect(response.statusCode, 200);
-      final stored = await backend.getAdminRecipe(variantId);
-      expect(stored, hasLength(1));
-      expect(stored.single.name, 'Кава');
-    });
-
-    test('the mock backend itself does not persist the recipe', () async {
+    test('the mock backend does not persist the recipe', () async {
       final variantId = await createVariantWithRecipe();
       final before = await backend.getAdminRecipe(variantId);
 
@@ -298,18 +286,246 @@ void main() {
       expect(await backend.getAdminRecipe(variantId), before);
     });
 
+    test('a missing variant still resolves, as the route would', () async {
+      final error = await errorOf(
+        () => backend.replaceAdminRecipe(
+          variantId: 999999,
+          ingredients: const [],
+        ),
+      );
+
+      expect(error.toString(), contains('Варіант не знайдено.'));
+    });
+
+    test('the transport no longer serves the route', () async {
+      final variantId = await createVariantWithRecipe();
+
+      final error = await errorOf(
+        () => client.put(
+          '/variants/$variantId/recipe',
+          data: {
+            'ingredients': [
+              {'ingredient_id': 2, 'name': 'Молоко', 'quantity': '120'},
+            ],
+          },
+        ),
+      );
+
+      expect(
+        error,
+        isA<DioException>().having(
+          (e) => e.response?.statusCode,
+          'status',
+          404,
+        ),
+      );
+    });
+  });
+
+  group('P2-1: the mock fails where its server fails', () {
+    Future<(int, int)> createProductWithVariant() async {
+      final product = await backend.createAdminProduct(
+        categoryId: 1,
+        name: 'Капучіно',
+      );
+      final variant = await backend.createAdminVariant(
+        productId: product.id,
+        name: '300 мл',
+        priceKopecks: 5500,
+        ingredients: const [
+          RecipeIngredient(ingredientId: 1, name: 'Кава', quantity: 18),
+        ],
+      );
+      return (product.id, variant.id);
+    }
+
     test(
-      'a missing variant still resolves, exactly as the route would',
+      "PATCH /products/{id} answers the server's 500, not a success",
       () async {
+        // routes.go:86 registers the route, but the handler saves a partial
+        // `Product` (id + name), GORM zeroes `category_id` and the insert
+        // violates the FK (23503) → 500. Success here was the lie P2-1 removes.
+        final (productId, _) = await createProductWithVariant();
+
         final error = await errorOf(
-          () => client.put(
-            '/variants/999999/recipe',
-            data: const {'ingredients': <Map<String, dynamic>>[]},
+          () => client.patch(
+            '/products/$productId',
+            data: {'name': 'Перейменовано'},
           ),
         );
 
-        expect(error.toString(), contains('Варіант не знайдено.'));
+        expect(
+          error,
+          isA<DioException>().having(
+            (e) => e.response?.statusCode,
+            'status',
+            500,
+          ),
+        );
+        final dioError = error! as DioException;
+        expect(dioError.response, isNotNull);
+        final data = dioError.response!.data as Map<String, dynamic>;
+        expect(data['error'], isA<Map<String, dynamic>>());
+        expect((data['error'] as Map)['code'], 'internal_error');
+        // The sentence a production user sees for that envelope.
+        expect(ApiException.fromDio(dioError).message, 'Помилка сервера.');
+        // And the product survives untouched, exactly as the server leaves it.
+        await expectLater(
+          backend.getAdminVariants(productId),
+          completion(isNotEmpty),
+        );
       },
     );
+
+    test('PATCH /variants/{id} answers 404 (route commented out)', () async {
+      // routes.go:106 is commented out, so Gin answers a bare 404 for any id.
+      final (_, variantId) = await createProductWithVariant();
+
+      final error = await errorOf(
+        () => client.patch(
+          '/variants/$variantId',
+          data: {'name': '400 мл', 'price': '60.00'},
+        ),
+      );
+
+      expect(
+        error,
+        isA<DioException>().having(
+          (e) => e.response?.statusCode,
+          'status',
+          404,
+        ),
+      );
+    });
+
+    test('DELETE /variants/{id} answers 404 (route commented out)', () async {
+      // routes.go:107 is commented out, so Gin answers a bare 404 for any id.
+      final (productId, variantId) = await createProductWithVariant();
+
+      final error = await errorOf(() => client.delete('/variants/$variantId'));
+
+      expect(
+        error,
+        isA<DioException>().having(
+          (e) => e.response?.statusCode,
+          'status',
+          404,
+        ),
+      );
+      final variants = await backend.getAdminVariants(productId);
+      expect(variants.any((v) => v.id == variantId), isTrue);
+    });
+
+    test('PATCH /categories/{id} still succeeds and decodes', () async {
+      // Registered and working on the server (routes.go:75), so the mock keeps
+      // answering — with the wire shape, so `AdminCategory.fromJson` works.
+      final response = await client.patch(
+        '/categories/1',
+        data: {'name': 'Гарячі напої'},
+      );
+
+      expect(response.statusCode, 200);
+      final category = AdminCategory.fromJson(
+        ((response.data as Map<String, dynamic>)['data'] as Map)
+            .cast<String, dynamic>(),
+      );
+      expect(category.id, 1);
+      expect(category.name, 'Гарячі напої');
+    });
+
+    test(
+      'DELETE /categories/{id} and /products/{id} still answer 204',
+      () async {
+        // Registered and working on the server (routes.go:76, :87).
+        final created = await backend.createAdminCategory(
+          outletId: 1,
+          name: 'Тимчасова',
+        );
+        final categories = await client.delete('/categories/${created.id}');
+        expect(categories.statusCode, 204);
+
+        final (productId, _) = await createProductWithVariant();
+        final products = await client.delete('/products/$productId');
+        expect(products.statusCode, 204);
+      },
+    );
+
+    test('the unreachable admin writes/reads fall through to 404', () async {
+      // Unreachable in the mock environment: the repository-level mocks
+      // (`AdminCatalogRepositoryMock`, `AdminUserRepositoryMock`) intercept
+      // before the transport, and they answered undecodably.
+      for (final call in <Future<Response<dynamic>> Function()>[
+        () => client.post(
+          '/retail-outlets/1/categories',
+          data: {'name': 'Нова категорія'},
+        ),
+        () => client.get('/retail-outlets/1/users'),
+        () => client.get('/retail-outlets/1/categories'),
+        () => client.get('/retail-outlets/1/ingredients'),
+        () => client.get('/measure-units'),
+        () => client.get('/categories'),
+        () => client.get('/products'),
+      ]) {
+        final error = await errorOf(call);
+        expect(
+          error,
+          isA<DioException>().having(
+            (e) => e.response?.statusCode,
+            'status',
+            404,
+          ),
+        );
+      }
+    });
+
+    test('MockBackend mirrors the 500 and 404 for admin writes', () async {
+      // The layer `AdminCatalogRepositoryMock` actually reaches, so mock mode
+      // fails with exactly the sentences the client renders in production.
+      final (productId, variantId) = await createProductWithVariant();
+
+      final productError = await errorOf(
+        () => backend.updateAdminProduct(id: productId, name: 'Капучіно'),
+      );
+      expect(
+        productError,
+        isA<MockBackendException>().having(
+          (e) => e.message,
+          'message',
+          'Помилка сервера.',
+        ),
+      );
+
+      final variantError = await errorOf(
+        () => backend.updateAdminVariant(
+          id: variantId,
+          name: '400 мл',
+          priceKopecks: 6000,
+        ),
+      );
+      expect(
+        variantError,
+        isA<MockBackendException>().having(
+          (e) => e.message,
+          'message',
+          'Помилка сервера (404).',
+        ),
+      );
+
+      final deleteError = await errorOf(
+        () => backend.deleteAdminVariant(id: variantId),
+      );
+      expect(
+        deleteError,
+        isA<MockBackendException>().having(
+          (e) => e.message,
+          'message',
+          'Помилка сервера (404).',
+        ),
+      );
+
+      // Nothing was written by either mirror.
+      final variants = await backend.getAdminVariants(productId);
+      expect(variants.any((v) => v.id == variantId), isTrue);
+    });
   });
 }

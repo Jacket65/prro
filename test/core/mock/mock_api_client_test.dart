@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:prro/core/mock/mock_api_client.dart';
 import 'package:prro/core/mock/mock_backend.dart';
@@ -135,32 +136,30 @@ void main() {
   });
 
   group('GET /auth/me', () {
-    test('returns 401 when not logged in', () async {
-      final response = await client.get('/auth/me');
-
-      expect(response.statusCode, 401);
-      final data = response.data as Map<String, dynamic>;
-      expect(data['code'], 'UNAUTHORIZED');
-    });
-
-    test('returns user data after login', () async {
+    // `AuthRepositoryImpl` never calls `/auth/me`, so no client path reaches
+    // the route and the mock does not answer it: an unmatched path is the
+    // honest 404 instead of a stand-in payload nobody decodes.
+    test('is unrouted for the transport', () async {
       await client.post(
         '/auth/login',
         data: {'login': 'admin', 'password': _adminPassword},
       );
 
-      final response = await client.get('/auth/me');
-
-      expect(response.statusCode, 200);
-      final data = response.data as Map<String, dynamic>;
-      final userData = data['data'] as Map<String, dynamic>;
-      expect(userData['login'], 'admin');
-      expect(userData['role'], 'admin');
+      expect(
+        () => client.get('/auth/me'),
+        throwsA(
+          isA<DioException>().having(
+            (e) => e.response?.statusCode,
+            'statusCode',
+            404,
+          ),
+        ),
+      );
     });
   });
 
   group('POST /auth/logout', () {
-    test('returns 204 and clears session', () async {
+    test('returns 204 and ends the mock session', () async {
       await client.post(
         '/auth/login',
         data: {'login': 'admin', 'password': _adminPassword},
@@ -168,9 +167,27 @@ void main() {
 
       final response = await client.post('/auth/logout');
       expect(response.statusCode, 204);
+    });
+  });
 
-      final meResponse = await client.get('/auth/me');
-      expect(meResponse.statusCode, 401);
+  group('GET /retail-outlets/', () {
+    // The only admin-shaped read that survives on this transport:
+    // `AuthRepositoryImpl._firstOutletId` reads it when a login payload
+    // carries no `outlet_id`, and it decodes with `unwrapList` + `m['id']`,
+    // so the body has to be wire JSON rather than Dart model objects.
+    test('answers with decodable outlet maps', () async {
+      final response = await client.get('/retail-outlets/');
+
+      expect(response.statusCode, 200);
+      final data = response.data as Map<String, dynamic>;
+      expect(data['data'], isA<List<dynamic>>());
+      final ids = (data['data'] as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .map((o) => o['id']);
+      expect(ids, isNotEmpty);
+      for (final id in ids) {
+        expect(id, isA<int>());
+      }
     });
   });
 }
