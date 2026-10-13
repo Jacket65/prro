@@ -15,10 +15,14 @@ class VariantDetailCubit extends Cubit<VariantDetailState> {
   Future<void> load({required int variantId, required int outletId}) async {
     emit(const VariantDetailLoading());
     try {
-      final recipe = await _repository.fetchRecipe(variantId: variantId);
-      final ingredients = await _repository.fetchIngredients(
-        outletId: outletId,
-      );
+      // The variant's recipe and the outlet's ingredient list are
+      // independent, so they are fetched together: awaiting them one after
+      // the other made every open of this screen (and every retry) pay two
+      // round-trips.
+      final (recipe, ingredients) = await (
+        _repository.fetchRecipe(variantId: variantId),
+        _repository.fetchIngredients(outletId: outletId),
+      ).wait;
       emit(VariantDetailLoaded(recipe, ingredients));
     } on Object catch (e) {
       emit(VariantDetailError(e.toString()));

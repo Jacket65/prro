@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -206,5 +208,31 @@ void main() {
       act: (cubit) => cubit.load(variantId: 1, outletId: 1),
       expect: () => [isA<VariantDetailLoading>(), isA<VariantDetailError>()],
     );
+
+    // The two reads are independent, so they must overlap (the product detail
+    // screen has done this since f24a38d). Sequential awaits would pay two
+    // round-trips before the screen could render anything.
+    test('load issues both reads concurrently', () async {
+      final recipeGate = Completer<List<RecipeIngredient>>();
+      when(
+        () => repository.fetchRecipe(variantId: 1),
+      ).thenAnswer((_) => recipeGate.future);
+      when(
+        () => repository.fetchIngredients(outletId: 1),
+      ).thenAnswer((_) async => ingredients);
+
+      final cubit = VariantDetailCubit(repository);
+      final pending = cubit.load(variantId: 1, outletId: 1);
+      await Future<void>.delayed(Duration.zero);
+
+      // While the recipe read is still pending, the ingredient read has
+      // already been issued.
+      verify(() => repository.fetchRecipe(variantId: 1)).called(1);
+      verify(() => repository.fetchIngredients(outletId: 1)).called(1);
+
+      recipeGate.complete(recipe);
+      await pending;
+      await cubit.close();
+    });
   });
 }
