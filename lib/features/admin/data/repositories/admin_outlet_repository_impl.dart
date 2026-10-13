@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
@@ -13,12 +12,8 @@ class AdminOutletRepositoryImpl implements AdminOutletRepositoryI {
   final ApiClientI _apiClient;
 
   @override
-  Future<List<RetailOutlet>> fetchOutlets() async {
-    try {
-      final response = await _apiClient.get('/retail-outlets/');
-      return unwrapList(response.data, RetailOutlet.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
-    }
-  }
+  Future<List<RetailOutlet>> fetchOutlets() => dioGuard(() async {
+    final response = await _apiClient.get('/retail-outlets/');
+    return unwrapList(response.data, RetailOutlet.fromJson);
+  });
 }
