@@ -1,7 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/core/di/di.dart';
 import 'package:prro/core/domain/bean.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
@@ -72,7 +71,7 @@ Bean? _defaultBean(List<BeanGroup> beanGroups) {
 /// [openLineEditor]).
 Future<void> startAddToCart(BuildContext context, Product variant) async {
   final ordersBloc = context.read<OrdersBloc>();
-  final repo = getIt<ItemsRepositoryI>();
+  final repo = context.read<ItemsRepositoryI>();
 
   final variantId = int.tryParse(variant.id);
   var groups = const <OptionGroup>[];
@@ -101,7 +100,7 @@ Future<void> startAddToCart(BuildContext context, Product variant) async {
 /// quantity block always shows,
 /// so weight goods with no options are editable too.
 Future<void> openLineEditor(BuildContext context, Product line) async {
-  final repo = getIt<ItemsRepositoryI>();
+  final repo = context.read<ItemsRepositoryI>();
 
   final variantId = int.tryParse(line.id);
   var groups = const <OptionGroup>[];

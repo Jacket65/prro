@@ -46,122 +46,119 @@ class _SellerScreenState extends State<SellerScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) =>
-              ItemsTilesBloc(itemsRepository: getIt<ItemsRepositoryI>())
-                ..add(const ItemsTilesStarted()),
-        ),
-        BlocProvider(
-          create: (context) => OrdersBloc(
-            ordersRepository: getIt<OrdersRepositoryI>(),
-            payOrder: getIt<PayOrderUseCase>(),
+    // The catalog repository is a dependency of the presentation tree (the
+    // options picker reads it to load a variant's options/beans). It is
+    // resolved here — inside a composition-root create callback, the only
+    // place `getIt` is allowed to run — so no widget method performs service
+    // location itself.
+    return RepositoryProvider<ItemsRepositoryI>(
+      create: (_) => getIt<ItemsRepositoryI>(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) =>
+                ItemsTilesBloc(itemsRepository: getIt<ItemsRepositoryI>())
+                  ..add(const ItemsTilesStarted()),
           ),
-        ),
-        BlocProvider(
-          create: (context) => CatalogSearchCubit(getIt<ItemsRepositoryI>()),
-        ),
-        BlocProvider(
-          create: (context) {
-            final cubit = BalanceCubit(getIt<BalanceRepositoryI>());
-            unawaited(cubit.fetchBalance());
-            return cubit;
-          },
-        ),
-        // One instance for the whole screen: the resume banner is shown both in
-        // the check column (shift open) and in the open-shift gate (shift
-        // closed), and two instances would resolve the same order twice.
-        BlocProvider(
-          create: (context) {
-            final cubit = PendingOrderCubit(
-              getIt<FinishPendingOrderUseCase>(),
-              getIt<PendingOrderStoreI>(),
-            );
-            unawaited(cubit.load());
-            return cubit;
-          },
-        ),
-      ],
-      child: Builder(
-        builder: (context) {
-          // When there is no open shift, clear the cart so nothing carries over
-          // into the next shift (covers close as well as expiry).
-          return BlocListener<OrdersBloc, OrdersState>(
-            // The banner resolves once, on mount, so an interruption that
-            // happens *during* this session would otherwise stay invisible: a
-            // failed terminal confirm returns the pending receipt, which
-            // `OrdersBloc` reports as payment success — the sale looks done
-            // while the order is still `pending` and history will never list
-            // it. Re-resolving here is what makes it recoverable without
-            // leaving and re-entering the screen.
-            listenWhen: (prev, curr) => curr is OrdersPaymentSuccess,
-            listener: (context, state) {
-              final receipt = (state as OrdersPaymentSuccess).receipt;
-              if (receipt.status != 'completed') {
-                unawaited(context.read<PendingOrderCubit>().load());
-              }
+          BlocProvider(
+            create: (context) => OrdersBloc(
+              ordersRepository: getIt<OrdersRepositoryI>(),
+              payOrder: getIt<PayOrderUseCase>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => CatalogSearchCubit(getIt<ItemsRepositoryI>()),
+          ),
+          BlocProvider(
+            create: (context) {
+              final cubit = BalanceCubit(getIt<BalanceRepositoryI>());
+              unawaited(cubit.fetchBalance());
+              return cubit;
             },
-            child: BlocListener<ShiftCubit, ShiftState>(
-              listenWhen: (prev, curr) => curr is ShiftNone,
+          ),
+          // One instance for the whole screen: the resume banner is shown
+          // both in the check column (shift open) and in the open-shift gate
+          // (shift closed), and two instances would resolve the same order
+          // twice.
+          BlocProvider(
+            create: (context) {
+              final cubit = PendingOrderCubit(
+                getIt<FinishPendingOrderUseCase>(),
+                getIt<PendingOrderStoreI>(),
+              );
+              unawaited(cubit.load());
+              return cubit;
+            },
+          ),
+        ],
+        child: Builder(
+          builder: (context) {
+            // When there is no open shift, clear the cart so nothing carries
+            // over into the next shift (covers close as well as expiry).
+            return BlocListener<OrdersBloc, OrdersState>(
+              // The banner resolves once, on mount, so an interruption that
+              // happens *during* this session would otherwise stay invisible:
+              // a failed terminal confirm returns the pending receipt, which
+              // `OrdersBloc` reports as payment success — the sale looks done
+              // while the order is still `pending` and history will never list
+              // it. Re-resolving here is what makes it recoverable without
+              // leaving and re-entering the screen.
+              listenWhen: (prev, curr) => curr is OrdersPaymentSuccess,
               listener: (context, state) {
-                context.read<OrdersBloc>().add(const ClearProducts());
+                final receipt = (state as OrdersPaymentSuccess).receipt;
+                if (receipt.status != 'completed') {
+                  unawaited(context.read<PendingOrderCubit>().load());
+                }
               },
-              child: Scaffold(
-                backgroundColor: theme.scaffoldBackgroundColor,
-                appBar: ResponsiveSellerAppBar(
-                  onLogout: () => _logout(context),
-                  onCloseShift: () => _closeShift(context),
-                  theme: theme,
-                  shiftMenuBuilder: (context, {required isNarrow}) =>
-                      BlocBuilder<ShiftCubit, ShiftState>(
-                        builder: (context, state) {
-                          if (state is! ShiftOpen) {
-                            return const SizedBox.shrink();
-                          }
-                          return CustomPopupMenu(
-                            name: isNarrow ? '' : 'Меню',
-                            icon: Icons.menu,
-                            widgets: [
-                              PopupMenuItem<void>(
-                                child: const Text('Історія замовлень'),
-                                onTap: () {
-                                  WidgetsBinding.instance.addPostFrameCallback((
-                                    _,
-                                  ) {
-                                    if (context.mounted) {
-                                      unawaited(
-                                        context.router.push(
-                                          const SellerShiftsHistoryRoute(),
-                                        ),
-                                      );
-                                    }
-                                  });
-                                },
-                              ),
-                              PopupMenuItem<void>(
-                                child: const Text('Закрити зміну'),
-                                onTap: () => _closeShift(context),
-                              ),
-                            ],
-                          );
-                        },
+              child: BlocListener<ShiftCubit, ShiftState>(
+                listenWhen: (prev, curr) => curr is ShiftNone,
+                listener: (context, state) {
+                  context.read<OrdersBloc>().add(const ClearProducts());
+                },
+                child: Scaffold(
+                  backgroundColor: theme.scaffoldBackgroundColor,
+                  appBar: ResponsiveSellerAppBar(
+                    onLogout: () => _logout(context),
+                    onCloseShift: () => _closeShift(context),
+                    theme: theme,
+                    shiftMenuBuilder: (context, {required isNarrow}) =>
+                        BlocBuilder<ShiftCubit, ShiftState>(
+                          builder: (context, state) {
+                            if (state is! ShiftOpen) {
+                              return const SizedBox.shrink();
+                            }
+                            return CustomPopupMenu(
+                              name: isNarrow ? '' : 'Меню',
+                              icon: Icons.menu,
+                              widgets: [
+                                PopupMenuItem<void>(
+                                  child: const Text('Історія замовлень'),
+                                  onTap: () => _openHistory(context),
+                                ),
+                                PopupMenuItem<void>(
+                                  child: const Text('Закрити зміну'),
+                                  onTap: () => _closeShift(context),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                  ),
+                  body: BlocBuilder<ShiftCubit, ShiftState>(
+                    builder: (context, state) => switch (state) {
+                      ShiftOpen() => const ResponsiveSellerLayout(),
+                      ShiftNone() => const _OpenShiftGate(),
+                      ShiftError(:final message) => _ShiftErrorView(
+                        message: message,
                       ),
-                ),
-                body: BlocBuilder<ShiftCubit, ShiftState>(
-                  builder: (context, state) => switch (state) {
-                    ShiftOpen() => const ResponsiveSellerLayout(),
-                    ShiftNone() => const _OpenShiftGate(),
-                    ShiftError(:final message) => _ShiftErrorView(
-                      message: message,
-                    ),
-                    _ => const Center(child: CircularProgressIndicator()),
-                  },
+                      _ => const Center(child: CircularProgressIndicator()),
+                    },
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -183,6 +180,16 @@ class _SellerScreenState extends State<SellerScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (context.mounted) {
         unawaited(ShiftDialog.show(context, ShiftDialogMode.close));
+      }
+    });
+  }
+
+  void _openHistory(BuildContext context) {
+    // Same defer as _closeShift: the menu item tap fires while the menu is
+    // dismissing, and the router needs a live context.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+        unawaited(context.router.push(const SellerShiftsHistoryRoute()));
       }
     });
   }
