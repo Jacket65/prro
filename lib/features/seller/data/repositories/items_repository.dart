@@ -8,7 +8,7 @@ import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
 import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/network/api_client_i.dart';
-import 'package:prro/core/network/unwrap.dart';
+import 'package:prro/core/utils/envelope.dart';
 import 'package:prro/features/seller/domain/repositories/items_repository_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

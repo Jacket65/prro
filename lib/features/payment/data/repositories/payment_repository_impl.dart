@@ -4,7 +4,7 @@ import 'package:prro/core/config/network_timeouts.dart';
 import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
-import 'package:prro/core/utils/json.dart';
+import 'package:prro/core/utils/envelope.dart';
 import 'package:prro/features/payment/data/models/payment_request.dart';
 import 'package:prro/features/payment/data/models/payment_result.dart';
 import 'package:prro/features/payment/data/models/payment_token.dart';

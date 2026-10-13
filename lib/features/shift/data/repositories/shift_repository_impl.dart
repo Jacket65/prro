@@ -3,7 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
-import 'package:prro/core/utils/json.dart';
+import 'package:prro/core/utils/envelope.dart';
 import 'package:prro/features/shift/domain/entities/shift.dart';
 import 'package:prro/features/shift/domain/repositories/shift_repository_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';

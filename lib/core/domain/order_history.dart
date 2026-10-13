@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:prro/core/domain/order.dart';
+import 'package:prro/core/utils/envelope.dart';
 import 'package:prro/core/utils/json.dart';
 import 'package:prro/core/utils/money.dart';
 

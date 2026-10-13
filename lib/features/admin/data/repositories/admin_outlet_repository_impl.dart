@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
-import 'package:prro/core/network/unwrap.dart';
+import 'package:prro/core/utils/envelope.dart';
 import 'package:prro/features/admin/data/models/retail_outlet.dart';
 import 'package:prro/features/admin/domain/repositories/admin_outlet_repository_i.dart';
 
