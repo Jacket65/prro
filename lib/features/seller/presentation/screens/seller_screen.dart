@@ -24,8 +24,7 @@ import 'package:prro/features/seller/presentation/widgets/logout_confirmation_di
 import 'package:prro/features/seller/presentation/widgets/responsive_seller_app_bar.dart';
 import 'package:prro/features/seller/presentation/widgets/responsive_seller_layout.dart';
 import 'package:prro/features/shift/presentation/cubit/shift_cubit.dart';
-import 'package:prro/features/shift/presentation/widgets/close_shift_dialog.dart';
-import 'package:prro/features/shift/presentation/widgets/open_shift_dialog.dart';
+import 'package:prro/features/shift/presentation/widgets/shift_dialog.dart';
 
 @RoutePage(name: 'SellerRoute')
 class SellerScreen extends StatefulWidget {
@@ -182,7 +181,9 @@ class _SellerScreenState extends State<SellerScreen> {
     // dialog attaches to a live context. On success the cubit emits ShiftNone,
     // which rebuilds the body into the open-shift gate (no navigation needed).
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (context.mounted) unawaited(CloseShiftDialog.show(context));
+      if (context.mounted) {
+        unawaited(ShiftDialog.show(context, ShiftDialogMode.close));
+      }
     });
   }
 }
@@ -219,7 +220,7 @@ class _OpenShiftGate extends StatelessWidget {
           FilledButton.icon(
             icon: const Icon(Icons.play_arrow),
             label: const Text('Відкрити зміну'),
-            onPressed: () => OpenShiftDialog.show(context),
+            onPressed: () => ShiftDialog.show(context, ShiftDialogMode.open),
           ),
         ],
       ),
