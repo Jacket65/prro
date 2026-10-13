@@ -10,8 +10,9 @@ import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
-import 'package:prro/core/utils/json.dart';
+import 'package:prro/core/utils/envelope.dart';
 import 'package:prro/core/utils/money.dart';
+import 'package:prro/features/seller/domain/cart.dart';
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,66 +23,35 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
   final ApiClientI _apiClient;
   final SharedPreferences _prefs;
 
-  final List<Product> _products = [];
+  /// The cart itself lives in the domain (`Cart`) — one implementation shared
+  /// with the mock repository, so the mock walk exercises production cart
+  /// behaviour (`resetForNewSession` exactness included).
+  final Cart _cart = Cart();
 
   @override
-  List<Product> get products => List.unmodifiable(_products);
-
-  /// Client-side approximation used only for the live "разом" display.
-  /// The authoritative total comes from [placeOrder]'s receipt. Includes the
-  /// surcharge of each line's selected options via
-  /// [Product.effectiveUnitPrice], all in exact [Decimal] — the cart is never
-  /// priced through a `double`.
-  @override
-  Decimal get totalPrice => _products.fold(
-    Decimal.zero,
-    (sum, p) => sum + p.effectiveUnitPrice * p.quantity,
-  );
+  List<Product> get products => _cart.products;
 
   @override
-  void addProduct(Product product) {
-    // Lines are keyed by lineId: the same variant with different options is a
-    // separate line, the same variant+options stacks (+1 unit step).
-    final index = _products.indexWhere((p) => p.lineId == product.lineId);
-    if (index != -1) {
-      final existing = _products[index];
-      _products[index] = existing.copyWith(
-        quantity: existing.quantity + unitStep(existing.unit),
-      );
-    } else {
-      _products.add(product);
-    }
-  }
+  Decimal get totalPrice => _cart.totalPrice;
 
   @override
-  void removeProduct(Product product) {
-    final index = _products.indexWhere((p) => p.lineId == product.lineId);
-    if (index == -1) return;
-    final current = _products[index];
-    final step = unitStep(current.unit);
-    // Drop a step; at (or below) one step the line is removed.
-    if (current.quantity > step) {
-      _products[index] = current.copyWith(quantity: current.quantity - step);
-    } else {
-      _products.removeAt(index);
-    }
-  }
+  void addProduct(Product product) => _cart.addProduct(product);
 
   @override
-  void deleteProductLine(Product product) {
-    // Видаляємо всю позицію за її унікальним lineId за один раз
-    _products.removeWhere((p) => p.lineId == product.lineId);
-  }
+  void removeProduct(Product product) => _cart.removeProduct(product);
 
   @override
-  void clearProducts() => _products.clear();
+  void deleteProductLine(Product product) => _cart.deleteProductLine(product);
 
-  /// See [OrdersRepositoryI.resetForNewSession]. The cart is the only
-  /// session-scoped state this singleton holds, so the reset is the clear —
-  /// the point is *when* it runs (every login and every session end), not a
-  /// second, subtly different clear path that can drift from this one.
   @override
-  void resetForNewSession() => _products.clear();
+  void clearProducts() => _cart.clearProducts();
+
+  /// See [OrdersRepositoryI.resetForNewSession] and [Cart.resetForNewSession]:
+  /// the cart is the only session-scoped state this singleton holds, so the
+  /// reset is the clear — the point is *when* it runs (every login and every
+  /// session end), not a second, subtly different clear path that can drift.
+  @override
+  void resetForNewSession() => _cart.resetForNewSession();
 
   @override
   void updateOptions(
@@ -89,36 +59,7 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
     List<SelectedOption> options, {
     Bean? bean,
     Decimal? quantity,
-  }) {
-    final index = _products.indexWhere((p) => p.lineId == lineId);
-    if (index == -1) return;
-    // Generated `copyWith` clears a nullable field when it is passed explicitly
-    // null, so only pass what the caller set: `bean: null` drops the line's
-    // bean, and `quantity` (non-nullable) can only be replaced, never cleared.
-    final line = _products[index];
-    final updated = quantity == null
-        ? line.copyWith(selectedOptions: options, selectedBean: bean)
-        : line.copyWith(
-            selectedOptions: options,
-            selectedBean: bean,
-            quantity: quantity,
-          );
-    // Options unchanged → just replace in place.
-    if (updated.lineId == lineId) {
-      _products[index] = updated;
-      return;
-    }
-    // Options changed → new line identity. Drop the old line and merge into an
-    // identical existing line if one exists, otherwise keep it in place.
-    _products.removeAt(index);
-    final twin = _products.indexWhere((p) => p.lineId == updated.lineId);
-    if (twin != -1) {
-      final t = _products[twin];
-      _products[twin] = t.copyWith(quantity: t.quantity + updated.quantity);
-    } else {
-      _products.insert(index, updated);
-    }
-  }
+  }) => _cart.updateOptions(lineId, options, bean: bean, quantity: quantity);
 
   /// `POST /orders` and `POST /orders/{id}/confirm` answer with the same receipt
   /// envelope, so the parse is shared. The store/cashier names are local-only
@@ -140,7 +81,7 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
     final outletId = requireOutletId(_prefs);
     // Backend expects quantities/amounts as decimal STRINGS. The selected bean
     // is just another option, so it folds into the line's `options` array.
-    final productsJson = _products.map((p) {
+    final productsJson = _cart.products.map((p) {
       final options = <Map<String, dynamic>>[
         for (final o in p.selectedOptions)
           {'option_id': o.optionId, 'quantity': o.quantity},

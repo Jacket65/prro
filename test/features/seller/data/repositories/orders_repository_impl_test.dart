@@ -2,7 +2,6 @@ import 'package:decimal/decimal.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:prro/core/domain/bean.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
 import 'package:prro/core/domain/order.dart';
@@ -299,7 +298,7 @@ void main() {
     });
   });
 
-  group('cart total (F-D: exact Decimal pricing)', () {
+  group('cart forwarding (shares the domain Cart)', () {
     Product line({
       required String id,
       required String price,
@@ -314,55 +313,68 @@ void main() {
       selectedOptions: options,
     );
 
-    test('a fractional-weight, multi-line cart totals exactly', () async {
-      // 0.300 × 33.33 = 9.999; 0.700 × 33.33 = 23.331;
-      // 2 × (45.00 + 25.00×2 portions) = 190.00 → the cart is 223.33, which the
-      // double path prints as 223.32999999999998.
-      repo
-        ..addProduct(line(id: 'a', price: '33.33', quantity: '0.300'))
-        ..addProduct(line(id: 'b', price: '33.33', quantity: '0.700'))
-        ..addProduct(
-          line(
-            id: 'c',
-            price: '45.00',
-            quantity: '2',
-            options: [
-              SelectedOption(
-                optionId: 2,
-                name: 'Соєве',
-                priceDelta: Decimal.parse('25.00'),
-                quantity: 2,
-              ),
-            ],
-          ),
+    test(
+      'the repository exposes the shared cart, priced in exact Decimal',
+      () async {
+        // 0.300 × 33.33 = 9.999; 0.700 × 33.33 = 23.331;
+        // 2 × (45.00 + 25.00×2 portions) = 190.00 → the cart is 223.33,
+        //which the
+        // double path prints as 223.32999999999998. (The full cart API coverage
+        // lives in `cart_test.dart` — this pins the forwarding.)
+        repo
+          ..addProduct(line(id: 'a', price: '33.33', quantity: '0.300'))
+          ..addProduct(line(id: 'b', price: '33.33', quantity: '0.700'))
+          ..addProduct(
+            line(
+              id: 'c',
+              price: '45.00',
+              quantity: '2',
+              options: [
+                SelectedOption(
+                  optionId: 2,
+                  name: 'Соєве',
+                  priceDelta: Decimal.parse('25.00'),
+                  quantity: 2,
+                ),
+              ],
+            ),
+          );
+
+        expect(repo.products, hasLength(3));
+        expect(repo.totalPrice, Decimal.parse('223.33'));
+        expect(repo.totalPrice.toString(), '223.33');
+
+        // The only conversion to kopecks happens at the payment boundary,
+        //and it
+        // lands exactly on the figure the same lines bill on the wire.
+        final totalKopecks = kopecksFromDecimal(repo.totalPrice);
+        expect(totalKopecks, 22333);
+
+        await repo.placeOrder(
+          method: PaymentMethod.cash,
+          tenderedKopecks: totalKopecks,
+          idempotencyKey: 'k-total',
         );
+        expect(capturedBody()['payment'], {
+          'method': 'cash',
+          'amount': '223.33',
+        });
+      },
+    );
 
-      expect(repo.products, hasLength(3));
-      expect(repo.totalPrice, Decimal.parse('223.33'));
-      expect(repo.totalPrice.toString(), '223.33');
+    test('updateOptions reaches the shared cart', () {
+      final lineP = line(id: 'p1', price: '45', quantity: '1');
+      repo
+        ..addProduct(lineP)
+        ..updateOptions(lineP.lineId, [
+          SelectedOption(
+            optionId: 2,
+            name: 'Молоко',
+            priceDelta: Decimal.parse('5'),
+          ),
+        ]);
 
-      // The only conversion to kopecks happens at the payment boundary, and it
-      // lands exactly on the figure the same lines bill on the wire.
-      final totalKopecks = kopecksFromDecimal(repo.totalPrice);
-      expect(totalKopecks, 22333);
-
-      await repo.placeOrder(
-        method: PaymentMethod.cash,
-        tenderedKopecks: totalKopecks,
-        idempotencyKey: 'k-total',
-      );
-      expect(capturedBody()['payment'], {'method': 'cash', 'amount': '223.33'});
-    });
-
-    test('quantity and price stay Decimal on a weight line', () async {
-      repo.addProduct(line(id: 'kg', price: '19.99', quantity: '0.125'));
-
-      final single = repo.products.single;
-      expect(single.quantity, Decimal.parse('0.125'));
-      expect(single.price, Decimal.parse('19.99'));
-      expect(single.effectiveUnitPrice, Decimal.parse('19.99'));
-      // 0.125 × 19.99 = 2.49875 → 250 kopecks, rounded once at the boundary.
-      expect(kopecksFromDecimal(repo.totalPrice), 250);
+      expect(repo.products.single.lineId, 'p1#2x1;');
     });
   });
 
@@ -388,94 +400,5 @@ void main() {
         expect(receipt.changeKopecks, 0);
       },
     );
-  });
-
-  group('updateOptions', () {
-    Product product({Bean? bean, List<SelectedOption> options = const []}) =>
-        Product(
-          id: 'p1',
-          quantity: Decimal.one,
-          name: 'Кава',
-          price: Decimal.parse('45'),
-          imageUrl: '',
-          selectedBean: bean,
-          selectedOptions: options,
-        );
-
-    List<Product> products() => repo.products;
-
-    test('replaces the options of a line', () {
-      final line = product();
-      repo.addProduct(line);
-      final options = [
-        SelectedOption(
-          optionId: 2,
-          name: 'Молоко',
-          priceDelta: Decimal.parse('5'),
-        ),
-      ];
-
-      repo.updateOptions(line.lineId, options);
-
-      expect(products().single.selectedOptions, options);
-      expect(products().single.lineId, 'p1#2x1;');
-    });
-
-    test('omitting bean drops the bean of the line', () {
-      final line = product(bean: const Bean(id: 3, name: 'Колумбія'));
-      repo.addProduct(line);
-      expect(products().single.selectedBean, isNotNull);
-
-      repo.updateOptions(line.lineId, const []);
-
-      expect(products().single.selectedBean, isNull);
-      expect(products().single.lineId, 'p1');
-    });
-
-    test('passing a bean sets it on the line', () {
-      final line = product();
-      repo
-        ..addProduct(line)
-        ..updateOptions(
-          line.lineId,
-          const [],
-          bean: const Bean(id: 4, name: 'x'),
-        );
-
-      expect(products().single.selectedBean?.id, 4);
-    });
-
-    test('a quantity replaces the line quantity, null keeps it', () {
-      final line = product();
-      repo
-        ..addProduct(line)
-        ..updateOptions(line.lineId, const [], quantity: Decimal.fromInt(3));
-      expect(products().single.quantity, Decimal.fromInt(3));
-
-      repo.updateOptions(products().single.lineId, const []);
-      expect(products().single.quantity, Decimal.fromInt(3));
-    });
-
-    test('changing the options merges into an identical existing line', () {
-      final options = [
-        SelectedOption(optionId: 2, name: 'Молоко', priceDelta: Decimal.zero),
-      ];
-      final plain = product();
-      repo
-        ..addProduct(plain)
-        ..addProduct(product(options: options))
-        ..updateOptions(plain.lineId, options);
-
-      expect(products().length, 1);
-      expect(products().single.selectedOptions, options);
-    });
-
-    test('an unknown lineId is ignored', () {
-      repo
-        ..addProduct(product())
-        ..updateOptions('nope', const []);
-
-      expect(products().length, 1);
-    });
   });
 }

@@ -4,12 +4,12 @@ import 'package:prro/core/data/mock/order_history_repository_mock.dart';
 import 'package:prro/core/domain/bean.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
-import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/domain/repositories/order_history_repository_i.dart';
 import 'package:prro/core/mock/mock_backend.dart';
 import 'package:prro/core/mock/order_request_dto.dart';
 import 'package:prro/core/network/api_exception.dart';
+import 'package:prro/features/seller/domain/cart.dart';
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 
 @Environment('mock')
@@ -19,60 +19,38 @@ class OrdersRepositoryMock implements OrdersRepositoryI {
   final MockBackend _backend;
   final OrderHistoryRepositoryI _historyRepository;
 
-  final List<Product> _products = [];
+  /// The shared domain cart: the mock walk must exercise exactly the
+  /// production cart behaviour (identical to the prod repository — the
+  /// duplication this replaces was where they drifted apart).
+  final Cart _cart = Cart();
 
   @override
-  List<Product> get products => List.unmodifiable(_products);
+  List<Product> get products => _cart.products;
 
   /// Identical to the prod implementation (see
   /// [OrdersRepositoryI.totalPrice]): exact [Decimal] via
   /// [Product.effectiveUnitPrice], converted to kopecks only at the payment
   /// boundary.
   @override
-  Decimal get totalPrice => _products.fold(
-    Decimal.zero,
-    (sum, p) => sum + p.effectiveUnitPrice * p.quantity,
-  );
+  Decimal get totalPrice => _cart.totalPrice;
 
   @override
-  void addProduct(Product product) {
-    final index = _products.indexWhere((p) => p.lineId == product.lineId);
-    if (index != -1) {
-      final existing = _products[index];
-      _products[index] = existing.copyWith(
-        quantity: existing.quantity + unitStep(existing.unit),
-      );
-    } else {
-      _products.add(product);
-    }
-  }
+  void addProduct(Product product) => _cart.addProduct(product);
 
   @override
-  void removeProduct(Product product) {
-    final index = _products.indexWhere((p) => p.lineId == product.lineId);
-    if (index == -1) return;
-    final current = _products[index];
-    final step = unitStep(current.unit);
-    if (current.quantity > step) {
-      _products[index] = current.copyWith(quantity: current.quantity - step);
-    } else {
-      _products.removeAt(index);
-    }
-  }
+  void removeProduct(Product product) => _cart.removeProduct(product);
 
   @override
-  void deleteProductLine(Product product) {
-    _products.removeWhere((p) => p.lineId == product.lineId);
-  }
+  void deleteProductLine(Product product) => _cart.deleteProductLine(product);
 
   @override
-  void clearProducts() => _products.clear();
+  void clearProducts() => _cart.clearProducts();
 
   /// Kept identical to the prod implementation (see
-  /// [OrdersRepositoryI.resetForNewSession]): the cart is the whole of the
-  /// session-scoped state, so the mock must reset exactly like production.
+  /// [OrdersRepositoryI.resetForNewSession]): both forward to the same
+  /// [Cart.resetForNewSession], so the mock resets exactly like production.
   @override
-  void resetForNewSession() => _products.clear();
+  void resetForNewSession() => _cart.resetForNewSession();
 
   @override
   void updateOptions(
@@ -80,33 +58,7 @@ class OrdersRepositoryMock implements OrdersRepositoryI {
     List<SelectedOption> options, {
     Bean? bean,
     Decimal? quantity,
-  }) {
-    final index = _products.indexWhere((p) => p.lineId == lineId);
-    if (index == -1) return;
-    // Generated `copyWith` clears a nullable field when it is passed explicitly
-    // null, so only pass what the caller set: `bean: null` drops the line's
-    // bean, and `quantity` (non-nullable) can only be replaced, never cleared.
-    final line = _products[index];
-    final updated = quantity == null
-        ? line.copyWith(selectedOptions: options, selectedBean: bean)
-        : line.copyWith(
-            selectedOptions: options,
-            selectedBean: bean,
-            quantity: quantity,
-          );
-    if (updated.lineId == lineId) {
-      _products[index] = updated;
-      return;
-    }
-    _products.removeAt(index);
-    final twin = _products.indexWhere((p) => p.lineId == updated.lineId);
-    if (twin != -1) {
-      final t = _products[twin];
-      _products[twin] = t.copyWith(quantity: t.quantity + updated.quantity);
-    } else {
-      _products.insert(index, updated);
-    }
-  }
+  }) => _cart.updateOptions(lineId, options, bean: bean, quantity: quantity);
 
   @override
   Future<OrderReceipt> placeOrder({
@@ -116,7 +68,7 @@ class OrdersRepositoryMock implements OrdersRepositoryI {
   }) async {
     try {
       final receipt = await _backend.placeOrder(
-        items: _products.map((p) {
+        items: _cart.products.map((p) {
           return OrderLineDto(
             productId: p.id,
             // As the client sends it: the raw decimal quantity. Converting
