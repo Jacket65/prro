@@ -95,8 +95,7 @@ abstract class OrderDetailOption with _$OrderDetailOption {
 @Freezed(toJson: false)
 abstract class OrderDetailPayment with _$OrderDetailPayment {
   const factory OrderDetailPayment({
-    @JsonKey(fromJson: paymentMethodFromJson)
-    required PaymentMethod method,
+    @JsonKey(fromJson: paymentMethodFromJson) required PaymentMethod method,
     @JsonKey(name: 'tendered', fromJson: kopecksFromJson)
     required int tenderedKopecks,
     @JsonKey(name: 'change', fromJson: kopecksFromJson)
@@ -198,12 +197,8 @@ class Page<T> {
   }
 
   @override
-  int get hashCode => Object.hash(
-        Object.hashAll(items),
-        page,
-        hasNext,
-        nextPage,
-      );
+  int get hashCode =>
+      Object.hash(Object.hashAll(items), page, hasNext, nextPage);
 
   @override
   String toString() =>

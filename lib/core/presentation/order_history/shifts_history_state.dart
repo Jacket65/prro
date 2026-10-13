@@ -1,43 +1,18 @@
 part of 'shifts_history_cubit.dart';
 
-sealed class ShiftsHistoryState {
-  const ShiftsHistoryState();
-}
-
 @Freezed(toJson: false)
-class ShiftsHistoryInitial extends ShiftsHistoryState
-    with _$ShiftsHistoryInitial {
-  const ShiftsHistoryInitial();
-}
+sealed class ShiftsHistoryState with _$ShiftsHistoryState {
+  const factory ShiftsHistoryState.initial() = ShiftsHistoryInitial;
 
-@Freezed(toJson: false)
-class ShiftsHistoryLoading extends ShiftsHistoryState
-    with _$ShiftsHistoryLoading {
-  const ShiftsHistoryLoading();
-}
+  const factory ShiftsHistoryState.loading() = ShiftsHistoryLoading;
 
-@Freezed(toJson: false)
-class ShiftsHistoryError extends ShiftsHistoryState
-    with _$ShiftsHistoryError {
-  const ShiftsHistoryError(this.message);
+  const factory ShiftsHistoryState.error(String message) = ShiftsHistoryError;
 
-  final String message;
-}
-
-@Freezed(toJson: false)
-class ShiftsHistoryLoaded extends ShiftsHistoryState
-    with _$ShiftsHistoryLoaded {
-  const ShiftsHistoryLoaded({
-    required this.items,
-    required this.hasNext,
-    required this.page,
-    this.isLoadingMore = false,
-    this.loadMoreError = false,
-  });
-
-  final List<ShiftSummary> items;
-  final bool hasNext;
-  final int page;
-  final bool isLoadingMore;
-  final bool loadMoreError;
+  const factory ShiftsHistoryState.loaded({
+    required List<ShiftSummary> items,
+    required bool hasNext,
+    required int page,
+    @Default(false) bool isLoadingMore,
+    @Default(false) bool loadMoreError,
+  }) = ShiftsHistoryLoaded;
 }

@@ -8,49 +8,84 @@ part 'shifts_history_state.dart';
 
 class ShiftsHistoryCubit extends Cubit<ShiftsHistoryState> {
   ShiftsHistoryCubit(this._repository, {this.outletId})
-    : super(const ShiftsHistoryInitial());
-  final OrderHistoryRepositoryI _repository;
+    : super(const ShiftsHistoryState.initial());
 
-  /// The outlet whose shifts are listed. Admin scopes the list to the outlet
-  /// selected in the outlets tab; the seller omits it and the repository falls
-  /// back to the session outlet.
+  final OrderHistoryRepositoryI _repository;
   final int? outletId;
 
+  int _requestGeneration = 0;
+  bool _isLoadingFirst = false;
+  bool _isLoadingMore = false;
+
   Future<void> loadFirst() async {
-    emit(const ShiftsHistoryLoading());
+    if (_isLoadingFirst) return;
+
+    _isLoadingFirst = true;
+    _isLoadingMore = false;
+    final generation = ++_requestGeneration;
+
+    emit(const ShiftsHistoryState.loading());
+
     try {
       final page = await _repository.getShifts(outletId: outletId);
+
+      if (isClosed || generation != _requestGeneration) return;
+
       emit(
-        ShiftsHistoryLoaded(
+        ShiftsHistoryState.loaded(
           items: page.items,
           hasNext: page.hasNext,
           page: page.page,
         ),
       );
     } on Object catch (e) {
-      emit(ShiftsHistoryError(e.toString()));
+      if (isClosed || generation != _requestGeneration) return;
+
+      emit(ShiftsHistoryState.error(e.toString()));
+    } finally {
+      if (generation == _requestGeneration) {
+        _isLoadingFirst = false;
+      }
     }
   }
 
   Future<void> loadMore() async {
     final current = state;
+
     if (current is! ShiftsHistoryLoaded) return;
-    if (!current.hasNext || current.isLoadingMore) return;
+    if (!current.hasNext || _isLoadingFirst || _isLoadingMore) return;
+
+    _isLoadingMore = true;
+    final generation = _requestGeneration;
+
     emit(current.copyWith(isLoadingMore: true, loadMoreError: false));
+
     try {
       final next = await _repository.getShifts(
         outletId: outletId,
         page: current.page + 1,
       );
+
+      if (isClosed || generation != _requestGeneration) return;
+
       emit(
-        ShiftsHistoryLoaded(
+        current.copyWith(
           items: [...current.items, ...next.items],
           hasNext: next.hasNext,
           page: next.page,
+          isLoadingMore: false,
+          loadMoreError: false,
         ),
       );
     } on Object catch (_) {
-      emit(current.copyWith(isLoadingMore: false, loadMoreError: true));
+      if (isClosed || generation != _requestGeneration) return;
+
+      final latest = state;
+      if (latest is ShiftsHistoryLoaded) {
+        emit(latest.copyWith(isLoadingMore: false, loadMoreError: true));
+      }
+    } finally {
+      _isLoadingMore = false;
     }
   }
 }

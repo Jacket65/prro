@@ -22,53 +22,53 @@ class ShiftsHistoryView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ShiftsHistoryCubit, ShiftsHistoryState>(
       builder: (context, state) {
-        if (state is ShiftsHistoryLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (state is ShiftsHistoryError) {
-          return OrderHistoryErrorView(
-            message: state.message,
-            onRetry: () => context.read<ShiftsHistoryCubit>().loadFirst(),
-          );
-        }
-        if (state is ShiftsHistoryLoaded) {
-          if (state.items.isEmpty) {
-            return const Center(child: Text('Немає змін'));
-          }
-          return ListView.builder(
-            itemCount: state.items.length + (state.hasNext ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index >= state.items.length) {
-                if (state.loadMoreError) {
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Center(
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Повторити'),
-                        onPressed: () =>
-                            context.read<ShiftsHistoryCubit>().loadMore(),
+        switch (state) {
+          case ShiftsHistoryLoading():
+            return const Center(child: CircularProgressIndicator());
+          case ShiftsHistoryInitial():
+            return const Center(child: CircularProgressIndicator());
+          case ShiftsHistoryError():
+            return OrderHistoryErrorView(
+              message: state.message,
+              onRetry: () => context.read<ShiftsHistoryCubit>().loadFirst(),
+            );
+          case ShiftsHistoryLoaded():
+            if (state.items.isEmpty) {
+              return const Center(child: Text('Немає змін'));
+            }
+            return ListView.builder(
+              itemCount: state.items.length + (state.hasNext ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index >= state.items.length) {
+                  if (state.loadMoreError) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Center(
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Повторити'),
+                          onPressed: () =>
+                              context.read<ShiftsHistoryCubit>().loadMore(),
+                        ),
                       ),
-                    ),
+                    );
+                  }
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    unawaited(context.read<ShiftsHistoryCubit>().loadMore());
+                  });
+                  return const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator()),
                   );
                 }
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  unawaited(context.read<ShiftsHistoryCubit>().loadMore());
-                });
-                return const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(child: CircularProgressIndicator()),
+                final shift = state.items[index];
+                return _ShiftTile(
+                  shift: shift,
+                  onTap: () => onOpenOrders(shift.id),
                 );
-              }
-              final shift = state.items[index];
-              return _ShiftTile(
-                shift: shift,
-                onTap: () => onOpenOrders(shift.id),
-              );
-            },
-          );
+              },
+            );
         }
-        return const SizedBox.shrink();
       },
     );
   }
