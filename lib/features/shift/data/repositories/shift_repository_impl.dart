@@ -37,7 +37,9 @@ class ShiftRepositoryImpl implements ShiftRepositoryI {
       return _parse(response.data);
     } on DioException catch (e) {
       // 404 is a normal state ("no open shift"), not an error — surface it as
-      // null so the UI can show the "open shift" gate without a toast.
+      // null so the UI can show the "open shift" gate without a toast. The
+      // mapping answers with a value rather than an exception, so this call
+      // keeps its own catch instead of using dioGuard.
       if (e.response?.statusCode == 404) return null;
       throw ApiException.fromDio(e);
     }
@@ -47,32 +49,24 @@ class ShiftRepositoryImpl implements ShiftRepositoryI {
   Future<ShiftResponse> openShift({
     required String idempotencyKey,
     String cashStart = '0.00',
-  }) async {
-    try {
-      final response = await _apiClient.post(
-        '/retail-outlets/${requireOutletId(_prefs)}/shift/open',
-        data: {'cash_start': cashStart},
-        idempotencyKey: idempotencyKey,
-      );
-      return _parse(response.data);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
-    }
-  }
+  }) => dioGuard(() async {
+    final response = await _apiClient.post(
+      '/retail-outlets/${requireOutletId(_prefs)}/shift/open',
+      data: {'cash_start': cashStart},
+      idempotencyKey: idempotencyKey,
+    );
+    return _parse(response.data);
+  });
 
   @override
   Future<void> closeShift({
     required String cashEnd,
     required String idempotencyKey,
-  }) async {
-    try {
-      await _apiClient.post(
-        '/retail-outlets/${requireOutletId(_prefs)}/shift/close',
-        data: {'cash_end': cashEnd},
-        idempotencyKey: idempotencyKey,
-      );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
-    }
-  }
+  }) => dioGuard(() async {
+    await _apiClient.post(
+      '/retail-outlets/${requireOutletId(_prefs)}/shift/close',
+      data: {'cash_end': cashEnd},
+      idempotencyKey: idempotencyKey,
+    );
+  });
 }

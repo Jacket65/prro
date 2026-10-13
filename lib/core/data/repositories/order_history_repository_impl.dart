@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/domain/order_history.dart';
@@ -20,20 +19,16 @@ class OrderHistoryRepositoryImpl implements OrderHistoryRepositoryI {
     String sort = 'opened_at',
     String order = 'desc',
     int? outletId,
-  }) async {
-    try {
-      final response = await _apiClient.get(
-        '/retail-outlets/${outletId ?? requireOutletId(_prefs)}/shifts',
-        queryParameters: {'page': page, 'sort': sort, 'order': order},
-      );
-      return Page<ShiftSummary>.fromJson(
-        (response.data as Map).cast<String, dynamic>(),
-        ShiftSummary.fromJson,
-      );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
-    }
-  }
+  }) => dioGuard(() async {
+    final response = await _apiClient.get(
+      '/retail-outlets/${outletId ?? requireOutletId(_prefs)}/shifts',
+      queryParameters: {'page': page, 'sort': sort, 'order': order},
+    );
+    return Page<ShiftSummary>.fromJson(
+      (response.data as Map).cast<String, dynamic>(),
+      ShiftSummary.fromJson,
+    );
+  });
 
   @override
   Future<Page<OrderListItem>> getShiftOrders(
@@ -41,30 +36,22 @@ class OrderHistoryRepositoryImpl implements OrderHistoryRepositoryI {
     required String sort,
     required String order,
     int page = 1,
-  }) async {
-    try {
-      final response = await _apiClient.get(
-        '/shifts/$shiftId/orders',
-        queryParameters: {'page': page, 'sort': sort, 'order': order},
-      );
-      return Page<OrderListItem>.fromJson(
-        (response.data as Map).cast<String, dynamic>(),
-        OrderListItem.fromJson,
-      );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
-    }
-  }
+  }) => dioGuard(() async {
+    final response = await _apiClient.get(
+      '/shifts/$shiftId/orders',
+      queryParameters: {'page': page, 'sort': sort, 'order': order},
+    );
+    return Page<OrderListItem>.fromJson(
+      (response.data as Map).cast<String, dynamic>(),
+      OrderListItem.fromJson,
+    );
+  });
 
   @override
-  Future<OrderDetail> getOrder(int orderId) async {
-    try {
-      final response = await _apiClient.get('/orders/$orderId');
-      return OrderDetail.fromJson(
-        (response.data as Map).cast<String, dynamic>(),
-      );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
-    }
-  }
+  Future<OrderDetail> getOrder(int orderId) => dioGuard(() async {
+    final response = await _apiClient.get('/orders/$orderId');
+    return OrderDetail.fromJson(
+      (response.data as Map).cast<String, dynamic>(),
+    );
+  });
 }
