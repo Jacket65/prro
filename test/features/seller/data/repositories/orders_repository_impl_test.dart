@@ -2,6 +2,7 @@ import 'package:decimal/decimal.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
 import 'package:prro/core/domain/order.dart';
@@ -112,7 +113,11 @@ void main() {
       'username': 'cashier1',
     });
     final prefs = await SharedPreferences.getInstance();
-    repo = OrdersRepositoryImpl(apiClient: apiClient, prefs: prefs);
+    repo = OrdersRepositoryImpl(
+      apiClient: apiClient,
+      prefs: prefs,
+      outlets: OutletSession(prefs),
+    );
 
     when(
       () => apiClient.post(
@@ -285,7 +290,11 @@ void main() {
     test('throws when no outlet is stored', () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
-      repo = OrdersRepositoryImpl(apiClient: apiClient, prefs: prefs);
+      repo = OrdersRepositoryImpl(
+      apiClient: apiClient,
+      prefs: prefs,
+      outlets: OutletSession(prefs),
+    );
 
       expect(
         () => repo.placeOrder(

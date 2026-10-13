@@ -1,29 +1,56 @@
+import 'package:injectable/injectable.dart';
 import 'package:prro/core/network/api_exception.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// The session's outlet id, as stored by the auth flow after login.
-///
-/// Seller-scoped endpoints live under `/retail-outlets/{id}/…`, so the id has to
-/// come from somewhere. It is written once at login (`AuthRepositoryImpl`) and
-/// cleared on logout — never from a user-visible control.
-const String outletIdKey = 'outlet_id';
+/// The prefs key holding the signed-in user's outlet id. Written at login
+/// (with the user-scoped outlet-list fallback) and cleared at logout.
+const outletIdKey = 'outlet_id';
 
-const String _noOutletMessage = 'Точку продажу не визначено. Увійдіть знову.';
+const _noOutletMessage = 'Точку продажу не визначено. Увійдіть знову.';
 
-/// The session outlet id, or a localized failure when the session has none.
+/// The session's outlet: one value, read here and nowhere else.
 ///
-/// A missing id means the app reached a seller endpoint before (or after) login
-/// established the outlet, which the UI cannot recover from by retrying.
-int requireOutletId(SharedPreferences prefs) {
-  final id = prefs.getInt(outletIdKey);
-  if (id == null) {
-    throw const ApiException(_noOutletMessage);
+/// Outlet-scoped endpoints need the id to build their path. Resolving it
+/// inside the repositories meant every one of them took `SharedPreferences`
+/// just to read this single key (and every test had to seed prefs). The
+/// session resolves it once at login — the auth repository stays the writer
+/// ([OutletSession.set]) — and repositories read it from the injected session.
+@Singleton()
+class OutletSession {
+  OutletSession(this._prefs);
+  final SharedPreferences _prefs;
+
+  /// The outlet id an outlet-scoped path needs.
+  ///
+  /// Throws the Ukrainian [ApiException] when none is assigned: the endpoint
+  /// cannot be retried by the UI, so this is a failure rather than an empty
+  /// result (contrast [idOrNull]).
+  int id() {
+    final value = _prefs.getInt(outletIdKey);
+    if (value == null || value == 0) {
+      throw const ApiException(_noOutletMessage);
+    }
+    return value;
   }
-  return id;
-}
 
-/// The session outlet id, or `null` when the session has none.
-///
-/// For the read paths that treat "no outlet" as an empty result rather than a
-/// failure (the catalog, product search).
-int? maybeOutletId(SharedPreferences prefs) => prefs.getInt(outletIdKey);
+  /// The outlet id, or `null` when none is assigned. For callers that treat
+  /// "no outlet" as an empty result (the catalog grid) rather than a failure.
+  int? idOrNull() {
+    final value = _prefs.getInt(outletIdKey);
+    return (value == null || value == 0) ? null : value;
+  }
+
+  /// Login writer: stores the resolved id, or clears it when none could be
+  /// resolved. Kept on the session so the read and the write sides of the
+  /// key cannot drift apart.
+  Future<void> set(int? outletId) async {
+    if (outletId == null || outletId == 0) {
+      await _prefs.remove(outletIdKey);
+      return;
+    }
+    await _prefs.setInt(outletIdKey, outletId);
+  }
+
+  /// Logout / session-expiry writer.
+  Future<void> clear() => _prefs.remove(outletIdKey);
+}

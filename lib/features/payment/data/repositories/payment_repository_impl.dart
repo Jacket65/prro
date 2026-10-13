@@ -10,7 +10,6 @@ import 'package:prro/features/payment/data/models/payment_result.dart';
 import 'package:prro/features/payment/data/models/payment_token.dart';
 import 'package:prro/features/payment/domain/repositories/payment_repository_i.dart';
 import 'package:prro/features/payment/domain/repositories/terminal_payment_service_i.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Production implementation of [PaymentRepositoryI].
 ///
@@ -25,16 +24,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// rather than shown an opaque server error.
 @LazySingleton(as: PaymentRepositoryI, env: [Environment.prod])
 class PaymentRepositoryImpl implements PaymentRepositoryI {
-  PaymentRepositoryImpl({required this._apiClient, required this._prefs});
+  PaymentRepositoryImpl({
+    required this._apiClient,
+    required this._outlets,
+  });
 
   final ApiClientI _apiClient;
-  final SharedPreferences _prefs;
+  final OutletSession _outlets;
 
   @override
   Future<TerminalToken> createPaymentToken(CreatePaymentRequest request) async {
     try {
       final response = await _apiClient.post(
-        '/retail-outlets/${requireOutletId(_prefs)}/payments/create',
+        '/retail-outlets/${_outlets.id()}/payments/create',
         data: request.toJson(),
         timeout: NetworkTimeouts.payment,
       );
@@ -57,7 +59,7 @@ class PaymentRepositoryImpl implements PaymentRepositoryI {
   Future<PaymentResult> verifyPayment(String transactionId) async {
     try {
       final response = await _apiClient.post(
-        '/retail-outlets/${requireOutletId(_prefs)}/payments/check',
+        '/retail-outlets/${_outlets.id()}/payments/check',
         data: {'transaction_id': transactionId},
         timeout: NetworkTimeouts.payment,
       );

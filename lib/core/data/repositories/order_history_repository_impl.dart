@@ -4,14 +4,16 @@ import 'package:prro/core/domain/order_history.dart';
 import 'package:prro/core/domain/repositories/order_history_repository_i.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 @Environment('prod')
 @Singleton(as: OrderHistoryRepositoryI)
 class OrderHistoryRepositoryImpl implements OrderHistoryRepositoryI {
-  OrderHistoryRepositoryImpl({required this._apiClient, required this._prefs});
+  OrderHistoryRepositoryImpl({
+    required this._apiClient,
+    required this._outlets,
+  });
   final ApiClientI _apiClient;
-  final SharedPreferences _prefs;
+  final OutletSession _outlets;
 
   @override
   Future<Page<ShiftSummary>> getShifts({
@@ -21,7 +23,7 @@ class OrderHistoryRepositoryImpl implements OrderHistoryRepositoryI {
     int? outletId,
   }) => dioGuard(() async {
     final response = await _apiClient.get(
-      '/retail-outlets/${outletId ?? requireOutletId(_prefs)}/shifts',
+      '/retail-outlets/${outletId ?? _outlets.id()}/shifts',
       queryParameters: {'page': page, 'sort': sort, 'order': order},
     );
     return Page<ShiftSummary>.fromJson(

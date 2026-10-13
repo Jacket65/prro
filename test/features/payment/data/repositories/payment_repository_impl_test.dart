@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:prro/core/config/network_timeouts.dart';
+import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/features/payment/data/models/payment_request.dart';
@@ -42,7 +43,10 @@ void main() {
     apiClient = MockApiClient();
     SharedPreferences.setMockInitialValues({'outlet_id': 7});
     final prefs = await SharedPreferences.getInstance();
-    repository = PaymentRepositoryImpl(apiClient: apiClient, prefs: prefs);
+    repository = PaymentRepositoryImpl(
+    apiClient: apiClient,
+    outlets: OutletSession(prefs),
+  );
 
     when(
       () => apiClient.post(

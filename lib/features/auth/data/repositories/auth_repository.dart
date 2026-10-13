@@ -29,10 +29,16 @@ class AuthRepositoryImpl implements AuthRepositoryI {
     required this.tokenStorage,
     required this.apiClient,
     required this.prefs,
+    required this._outlets,
   });
 
   final TokenStorageI tokenStorage;
   final ApiClientI apiClient;
+
+  /// The session outlet: login writes it (with the outlet-list fallback below)
+  /// and logout clears it, so the read side lives in one place with the write
+  /// side. The rest of the login/session fields stay in prefs.
+  final OutletSession _outlets;
   final SharedPreferences prefs;
 
   Completer<void>? _mutex;
@@ -198,7 +204,7 @@ class AuthRepositoryImpl implements AuthRepositoryI {
         refreshToken: refreshToken,
       );
       await prefs.setString('username', username);
-      await prefs.setInt(outletIdKey, outletId);
+      await _outlets.set(outletId);
       if (role != null) {
         await prefs.setString('user_role', role);
       }
@@ -258,7 +264,7 @@ class AuthRepositoryImpl implements AuthRepositoryI {
     }
     await tokenStorage.clear();
     await prefs.remove('username');
-    await prefs.remove(outletIdKey);
+    await _outlets.clear();
     await prefs.remove('user_role');
     await prefs.remove('user_id');
   }

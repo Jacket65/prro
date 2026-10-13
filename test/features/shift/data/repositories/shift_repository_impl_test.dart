@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/features/shift/data/repositories/shift_repository_impl.dart';
@@ -40,7 +41,7 @@ void main() {
     apiClient = _MockApiClient();
     repository = ShiftRepositoryImpl(
       apiClient: apiClient,
-      prefs: await SharedPreferences.getInstance(),
+      outlets: OutletSession(await SharedPreferences.getInstance()),
     );
   });
 
@@ -238,7 +239,7 @@ void main() {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       repository = ShiftRepositoryImpl(
         apiClient: apiClient,
-        prefs: await SharedPreferences.getInstance(),
+        outlets: OutletSession(await SharedPreferences.getInstance()),
       );
     });
 

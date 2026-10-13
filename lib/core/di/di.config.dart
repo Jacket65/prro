@@ -15,6 +15,7 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:prro/core/data/mock/order_history_repository_mock.dart'
     as _i798;
+import 'package:prro/core/data/outlet_scope.dart' as _i912;
 import 'package:prro/core/data/repositories/order_history_repository_impl.dart'
     as _i377;
 import 'package:prro/core/di/app_module.dart' as _i297;
@@ -146,6 +147,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i203.SecureTokenStorage(),
       registerFor: {_prod},
     );
+    gh.singleton<_i912.OutletSession>(
+      () => _i912.OutletSession(gh<_i460.SharedPreferences>()),
+    );
     gh.singleton<_i361.Dio>(() => appModule.dio(), registerFor: {_prod});
     gh.singleton<_i132.BalanceRepositoryI>(
       () => _i445.BalanceRepository(),
@@ -181,37 +185,60 @@ extension GetItInjectableX on _i174.GetIt {
       () => appModule.mockApiClient(gh<_i1010.MockBackend>()),
       registerFor: {_mock},
     );
-    gh.singleton<_i28.ShiftRepositoryI>(
-      () => _i277.ShiftRepositoryImpl(
-        apiClient: gh<_i787.ApiClientI>(),
-        prefs: gh<_i460.SharedPreferences>(),
-      ),
-      registerFor: {_prod},
-    );
     gh.singleton<_i691.ItemsRepositoryI>(
       () => _i972.ItemsRepositoryMock(gh<_i1010.MockBackend>()),
       registerFor: {_mock},
-    );
-    gh.lazySingleton<_i943.PaymentRepositoryI>(
-      () => _i883.PaymentRepositoryImpl(
-        apiClient: gh<_i787.ApiClientI>(),
-        prefs: gh<_i460.SharedPreferences>(),
-      ),
-      registerFor: {_prod},
     );
     gh.singleton<_i749.AuthRepositoryI>(
       () => _i76.AuthRepositoryImpl(
         tokenStorage: gh<_i330.TokenStorageI>(),
         apiClient: gh<_i787.ApiClientI>(),
         prefs: gh<_i460.SharedPreferences>(),
+        outlets: gh<_i912.OutletSession>(),
       ),
+    );
+    gh.singleton<_i691.ItemsRepositoryI>(
+      () => _i1038.ItemsRepository(
+        apiClient: gh<_i787.ApiClientI>(),
+        outlets: gh<_i912.OutletSession>(),
+      ),
+      registerFor: {_prod},
+    );
+    gh.singleton<_i766.OrderHistoryRepositoryI>(
+      () => _i377.OrderHistoryRepositoryImpl(
+        apiClient: gh<_i787.ApiClientI>(),
+        outlets: gh<_i912.OutletSession>(),
+      ),
+      registerFor: {_prod},
     );
     gh.singleton<_i310.AdminOutletRepositoryI>(
       () => _i328.AdminOutletRepositoryImpl(gh<_i787.ApiClientI>()),
       registerFor: {_prod},
     );
+    gh.singleton<_i876.OrdersRepositoryI>(
+      () => _i278.OrdersRepositoryImpl(
+        apiClient: gh<_i787.ApiClientI>(),
+        prefs: gh<_i460.SharedPreferences>(),
+        outlets: gh<_i912.OutletSession>(),
+      ),
+      registerFor: {_prod},
+    );
+    gh.lazySingleton<_i943.PaymentRepositoryI>(
+      () => _i883.PaymentRepositoryImpl(
+        apiClient: gh<_i787.ApiClientI>(),
+        outlets: gh<_i912.OutletSession>(),
+      ),
+      registerFor: {_prod},
+    );
     gh.singleton<_i617.AdminCatalogRepositoryI>(
       () => _i744.AdminCatalogRepositoryImpl(gh<_i787.ApiClientI>()),
+      registerFor: {_prod},
+    );
+    gh.singleton<_i28.ShiftRepositoryI>(
+      () => _i277.ShiftRepositoryImpl(
+        apiClient: gh<_i787.ApiClientI>(),
+        outlets: gh<_i912.OutletSession>(),
+      ),
       registerFor: {_prod},
     );
     gh.factory<_i249.TerminalPaymentServiceI>(
@@ -226,26 +253,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i524.AdminUserRepositoryImpl(gh<_i787.ApiClientI>()),
       registerFor: {_prod},
     );
-    gh.singleton<_i691.ItemsRepositoryI>(
-      () => _i1038.ItemsRepository(
-        apiClient: gh<_i787.ApiClientI>(),
-        prefs: gh<_i460.SharedPreferences>(),
+    gh.factory<_i887.FinishPendingOrderUseCase>(
+      () => _i887.FinishPendingOrderUseCase(
+        pendingOrderStore: gh<_i1025.PendingOrderStoreI>(),
+        orderHistoryRepository: gh<_i766.OrderHistoryRepositoryI>(),
+        ordersRepository: gh<_i876.OrdersRepositoryI>(),
       ),
-      registerFor: {_prod},
-    );
-    gh.singleton<_i766.OrderHistoryRepositoryI>(
-      () => _i377.OrderHistoryRepositoryImpl(
-        apiClient: gh<_i787.ApiClientI>(),
-        prefs: gh<_i460.SharedPreferences>(),
-      ),
-      registerFor: {_prod},
-    );
-    gh.singleton<_i876.OrdersRepositoryI>(
-      () => _i278.OrdersRepositoryImpl(
-        apiClient: gh<_i787.ApiClientI>(),
-        prefs: gh<_i460.SharedPreferences>(),
-      ),
-      registerFor: {_prod},
     );
     gh.factory<_i1000.TerminalPaymentHandler>(
       () => _i1000.TerminalPaymentHandler(
@@ -259,13 +272,6 @@ extension GetItInjectableX on _i174.GetIt {
         pendingOrderStore: gh<_i1025.PendingOrderStoreI>(),
         cash: gh<_i131.CashPaymentHandler>(),
         terminal: gh<_i1000.TerminalPaymentHandler>(),
-      ),
-    );
-    gh.factory<_i887.FinishPendingOrderUseCase>(
-      () => _i887.FinishPendingOrderUseCase(
-        pendingOrderStore: gh<_i1025.PendingOrderStoreI>(),
-        orderHistoryRepository: gh<_i766.OrderHistoryRepositoryI>(),
-        ordersRepository: gh<_i876.OrdersRepositoryI>(),
       ),
     );
     return this;

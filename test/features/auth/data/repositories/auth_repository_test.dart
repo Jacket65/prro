@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:prro/core/config/network_timeouts.dart';
+import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/security/token_storage_i.dart';
 import 'package:prro/features/auth/data/repositories/auth_repository.dart';
@@ -70,6 +71,7 @@ void main() {
       tokenStorage: tokenStorage,
       apiClient: apiClient,
       prefs: prefs,
+      outlets: OutletSession(prefs),
     );
   });
 

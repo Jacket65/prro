@@ -19,9 +19,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 @Singleton(as: OrdersRepositoryI)
 @Environment('prod')
 class OrdersRepositoryImpl implements OrdersRepositoryI {
-  OrdersRepositoryImpl({required this._apiClient, required this._prefs});
+  OrdersRepositoryImpl({
+    required this._apiClient,
+    required this._prefs,
+    required this._outlets,
+  });
   final ApiClientI _apiClient;
+
+  /// Kept only for the receipt's cashier name; the outlet id comes from the
+  /// injected [OutletSession], like everywhere else.
   final SharedPreferences _prefs;
+  final OutletSession _outlets;
 
   /// The cart itself lives in the domain (`Cart`) — one implementation shared
   /// with the mock repository, so the mock walk exercises production cart
@@ -79,7 +87,7 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
     required String idempotencyKey,
   }) => dioGuard(
     () async {
-      final outletId = requireOutletId(_prefs);
+      final outletId = _outlets.id();
       // Backend expects quantities/amounts as decimal STRINGS. The selected
       // bean is just another option, so it folds into the line's `options`
       // array.

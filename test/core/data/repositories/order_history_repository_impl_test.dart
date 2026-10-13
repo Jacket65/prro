@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/data/repositories/order_history_repository_impl.dart';
 import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/network/api_client_i.dart';
@@ -67,7 +68,10 @@ void main() {
     apiClient = MockApiClient();
     SharedPreferences.setMockInitialValues({'outlet_id': 7});
     final prefs = await SharedPreferences.getInstance();
-    repository = OrderHistoryRepositoryImpl(apiClient: apiClient, prefs: prefs);
+    repository = OrderHistoryRepositoryImpl(
+      apiClient: apiClient,
+      outlets: OutletSession(prefs),
+    );
   });
 
   group('getShifts', () {
@@ -159,7 +163,7 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       final sessionLess = OrderHistoryRepositoryImpl(
         apiClient: apiClient,
-        prefs: prefs,
+        outlets: OutletSession(prefs),
       );
 
       await expectLater(

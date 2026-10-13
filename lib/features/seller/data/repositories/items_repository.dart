@@ -10,14 +10,13 @@ import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/utils/envelope.dart';
 import 'package:prro/features/seller/domain/repositories/items_repository_i.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 @Environment('prod')
 @Singleton(as: ItemsRepositoryI)
 class ItemsRepository implements ItemsRepositoryI {
-  ItemsRepository({required this._apiClient, required this._prefs});
+  ItemsRepository({required this._apiClient, required this._outlets});
   final ApiClientI _apiClient;
-  final SharedPreferences _prefs;
+  final OutletSession _outlets;
 
   /// Session cache of `GET /variants/:id/options` keyed by variant id, plus the
   /// in-flight request so two near-simultaneous callers (options + beans) share
@@ -28,7 +27,7 @@ class ItemsRepository implements ItemsRepositoryI {
   @override
   Future<List<Item>> getCategories() async {
     try {
-      final outletId = maybeOutletId(_prefs);
+      final outletId = _outlets.idOrNull();
       if (outletId == null) {
         log('ItemsRepository.getCategories: outlet_id is not set');
         return [];
@@ -60,7 +59,7 @@ class ItemsRepository implements ItemsRepositoryI {
     int? categoryId,
     CancelToken? cancelToken,
   }) async {
-    final outletId = maybeOutletId(_prefs);
+    final outletId = _outlets.idOrNull();
     if (outletId == null) return const [];
     // Errors (incl. cancellation) propagate so the caller can tell a superseded
     // search from a real failure.

@@ -6,7 +6,6 @@ import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/core/utils/envelope.dart';
 import 'package:prro/features/shift/domain/entities/shift.dart';
 import 'package:prro/features/shift/domain/repositories/shift_repository_i.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Shift endpoints are scoped under the outlet — there is no `/shifts` group:
 ///   GET   /retail-outlets/{id}/shift/current   → 200 ShiftResponse | 404 none
@@ -18,9 +17,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 @Environment('prod')
 @Singleton(as: ShiftRepositoryI)
 class ShiftRepositoryImpl implements ShiftRepositoryI {
-  ShiftRepositoryImpl({required this._apiClient, required this._prefs});
+  ShiftRepositoryImpl({required this._apiClient, required this._outlets});
   final ApiClientI _apiClient;
-  final SharedPreferences _prefs;
+  final OutletSession _outlets;
 
   ShiftResponse _parse(dynamic body) => ShiftResponse.fromJson(
     // A body with no object payload is a protocol violation: fail rather than
@@ -32,7 +31,7 @@ class ShiftRepositoryImpl implements ShiftRepositoryI {
   Future<ShiftResponse?> currentShift() async {
     try {
       final response = await _apiClient.get(
-        '/retail-outlets/${requireOutletId(_prefs)}/shift/current',
+        '/retail-outlets/${_outlets.id()}/shift/current',
       );
       return _parse(response.data);
     } on DioException catch (e) {
@@ -51,7 +50,7 @@ class ShiftRepositoryImpl implements ShiftRepositoryI {
     String cashStart = '0.00',
   }) => dioGuard(() async {
     final response = await _apiClient.post(
-      '/retail-outlets/${requireOutletId(_prefs)}/shift/open',
+      '/retail-outlets/${_outlets.id()}/shift/open',
       data: {'cash_start': cashStart},
       idempotencyKey: idempotencyKey,
     );
@@ -64,7 +63,7 @@ class ShiftRepositoryImpl implements ShiftRepositoryI {
     required String idempotencyKey,
   }) => dioGuard(() async {
     await _apiClient.post(
-      '/retail-outlets/${requireOutletId(_prefs)}/shift/close',
+      '/retail-outlets/${_outlets.id()}/shift/close',
       data: {'cash_end': cashEnd},
       idempotencyKey: idempotencyKey,
     );

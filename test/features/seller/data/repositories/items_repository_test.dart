@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:prro/core/data/outlet_scope.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/features/seller/data/repositories/items_repository.dart';
@@ -20,9 +21,10 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({'outlet_id': 7});
     apiClient = _MockApiClient();
+    final prefs = await SharedPreferences.getInstance();
     repository = ItemsRepository(
       apiClient: apiClient,
-      prefs: await SharedPreferences.getInstance(),
+      outlets: OutletSession(prefs),
     );
   });
 
