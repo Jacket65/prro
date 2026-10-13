@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
@@ -148,7 +149,11 @@ class ItemsRepository implements ItemsRepositoryI {
         );
         return const <OptionGroup>[];
       } finally {
-        await _optionsInFlight.remove(variantId);
+        // No `await`: Map.remove returns the in-flight future for this very
+        // call, and awaiting it re-enters the future being completed — the
+        // removal has to run synchronously, in the same microtask the body
+        // finished. The removed future is intentionally not awaited.
+        unawaited(_optionsInFlight.remove(variantId));
       }
     });
   }

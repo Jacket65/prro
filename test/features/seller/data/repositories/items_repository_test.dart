@@ -75,4 +75,54 @@ void main() {
       verify(() => apiClient.get('/categories/1/products')).called(1);
     },
   );
+
+  group('getVariantOptions (in-flight de-duplication)', () {
+    void stubOptions() {
+      when(() => apiClient.get(any())).thenAnswer(
+        (_) async => _response([
+          {'id': 1, 'name': 'Сиропи', 'options': const <dynamic>[]},
+        ]),
+      );
+    }
+
+    test('two overlapping calls share exactly one request', () async {
+      stubOptions();
+
+      // The options picker and the bean picker fire for the same variant
+      // before the first response lands; the in-flight map is what keeps this
+      // to one round-trip.
+      final first = repository.getVariantOptions(1);
+      final second = repository.getVariantOptions(1);
+      await Future.wait([first, second]);
+
+      verify(() => apiClient.get('/variants/1/options')).called(1);
+    });
+
+    test('a repeat selection after the first settles hits the cache', () async {
+      stubOptions();
+
+      await repository.getVariantOptions(1);
+      await repository.getVariantOptions(1);
+      await repository.getVariantOptions(1);
+
+      verify(() => apiClient.get('/variants/1/options')).called(1);
+    });
+
+    test('the in-flight entry is dropped as the call settles', () async {
+      stubOptions();
+
+      // Regression for the awaited `_optionsInFlight.remove`: awaiting
+      // the removal re-entered the future being completed, so the entry
+      // (and the next request) could not be observed in the same
+      // microtask.
+      await repository.getVariantOptions(1);
+
+      // The beans caller for the same variant shares the cached response,
+      // and the variant-1 in-flight entry is already gone, so exactly one
+      // round-trip happened in total.
+      await repository.getVariantBeans(1);
+
+      verify(() => apiClient.get('/variants/1/options')).called(1);
+    });
+  });
 }
