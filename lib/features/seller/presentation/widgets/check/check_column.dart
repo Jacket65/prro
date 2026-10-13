@@ -1,6 +1,5 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:prro/features/seller/presentation/widgets/check/check_body.dart';
-import 'package:prro/features/seller/presentation/widgets/check/check_bottom_buttons.dart';
 import 'package:prro/features/seller/presentation/widgets/check/check_pay_button.dart';
 import 'package:prro/features/seller/presentation/widgets/check/check_price.dart';
 import 'package:prro/features/seller/presentation/widgets/check/check_top_bar_with_time.dart';
@@ -26,7 +25,6 @@ class CheckColumn extends StatelessWidget {
               PendingOrderBanner(),
               Expanded(child: CheckBody()),
               CheckPrice(),
-              CheckBottomButtons(),
               CheckPayButton(),
             ],
           ),

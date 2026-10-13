@@ -107,7 +107,6 @@ class _ResponsiveSellerAppBarState extends State<ResponsiveSellerAppBar> {
           icon: const Icon(Icons.search, color: Colors.white),
           tooltip: 'Пошук',
         ),
-        const CustomPopupMenu(name: '', icon: Icons.notifications),
         const SizedBox(width: 2),
         _buildUsername(context),
       ],
