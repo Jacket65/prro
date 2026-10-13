@@ -2,9 +2,22 @@
 /// Float arithmetic is forbidden for money — use `Money` math instead.
 library;
 
+import 'package:decimal/decimal.dart';
+
 /// Convert UAH expressed as `double` (e.g. seed/mock literals like `45.50`)
 /// to kopecks without floating-point drift for values with ≤2 decimals.
 int uahToKopecks(num uah) => (uah * 100).round();
+
+/// Exact UAH (the [Decimal] the cart works in) → kopecks. This is the one
+/// place a cart price reaches money: the multiply is exact and the rounding
+/// happens once, here, instead of drifting through a `double` total that is
+/// only billed at kopecks.
+int kopecksFromDecimal(Decimal uah) =>
+    (uah * Decimal.fromInt(100)).round().toBigInt().toInt();
+
+/// The inverse, for seeds and fixtures that think in kopecks: reparsed through
+/// [formatAmount] so the decimal is exactly the string the wire uses.
+Decimal uahFromKopecks(int kopecks) => Decimal.parse(formatAmount(kopecks));
 
 int kopecksFromString(String raw) {
   final trimmed = raw.trim().replaceAll(',', '.');

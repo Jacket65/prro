@@ -10,7 +10,8 @@ import 'package:prro/features/seller/domain/payment/pay_order_request.dart';
 import 'package:prro/features/seller/domain/payment/payment_method_handler.dart';
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 import 'package:prro/features/seller/domain/repositories/pending_order_store_i.dart';
-import 'package:prro/features/seller/domain/usecases/finish_pending_order_use_case.dart' show FinishPendingOrderUseCase;
+import 'package:prro/features/seller/domain/usecases/finish_pending_order_use_case.dart'
+    show FinishPendingOrderUseCase;
 
 /// Coordinates a single payment: picks the [PaymentMethodHandler] for the
 /// requested method, runs its method-specific [PaymentMethodHandler.pay],
@@ -60,7 +61,7 @@ class PayOrderUseCase {
     _activeHandler = handler;
     try {
       final paymentRequest = PaymentRequest(
-        amountKopecks: uahToKopecks(_ordersRepository.totalPrice),
+        amountKopecks: kopecksFromDecimal(_ordersRepository.totalPrice),
         tenderedKopecks: request.tenderedKopecks,
         currency: 'UAH',
       );

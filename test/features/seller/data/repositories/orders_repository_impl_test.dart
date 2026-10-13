@@ -8,6 +8,7 @@ import 'package:prro/core/domain/drink_option.dart';
 import 'package:prro/core/domain/order.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
+import 'package:prro/core/utils/money.dart';
 import 'package:prro/features/seller/data/repositories/orders_repository_impl.dart';
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -62,27 +63,27 @@ Response<dynamic> _orderResponse(
 /// A backend 404 on order creation: the seller's shift was closed from another
 /// device while this screen was open.
 DioException _notFound() => DioException(
-      requestOptions: RequestOptions(path: '/retail-outlets/7/orders'),
-      response: Response<dynamic>(
-        requestOptions: RequestOptions(path: '/retail-outlets/7/orders'),
-        statusCode: 404,
-        data: {
-          'error': {'code': 'not_found', 'message': 'shift not found'},
-        },
-      ),
-    );
+  requestOptions: RequestOptions(path: '/retail-outlets/7/orders'),
+  response: Response<dynamic>(
+    requestOptions: RequestOptions(path: '/retail-outlets/7/orders'),
+    statusCode: 404,
+    data: {
+      'error': {'code': 'not_found', 'message': 'shift not found'},
+    },
+  ),
+);
 
 /// A backend 500, to prove the 404 mapping is narrow.
 DioException _serverError() => DioException(
-      requestOptions: RequestOptions(path: '/retail-outlets/7/orders'),
-      response: Response<dynamic>(
-        requestOptions: RequestOptions(path: '/retail-outlets/7/orders'),
-        statusCode: 500,
-        data: {
-          'error': {'code': 'internal_error', 'message': 'boom'},
-        },
-      ),
-    );
+  requestOptions: RequestOptions(path: '/retail-outlets/7/orders'),
+  response: Response<dynamic>(
+    requestOptions: RequestOptions(path: '/retail-outlets/7/orders'),
+    statusCode: 500,
+    data: {
+      'error': {'code': 'internal_error', 'message': 'boom'},
+    },
+  ),
+);
 
 void main() {
   late MockApiClient apiClient;
@@ -217,45 +218,49 @@ void main() {
       expect(receipt.changeKopecks, 0);
     });
 
-    test('a 404 becomes ShiftClosedException, not a bare ApiException',
-        () async {
-      when(
-        () => apiClient.post(
-          any<String>(),
-          data: any<dynamic>(named: 'data'),
-          idempotencyKey: any(named: 'idempotencyKey'),
-        ),
-      ).thenThrow(_notFound());
+    test(
+      'a 404 becomes ShiftClosedException, not a bare ApiException',
+      () async {
+        when(
+          () => apiClient.post(
+            any<String>(),
+            data: any<dynamic>(named: 'data'),
+            idempotencyKey: any(named: 'idempotencyKey'),
+          ),
+        ).thenThrow(_notFound());
 
-      await expectLater(
-        () => repo.placeOrder(
-          method: PaymentMethod.cash,
-          tenderedKopecks: _overTenderKopecks,
-          idempotencyKey: 'k5',
-        ),
-        throwsA(isA<ShiftClosedException>()),
-      );
-    });
+        await expectLater(
+          () => repo.placeOrder(
+            method: PaymentMethod.cash,
+            tenderedKopecks: _overTenderKopecks,
+            idempotencyKey: 'k5',
+          ),
+          throwsA(isA<ShiftClosedException>()),
+        );
+      },
+    );
 
-    test('a 404 on the terminal path also becomes ShiftClosedException',
-        () async {
-      when(
-        () => apiClient.post(
-          any<String>(),
-          data: any<dynamic>(named: 'data'),
-          idempotencyKey: any(named: 'idempotencyKey'),
-        ),
-      ).thenThrow(_notFound());
+    test(
+      'a 404 on the terminal path also becomes ShiftClosedException',
+      () async {
+        when(
+          () => apiClient.post(
+            any<String>(),
+            data: any<dynamic>(named: 'data'),
+            idempotencyKey: any(named: 'idempotencyKey'),
+          ),
+        ).thenThrow(_notFound());
 
-      await expectLater(
-        () => repo.placeOrder(
-          method: PaymentMethod.terminal,
-          tenderedKopecks: _overTenderKopecks,
-          idempotencyKey: 'k6',
-        ),
-        throwsA(isA<ShiftClosedException>()),
-      );
-    });
+        await expectLater(
+          () => repo.placeOrder(
+            method: PaymentMethod.terminal,
+            tenderedKopecks: _overTenderKopecks,
+            idempotencyKey: 'k6',
+          ),
+          throwsA(isA<ShiftClosedException>()),
+        );
+      },
+    );
 
     test('a non-404 failure still maps to ApiException', () async {
       when(
@@ -294,6 +299,73 @@ void main() {
     });
   });
 
+  group('cart total (F-D: exact Decimal pricing)', () {
+    Product line({
+      required String id,
+      required String price,
+      required String quantity,
+      List<SelectedOption> options = const [],
+    }) => Product(
+      id: id,
+      name: 'Позиція $id',
+      price: Decimal.parse(price),
+      quantity: Decimal.parse(quantity),
+      imageUrl: '',
+      selectedOptions: options,
+    );
+
+    test('a fractional-weight, multi-line cart totals exactly', () async {
+      // 0.300 × 33.33 = 9.999; 0.700 × 33.33 = 23.331;
+      // 2 × (45.00 + 25.00×2 portions) = 190.00 → the cart is 223.33, which the
+      // double path prints as 223.32999999999998.
+      repo
+        ..addProduct(line(id: 'a', price: '33.33', quantity: '0.300'))
+        ..addProduct(line(id: 'b', price: '33.33', quantity: '0.700'))
+        ..addProduct(
+          line(
+            id: 'c',
+            price: '45.00',
+            quantity: '2',
+            options: [
+              SelectedOption(
+                optionId: 2,
+                name: 'Соєве',
+                priceDelta: Decimal.parse('25.00'),
+                quantity: 2,
+              ),
+            ],
+          ),
+        );
+
+      expect(repo.products, hasLength(3));
+      expect(repo.totalPrice, Decimal.parse('223.33'));
+      expect(repo.totalPrice.toString(), '223.33');
+
+      // The only conversion to kopecks happens at the payment boundary, and it
+      // lands exactly on the figure the same lines bill on the wire.
+      final totalKopecks = kopecksFromDecimal(repo.totalPrice);
+      expect(totalKopecks, 22333);
+
+      await repo.placeOrder(
+        method: PaymentMethod.cash,
+        tenderedKopecks: totalKopecks,
+        idempotencyKey: 'k-total',
+      );
+      expect(capturedBody()['payment'], {'method': 'cash', 'amount': '223.33'});
+    });
+
+    test('quantity and price stay Decimal on a weight line', () async {
+      repo.addProduct(line(id: 'kg', price: '19.99', quantity: '0.125'));
+
+      final single = repo.products.single;
+      expect(single.quantity, Decimal.parse('0.125'));
+      expect(single.price, Decimal.parse('19.99'));
+      expect(single.effectiveUnitPrice, Decimal.parse('19.99'));
+      // 0.125 × 19.99 = 2.49875 → 250 kopecks, rounded once at the boundary.
+      expect(kopecksFromDecimal(repo.totalPrice), 250);
+    });
+  });
+
   group('confirmOrder', () {
     test(
       'POSTs /orders/{id}/confirm and parses the returned receipt',
@@ -324,7 +396,7 @@ void main() {
           id: 'p1',
           quantity: Decimal.one,
           name: 'Кава',
-          price: 45,
+          price: Decimal.parse('45'),
           imageUrl: '',
           selectedBean: bean,
           selectedOptions: options,
@@ -335,8 +407,12 @@ void main() {
     test('replaces the options of a line', () {
       final line = product();
       repo.addProduct(line);
-      const options = [
-        SelectedOption(optionId: 2, name: 'Молоко'),
+      final options = [
+        SelectedOption(
+          optionId: 2,
+          name: 'Молоко',
+          priceDelta: Decimal.parse('5'),
+        ),
       ];
 
       repo.updateOptions(line.lineId, options);
@@ -381,7 +457,9 @@ void main() {
     });
 
     test('changing the options merges into an identical existing line', () {
-      const options = [SelectedOption(optionId: 2, name: 'Молоко')];
+      final options = [
+        SelectedOption(optionId: 2, name: 'Молоко', priceDelta: Decimal.zero),
+      ];
       final plain = product();
       repo
         ..addProduct(plain)

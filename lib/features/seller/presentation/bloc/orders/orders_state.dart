@@ -21,7 +21,9 @@ class OrdersUpdated extends OrdersState with _$OrdersUpdated {
   const OrdersUpdated({required this.products, required this.total});
 
   final List<Product> products;
-  final double total;
+
+  /// Live cart total in exact UAH; rendered at kopecks by the pay button.
+  final Decimal total;
 }
 
 /// Payment finished — cart has been cleared, receipt is shown to the cashier.
@@ -40,7 +42,9 @@ class OrdersPaymentProcessing extends OrdersState
   const OrdersPaymentProcessing({required this.method, required this.total});
 
   final PaymentMethod method;
-  final double total;
+
+  /// Live cart total in exact UAH; rendered at kopecks by the pay button.
+  final Decimal total;
 }
 
 @Freezed(toJson: false)
@@ -53,5 +57,7 @@ class OrdersError extends OrdersState with _$OrdersError {
 
   final String message;
   final List<Product> products;
-  final double total;
+
+  /// Live cart total in exact UAH; rendered at kopecks by the pay button.
+  final Decimal total;
 }

@@ -24,7 +24,7 @@ void main() {
       final product = Product(
         id: '1', // Espresso variant ID
         name: 'Еспресо',
-        price: 35,
+        price: Decimal.parse('35'),
         imageUrl: '',
         quantity: Decimal.one,
         unit: MeasureUnit(id: 3, name: 'шт', step: Decimal.one),
@@ -77,7 +77,7 @@ void main() {
         final product = Product(
           id: '1',
           name: 'Еспресо',
-          price: 35,
+          price: Decimal.parse('35'),
           imageUrl: '',
           quantity: Decimal.one,
           unit: MeasureUnit(id: 3, name: 'шт', step: Decimal.one),

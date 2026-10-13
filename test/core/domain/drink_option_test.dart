@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:prro/core/domain/drink_option.dart';
 
@@ -13,7 +14,7 @@ void main() {
       });
       expect(option.id, 5);
       expect(option.name, 'Сироп');
-      expect(option.priceDelta, 7.5);
+      expect(option.priceDelta, Decimal.parse('7.5'));
       expect(option.isDefault, isTrue);
     });
 
@@ -25,7 +26,7 @@ void main() {
       final option = DrinkOption.fromJson(const {});
       expect(option.id, 0);
       expect(option.name, isEmpty);
-      expect(option.priceDelta, 0);
+      expect(option.priceDelta, Decimal.zero);
       expect(option.isDefault, isFalse);
     });
 
@@ -62,8 +63,10 @@ void main() {
 
     test('an unknown selection_type decodes as single', () {
       expect(
-        OptionGroup.fromJson(const {'id': 1, 'selection_type': 'weird'})
-            .selectionType,
+        OptionGroup.fromJson(const {
+          'id': 1,
+          'selection_type': 'weird',
+        }).selectionType,
         OptionSelectionType.single,
       );
       expect(
@@ -80,33 +83,45 @@ void main() {
   });
 
   group('SelectedOption', () {
-    test('defaults price_delta to 0 and quantity to 1', () {
-      const option = SelectedOption(optionId: 1, name: 'Сироп');
-      expect(option.priceDelta, 0);
+    test('a free option keeps quantity at 1', () {
+      // `priceDelta` is required (a `Decimal` has no const constructor, so a
+      // freezed @Default is impossible); zero is written explicitly.
+      final option = SelectedOption(
+        optionId: 1,
+        name: 'Сироп',
+        priceDelta: Decimal.zero,
+      );
+      expect(option.priceDelta, Decimal.zero);
       expect(option.quantity, 1);
     });
 
     test('copyWith keeps the omitted fields', () {
-      const option = SelectedOption(
+      final option = SelectedOption(
         optionId: 1,
         name: 'Сироп',
-        priceDelta: 7.5,
+        priceDelta: Decimal.parse('7.5'),
         quantity: 2,
       );
-      expect(option.copyWith(quantity: 3).priceDelta, 7.5);
+      expect(option.copyWith(quantity: 3).priceDelta, Decimal.parse('7.5'));
       expect(option.copyWith(quantity: 3).quantity, 3);
     });
 
     test('equals another option with the same fields', () {
-      expect(
-        const SelectedOption(optionId: 1, name: 'Сироп'),
-        const SelectedOption(optionId: 1, name: 'Сироп'),
+      final one = SelectedOption(
+        optionId: 1,
+        name: 'Сироп',
+        priceDelta: Decimal.zero,
       );
-      const other = SelectedOption(optionId: 2, name: 'Сироп');
       expect(
-        const SelectedOption(optionId: 1, name: 'Сироп'),
-        isNot(other),
+        one,
+        SelectedOption(optionId: 1, name: 'Сироп', priceDelta: Decimal.zero),
       );
+      final other = SelectedOption(
+        optionId: 2,
+        name: 'Сироп',
+        priceDelta: Decimal.zero,
+      );
+      expect(one, isNot(other));
     });
   });
 }

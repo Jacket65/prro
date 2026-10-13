@@ -34,8 +34,11 @@ abstract class Product extends Item with _$Product {
     required Decimal quantity,
 
     /// Backend ships the price as a decimal STRING ("45.50"); some legacy
-    /// paths still ship a number, so the factory accepts both.
-    required double price,
+    /// paths still ship a number, so the factory accepts both. Kept as a
+    /// [Decimal]: a catalog price multiplied by a weight-goods quantity must
+    /// not round twice (once in the unit price, once in the line total)
+    /// before the cart is billed at kopecks.
+    required Decimal price,
     required String imageUrl,
 
     /// Measure unit of the variant (id/name/step). `null` → piece (step 1).
@@ -63,7 +66,7 @@ abstract class Product extends Item with _$Product {
     return Product(
       id: json['id'].toString(),
       name: stringOr(json['name'], ''),
-      price: parseDouble(json['price']),
+      price: parseDecimal(json['price']),
       imageUrl: stringOr(json['image_url'], ''),
       quantity: quantity,
       unit: unit,
@@ -82,11 +85,15 @@ abstract class Product extends Item with _$Product {
     return '$id#$opts;$bean';
   }
 
-  /// Base price plus the sum of selected option surcharges (× portions).
-  /// Used for the live "Разом"; the authoritative total comes from the receipt.
-  double get effectiveUnitPrice =>
+  /// Base price plus the sum of selected option surcharges (× portions), all
+  /// in exact [Decimal]. Used for the live "Разом"; the authoritative total
+  /// comes from the receipt.
+  Decimal get effectiveUnitPrice =>
       price +
-      selectedOptions.fold(0.0, (sum, o) => sum + o.priceDelta * o.quantity);
+      selectedOptions.fold(
+        Decimal.zero,
+        (sum, o) => sum + o.priceDelta * Decimal.fromInt(o.quantity),
+      );
 }
 
 /// Abstract product (e.g. "Американо") that owns one or more orderable variants
@@ -133,8 +140,9 @@ abstract class Category extends Item with _$Category {
   const Category._() : super._();
 
   factory Category.fromJson(Map<String, dynamic> json) {
-    final items = (json['items'] as List<dynamic>? ?? const [])
-        .map<Item>((itemJson) {
+    final items = (json['items'] as List<dynamic>? ?? const []).map<Item>((
+      itemJson,
+    ) {
       final itemMap = (itemJson as Map).cast<String, dynamic>();
       return itemMap.containsKey('price')
           ? Product.fromJson(itemMap)

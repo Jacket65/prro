@@ -21,7 +21,7 @@ class FakeOrdersRepository extends Fake implements OrdersRepositoryI {
   @override
   List<Product> products = [];
   @override
-  double totalPrice = 0;
+  Decimal totalPrice = Decimal.zero;
   int clearProductsCallCount = 0;
 
   @override
@@ -51,7 +51,7 @@ Product product(String id) => Product(
   id: id,
   quantity: Decimal.one,
   name: 'Кава',
-  price: 45,
+  price: Decimal.parse('45'),
   imageUrl: '',
 );
 
@@ -123,28 +123,25 @@ void main() {
   // bloc is therefore not enough — the reset has to happen at the session
   // boundary (AuthBloc, R2). This test pins the observable consequence: after
   // a session-end reset, a freshly built bloc starts at OrdersInitial.
-  test(
-    'a new session after a cart reset starts from OrdersInitial, not the '
-    "previous cashier's cart",
-    () {
-      // The previous session's cart, as the old code left it.
-      final previousCart = <Product>[product('p1')];
+  test('a new session after a cart reset starts from OrdersInitial, not the '
+      "previous cashier's cart", () {
+    // The previous session's cart, as the old code left it.
+    final previousCart = <Product>[product('p1')];
 
-      // Session end (AuthBloc): the shared repository drops the cart.
-      fakeRepo
-        ..products = previousCart
-        ..resetForNewSession();
+    // Session end (AuthBloc): the shared repository drops the cart.
+    fakeRepo
+      ..products = previousCart
+      ..resetForNewSession();
 
-      // The next login builds a fresh bloc over the same repository.
-      final nextSession = OrdersBloc(
-        ordersRepository: fakeRepo,
-        payOrder: mockPayOrder,
-      );
+    // The next login builds a fresh bloc over the same repository.
+    final nextSession = OrdersBloc(
+      ordersRepository: fakeRepo,
+      payOrder: mockPayOrder,
+    );
 
-      expect(nextSession.state, const OrdersInitial());
-      expect(fakeRepo.products, isEmpty);
-    },
-  );
+    expect(nextSession.state, const OrdersInitial());
+    expect(fakeRepo.products, isEmpty);
+  });
 
   blocTest<OrdersBloc, OrdersState>(
     'PaymentException emits OrdersError with the message',
@@ -294,7 +291,7 @@ void main() {
       final a = OrdersError(
         message: 'boom',
         products: [product('p1')],
-        total: 45,
+        total: Decimal.parse('45'),
       );
 
       expect(a, a);
@@ -304,17 +301,17 @@ void main() {
           OrdersError(
             message: 'boom',
             products: [product('p2')],
-            total: 45,
+            total: Decimal.parse('45'),
           ),
         ),
       );
       expect(
         a,
         isNot(
-          const OrdersError(
+          OrdersError(
             message: 'boom',
             products: [],
-            total: 99,
+            total: Decimal.parse('99'),
           ),
         ),
       );
@@ -358,14 +355,8 @@ void main() {
     });
 
     test('a different case is never equal', () {
-      expect(
-        const OrdersInitial(),
-        isNot(const OrdersLoading()),
-      );
-      expect(
-        const OrdersLoading(),
-        const OrdersLoading(),
-      );
+      expect(const OrdersInitial(), isNot(const OrdersLoading()));
+      expect(const OrdersLoading(), const OrdersLoading());
     });
   });
 }

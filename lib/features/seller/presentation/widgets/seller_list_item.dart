@@ -6,6 +6,7 @@ import 'package:prro/core/domain/bean.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
 import 'package:prro/core/domain/measure_unit.dart';
+import 'package:prro/core/utils/money.dart';
 import 'package:prro/features/seller/presentation/bloc/orders/orders_bloc.dart';
 import 'package:prro/features/seller/presentation/widgets/options_picker_dialog.dart';
 
@@ -23,7 +24,7 @@ class ListItem extends StatefulWidget {
   });
   final String lineId;
   final String name;
-  final double price;
+  final Decimal price;
   final String imageUrl;
   final Decimal quantity;
   final MeasureUnit? unit;
@@ -149,7 +150,7 @@ class _ListItemState extends State<ListItem> {
                           ],
                           const SizedBox(height: 2),
                           Text(
-                            '${widget.price.toStringAsFixed(2)}₴',
+                            formatUah(kopecksFromDecimal(widget.price)),
                             style: const TextStyle(
                               color: Colors.grey,
                               fontSize: 12,
@@ -176,8 +177,11 @@ class _ListItemState extends State<ListItem> {
                         Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: Text(
-                            (widget.price * widget.quantity.toDouble())
-                                .toStringAsFixed(2),
+                            formatUah(
+                              kopecksFromDecimal(
+                                widget.price * widget.quantity,
+                              ),
+                            ),
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,

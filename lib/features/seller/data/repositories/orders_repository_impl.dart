@@ -29,11 +29,13 @@ class OrdersRepositoryImpl implements OrdersRepositoryI {
 
   /// Client-side approximation used only for the live "разом" display.
   /// The authoritative total comes from [placeOrder]'s receipt. Includes the
-  /// surcharge of each line's selected options via [Product.effectiveUnitPrice]
+  /// surcharge of each line's selected options via
+  /// [Product.effectiveUnitPrice], all in exact [Decimal] — the cart is never
+  /// priced through a `double`.
   @override
-  double get totalPrice => _products.fold(
-    0,
-    (sum, p) => sum + (p.effectiveUnitPrice * p.quantity.toDouble()),
+  Decimal get totalPrice => _products.fold(
+    Decimal.zero,
+    (sum, p) => sum + p.effectiveUnitPrice * p.quantity,
   );
 
   @override

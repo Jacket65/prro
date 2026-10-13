@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:prro/core/utils/json.dart';
 
@@ -39,15 +40,17 @@ abstract class OptionGroup with _$OptionGroup {
 }
 
 /// A single selectable option with its (variant-effective) surcharge.
-/// `price_delta` arrives as a decimal STRING — parse via [parseDouble].
+/// `price_delta` arrives as a decimal STRING — parsed exactly via
+/// [parseDecimal], so a surcharge summed into a price never drifts. No
+/// freezed default: a `Decimal` has no const constructor, so the default lives
+/// in `parseDecimal` (missing → `Decimal.zero`).
 @Freezed(toJson: false)
 abstract class DrinkOption with _$DrinkOption {
   const factory DrinkOption({
     @JsonKey(readValue: optionIdValue, fromJson: parseInt) required int id,
     @JsonKey(fromJson: parseString) required String name,
-    @JsonKey(name: 'price_delta', fromJson: parseDouble)
-    @Default(0)
-    double priceDelta,
+    @JsonKey(name: 'price_delta', fromJson: parseDecimal)
+    required Decimal priceDelta,
 
     /// Whether this option is preselected by default (the value the cashier
     /// gets without touching the group).
@@ -62,7 +65,8 @@ abstract class DrinkOption with _$DrinkOption {
 
 /// An option the cashier picked for a cart line. [quantity] is the number of
 /// portions (e.g. 2 syrups), each multiplying [priceDelta]. [name]/[priceDelta]
-/// are kept for display and the local "Разом" approximation.
+/// are kept for display and the local "Разом" approximation. Pass
+/// [Decimal.zero] for a free option.
 ///
 /// Never serialized: the order wire is built by
 /// `core/mock/order_request_dto.dart`.
@@ -71,7 +75,7 @@ abstract class SelectedOption with _$SelectedOption {
   const factory SelectedOption({
     required int optionId,
     required String name,
-    @Default(0) double priceDelta,
+    required Decimal priceDelta,
     @Default(1) int quantity,
   }) = _SelectedOption;
 }

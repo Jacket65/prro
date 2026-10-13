@@ -299,7 +299,7 @@ as List<DrinkOption>,
 /// @nodoc
 mixin _$DrinkOption {
 
-@JsonKey(readValue: optionIdValue, fromJson: parseInt) int get id;@JsonKey(fromJson: parseString) String get name;@JsonKey(name: 'price_delta', fromJson: parseDouble) double get priceDelta;/// Whether this option is preselected by default (the value the cashier
+@JsonKey(readValue: optionIdValue, fromJson: parseInt) int get id;@JsonKey(fromJson: parseString) String get name;@JsonKey(name: 'price_delta', fromJson: parseDecimal) Decimal get priceDelta;/// Whether this option is preselected by default (the value the cashier
 /// gets without touching the group).
 @JsonKey(name: 'is_default', fromJson: boolOrFalse) bool get isDefault;
 /// Create a copy of DrinkOption
@@ -337,7 +337,7 @@ abstract mixin class $DrinkOptionCopyWith<$Res>  {
   factory $DrinkOptionCopyWith(DrinkOption value, $Res Function(DrinkOption) _then) = _$DrinkOptionCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(readValue: optionIdValue, fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'price_delta', fromJson: parseDouble) double priceDelta,@JsonKey(name: 'is_default', fromJson: boolOrFalse) bool isDefault
+@JsonKey(readValue: optionIdValue, fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'price_delta', fromJson: parseDecimal) Decimal priceDelta,@JsonKey(name: 'is_default', fromJson: boolOrFalse) bool isDefault
 });
 
 
@@ -359,7 +359,7 @@ class _$DrinkOptionCopyWithImpl<$Res>
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,priceDelta: null == priceDelta ? _self.priceDelta : priceDelta // ignore: cast_nullable_to_non_nullable
-as double,isDefault: null == isDefault ? _self.isDefault : isDefault // ignore: cast_nullable_to_non_nullable
+as Decimal,isDefault: null == isDefault ? _self.isDefault : isDefault // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -445,7 +445,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(readValue: optionIdValue, fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'price_delta', fromJson: parseDouble)  double priceDelta, @JsonKey(name: 'is_default', fromJson: boolOrFalse)  bool isDefault)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(readValue: optionIdValue, fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'price_delta', fromJson: parseDecimal)  Decimal priceDelta, @JsonKey(name: 'is_default', fromJson: boolOrFalse)  bool isDefault)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DrinkOption() when $default != null:
 return $default(_that.id,_that.name,_that.priceDelta,_that.isDefault);case _:
@@ -466,7 +466,7 @@ return $default(_that.id,_that.name,_that.priceDelta,_that.isDefault);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(readValue: optionIdValue, fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'price_delta', fromJson: parseDouble)  double priceDelta, @JsonKey(name: 'is_default', fromJson: boolOrFalse)  bool isDefault)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(readValue: optionIdValue, fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'price_delta', fromJson: parseDecimal)  Decimal priceDelta, @JsonKey(name: 'is_default', fromJson: boolOrFalse)  bool isDefault)  $default,) {final _that = this;
 switch (_that) {
 case _DrinkOption():
 return $default(_that.id,_that.name,_that.priceDelta,_that.isDefault);case _:
@@ -486,7 +486,7 @@ return $default(_that.id,_that.name,_that.priceDelta,_that.isDefault);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(readValue: optionIdValue, fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'price_delta', fromJson: parseDouble)  double priceDelta, @JsonKey(name: 'is_default', fromJson: boolOrFalse)  bool isDefault)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(readValue: optionIdValue, fromJson: parseInt)  int id, @JsonKey(fromJson: parseString)  String name, @JsonKey(name: 'price_delta', fromJson: parseDecimal)  Decimal priceDelta, @JsonKey(name: 'is_default', fromJson: boolOrFalse)  bool isDefault)?  $default,) {final _that = this;
 switch (_that) {
 case _DrinkOption() when $default != null:
 return $default(_that.id,_that.name,_that.priceDelta,_that.isDefault);case _:
@@ -501,12 +501,12 @@ return $default(_that.id,_that.name,_that.priceDelta,_that.isDefault);case _:
 @JsonSerializable(createToJson: false)
 
 class _DrinkOption implements DrinkOption {
-  const _DrinkOption({@JsonKey(readValue: optionIdValue, fromJson: parseInt) required this.id, @JsonKey(fromJson: parseString) required this.name, @JsonKey(name: 'price_delta', fromJson: parseDouble) this.priceDelta = 0, @JsonKey(name: 'is_default', fromJson: boolOrFalse) this.isDefault = false});
+  const _DrinkOption({@JsonKey(readValue: optionIdValue, fromJson: parseInt) required this.id, @JsonKey(fromJson: parseString) required this.name, @JsonKey(name: 'price_delta', fromJson: parseDecimal) required this.priceDelta, @JsonKey(name: 'is_default', fromJson: boolOrFalse) this.isDefault = false});
   factory _DrinkOption.fromJson(Map<String, dynamic> json) => _$DrinkOptionFromJson(json);
 
 @override@JsonKey(readValue: optionIdValue, fromJson: parseInt) final  int id;
 @override@JsonKey(fromJson: parseString) final  String name;
-@override@JsonKey(name: 'price_delta', fromJson: parseDouble) final  double priceDelta;
+@override@JsonKey(name: 'price_delta', fromJson: parseDecimal) final  Decimal priceDelta;
 /// Whether this option is preselected by default (the value the cashier
 /// gets without touching the group).
 @override@JsonKey(name: 'is_default', fromJson: boolOrFalse) final  bool isDefault;
@@ -543,7 +543,7 @@ abstract mixin class _$DrinkOptionCopyWith<$Res> implements $DrinkOptionCopyWith
   factory _$DrinkOptionCopyWith(_DrinkOption value, $Res Function(_DrinkOption) _then) = __$DrinkOptionCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(readValue: optionIdValue, fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'price_delta', fromJson: parseDouble) double priceDelta,@JsonKey(name: 'is_default', fromJson: boolOrFalse) bool isDefault
+@JsonKey(readValue: optionIdValue, fromJson: parseInt) int id,@JsonKey(fromJson: parseString) String name,@JsonKey(name: 'price_delta', fromJson: parseDecimal) Decimal priceDelta,@JsonKey(name: 'is_default', fromJson: boolOrFalse) bool isDefault
 });
 
 
@@ -565,7 +565,7 @@ class __$DrinkOptionCopyWithImpl<$Res>
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,priceDelta: null == priceDelta ? _self.priceDelta : priceDelta // ignore: cast_nullable_to_non_nullable
-as double,isDefault: null == isDefault ? _self.isDefault : isDefault // ignore: cast_nullable_to_non_nullable
+as Decimal,isDefault: null == isDefault ? _self.isDefault : isDefault // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -576,7 +576,7 @@ as bool,
 /// @nodoc
 mixin _$SelectedOption {
 
- int get optionId; String get name; double get priceDelta; int get quantity;
+ int get optionId; String get name; Decimal get priceDelta; int get quantity;
 /// Create a copy of SelectedOption
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -612,7 +612,7 @@ abstract mixin class $SelectedOptionCopyWith<$Res>  {
   factory $SelectedOptionCopyWith(SelectedOption value, $Res Function(SelectedOption) _then) = _$SelectedOptionCopyWithImpl;
 @useResult
 $Res call({
- int optionId, String name, double priceDelta, int quantity
+ int optionId, String name, Decimal priceDelta, int quantity
 });
 
 
@@ -634,7 +634,7 @@ class _$SelectedOptionCopyWithImpl<$Res>
 optionId: null == optionId ? _self.optionId : optionId // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,priceDelta: null == priceDelta ? _self.priceDelta : priceDelta // ignore: cast_nullable_to_non_nullable
-as double,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
+as Decimal,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -720,7 +720,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int optionId,  String name,  double priceDelta,  int quantity)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int optionId,  String name,  Decimal priceDelta,  int quantity)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SelectedOption() when $default != null:
 return $default(_that.optionId,_that.name,_that.priceDelta,_that.quantity);case _:
@@ -741,7 +741,7 @@ return $default(_that.optionId,_that.name,_that.priceDelta,_that.quantity);case 
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int optionId,  String name,  double priceDelta,  int quantity)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int optionId,  String name,  Decimal priceDelta,  int quantity)  $default,) {final _that = this;
 switch (_that) {
 case _SelectedOption():
 return $default(_that.optionId,_that.name,_that.priceDelta,_that.quantity);case _:
@@ -761,7 +761,7 @@ return $default(_that.optionId,_that.name,_that.priceDelta,_that.quantity);case 
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int optionId,  String name,  double priceDelta,  int quantity)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int optionId,  String name,  Decimal priceDelta,  int quantity)?  $default,) {final _that = this;
 switch (_that) {
 case _SelectedOption() when $default != null:
 return $default(_that.optionId,_that.name,_that.priceDelta,_that.quantity);case _:
@@ -776,12 +776,12 @@ return $default(_that.optionId,_that.name,_that.priceDelta,_that.quantity);case 
 
 
 class _SelectedOption implements SelectedOption {
-  const _SelectedOption({required this.optionId, required this.name, this.priceDelta = 0, this.quantity = 1});
+  const _SelectedOption({required this.optionId, required this.name, required this.priceDelta, this.quantity = 1});
   
 
 @override final  int optionId;
 @override final  String name;
-@override@JsonKey() final  double priceDelta;
+@override final  Decimal priceDelta;
 @override@JsonKey() final  int quantity;
 
 /// Create a copy of SelectedOption
@@ -816,7 +816,7 @@ abstract mixin class _$SelectedOptionCopyWith<$Res> implements $SelectedOptionCo
   factory _$SelectedOptionCopyWith(_SelectedOption value, $Res Function(_SelectedOption) _then) = __$SelectedOptionCopyWithImpl;
 @override @useResult
 $Res call({
- int optionId, String name, double priceDelta, int quantity
+ int optionId, String name, Decimal priceDelta, int quantity
 });
 
 
@@ -838,7 +838,7 @@ class __$SelectedOptionCopyWithImpl<$Res>
 optionId: null == optionId ? _self.optionId : optionId // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,priceDelta: null == priceDelta ? _self.priceDelta : priceDelta // ignore: cast_nullable_to_non_nullable
-as double,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
+as Decimal,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }

@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:prro/core/utils/money.dart';
 
@@ -7,6 +8,56 @@ void main() {
       expect(uahToKopecks(45.5), 4550);
       expect(uahToKopecks(0.1), 10);
       expect(uahToKopecks(1234), 123400);
+    });
+  });
+
+  group('kopecksFromDecimal', () {
+    // The one conversion between the Decimal cart and the integer money
+    // everything downstream uses: exact multiply, round once, half up.
+    test('converts exact decimal prices', () {
+      expect(kopecksFromDecimal(Decimal.parse('45.50')), 4550);
+      expect(kopecksFromDecimal(Decimal.parse('0.07')), 7);
+      expect(kopecksFromDecimal(Decimal.parse('0')), 0);
+      expect(kopecksFromDecimal(Decimal.parse('35')), 3500);
+    });
+
+    test('a cart sum that a double cannot represent is still exact', () {
+      // 33.33 × 0.3 + 33.33 × 0.7 + (45 + 25×2) is exactly 128.33; in double
+      // arithmetic the same sum prints as 128.32999999999998.
+      final exact =
+          Decimal.parse('33.33') * Decimal.parse('0.300') +
+          Decimal.parse('33.33') * Decimal.parse('0.700') +
+          (Decimal.parse('45.00') +
+              Decimal.parse('25.00') * Decimal.fromInt(2));
+      expect(exact, Decimal.parse('128.33'));
+      expect(kopecksFromDecimal(exact), 12833);
+    });
+
+    test('keeps the sign on a negative delta total', () {
+      expect(kopecksFromDecimal(Decimal.parse('-0.50')), -50);
+    });
+
+    test('rounds a half kopeck away from zero', () {
+      expect(kopecksFromDecimal(Decimal.parse('0.005')), 1);
+      expect(kopecksFromDecimal(Decimal.parse('-0.005')), -1);
+    });
+  });
+
+  group('uahFromKopecks', () {
+    test('is the inverse of kopecksFromDecimal', () {
+      for (final kopecks in [0, 5, 50, 3500, 123450, -4550]) {
+        expect(
+          kopecksFromDecimal(uahFromKopecks(kopecks)),
+          kopecks,
+          reason: 'kopecks=$kopecks',
+        );
+      }
+    });
+
+    test('keeps two decimals for seed prices', () {
+      expect(uahFromKopecks(3500), Decimal.parse('35.00'));
+      expect(uahFromKopecks(4050), Decimal.parse('40.50'));
+      expect(uahFromKopecks(5), Decimal.parse('0.05'));
     });
   });
 

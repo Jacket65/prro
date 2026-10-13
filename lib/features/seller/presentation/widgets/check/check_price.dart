@@ -11,7 +11,7 @@ class CheckPrice extends StatelessWidget {
     final theme = Theme.of(context);
     final totalKopecks = context.select<OrdersBloc, int>((bloc) {
       final state = bloc.state;
-      return state is OrdersUpdated ? uahToKopecks(state.total) : 0;
+      return state is OrdersUpdated ? kopecksFromDecimal(state.total) : 0;
     });
 
     return Row(

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:prro/core/domain/catalog_item.dart';
+import 'package:prro/core/utils/money.dart';
 import 'package:prro/features/seller/presentation/widgets/options_picker_dialog.dart';
 
 /// Modal that lists the variants of a [ProductGroup]
@@ -75,7 +76,7 @@ class VariantPickerDialog extends StatelessWidget {
                             ),
                             title: Text(variant.name),
                             trailing: Text(
-                              '${variant.price.toStringAsFixed(2)}₴',
+                              formatUah(kopecksFromDecimal(variant.price)),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),

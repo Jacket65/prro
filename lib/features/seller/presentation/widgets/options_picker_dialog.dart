@@ -7,6 +7,7 @@ import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
 import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/utils/json.dart';
+import 'package:prro/core/utils/money.dart';
 import 'package:prro/features/seller/domain/repositories/items_repository_i.dart';
 import 'package:prro/features/seller/presentation/bloc/orders/orders_bloc.dart';
 import 'package:prro/features/seller/presentation/widgets/bean_picker_dialog.dart';
@@ -231,8 +232,10 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
     });
   }
 
-  /// Live line total = unit price × quantity (preview only).
-  double get _previewLineTotal => _previewPrice * _quantity.toDouble();
+  /// Live line total = unit price × quantity (preview only), in exact
+  /// [Decimal]: multiplied once here, converted to kopecks once at the
+  /// boundary, never through a `double`.
+  Decimal get _previewLineTotal => _previewPrice * _quantity;
 
   bool get _allRequiredChosen {
     for (final g in widget.groups) {
@@ -245,9 +248,9 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
     return true;
   }
 
-  /// Live unit price = base + sum of selected surcharges (× portions).
-  /// Beans are free, so they don't enter the calculation.
-  double get _previewPrice {
+  /// Live unit price = base + sum of selected surcharges (× portions), all in
+  /// exact [Decimal]. Beans are free, so they don't enter the calculation.
+  Decimal get _previewPrice {
     var total = widget.line.price;
     for (final g in widget.groups) {
       if (g.selectionType == OptionSelectionType.single) {
@@ -258,7 +261,9 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
       } else {
         final portions = _multi[g.id] ?? const {};
         for (final entry in portions.entries) {
-          total += _optionById(g, entry.key).priceDelta * entry.value;
+          total +=
+              _optionById(g, entry.key).priceDelta *
+              Decimal.fromInt(entry.value);
         }
       }
     }
@@ -533,14 +538,13 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
     if (picked != null) setState(() => _selectedBeanId = picked.id);
   }
 
-  /// Surcharge chip; `null` (no label) when the option is free.
-  Widget? _deltaLabel(double delta) {
-    if (delta == 0) return null;
-    final str = delta == delta.roundToDouble()
-        ? delta.toStringAsFixed(0)
-        : delta.toStringAsFixed(2);
+  /// Surcharge chip; `null` (no label) when the option is free. Rendered from
+  /// the delta's kopecks so it reads exactly like every other price in the app.
+  Widget? _deltaLabel(Decimal delta) {
+    final kopecks = kopecksFromDecimal(delta);
+    if (kopecks == 0) return null;
     return Text(
-      '+$str ₴',
+      '+${formatUah(kopecks)}',
       style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600),
     );
   }
@@ -622,11 +626,11 @@ class _OptionsPickerDialogState extends State<OptionsPickerDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Ціна: ${_previewPrice.toStringAsFixed(2)} ₴',
+              'Ціна: ${formatUah(kopecksFromDecimal(_previewPrice))}',
               style: const TextStyle(fontSize: 13, color: Colors.black54),
             ),
             Text(
-              'Сума: ${_previewLineTotal.toStringAsFixed(2)} ₴',
+              'Сума: ${formatUah(kopecksFromDecimal(_previewLineTotal))}',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ],

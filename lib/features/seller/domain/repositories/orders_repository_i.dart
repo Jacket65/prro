@@ -6,7 +6,13 @@ import 'package:prro/core/domain/order.dart';
 
 abstract interface class OrdersRepositoryI {
   List<Product> get products;
-  double get totalPrice;
+
+  /// Client-side approximation of the cart total, in exact UAH [Decimal]:
+  /// `Σ effectiveUnitPrice × quantity`. Only the live "Разом" display and the
+  /// amount tendered before payment use it; the authoritative total comes from
+  /// the receipt. Kept exact because it is converted to kopecks once, at the
+  /// payment boundary.
+  Decimal get totalPrice;
 
   /// Adds [product] (or bumps an identical line by one unit step).
   void addProduct(Product product);

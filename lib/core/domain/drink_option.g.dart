@@ -21,9 +21,7 @@ _OptionGroup _$OptionGroupFromJson(Map<String, dynamic> json) => _OptionGroup(
 _DrinkOption _$DrinkOptionFromJson(Map<String, dynamic> json) => _DrinkOption(
   id: parseInt(optionIdValue(json, 'id')),
   name: parseString(json['name']),
-  priceDelta: json['price_delta'] == null
-      ? 0
-      : parseDouble(json['price_delta']),
+  priceDelta: parseDecimal(json['price_delta']),
   isDefault: json['is_default'] == null
       ? false
       : boolOrFalse(json['is_default']),

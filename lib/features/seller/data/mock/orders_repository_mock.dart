@@ -24,10 +24,14 @@ class OrdersRepositoryMock implements OrdersRepositoryI {
   @override
   List<Product> get products => List.unmodifiable(_products);
 
+  /// Identical to the prod implementation (see
+  /// [OrdersRepositoryI.totalPrice]): exact [Decimal] via
+  /// [Product.effectiveUnitPrice], converted to kopecks only at the payment
+  /// boundary.
   @override
-  double get totalPrice => _products.fold(
-    0,
-    (sum, p) => sum + (p.effectiveUnitPrice * p.quantity.toDouble()),
+  Decimal get totalPrice => _products.fold(
+    Decimal.zero,
+    (sum, p) => sum + p.effectiveUnitPrice * p.quantity,
   );
 
   @override

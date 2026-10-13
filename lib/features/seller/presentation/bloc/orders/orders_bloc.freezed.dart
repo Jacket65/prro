@@ -1812,7 +1812,7 @@ abstract mixin class $OrdersUpdatedCopyWith<$Res>  {
   factory $OrdersUpdatedCopyWith(OrdersUpdated value, $Res Function(OrdersUpdated) _then) = _$OrdersUpdatedCopyWithImpl;
 @useResult
 $Res call({
- List<Product> products, double total
+ List<Product> products, Decimal total
 });
 
 
@@ -1833,7 +1833,7 @@ class _$OrdersUpdatedCopyWithImpl<$Res>
   return _then(OrdersUpdated(
 products: null == products ? _self.products : products // ignore: cast_nullable_to_non_nullable
 as List<Product>,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
-as double,
+as Decimal,
   ));
 }
 
@@ -2193,7 +2193,7 @@ abstract mixin class $OrdersPaymentProcessingCopyWith<$Res>  {
   factory $OrdersPaymentProcessingCopyWith(OrdersPaymentProcessing value, $Res Function(OrdersPaymentProcessing) _then) = _$OrdersPaymentProcessingCopyWithImpl;
 @useResult
 $Res call({
- PaymentMethod method, double total
+ PaymentMethod method, Decimal total
 });
 
 
@@ -2214,7 +2214,7 @@ class _$OrdersPaymentProcessingCopyWithImpl<$Res>
   return _then(OrdersPaymentProcessing(
 method: null == method ? _self.method : method // ignore: cast_nullable_to_non_nullable
 as PaymentMethod,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
-as double,
+as Decimal,
   ));
 }
 
@@ -2384,7 +2384,7 @@ abstract mixin class $OrdersErrorCopyWith<$Res>  {
   factory $OrdersErrorCopyWith(OrdersError value, $Res Function(OrdersError) _then) = _$OrdersErrorCopyWithImpl;
 @useResult
 $Res call({
- String message, List<Product> products, double total
+ String message, List<Product> products, Decimal total
 });
 
 
@@ -2406,7 +2406,7 @@ class _$OrdersErrorCopyWithImpl<$Res>
 message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,products: null == products ? _self.products : products // ignore: cast_nullable_to_non_nullable
 as List<Product>,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
-as double,
+as Decimal,
   ));
 }
 

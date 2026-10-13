@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:prro/core/domain/order.dart';
@@ -94,7 +95,7 @@ void main() {
         idempotencyKey: any(named: 'idempotencyKey'),
       ),
     ).thenAnswer((_) async => _receipt());
-    when(() => repo.totalPrice).thenReturn(50);
+    when(() => repo.totalPrice).thenReturn(Decimal.parse('50'));
 
     useCase = PayOrderUseCase(
       ordersRepository: repo,
@@ -169,7 +170,7 @@ void main() {
       final order = captured[0] as OrderReceipt;
       final paymentRequest = captured[1] as PaymentRequest;
       expect(order.orderId, '1'); // receipt from placeOrder
-      expect(paymentRequest.amountKopecks, 5000); // uahToKopecks(totalPrice)
+      expect(paymentRequest.amountKopecks, 5000); // kopecksFromDecimal
       expect(paymentRequest.tenderedKopecks, 100);
       expect(paymentRequest.currency, 'UAH');
     });
@@ -179,10 +180,30 @@ void main() {
       final captured =
           verify(() => cash.pay(captureAny())).captured.single
               as PaymentRequest;
-      expect(captured.amountKopecks, 5000); // uahToKopecks(50.0)
+      expect(captured.amountKopecks, 5000); // kopecksFromDecimal(50.00)
       expect(captured.tenderedKopecks, 100);
       expect(captured.currency, 'UAH');
     });
+
+    test(
+      'a fractional exact total converts to kopecks once, exactly',
+      () async {
+        // The cart is priced in Decimal and only becomes an integer here
+        // (F-D): 33.33 + 0.30×33.33 + 0.70×33.33 = 66.66 exactly, and the
+        // Decimal total converts to 6666 without a float round-trip.
+        when(() => repo.totalPrice).thenReturn(
+          Decimal.parse('33.33') *
+              (Decimal.one + Decimal.parse('0.30') + Decimal.parse('0.70')),
+        );
+
+        await useCase(req(PaymentMethod.cash));
+
+        final captured =
+            verify(() => cash.pay(captureAny())).captured.single
+                as PaymentRequest;
+        expect(captured.amountKopecks, 6666);
+      },
+    );
 
     test('placeOrder is called only after successful pay', () async {
       await useCase(req(PaymentMethod.cash));

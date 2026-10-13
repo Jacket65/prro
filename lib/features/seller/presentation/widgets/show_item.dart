@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:prro/core/domain/catalog_item.dart';
+import 'package:prro/core/utils/money.dart';
 import 'package:prro/features/seller/presentation/bloc/items_tiles/items_tiles_bloc.dart';
 import 'package:prro/features/seller/presentation/widgets/options_picker_dialog.dart';
 import 'package:prro/features/seller/presentation/widgets/variant_picker_dialog.dart';
@@ -57,7 +58,7 @@ class _ProductTile extends StatelessWidget {
             ),
           ),
           Text(
-            '${product.price.toStringAsFixed(2)}₴',
+            formatUah(kopecksFromDecimal(product.price)),
             style: const TextStyle(color: Colors.grey),
           ),
         ],

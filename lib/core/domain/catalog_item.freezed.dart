@@ -19,8 +19,11 @@ mixin _$Product {
 /// fractionally (e.g. `0.250` kg). Stepped by [MeasureUnit.step]; minimum
 /// is one step.
  Decimal get quantity;/// Backend ships the price as a decimal STRING ("45.50"); some legacy
-/// paths still ship a number, so the factory accepts both.
- double get price; String get imageUrl;/// Measure unit of the variant (id/name/step). `null` → piece (step 1).
+/// paths still ship a number, so the factory accepts both. Kept as a
+/// [Decimal]: a catalog price multiplied by a weight-goods quantity must
+/// not round twice (once in the unit price, once in the line total)
+/// before the cart is billed at kopecks.
+ Decimal get price; String get imageUrl;/// Measure unit of the variant (id/name/step). `null` → piece (step 1).
  MeasureUnit? get unit;/// Options the cashier picked for this cart line (empty for catalog tiles).
  List<SelectedOption> get selectedOptions;/// Coffee bean picked for this line, if the drink supports bean selection.
  Bean? get selectedBean;
@@ -59,7 +62,7 @@ abstract mixin class $ProductCopyWith<$Res>  {
   factory $ProductCopyWith(Product value, $Res Function(Product) _then) = _$ProductCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, Decimal quantity, double price, String imageUrl, MeasureUnit? unit, List<SelectedOption> selectedOptions, Bean? selectedBean
+ String id, String name, Decimal quantity, Decimal price, String imageUrl, MeasureUnit? unit, List<SelectedOption> selectedOptions, Bean? selectedBean
 });
 
 
@@ -82,7 +85,7 @@ id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as Decimal,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
-as double,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as Decimal,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String,unit: freezed == unit ? _self.unit : unit // ignore: cast_nullable_to_non_nullable
 as MeasureUnit?,selectedOptions: null == selectedOptions ? _self.selectedOptions : selectedOptions // ignore: cast_nullable_to_non_nullable
 as List<SelectedOption>,selectedBean: freezed == selectedBean ? _self.selectedBean : selectedBean // ignore: cast_nullable_to_non_nullable
@@ -195,7 +198,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  Decimal quantity,  double price,  String imageUrl,  MeasureUnit? unit,  List<SelectedOption> selectedOptions,  Bean? selectedBean)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  Decimal quantity,  Decimal price,  String imageUrl,  MeasureUnit? unit,  List<SelectedOption> selectedOptions,  Bean? selectedBean)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
 return $default(_that.id,_that.name,_that.quantity,_that.price,_that.imageUrl,_that.unit,_that.selectedOptions,_that.selectedBean);case _:
@@ -216,7 +219,7 @@ return $default(_that.id,_that.name,_that.quantity,_that.price,_that.imageUrl,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  Decimal quantity,  double price,  String imageUrl,  MeasureUnit? unit,  List<SelectedOption> selectedOptions,  Bean? selectedBean)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  Decimal quantity,  Decimal price,  String imageUrl,  MeasureUnit? unit,  List<SelectedOption> selectedOptions,  Bean? selectedBean)  $default,) {final _that = this;
 switch (_that) {
 case _Product():
 return $default(_that.id,_that.name,_that.quantity,_that.price,_that.imageUrl,_that.unit,_that.selectedOptions,_that.selectedBean);case _:
@@ -236,7 +239,7 @@ return $default(_that.id,_that.name,_that.quantity,_that.price,_that.imageUrl,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  Decimal quantity,  double price,  String imageUrl,  MeasureUnit? unit,  List<SelectedOption> selectedOptions,  Bean? selectedBean)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  Decimal quantity,  Decimal price,  String imageUrl,  MeasureUnit? unit,  List<SelectedOption> selectedOptions,  Bean? selectedBean)?  $default,) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
 return $default(_that.id,_that.name,_that.quantity,_that.price,_that.imageUrl,_that.unit,_that.selectedOptions,_that.selectedBean);case _:
@@ -261,8 +264,11 @@ class _Product extends Product {
 /// is one step.
 @override final  Decimal quantity;
 /// Backend ships the price as a decimal STRING ("45.50"); some legacy
-/// paths still ship a number, so the factory accepts both.
-@override final  double price;
+/// paths still ship a number, so the factory accepts both. Kept as a
+/// [Decimal]: a catalog price multiplied by a weight-goods quantity must
+/// not round twice (once in the unit price, once in the line total)
+/// before the cart is billed at kopecks.
+@override final  Decimal price;
 @override final  String imageUrl;
 /// Measure unit of the variant (id/name/step). `null` → piece (step 1).
 @override final  MeasureUnit? unit;
@@ -310,7 +316,7 @@ abstract mixin class _$ProductCopyWith<$Res> implements $ProductCopyWith<$Res> {
   factory _$ProductCopyWith(_Product value, $Res Function(_Product) _then) = __$ProductCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, Decimal quantity, double price, String imageUrl, MeasureUnit? unit, List<SelectedOption> selectedOptions, Bean? selectedBean
+ String id, String name, Decimal quantity, Decimal price, String imageUrl, MeasureUnit? unit, List<SelectedOption> selectedOptions, Bean? selectedBean
 });
 
 
@@ -333,7 +339,7 @@ id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as Decimal,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
-as double,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as Decimal,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String,unit: freezed == unit ? _self.unit : unit // ignore: cast_nullable_to_non_nullable
 as MeasureUnit?,selectedOptions: null == selectedOptions ? _self._selectedOptions : selectedOptions // ignore: cast_nullable_to_non_nullable
 as List<SelectedOption>,selectedBean: freezed == selectedBean ? _self.selectedBean : selectedBean // ignore: cast_nullable_to_non_nullable
