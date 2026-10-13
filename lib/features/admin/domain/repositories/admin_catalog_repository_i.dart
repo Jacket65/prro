@@ -23,6 +23,11 @@ abstract interface class AdminCatalogRepositoryI {
     required String name,
     required String idempotencyKey,
   });
+
+  /// Kept for contract symmetry: `PATCH /products/:id` exists and is correct,
+  /// but no admin UI caller renames a product yet. The call and its tests stay
+  /// so the admin panel can add the action without touching the data layer
+  /// (see "Known gaps" in CLAUDE.md).
   Future<AdminProduct> updateProduct({required int id, required String name});
   Future<void> deleteProduct({required int id});
 
@@ -35,11 +40,19 @@ abstract interface class AdminCatalogRepositoryI {
     required List<RecipeIngredient> ingredients,
     required String idempotencyKey,
   });
+
+  /// The backend does not serve `PATCH /variants/:id` yet — the contract
+  /// declares it, the route answers 404. Kept (with the impl and its tests)
+  /// so enabling variant renaming/pricing needs no data-layer change; today
+  /// the routes are contract-only with no UI caller.
   Future<AdminVariant> updateVariant({
     required int id,
     required String name,
     required int priceKopecks,
   });
+
+  /// Same gap as [updateVariant]: `DELETE /variants/:id` is contract-only (no
+  /// route, no UI caller today).
   Future<void> deleteVariant({required int id});
 
   // ── Recipe (scoped by variant) ──

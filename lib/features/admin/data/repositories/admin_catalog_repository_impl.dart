@@ -80,6 +80,9 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
         AdminProduct(id: 0, name: name, categoryId: categoryId);
   });
 
+  /// Kept for contract symmetry: the route exists and is correct, but no admin
+  /// UI caller renames a product yet. Tests pin the request shape so enabling
+  /// the action is a UI change only (see "Known gaps" in CLAUDE.md).
   @override
   Future<AdminProduct> updateProduct({
     required int id,
@@ -137,6 +140,10 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
         AdminVariant(id: 0, name: name, priceKopecks: priceKopecks);
   });
 
+  /// The backend does not serve `PATCH /variants/:id` yet — the contract
+  /// declares it and the route answers 404. The call stays (tests pin the
+  /// request shape) so enabling variant renaming/pricing needs no data-layer
+  /// change; today it is contract-only with no UI caller.
   @override
   Future<AdminVariant> updateVariant({
     required int id,
@@ -151,6 +158,9 @@ class AdminCatalogRepositoryImpl implements AdminCatalogRepositoryI {
         AdminVariant(id: id, name: name, priceKopecks: priceKopecks);
   });
 
+  /// Same gap as [updateVariant]: `DELETE /variants/:id` is contract-only (no
+  /// route, no UI caller today). The call and its 404 test stay so the delete
+  /// action can be switched on without touching the data layer.
   @override
   Future<void> deleteVariant({required int id}) => dioGuard(() async {
     await _apiClient.delete('/variants/$id');
