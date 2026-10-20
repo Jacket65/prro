@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/mock/mock_api_client.dart';
 import 'package:prro/core/mock/mock_backend.dart';
 import 'package:prro/core/network/api_client.dart';
@@ -31,6 +32,9 @@ abstract class AppModule {
   @Environment('mock')
   MockBackend mockBackend() => MockBackend.instance;
 
+  /// The one application-wide logger. It is the shared [appTalker] instance,
+  /// so a [Talker] taken from the container and a direct `appTalker`
+  /// reference write to the same history.
   @singleton
-  Talker talker() => Talker();
+  Talker talker() => appTalker;
 }

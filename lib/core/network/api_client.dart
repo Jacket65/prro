@@ -1,14 +1,17 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:prro/core/config/env.dart';
+import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/network/api_client_i.dart';
+import 'package:prro/core/network/payload_log.dart';
 import 'package:prro/core/security/token_storage_i.dart';
+import 'package:talker/talker.dart';
 
 class ApiClient implements ApiClientI {
-  ApiClient({required this.dio, required this.tokenStorage})
-    : _refreshDio = Dio(BaseOptions(baseUrl: Env.baseUrl)) {
+  ApiClient({required this.dio, required this.tokenStorage, Talker? talker})
+    : _talker = talker ?? appTalker,
+      _refreshDio = Dio(BaseOptions(baseUrl: Env.baseUrl)) {
     dio.options.baseUrl = Env.baseUrl;
     dio.options.connectTimeout = const Duration(seconds: 10);
     dio.options.receiveTimeout = const Duration(seconds: 10);
@@ -18,6 +21,10 @@ class ApiClient implements ApiClientI {
   final Dio dio;
 
   final TokenStorageI tokenStorage;
+
+  /// Where the request/response trail goes. Defaults to the shared
+  /// [appTalker]; a test can pass its own to capture the records.
+  final Talker _talker;
 
   final Dio _refreshDio;
 
@@ -50,18 +57,29 @@ class ApiClient implements ApiClientI {
           }
           options.headers['Accept'] = 'application/json';
           options.headers['Content-Type'] = 'application/json';
-          log('[REQUEST] ${options.method} ${options.baseUrl} ${options.path}');
+          _talker.info('[REQUEST] ${options.method} ${options.uri}');
+          final requestBody = describePayload(options.data);
+          if (requestBody != null) {
+            _talker.debug('[REQUEST BODY] $requestBody');
+          }
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          log(
+          _talker.info(
             '[RESPONSE] ${response.statusCode} ${response.requestOptions.path}',
           );
           return handler.next(response);
         },
         onError: (error, handler) async {
           final status = error.response?.statusCode;
-          log('[ERROR] $status ${error.requestOptions.path} ${error.message}');
+          _talker.error(
+            '[ERROR] $status ${error.requestOptions.path} ${error.message}',
+            error,
+          );
+          final errorBody = describePayload(error.response?.data);
+          if (errorBody != null) {
+            _talker.error('[ERROR BODY] $errorBody');
+          }
 
           final isAuthCall =
               error.requestOptions.path.contains('/auth/login') ||
@@ -117,13 +135,13 @@ class ApiClient implements ApiClientI {
         if (token.isNotEmpty) {
           await tokenStorage.saveAccessToken(token);
           _teardownInProgress = false;
-          log('[AUTH] access token refreshed');
+          _talker.info('[AUTH] access token refreshed');
           return true;
         }
       }
       return false;
     } on DioException catch (e) {
-      log('[AUTH] refresh failed: ${e.response?.statusCode}');
+      _talker.warning('[AUTH] refresh failed: ${e.response?.statusCode}');
       return false;
     }
   }
@@ -141,7 +159,7 @@ class ApiClient implements ApiClientI {
       return;
     }
     await tokenStorage.clear();
-    log('[AUTH] session cleared — redirecting to login');
+    _talker.warning('[AUTH] session cleared — redirecting to login');
     if (!_unauthorized.isClosed) _unauthorized.add(accessToken);
   }
 

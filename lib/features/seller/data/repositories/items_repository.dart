@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/data/outlet_scope.dart';
@@ -8,6 +6,7 @@ import 'package:prro/core/domain/bean.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
 import 'package:prro/core/domain/measure_unit.dart';
+import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/utils/envelope.dart';
 import 'package:prro/features/seller/domain/repositories/items_repository_i.dart';
@@ -30,7 +29,9 @@ class ItemsRepository implements ItemsRepositoryI {
     try {
       final outletId = _outlets.idOrNull();
       if (outletId == null) {
-        log('ItemsRepository.getCategories: outlet_id is not set');
+        appTalker.warning(
+          'ItemsRepository.getCategories: outlet_id is not set',
+        );
         return [];
       }
       final response = await _apiClient.get(
@@ -38,7 +39,7 @@ class ItemsRepository implements ItemsRepositoryI {
       );
       return unwrapList(response.data, Category.fromJson);
     } on Object catch (e, stackTrace) {
-      log('Error in getCategories: $e', stackTrace: stackTrace);
+      appTalker.error('Error in getCategories: $e', e, stackTrace);
       return [];
     }
   }
@@ -59,7 +60,7 @@ class ItemsRepository implements ItemsRepositoryI {
       );
       return _flattenProducts(unwrapList(response.data, ProductGroup.fromJson));
     } on Object catch (e, stackTrace) {
-      log('Error in getProducts: $e', stackTrace: stackTrace);
+      appTalker.error('Error in getProducts: $e', e, stackTrace);
       return [];
     }
   }
@@ -116,7 +117,7 @@ class ItemsRepository implements ItemsRepositoryI {
       final response = await _apiClient.get('/measure-units');
       return unwrapList(response.data, MeasureUnit.fromJson);
     } on Object catch (e, stackTrace) {
-      log('Error in getMeasureUnits: $e', stackTrace: stackTrace);
+      appTalker.error('Error in getMeasureUnits: $e', e, stackTrace);
       return [];
     }
   }
@@ -143,9 +144,10 @@ class ItemsRepository implements ItemsRepositoryI {
         return groups;
       } on Object catch (e, stackTrace) {
         // Don't cache failures — let the next selection retry.
-        log(
+        appTalker.error(
           'Error in getVariantOptions($variantId): $e',
-          stackTrace: stackTrace,
+          e,
+          stackTrace,
         );
         return const <OptionGroup>[];
       } finally {

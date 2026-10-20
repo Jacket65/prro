@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/config/network_timeouts.dart';
 import 'package:prro/core/data/outlet_scope.dart';
+import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/core/security/access_token_expiry.dart';
@@ -257,9 +257,8 @@ class AuthRepositoryImpl implements AuthRepositoryI {
     try {
       await apiClient.post('/auth/logout');
     } on Object catch (e) {
-      developer.log(
+      appTalker.warning(
         '[AUTH] logout endpoint failed (swallowed): $e',
-        name: 'auth',
       );
     }
     await tokenStorage.clear();

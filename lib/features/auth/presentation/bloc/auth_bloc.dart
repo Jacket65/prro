@@ -1,7 +1,6 @@
-import 'dart:developer' as developer;
-
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/security/token_storage_i.dart';
 import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_event.dart';
@@ -72,9 +71,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } on Object catch (e) {
       // The teardown must complete either way; losing a record that is about
       // to become someone else's is the better failure.
-      developer.log(
+      appTalker.warning(
         '[AUTH] pending order could not be cleared: $e',
-        name: 'auth',
       );
     }
   }

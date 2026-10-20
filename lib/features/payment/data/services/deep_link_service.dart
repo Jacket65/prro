@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:app_links/app_links.dart';
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/config/payment_config.dart';
+import 'package:prro/core/logging/app_talker.dart';
 
 /// Service interface for handling deep links
 /// (callbacks from PrivatBank Terminal).
@@ -42,7 +42,7 @@ class DeepLinkService implements DeepLinkServiceI {
     // The service is a DI singleton: initializing twice would stack a second
     // app_links subscription and emit every callback twice.
     if (_initialized) {
-      log('[DeepLinkService] Already initialized, skipping');
+      appTalker.info('[DeepLinkService] Already initialized, skipping');
       return;
     }
     _initialized = true;
@@ -57,35 +57,45 @@ class DeepLinkService implements DeepLinkServiceI {
     _subscription = _appLinks.uriLinkStream.listen(
       _handleUri,
       onError: (Object error, StackTrace stackTrace) {
-        log('[DeepLinkService] Link stream error: $error');
+        appTalker.error(
+          '[DeepLinkService] Link stream error: $error',
+          error,
+          stackTrace,
+        );
       },
     );
-    log('[DeepLinkService] Listening for ${PaymentConfig.callbackUri}');
+    appTalker.info(
+      '[DeepLinkService] Listening for ${PaymentConfig.callbackUri}',
+    );
     final initialUri = await _appLinks.getInitialLink();
 
     if (initialUri != null) {
-      log('[DeepLinkService] Initial link: $initialUri');
+      appTalker.info('[DeepLinkService] Initial link: $initialUri');
       _handleUri(initialUri);
     }
   }
 
   void _handleUri(Uri uri) {
-    log('[DeepLinkService] Incoming link: $uri');
+    appTalker.info('[DeepLinkService] Incoming link: $uri');
     if (!PaymentConfig.isCallback(uri)) {
-      log(
+      appTalker.info(
         '[DeepLinkService] Ignored — expected '
         '${PaymentConfig.callbackScheme}://${PaymentConfig.callbackHost}, '
         'got ${uri.scheme}://${uri.host}',
       );
       return;
     }
-    log('[DeepLinkService] Payment callback params: ${uri.queryParameters}');
+    appTalker.info(
+      '[DeepLinkService] Payment callback params: ${uri.queryParameters}',
+    );
     if (_controller.isClosed) {
-      log('[DeepLinkService] Controller closed, callback dropped');
+      appTalker.info('[DeepLinkService] Controller closed, callback dropped');
       return;
     }
     if (!_controller.hasListener) {
-      log('[DeepLinkService] No active payment listener; callback ignored');
+      appTalker.info(
+        '[DeepLinkService] No active payment listener; callback ignored',
+      );
       return;
     }
     _controller.add(uri);

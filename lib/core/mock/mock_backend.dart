@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:decimal/decimal.dart';
 import 'package:prro/core/domain/bean.dart';
@@ -7,6 +6,7 @@ import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
 import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/domain/order.dart';
+import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/mock/order_request_dto.dart';
 import 'package:prro/core/utils/money.dart';
 import 'package:prro/features/admin/data/models/admin_models.dart';
@@ -401,7 +401,7 @@ class MockBackend {
     );
     _receiptsByKey[idempotencyKey] = receipt;
     _receiptsByOrderId[receipt.orderId] = receipt;
-    log('[MOCK /orders] $idempotencyKey → $receipt');
+    appTalker.info('[MOCK /orders] $idempotencyKey → $receipt');
     return receipt;
   }
 
@@ -430,7 +430,7 @@ class MockBackend {
       cashierName: receipt.cashierName,
     );
     _receiptsByOrderId[id] = confirmed;
-    log('[MOCK /orders/$id/confirm] → $confirmed');
+    appTalker.info('[MOCK /orders/$id/confirm] → $confirmed');
     return confirmed;
   }
 
@@ -675,7 +675,7 @@ class MockBackend {
     // The variant must exist, exactly as the real route resolves it before it
     // would (or would not) write anything.
     _findAdminVariant(variantId);
-    log(
+    appTalker.info(
       '[MOCK /variants/$variantId/recipe] 200, stored by the server as a '
       'no-op',
     );

@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:prro/core/config/network_timeouts.dart';
 import 'package:prro/core/network/api_client.dart';
 import 'package:prro/core/security/token_storage_i.dart';
+import 'package:talker/talker.dart';
 
 class MockTokenStorage extends Mock implements TokenStorageI {}
 
@@ -47,7 +48,11 @@ void main() {
     });
 
     final dio = Dio()..httpClientAdapter = adapter;
-    apiClient = ApiClient(dio: dio, tokenStorage: tokenStorage);
+    apiClient = ApiClient(
+      dio: dio,
+      tokenStorage: tokenStorage,
+      talker: Talker(settings: TalkerSettings(useConsoleLogs: false)),
+    );
   });
 
   RequestOptions onlyRequest() {

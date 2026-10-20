@@ -1,7 +1,6 @@
-import 'dart:developer' as developer;
-
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/domain/order.dart';
+import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/utils/money.dart';
 import 'package:prro/features/payment/domain/payment_exceptions.dart';
 import 'package:prro/features/seller/domain/payment/handlers/cash_payment_handler.dart';
@@ -127,9 +126,8 @@ class PayOrderUseCase {
           await _pendingOrderStore.clear();
         } on Object catch (e) {
           // Never mask the cancellation behind a storage failure.
-          developer.log(
+          appTalker.warning(
             '[PAYMENT] pending order not cleared on cancel: $e',
-            name: 'payment',
           );
         }
         rethrow;
@@ -163,10 +161,9 @@ class PayOrderUseCase {
         idempotencyKey: request.idempotencyKey,
       );
     } on Object catch (e) {
-      developer.log(
+      appTalker.warning(
         '[PAYMENT] could not record the pending card order '
         '${order.orderId}: $e',
-        name: 'payment',
       );
     }
   }

@@ -78,7 +78,7 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
     _activeSessionId = sessionId;
 
     _talker
-      ..info('🔵 [Terminal Payment] Starting payment flow', request.toString())
+      ..info('🔵 [Terminal Payment] Starting payment flow: $request')
       // Step 1: Create payment token
       ..info('🔵 [Terminal Payment] Creating payment token...');
 
@@ -103,7 +103,7 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
 
     try {
       final token = await _paymentRepository.createPaymentToken(request);
-      _talker.info('🟢 [Terminal Payment] Token received', token.toString());
+      _talker.info('🟢 [Terminal Payment] Token received');
 
       await _deepLinkService.init();
 
@@ -169,7 +169,7 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
       final transactionId = await completer.future;
       _talker
         ..info(
-          '🟢 [Terminal Payment] Callback received',
+          '🟢 [Terminal Payment] Callback received, '
           'transactionId: $transactionId',
         )
         // Step 4: Verify payment
@@ -180,8 +180,7 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
       // status.
       final result = await _paymentRepository.verifyPayment(transactionId);
       _talker.info(
-        '🟢 [Terminal Payment] Verification complete',
-        result.toString(),
+        '🟢 [Terminal Payment] Verification complete: $result',
       );
 
       return result;
@@ -307,8 +306,7 @@ class TerminalPaymentService implements TerminalPaymentServiceI {
     }
 
     _talker.info(
-      '🟢 [Terminal Payment] Extracted transactionId',
-      transactionId,
+      '🟢 [Terminal Payment] Extracted transactionId: $transactionId',
     );
 
     return transactionId;

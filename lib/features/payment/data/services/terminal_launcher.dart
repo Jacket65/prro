@@ -1,7 +1,6 @@
-import 'dart:developer';
-
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/config/payment_config.dart';
+import 'package:prro/core/logging/app_talker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Service interface for launching the PrivatBank POS Terminal.
@@ -42,7 +41,7 @@ class TerminalLauncher implements TerminalLauncherI {
     // Console log for debugging. The URI itself is deliberately not logged: it
     // carries the terminal JWT (a bearer credential for the charge).
     // `PaymentConfig.buildTerminalUri` already logs the redacted form.
-    log(
+    appTalker.info(
       '[TerminalLauncher] Attempting to launch terminal '
       '(${PaymentConfig.terminalUriScheme} scheme)',
     );
@@ -59,14 +58,14 @@ class TerminalLauncher implements TerminalLauncherI {
         );
       }
 
-      log('[TerminalLauncher] Terminal launched successfully');
+      appTalker.info('[TerminalLauncher] Terminal launched successfully');
     } on TerminalLaunchException {
       rethrow;
     } on Exception catch (e, st) {
-      log(
+      appTalker.error(
         '[TerminalLauncher] Failed to launch terminal',
-        error: e,
-        stackTrace: st,
+        e,
+        st,
       );
 
       throw TerminalLaunchException(

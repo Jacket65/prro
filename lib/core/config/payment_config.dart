@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'package:prro/core/logging/app_talker.dart';
 
 /// Payment configuration constants.
 ///
@@ -87,7 +87,9 @@ class PaymentConfig {
     final uriString = uri.toString();
     // Only the redacted form may reach the log: [jwtToken] authorizes a charge
     // against the terminal, so a full URI in a log line leaks the credential.
-    log('[PaymentConfig] Built terminal URI: ${redactedTerminalUri(uri)}');
+    appTalker.info(
+      '[PaymentConfig] Built terminal URI: ${redactedTerminalUri(uri)}',
+    );
     return uriString;
   }
 }
