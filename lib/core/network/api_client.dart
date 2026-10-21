@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:dio/dio.dart';
 import 'package:prro/core/config/env.dart';
 import 'package:prro/core/logging/app_talker.dart';
@@ -7,33 +6,25 @@ import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/payload_log.dart';
 import 'package:prro/core/security/token_storage_i.dart';
 import 'package:talker/talker.dart';
+import 'package:talker_dio_logger/talker_dio_logger.dart';
 
 class ApiClient implements ApiClientI {
   ApiClient({required this.dio, required this.tokenStorage, Talker? talker})
     : _talker = talker ?? appTalker,
       _refreshDio = Dio(BaseOptions(baseUrl: Env.baseUrl)) {
-    dio.options.baseUrl = Env.baseUrl;
-    dio.options.connectTimeout = const Duration(seconds: 10);
-    dio.options.receiveTimeout = const Duration(seconds: 10);
+    dio.options
+      ..baseUrl = Env.baseUrl
+      ..connectTimeout = const Duration(seconds: 10)
+      ..receiveTimeout = const Duration(seconds: 10);
     _initializeInterceptors();
   }
 
   final Dio dio;
-
   final TokenStorageI tokenStorage;
-
-  /// Where the request/response trail goes. Defaults to the shared
-  /// [appTalker]; a test can pass its own to capture the records.
   final Talker _talker;
-
   final Dio _refreshDio;
 
   Future<bool>? _refreshFuture;
-
-  /// Synchronous re-entry guard for the auth-failure teardown. Checked and set
-  /// with no `await` in between, so concurrent 401s cannot all pass the guard
-  /// before any of them sets it (the async token reads would otherwise yield
-  /// and let multiple callers through).
   bool _teardownInProgress = false;
 
   final StreamController<String?> _unauthorized =
@@ -43,82 +34,70 @@ class ApiClient implements ApiClientI {
   Stream<String?> get onUnauthorized => _unauthorized.stream;
 
   void _initializeInterceptors() {
-    dio.interceptors.clear();
-
-    dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final token = await tokenStorage.getAccessToken();
-          if (token != null && token.isNotEmpty) {
-            _teardownInProgress = false;
-            if (!options.headers.containsKey('Authorization')) {
-              options.headers['Authorization'] = 'Bearer $token';
+    dio.interceptors
+      ..clear()
+      ..add(TalkerDioLogger(talker: _talker))
+      ..add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) async {
+            final token = await tokenStorage.getAccessToken();
+            if (token != null && token.isNotEmpty) {
+              _teardownInProgress = false;
+              options.headers.putIfAbsent(
+                'Authorization',
+                () => 'Bearer $token',
+              );
             }
-          }
-          options.headers['Accept'] = 'application/json';
-          options.headers['Content-Type'] = 'application/json';
-          _talker.info('[REQUEST] ${options.method} ${options.uri}');
-          final requestBody = describePayload(options.data);
-          if (requestBody != null) {
-            _talker.debug('[REQUEST BODY] $requestBody');
-          }
-          return handler.next(options);
-        },
-        onResponse: (response, handler) {
-          _talker.info(
-            '[RESPONSE] ${response.statusCode} ${response.requestOptions.path}',
-          );
-          return handler.next(response);
-        },
-        onError: (error, handler) async {
-          final status = error.response?.statusCode;
-          _talker.error(
-            '[ERROR] $status ${error.requestOptions.path} ${error.message}',
-            error,
-          );
-          final errorBody = describePayload(error.response?.data);
-          if (errorBody != null) {
-            _talker.error('[ERROR BODY] $errorBody');
-          }
+            options.headers
+              ..putIfAbsent('Accept', () => 'application/json')
+              ..putIfAbsent('Content-Type', () => 'application/json');
 
-          final isAuthCall =
-              error.requestOptions.path.contains('/auth/login') ||
-              error.requestOptions.path.contains('/auth/refresh');
-          final canRetry =
-              status == 401 &&
-              error.requestOptions.extra['__retried__'] != true &&
-              !isAuthCall;
+            final requestBody = describePayload(options.data);
+            if (requestBody != null) {
+              _talker.debug('[REQUEST BODY] $requestBody');
+            }
 
-          if (canRetry) {
-            final refreshed = await _refreshToken();
-            if (refreshed) {
-              try {
-                error.requestOptions.extra['__retried__'] = true;
-                final token = await tokenStorage.getAccessToken();
-                if (token != null && token.isNotEmpty) {
-                  error.requestOptions.headers['Authorization'] =
-                      'Bearer $token';
+            return handler.next(options);
+          },
+          onError: (error, handler) async {
+            final status = error.response?.statusCode;
+            final errorBody = describePayload(error.response?.data);
+            if (errorBody != null) _talker.error('[ERROR BODY] $errorBody');
+
+            final path = error.requestOptions.path;
+            final isAuthCall =
+                path.contains('/auth/login') || path.contains('/auth/refresh');
+            final canRetry =
+                status == 401 &&
+                error.requestOptions.extra['__retried__'] != true &&
+                !isAuthCall;
+
+            if (canRetry) {
+              if (await _refreshToken()) {
+                try {
+                  error.requestOptions.extra['__retried__'] = true;
+                  final token = await tokenStorage.getAccessToken();
+                  if (token != null && token.isNotEmpty) {
+                    error.requestOptions.headers['Authorization'] =
+                        'Bearer $token';
+                  }
+                  return handler.resolve(
+                    await dio.fetch<dynamic>(error.requestOptions),
+                  );
+                } on DioException catch (retryError) {
+                  return handler.next(retryError);
                 }
-                final cloned = await dio.fetch<dynamic>(error.requestOptions);
-                return handler.resolve(cloned);
-              } on DioException catch (retryError) {
-                return handler.next(retryError);
               }
-            } else {
               await onAuthFailure();
             }
-          }
-          return handler.next(error);
-        },
-      ),
-    );
+            return handler.next(error);
+          },
+        ),
+      );
   }
 
-  Future<bool> _refreshToken() {
-    return _refreshFuture ??= _doRefresh().whenComplete(
-      () => _refreshFuture = null,
-    );
-  }
+  Future<bool> _refreshToken() =>
+      _refreshFuture ??= _doRefresh().whenComplete(() => _refreshFuture = null);
 
   Future<bool> _doRefresh() async {
     final refresh = await tokenStorage.getRefreshToken();
@@ -149,15 +128,15 @@ class ApiClient implements ApiClientI {
   Future<void> onAuthFailure() async {
     if (_teardownInProgress) return;
     _teardownInProgress = true;
+
     final accessToken = await tokenStorage.getAccessToken();
     final refreshToken = await tokenStorage.getRefreshToken();
-    final hadSession =
-        (accessToken != null && accessToken.isNotEmpty) ||
-        (refreshToken != null && refreshToken.isNotEmpty);
-    if (!hadSession) {
+    if ((accessToken == null || accessToken.isEmpty) &&
+        (refreshToken == null || refreshToken.isEmpty)) {
       _teardownInProgress = false;
       return;
     }
+
     await tokenStorage.clear();
     _talker.warning('[AUTH] session cleared — redirecting to login');
     if (!_unauthorized.isClosed) _unauthorized.add(accessToken);
@@ -170,14 +149,14 @@ class ApiClient implements ApiClientI {
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Duration? timeout,
-  }) {
-    return dio.get(
-      path,
-      queryParameters: queryParameters,
-      cancelToken: cancelToken,
-      options: _mergeOptions(null, headers, timeout),
-    );
-  }
+  }) => _request(
+    'GET',
+    path,
+    queryParameters: queryParameters,
+    cancelToken: cancelToken,
+    headers: headers,
+    timeout: timeout,
+  );
 
   @override
   Future<Response<dynamic>> post(
@@ -186,13 +165,14 @@ class ApiClient implements ApiClientI {
     String? idempotencyKey,
     Map<String, dynamic>? headers,
     Duration? timeout,
-  }) {
-    return dio.post(
-      path,
-      data: data,
-      options: _mergeOptions(idempotencyKey, headers, timeout),
-    );
-  }
+  }) => _request(
+    'POST',
+    path,
+    data: data,
+    idempotencyKey: idempotencyKey,
+    headers: headers,
+    timeout: timeout,
+  );
 
   @override
   Future<Response<dynamic>> patch(
@@ -201,13 +181,14 @@ class ApiClient implements ApiClientI {
     String? idempotencyKey,
     Map<String, dynamic>? headers,
     Duration? timeout,
-  }) {
-    return dio.patch(
-      path,
-      data: data,
-      options: _mergeOptions(idempotencyKey, headers, timeout),
-    );
-  }
+  }) => _request(
+    'PATCH',
+    path,
+    data: data,
+    idempotencyKey: idempotencyKey,
+    headers: headers,
+    timeout: timeout,
+  );
 
   @override
   Future<Response<dynamic>> put(
@@ -216,13 +197,14 @@ class ApiClient implements ApiClientI {
     String? idempotencyKey,
     Map<String, dynamic>? headers,
     Duration? timeout,
-  }) {
-    return dio.put(
-      path,
-      data: data,
-      options: _mergeOptions(idempotencyKey, headers, timeout),
-    );
-  }
+  }) => _request(
+    'PUT',
+    path,
+    data: data,
+    idempotencyKey: idempotencyKey,
+    headers: headers,
+    timeout: timeout,
+  );
 
   @override
   Future<Response<dynamic>> delete(
@@ -231,33 +213,36 @@ class ApiClient implements ApiClientI {
     String? idempotencyKey,
     Map<String, dynamic>? headers,
     Duration? timeout,
-  }) {
-    return dio.delete(
-      path,
-      data: data,
-      options: _mergeOptions(idempotencyKey, headers, timeout),
-    );
-  }
+  }) => _request(
+    'DELETE',
+    path,
+    data: data,
+    idempotencyKey: idempotencyKey,
+    headers: headers,
+    timeout: timeout,
+  );
 
-  /// Builds the request options for one call. Returns `null` only when the
-  /// call is fully unannotated (no headers, no idempotency key, no explicit
-  /// timeout) so that dio's instance-level options apply untouched.
-  Options? _mergeOptions(
+  Future<Response<dynamic>> _request(
+    String method,
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    CancelToken? cancelToken,
     String? idempotencyKey,
     Map<String, dynamic>? headers,
     Duration? timeout,
-  ) {
-    final map = <String, dynamic>{
-      'Idempotency-Key': ?idempotencyKey,
-      ...?headers,
-    };
-    if (map.isEmpty && timeout == null) return null;
-    return Options(
-      headers: map.isEmpty ? null : map,
-      // Both bounds, matching the instance defaults they override: connect
-      // for reaching the server, receive for the response.
-      connectTimeout: timeout,
-      receiveTimeout: timeout,
+  }) {
+    return dio.request<dynamic>(
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      cancelToken: cancelToken,
+      options: Options(
+        method: method,
+        headers: {'Idempotency-Key': ?idempotencyKey, ...?headers},
+        connectTimeout: timeout,
+        receiveTimeout: timeout,
+      ),
     );
   }
 }

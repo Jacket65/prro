@@ -34,6 +34,8 @@ dependencies:
   meta: ^1.19.0
   shared_preferences: ^2.5.5
   talker: ^5.1.20
+  talker_bloc_logger: ^5.1.20
+  talker_dio_logger: ^5.1.20
   url_launcher: ^6.3.2
 
 dev_dependencies:

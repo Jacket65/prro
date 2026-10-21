@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:prro/core/di/di.dart';
+import 'package:prro/core/logging/logs_screen.dart';
 import 'package:prro/core/router/app_router.gr.dart';
 import 'package:prro/core/theme/breakpoints.dart';
 import 'package:prro/features/admin/domain/repositories/admin_outlet_repository_i.dart';
@@ -63,6 +64,7 @@ class _AdminShellView extends StatelessWidget {
                   title: const Row(
                     children: [AdminMainMenuButton(), Text('Адміністрування')],
                   ),
+                  actions: const [_LogsButton()],
                   bottom: TabBar(
                     controller: tabController,
                     labelColor: const Color(0xFFFFFFFF),
@@ -77,6 +79,7 @@ class _AdminShellView extends StatelessWidget {
               appBar: AppBar(
                 leading: const AdminMainMenuButton(),
                 title: const Text('Адміністрування'),
+                actions: const [_LogsButton()],
               ),
               body: Row(
                 children: [
@@ -115,6 +118,26 @@ class _AdminShellView extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _LogsButton extends StatelessWidget {
+  const _LogsButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.bug_report_outlined),
+      tooltip: 'Журнал подій',
+      onPressed: () => Navigator.of(context, rootNavigator: true).push(
+        PageRouteBuilder<void>(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const LogsScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(opacity: animation, child: child),
+        ),
+      ),
     );
   }
 }
