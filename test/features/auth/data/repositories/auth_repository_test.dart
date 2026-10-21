@@ -11,6 +11,7 @@ import 'package:prro/features/auth/data/repositories/auth_repository.dart';
 import 'package:prro/features/auth/domain/entities/auth_user.dart';
 import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talker/talker.dart';
 
 class MockApiClient extends Mock implements ApiClientI {}
 
@@ -72,6 +73,7 @@ void main() {
       apiClient: apiClient,
       prefs: prefs,
       outlets: OutletSession(prefs),
+      talker: Talker(settings: TalkerSettings(useConsoleLogs: false)),
     );
   });
 

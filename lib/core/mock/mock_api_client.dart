@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:prro/core/domain/order.dart';
-import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/mock/mock_backend.dart';
 import 'package:prro/core/mock/order_request_dto.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/utils/json.dart';
 import 'package:prro/core/utils/money.dart';
+import 'package:talker/talker.dart';
 
 /// Mock implementation of ApiClientI that uses the in-memory MockBackend
 /// instead of making real HTTP requests.
@@ -32,9 +32,10 @@ import 'package:prro/core/utils/money.dart';
 /// [_unhandled] like any other unrouted path, and the branches that remain
 /// serve the auth transport and the order/payment client paths.
 class MockApiClient implements ApiClientI {
-  MockApiClient({required this.mockBackend});
+  MockApiClient({required this.mockBackend, required this._talker});
 
   final MockBackend mockBackend;
+  final Talker _talker;
   final StreamController<String?> _unauthorized =
       StreamController<String?>.broadcast();
 
@@ -92,7 +93,7 @@ class MockApiClient implements ApiClientI {
   Stream<String?> get onUnauthorized => _unauthorized.stream;
 
   DioException _wrapped(Object error, String path) {
-    appTalker.error('[MOCK API] Error on $path: $error');
+    _talker.error('[MOCK API] Error on $path: $error');
     return DioException(
       requestOptions: RequestOptions(path: path),
       message: error.toString(),
@@ -108,7 +109,7 @@ class MockApiClient implements ApiClientI {
   /// the same and throws: the repositories already branch on a 404 for exactly
   /// their absent routes, and the response body keeps the path diagnosable.
   Never _unhandled(String verb, String path) {
-    appTalker.warning('[MOCK API] No route for $verb $path');
+    _talker.warning('[MOCK API] No route for $verb $path');
     throw DioException(
       requestOptions: RequestOptions(path: path),
       response: Response<dynamic>(
@@ -294,7 +295,7 @@ class MockApiClient implements ApiClientI {
         final loginData = data as Map<String, dynamic>?;
         final login = loginData?['login'] as String? ?? '';
         final password = loginData?['password'] as String? ?? '';
-        appTalker.info('[MOCK API] Login attempt for user: $login');
+        _talker.info('[MOCK API] Login attempt for user: $login');
 
         if (login.isEmpty || password.isEmpty) {
           return Response(
@@ -342,13 +343,13 @@ class MockApiClient implements ApiClientI {
           statusCode: 200,
         );
       } else if (path.contains('/auth/logout')) {
-        appTalker.info('[MOCK API] Logout');
+        _talker.info('[MOCK API] Logout');
         return Response(
           requestOptions: RequestOptions(path: path),
           statusCode: 204,
         );
       } else if (path.contains('/auth/refresh')) {
-        appTalker.info('[MOCK API] Token refresh');
+        _talker.info('[MOCK API] Token refresh');
 
         if (mockBackend.forceRefreshFailure) {
           return Response(
@@ -490,7 +491,7 @@ class MockApiClient implements ApiClientI {
   /// `internal_error` to 'Помилка сервера.' — the same sentence a production
   /// user sees today.
   DioException _registeredButBroken(String path) {
-    appTalker.error('[MOCK API] $path is routed but broken on the server');
+    _talker.error('[MOCK API] $path is routed but broken on the server');
     return DioException(
       requestOptions: RequestOptions(path: path),
       response: Response<dynamic>(

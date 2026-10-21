@@ -4,6 +4,7 @@ import 'package:prro/core/mock/mock_api_client.dart';
 import 'package:prro/core/mock/mock_backend.dart';
 import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/features/admin/data/models/catalog.dart';
+import 'package:talker/talker.dart';
 
 void main() {
   late MockBackend backend;
@@ -11,7 +12,10 @@ void main() {
 
   setUp(() {
     backend = MockBackend.instance;
-    client = MockApiClient(mockBackend: backend);
+    client = MockApiClient(
+      mockBackend: backend,
+      talker: Talker(settings: TalkerSettings(useConsoleLogs: false)),
+    );
   });
 
   /// A unique key per call: the backend caches receipts by key, and a shared

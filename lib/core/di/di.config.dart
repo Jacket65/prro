@@ -13,6 +13,7 @@
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:prro/core/config/payment_config.dart' as _i194;
 import 'package:prro/core/data/mock/order_history_repository_mock.dart'
     as _i798;
 import 'package:prro/core/data/outlet_scope.dart' as _i912;
@@ -116,17 +117,18 @@ extension GetItInjectableX on _i174.GetIt {
       preResolve: true,
     );
     gh.factory<_i131.CashPaymentHandler>(() => _i131.CashPaymentHandler());
-    gh.singleton<_i993.Talker>(() => appModule.talker());
+    gh.lazySingleton<_i993.Talker>(() => appModule.talker);
+    gh.lazySingleton<_i792.DeepLinkServiceI>(
+      () => _i792.DeepLinkService(gh<_i993.Talker>()),
+    );
     gh.singleton<_i766.OrderHistoryRepositoryI>(
       () => _i798.OrderHistoryRepositoryMock(),
       registerFor: {_mock},
     );
-    gh.lazySingleton<_i792.DeepLinkServiceI>(() => _i792.DeepLinkService());
     gh.singleton<_i132.BalanceRepositoryI>(
       () => _i728.BalanceRepositoryMock(),
       registerFor: {_mock},
     );
-    gh.lazySingleton<_i944.TerminalLauncherI>(() => _i944.TerminalLauncher());
     gh.lazySingleton<_i943.PaymentRepositoryI>(
       () => _i84.PaymentRepositoryMock(),
       registerFor: {_mock},
@@ -139,21 +141,24 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i392.ShiftRepositoryMock(),
       registerFor: {_mock},
     );
-    gh.singleton<_i1010.MockBackend>(
-      () => appModule.mockBackend(),
-      registerFor: {_mock},
-    );
     gh.singleton<_i330.TokenStorageI>(
       () => _i203.SecureTokenStorage(),
       registerFor: {_prod},
     );
+    gh.lazySingleton<_i194.PaymentConfig>(
+      () => _i194.PaymentConfig(gh<_i993.Talker>()),
+    );
     gh.singleton<_i912.OutletSession>(
       () => _i912.OutletSession(gh<_i460.SharedPreferences>()),
     );
-    gh.singleton<_i361.Dio>(() => appModule.dio(), registerFor: {_prod});
+    gh.lazySingleton<_i361.Dio>(() => appModule.dio(), registerFor: {_prod});
     gh.singleton<_i132.BalanceRepositoryI>(
       () => _i445.BalanceRepository(),
       registerFor: {_prod},
+    );
+    gh.lazySingleton<_i1010.MockBackend>(
+      () => appModule.mockBackend(gh<_i993.Talker>()),
+      registerFor: {_mock},
     );
     gh.lazySingleton<_i1025.PendingOrderStoreI>(
       () => _i97.PendingOrderStore(gh<_i460.SharedPreferences>()),
@@ -173,34 +178,31 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i412.AdminOutletRepositoryMock(gh<_i1010.MockBackend>()),
       registerFor: {_mock},
     );
+    gh.lazySingleton<_i944.TerminalLauncherI>(
+      () =>
+          _i944.TerminalLauncher(gh<_i993.Talker>(), gh<_i194.PaymentConfig>()),
+    );
     gh.singleton<_i617.AdminCatalogRepositoryI>(
       () => _i797.AdminCatalogRepositoryMock(gh<_i1010.MockBackend>()),
-      registerFor: {_mock},
-    );
-    gh.singleton<_i787.ApiClientI>(
-      () => appModule.apiClient(gh<_i361.Dio>(), gh<_i330.TokenStorageI>()),
-      registerFor: {_prod},
-    );
-    gh.singleton<_i787.ApiClientI>(
-      () => appModule.mockApiClient(gh<_i1010.MockBackend>()),
       registerFor: {_mock},
     );
     gh.singleton<_i691.ItemsRepositoryI>(
       () => _i972.ItemsRepositoryMock(gh<_i1010.MockBackend>()),
       registerFor: {_mock},
     );
-    gh.singleton<_i749.AuthRepositoryI>(
-      () => _i76.AuthRepositoryImpl(
-        tokenStorage: gh<_i330.TokenStorageI>(),
-        apiClient: gh<_i787.ApiClientI>(),
-        prefs: gh<_i460.SharedPreferences>(),
-        outlets: gh<_i912.OutletSession>(),
+    gh.lazySingleton<_i787.ApiClientI>(
+      () => appModule.apiClient(
+        gh<_i361.Dio>(),
+        gh<_i330.TokenStorageI>(),
+        gh<_i993.Talker>(),
       ),
+      registerFor: {_prod},
     );
     gh.singleton<_i691.ItemsRepositoryI>(
       () => _i1038.ItemsRepository(
         apiClient: gh<_i787.ApiClientI>(),
         outlets: gh<_i912.OutletSession>(),
+        talker: gh<_i993.Talker>(),
       ),
       registerFor: {_prod},
     );
@@ -230,6 +232,11 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       registerFor: {_prod},
     );
+    gh.lazySingleton<_i787.ApiClientI>(
+      () =>
+          appModule.mockApiClient(gh<_i1010.MockBackend>(), gh<_i993.Talker>()),
+      registerFor: {_mock},
+    );
     gh.singleton<_i617.AdminCatalogRepositoryI>(
       () => _i744.AdminCatalogRepositoryImpl(gh<_i787.ApiClientI>()),
       registerFor: {_prod},
@@ -253,6 +260,15 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i524.AdminUserRepositoryImpl(gh<_i787.ApiClientI>()),
       registerFor: {_prod},
     );
+    gh.singleton<_i749.AuthRepositoryI>(
+      () => _i76.AuthRepositoryImpl(
+        tokenStorage: gh<_i330.TokenStorageI>(),
+        apiClient: gh<_i787.ApiClientI>(),
+        prefs: gh<_i460.SharedPreferences>(),
+        outlets: gh<_i912.OutletSession>(),
+        talker: gh<_i993.Talker>(),
+      ),
+    );
     gh.factory<_i887.FinishPendingOrderUseCase>(
       () => _i887.FinishPendingOrderUseCase(
         pendingOrderStore: gh<_i1025.PendingOrderStoreI>(),
@@ -272,6 +288,7 @@ extension GetItInjectableX on _i174.GetIt {
         pendingOrderStore: gh<_i1025.PendingOrderStoreI>(),
         cash: gh<_i131.CashPaymentHandler>(),
         terminal: gh<_i1000.TerminalPaymentHandler>(),
+        talker: gh<_i993.Talker>(),
       ),
     );
     return this;

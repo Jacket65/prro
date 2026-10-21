@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
-import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/mock/mock_api_client.dart';
 import 'package:prro/core/mock/mock_backend.dart';
 import 'package:prro/core/network/api_client.dart';
@@ -14,27 +13,39 @@ abstract class AppModule {
   @preResolve
   Future<SharedPreferences> get prefs => SharedPreferences.getInstance();
 
-  @singleton
+  @lazySingleton
   @Environment('prod')
-  Dio dio() => Dio();
+  Dio dio() {
+    return Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
+        sendTimeout: const Duration(seconds: 15),
+      ),
+    );
+  }
 
-  @singleton
+  @lazySingleton
   @Environment('prod')
-  ApiClientI apiClient(Dio dio, TokenStorageI tokenStorage) =>
-      ApiClient(dio: dio, tokenStorage: tokenStorage);
+  ApiClientI apiClient(Dio dio, TokenStorageI tokenStorage, Talker talker) {
+    return ApiClient(dio: dio, tokenStorage: tokenStorage, talker: talker);
+  }
 
-  @singleton
+  @lazySingleton
   @Environment('mock')
-  ApiClientI mockApiClient(MockBackend mockBackend) =>
-      MockApiClient(mockBackend: mockBackend);
+  MockBackend mockBackend(Talker talker) {
+    return MockBackend.instance..talker = talker;
+  }
 
-  @singleton
+  @lazySingleton
   @Environment('mock')
-  MockBackend mockBackend() => MockBackend.instance;
+  ApiClientI mockApiClient(MockBackend mockBackend, Talker talker) {
+    return MockApiClient(mockBackend: mockBackend, talker: talker);
+  }
 
-  /// The one application-wide logger. It is the shared [appTalker] instance,
-  /// so a [Talker] taken from the container and a direct `appTalker`
-  /// reference write to the same history.
-  @singleton
-  Talker talker() => appTalker;
+  @lazySingleton
+  Talker get talker => Talker(
+    logger: TalkerLogger(settings: TalkerLoggerSettings(enableColors: false)),
+    settings: TalkerSettings(maxHistoryItems: 500),
+  );
 }

@@ -6,6 +6,7 @@ import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/features/seller/data/repositories/items_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talker/talker.dart';
 
 class _MockApiClient extends Mock implements ApiClientI {}
 
@@ -25,6 +26,7 @@ void main() {
     repository = ItemsRepository(
       apiClient: apiClient,
       outlets: OutletSession(prefs),
+      talker: Talker(settings: TalkerSettings(useConsoleLogs: false)),
     );
   });
 

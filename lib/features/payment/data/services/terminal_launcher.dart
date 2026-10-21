@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/config/payment_config.dart';
-import 'package:prro/core/logging/app_talker.dart';
+import 'package:talker/talker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Service interface for launching the PrivatBank POS Terminal.
@@ -19,7 +19,9 @@ abstract interface class TerminalLauncherI {
 /// Production implementation of [TerminalLauncherI].
 @LazySingleton(as: TerminalLauncherI)
 class TerminalLauncher implements TerminalLauncherI {
-  TerminalLauncher();
+  TerminalLauncher(this.talker, this.paymentConfig);
+  final Talker talker;
+  final PaymentConfig paymentConfig;
 
   @override
   Future<void> launchTerminal({
@@ -29,7 +31,7 @@ class TerminalLauncher implements TerminalLauncherI {
     required String orderId,
     String? merchantId,
   }) async {
-    final uriString = PaymentConfig.buildTerminalUri(
+    final uriString = paymentConfig.buildTerminalUri(
       jwtToken: jwtToken,
       amount: amount,
       currency: currency,
@@ -38,10 +40,9 @@ class TerminalLauncher implements TerminalLauncherI {
     );
     final uri = Uri.parse(uriString);
 
-    // Console log for debugging. The URI itself is deliberately not logged: it
-    // carries the terminal JWT (a bearer credential for the charge).
-    // `PaymentConfig.buildTerminalUri` already logs the redacted form.
-    appTalker.info(
+    // The URI itself is not logged: it carries the terminal JWT (a bearer
+    // credential for the charge). `buildTerminalUri` logs the redacted form.
+    talker.info(
       '[TerminalLauncher] Attempting to launch terminal '
       '(${PaymentConfig.terminalUriScheme} scheme)',
     );
@@ -58,15 +59,11 @@ class TerminalLauncher implements TerminalLauncherI {
         );
       }
 
-      appTalker.info('[TerminalLauncher] Terminal launched successfully');
+      talker.info('[TerminalLauncher] Terminal launched successfully');
     } on TerminalLaunchException {
       rethrow;
     } on Exception catch (e, st) {
-      appTalker.error(
-        '[TerminalLauncher] Failed to launch terminal',
-        e,
-        st,
-      );
+      talker.error('[TerminalLauncher] Failed to launch terminal', e, st);
 
       throw TerminalLaunchException(
         'Не вдалося відкрити PrivatBank Terminal: $e',

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:prro/core/mock/mock_api_client.dart';
 import 'package:prro/core/mock/mock_backend.dart';
+import 'package:talker/talker.dart';
 
 // The mock's accounts, mirrored from MockApiClient's table: the checker
 // validates the password exactly, so a test that logs in has to use it.
@@ -15,7 +16,10 @@ void main() {
 
   setUp(() {
     mockBackend = MockBackend.instance;
-    client = MockApiClient(mockBackend: mockBackend);
+    client = MockApiClient(
+      mockBackend: mockBackend,
+      talker: Talker(settings: TalkerSettings(useConsoleLogs: false)),
+    );
   });
 
   group('POST /auth/login', () {

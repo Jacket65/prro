@@ -13,6 +13,7 @@ import 'package:prro/features/seller/domain/payment/payment_method_handler.dart'
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 import 'package:prro/features/seller/domain/repositories/pending_order_store_i.dart';
 import 'package:prro/features/seller/domain/usecases/pay_order_use_case.dart';
+import 'package:talker/talker.dart';
 
 class MockCashHandler extends Mock implements CashPaymentHandler {}
 
@@ -102,6 +103,7 @@ void main() {
       pendingOrderStore: pendingOrderStore,
       cash: cash,
       terminal: terminal,
+      talker: Talker(settings: TalkerSettings(useConsoleLogs: false)),
     );
   });
 

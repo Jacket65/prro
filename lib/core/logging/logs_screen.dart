@@ -1,13 +1,18 @@
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/core/logging/app_talker.dart';
+import 'package:prro/core/di/di.dart';
 import 'package:talker/talker.dart';
 
+/// On-device view of the application log.
+///
+/// Built from the project's own `material_ui` widgets, so the screen shares
+/// the app theme and its localizations.
 class LogsScreen extends StatelessWidget {
   const LogsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final talker = getIt<Talker>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Журнал подій'),
@@ -15,16 +20,19 @@ class LogsScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.copy_all),
             tooltip: 'Скопіювати журнал',
-            onPressed: () => _copyAll(context),
+            onPressed: () => _copyAll(context, talker),
           ),
         ],
       ),
-      body: const _LogsList(),
+      body: StreamBuilder<TalkerData>(
+        stream: talker.stream,
+        builder: (context, snapshot) => _LogsList(records: talker.history),
+      ),
     );
   }
 
-  Future<void> _copyAll(BuildContext context) async {
-    final text = appTalker.history
+  Future<void> _copyAll(BuildContext context, Talker talker) async {
+    final text = talker.history
         .map((record) => record.generateTextMessage())
         .join('\n');
     await Clipboard.setData(ClipboardData(text: text));
@@ -36,23 +44,20 @@ class LogsScreen extends StatelessWidget {
 }
 
 class _LogsList extends StatelessWidget {
-  const _LogsList();
+  const _LogsList({required this.records});
+
+  final List<TalkerData> records;
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<TalkerData>(
-      stream: appTalker.stream,
-      builder: (context, snapshot) {
-        final records = appTalker.history.reversed.toList();
-        if (records.isEmpty) {
-          return const Center(child: Text('Журнал порожній'));
-        }
-        return ListView.separated(
-          itemCount: records.length,
-          separatorBuilder: (context, index) => const Divider(height: 1),
-          itemBuilder: (context, index) => _LogTile(record: records[index]),
-        );
-      },
+    if (records.isEmpty) {
+      return const Center(child: Text('Журнал порожній'));
+    }
+    final newestFirst = records.reversed.toList();
+    return ListView.separated(
+      itemCount: newestFirst.length,
+      separatorBuilder: (context, index) => const Divider(height: 1),
+      itemBuilder: (context, index) => _LogTile(record: newestFirst[index]),
     );
   }
 }

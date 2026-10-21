@@ -4,7 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/config/network_timeouts.dart';
 import 'package:prro/core/data/outlet_scope.dart';
-import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/api_exception.dart';
 import 'package:prro/core/security/access_token_expiry.dart';
@@ -13,6 +12,7 @@ import 'package:prro/core/utils/envelope.dart';
 import 'package:prro/features/auth/domain/entities/auth_user.dart';
 import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talker/talker.dart';
 
 UserRole? _parseRole(String? roleStr) {
   return switch (roleStr) {
@@ -30,10 +30,12 @@ class AuthRepositoryImpl implements AuthRepositoryI {
     required this.apiClient,
     required this.prefs,
     required this._outlets,
+    required this._talker,
   });
 
   final TokenStorageI tokenStorage;
   final ApiClientI apiClient;
+  final Talker _talker;
 
   /// The session outlet: login writes it (with the outlet-list fallback below)
   /// and logout clears it, so the read side lives in one place with the write
@@ -257,7 +259,7 @@ class AuthRepositoryImpl implements AuthRepositoryI {
     try {
       await apiClient.post('/auth/logout');
     } on Object catch (e) {
-      appTalker.warning(
+      _talker.warning(
         '[AUTH] logout endpoint failed (swallowed): $e',
       );
     }

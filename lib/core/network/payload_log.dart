@@ -37,10 +37,14 @@ String? describePayload(Object? data) {
   if (decoded == null) return _truncate(data.toString());
 
   final redactedData = _redact(decoded);
-  const encoder = JsonEncoder.withIndent('  ');
+  // A value the encoder cannot handle (a Decimal, say) must not break the
+  // request that is being logged, so it is rendered through toString().
+  const encoder = JsonEncoder.withIndent('  ', _toEncodable);
 
   return _truncate(encoder.convert(redactedData));
 }
+
+Object? _toEncodable(Object? object) => object.toString();
 
 Object? _decodeJson(String value) {
   final trimmed = value.trim();

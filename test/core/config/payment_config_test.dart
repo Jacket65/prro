@@ -1,7 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:prro/core/config/payment_config.dart';
+import 'package:talker/talker.dart';
 
 void main() {
+  final config = PaymentConfig(
+    Talker(settings: TalkerSettings(useConsoleLogs: false)),
+  );
+
   group('PaymentConfig.isCallback', () {
     test('accepts the callback this app launches the terminal with', () {
       expect(PaymentConfig.isCallback(Uri.parse('prro://payment')), isTrue);
@@ -42,7 +47,7 @@ void main() {
 
   group('PaymentConfig.buildTerminalUri', () {
     test('still returns the full URI the terminal needs', () {
-      final uri = PaymentConfig.buildTerminalUri(
+      final uri = config.buildTerminalUri(
         jwtToken: 'jwt-abc.def-ghi',
         amount: 1500,
         currency: 'UAH',
@@ -62,7 +67,7 @@ void main() {
       String token = 'jwt-abc.def-ghi',
       String? merchantId = 'merchant-1',
     }) => Uri.parse(
-      PaymentConfig.buildTerminalUri(
+      config.buildTerminalUri(
         jwtToken: token,
         amount: 1500,
         currency: 'UAH',

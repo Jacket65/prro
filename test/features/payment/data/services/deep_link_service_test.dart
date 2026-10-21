@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app_links_platform_interface/app_links_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:prro/features/payment/data/services/deep_link_service.dart';
+import 'package:talker/talker.dart';
 
 /// Stands in for the platform's link source.
 ///
@@ -57,7 +58,9 @@ void main() {
 
   setUp(() {
     platform.reset();
-    service = DeepLinkService();
+    service = DeepLinkService(
+      Talker(settings: TalkerSettings(useConsoleLogs: false)),
+    );
   });
 
   tearDown(() => service.dispose());

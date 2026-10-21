@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/config/payment_config.dart';
-import 'package:prro/core/logging/app_talker.dart';
+import 'package:talker/talker.dart';
 
 /// Service interface for handling deep links
 /// (callbacks from PrivatBank Terminal).
@@ -27,8 +27,9 @@ abstract interface class DeepLinkServiceI {
 /// would be delivered twice and one charge could complete two payments.
 @LazySingleton(as: DeepLinkServiceI)
 class DeepLinkService implements DeepLinkServiceI {
-  DeepLinkService();
+  DeepLinkService(this._talker);
 
+  final Talker _talker;
   final _appLinks = AppLinks();
   StreamController<Uri> _controller = StreamController<Uri>.broadcast();
   StreamSubscription<Uri>? _subscription;
@@ -42,7 +43,7 @@ class DeepLinkService implements DeepLinkServiceI {
     // The service is a DI singleton: initializing twice would stack a second
     // app_links subscription and emit every callback twice.
     if (_initialized) {
-      appTalker.info('[DeepLinkService] Already initialized, skipping');
+      _talker.info('[DeepLinkService] Already initialized, skipping');
       return;
     }
     _initialized = true;
@@ -57,43 +58,43 @@ class DeepLinkService implements DeepLinkServiceI {
     _subscription = _appLinks.uriLinkStream.listen(
       _handleUri,
       onError: (Object error, StackTrace stackTrace) {
-        appTalker.error(
+        _talker.error(
           '[DeepLinkService] Link stream error: $error',
           error,
           stackTrace,
         );
       },
     );
-    appTalker.info(
+    _talker.info(
       '[DeepLinkService] Listening for ${PaymentConfig.callbackUri}',
     );
     final initialUri = await _appLinks.getInitialLink();
 
     if (initialUri != null) {
-      appTalker.info('[DeepLinkService] Initial link: $initialUri');
+      _talker.info('[DeepLinkService] Initial link: $initialUri');
       _handleUri(initialUri);
     }
   }
 
   void _handleUri(Uri uri) {
-    appTalker.info('[DeepLinkService] Incoming link: $uri');
+    _talker.info('[DeepLinkService] Incoming link: $uri');
     if (!PaymentConfig.isCallback(uri)) {
-      appTalker.info(
+      _talker.info(
         '[DeepLinkService] Ignored — expected '
         '${PaymentConfig.callbackScheme}://${PaymentConfig.callbackHost}, '
         'got ${uri.scheme}://${uri.host}',
       );
       return;
     }
-    appTalker.info(
+    _talker.info(
       '[DeepLinkService] Payment callback params: ${uri.queryParameters}',
     );
     if (_controller.isClosed) {
-      appTalker.info('[DeepLinkService] Controller closed, callback dropped');
+      _talker.info('[DeepLinkService] Controller closed, callback dropped');
       return;
     }
     if (!_controller.hasListener) {
-      appTalker.info(
+      _talker.info(
         '[DeepLinkService] No active payment listener; callback ignored',
       );
       return;

@@ -11,12 +11,6 @@ import 'package:prro/features/admin/domain/repositories/admin_outlet_repository_
 import 'package:prro/features/admin/presentation/cubit/outlets/outlets_cubit.dart';
 import 'package:prro/features/admin/presentation/widgets/admin_back_button.dart';
 
-/// Top-level admin screen: a router-driven tabbed shell over the four admin
-/// resources.
-///
-/// A single [OutletsCubit] is provided here so outlet selection (made in the
-/// Outlets tab) is available to the Tellers, Items and Orders tabs. Those tabs
-/// rebuild their internal cubits whenever the selected outlet changes.
 @RoutePage(name: 'AdminRoute')
 class AdminShell extends StatelessWidget {
   const AdminShell({super.key});

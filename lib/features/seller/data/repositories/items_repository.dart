@@ -6,17 +6,22 @@ import 'package:prro/core/domain/bean.dart';
 import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
 import 'package:prro/core/domain/measure_unit.dart';
-import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/utils/envelope.dart';
 import 'package:prro/features/seller/domain/repositories/items_repository_i.dart';
+import 'package:talker/talker.dart';
 
 @Environment('prod')
 @Singleton(as: ItemsRepositoryI)
 class ItemsRepository implements ItemsRepositoryI {
-  ItemsRepository({required this._apiClient, required this._outlets});
+  ItemsRepository({
+    required this._apiClient,
+    required this._outlets,
+    required this._talker,
+  });
   final ApiClientI _apiClient;
   final OutletSession _outlets;
+  final Talker _talker;
 
   /// Session cache of `GET /variants/:id/options` keyed by variant id, plus the
   /// in-flight request so two near-simultaneous callers (options + beans) share
@@ -29,7 +34,7 @@ class ItemsRepository implements ItemsRepositoryI {
     try {
       final outletId = _outlets.idOrNull();
       if (outletId == null) {
-        appTalker.warning(
+        _talker.warning(
           'ItemsRepository.getCategories: outlet_id is not set',
         );
         return [];
@@ -39,7 +44,7 @@ class ItemsRepository implements ItemsRepositoryI {
       );
       return unwrapList(response.data, Category.fromJson);
     } on Object catch (e, stackTrace) {
-      appTalker.error('Error in getCategories: $e', e, stackTrace);
+      _talker.error('Error in getCategories: $e', e, stackTrace);
       return [];
     }
   }
@@ -60,7 +65,7 @@ class ItemsRepository implements ItemsRepositoryI {
       );
       return _flattenProducts(unwrapList(response.data, ProductGroup.fromJson));
     } on Object catch (e, stackTrace) {
-      appTalker.error('Error in getProducts: $e', e, stackTrace);
+      _talker.error('Error in getProducts: $e', e, stackTrace);
       return [];
     }
   }
@@ -117,7 +122,7 @@ class ItemsRepository implements ItemsRepositoryI {
       final response = await _apiClient.get('/measure-units');
       return unwrapList(response.data, MeasureUnit.fromJson);
     } on Object catch (e, stackTrace) {
-      appTalker.error('Error in getMeasureUnits: $e', e, stackTrace);
+      _talker.error('Error in getMeasureUnits: $e', e, stackTrace);
       return [];
     }
   }
@@ -144,7 +149,7 @@ class ItemsRepository implements ItemsRepositoryI {
         return groups;
       } on Object catch (e, stackTrace) {
         // Don't cache failures — let the next selection retry.
-        appTalker.error(
+        _talker.error(
           'Error in getVariantOptions($variantId): $e',
           e,
           stackTrace,

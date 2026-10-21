@@ -1,6 +1,5 @@
 import 'package:injectable/injectable.dart';
 import 'package:prro/core/domain/order.dart';
-import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/utils/money.dart';
 import 'package:prro/features/payment/domain/payment_exceptions.dart';
 import 'package:prro/features/seller/domain/payment/handlers/cash_payment_handler.dart';
@@ -11,6 +10,7 @@ import 'package:prro/features/seller/domain/repositories/orders_repository_i.dar
 import 'package:prro/features/seller/domain/repositories/pending_order_store_i.dart';
 import 'package:prro/features/seller/domain/usecases/finish_pending_order_use_case.dart'
     show FinishPendingOrderUseCase;
+import 'package:talker/talker.dart';
 
 /// Coordinates a single payment: picks the [PaymentMethodHandler] for the
 /// requested method, runs its method-specific [PaymentMethodHandler.pay],
@@ -42,11 +42,13 @@ class PayOrderUseCase {
     required this._pendingOrderStore,
     required CashPaymentHandler cash,
     required TerminalPaymentHandler terminal,
+    required this._talker,
   }) : _handlers = [cash, terminal];
 
   final OrdersRepositoryI _ordersRepository;
   final PendingOrderStoreI _pendingOrderStore;
   final List<PaymentMethodHandler> _handlers;
+  final Talker _talker;
 
   /// The handler for the currently in-flight payment, or `null` when idle.
   PaymentMethodHandler? _activeHandler;
@@ -126,7 +128,7 @@ class PayOrderUseCase {
           await _pendingOrderStore.clear();
         } on Object catch (e) {
           // Never mask the cancellation behind a storage failure.
-          appTalker.warning(
+          _talker.warning(
             '[PAYMENT] pending order not cleared on cancel: $e',
           );
         }
@@ -161,7 +163,7 @@ class PayOrderUseCase {
         idempotencyKey: request.idempotencyKey,
       );
     } on Object catch (e) {
-      appTalker.warning(
+      _talker.warning(
         '[PAYMENT] could not record the pending card order '
         '${order.orderId}: $e',
       );

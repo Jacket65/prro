@@ -6,10 +6,10 @@ import 'package:prro/core/domain/catalog_item.dart';
 import 'package:prro/core/domain/drink_option.dart';
 import 'package:prro/core/domain/measure_unit.dart';
 import 'package:prro/core/domain/order.dart';
-import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/mock/order_request_dto.dart';
 import 'package:prro/core/utils/money.dart';
 import 'package:prro/features/admin/data/models/admin_models.dart';
+import 'package:talker/talker.dart';
 
 /// In-memory "server" used while the real backend's order/catalog endpoints
 /// are not ready. Every method mimics a real round-trip: configurable latency,
@@ -20,6 +20,10 @@ class MockBackend {
   MockBackend._internal();
 
   static final MockBackend instance = MockBackend._internal();
+
+  /// The application logger, injected by the DI module. It stays null in the
+  /// unit tests that use [instance] without the container.
+  Talker? talker;
 
   /// Flip to true (e.g. from a debug button) to make the next requests fail
   /// so error states can be exercised without touching code.
@@ -401,7 +405,7 @@ class MockBackend {
     );
     _receiptsByKey[idempotencyKey] = receipt;
     _receiptsByOrderId[receipt.orderId] = receipt;
-    appTalker.info('[MOCK /orders] $idempotencyKey → $receipt');
+    talker?.info('[MOCK /orders] $idempotencyKey → $receipt');
     return receipt;
   }
 
@@ -430,7 +434,7 @@ class MockBackend {
       cashierName: receipt.cashierName,
     );
     _receiptsByOrderId[id] = confirmed;
-    appTalker.info('[MOCK /orders/$id/confirm] → $confirmed');
+    talker?.info('[MOCK /orders/$id/confirm] → $confirmed');
     return confirmed;
   }
 
@@ -675,7 +679,7 @@ class MockBackend {
     // The variant must exist, exactly as the real route resolves it before it
     // would (or would not) write anything.
     _findAdminVariant(variantId);
-    appTalker.info(
+    talker?.info(
       '[MOCK /variants/$variantId/recipe] 200, stored by the server as a '
       'no-op',
     );

@@ -1,12 +1,12 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/security/token_storage_i.dart';
 import 'package:prro/features/auth/domain/repositories/auth_repository_i.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_event.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_state.dart';
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 import 'package:prro/features/seller/domain/repositories/pending_order_store_i.dart';
+import 'package:talker/talker.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({
@@ -14,6 +14,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.tokenStorage,
     required this.ordersRepository,
     required this.pendingOrderStore,
+    required this.talker,
   }) : super(const AuthInitial()) {
     on<AuthStarted>(_onAuthStarted, transformer: droppable());
     on<AuthLoginRequested>(_onLoginRequested, transformer: droppable());
@@ -27,6 +28,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   final AuthRepositoryI authRepository;
   final TokenStorageI tokenStorage;
+  final Talker talker;
 
   /// The seller cart, which lives in a process-wide repository. It is reset
   /// here, at the two moments a session boundary exists: a login that starts a
@@ -71,9 +73,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } on Object catch (e) {
       // The teardown must complete either way; losing a record that is about
       // to become someone else's is the better failure.
-      appTalker.warning(
-        '[AUTH] pending order could not be cleared: $e',
-      );
+      talker.warning('[AUTH] pending order could not be cleared: $e');
     }
   }
 

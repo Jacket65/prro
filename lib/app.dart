@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prro/core/di/di.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/router/app_router.dart';
 import 'package:prro/core/router/app_router.gr.dart';
@@ -16,11 +15,29 @@ import 'package:prro/features/seller/domain/repositories/orders_repository_i.dar
 import 'package:prro/features/seller/domain/repositories/pending_order_store_i.dart';
 import 'package:prro/features/shift/domain/repositories/shift_repository_i.dart';
 import 'package:prro/features/shift/presentation/cubit/shift_cubit.dart';
+import 'package:talker/talker.dart';
 
 class MyApp extends StatefulWidget {
-  const MyApp({required this.router, super.key});
+  const MyApp({
+    required this.router,
+    required this.talker,
+    required this.authRepository,
+    required this.tokenStorage,
+    required this.ordersRepository,
+    required this.pendingOrderStore,
+    required this.shiftRepository,
+    required this.apiClient,
+    super.key,
+  });
 
   final AppRouter router;
+  final Talker talker;
+  final AuthRepositoryI authRepository;
+  final TokenStorageI tokenStorage;
+  final OrdersRepositoryI ordersRepository;
+  final PendingOrderStoreI pendingOrderStore;
+  final ShiftRepositoryI shiftRepository;
+  final ApiClientI apiClient;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -32,7 +49,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _authSub = getIt<ApiClientI>().onUnauthorized.listen((failedToken) {
+    _authSub = widget.apiClient.onUnauthorized.listen((failedToken) {
       final bloc = widget.router.adminGuard.authBloc;
       if (bloc != null) {
         bloc.add(AuthSessionExpired(failedToken: failedToken));
@@ -51,20 +68,18 @@ class _MyAppState extends State<MyApp> {
     return BlocProvider(
       create: (context) {
         final bloc = AuthBloc(
-          authRepository: getIt<AuthRepositoryI>(),
-          tokenStorage: getIt<TokenStorageI>(),
-          // Owns the seller-cart reset at every session boundary (login start
-          // and session end); see F8.
-          ordersRepository: getIt<OrdersRepositoryI>(),
-          // Same boundary, same reason, for the card order a session may have
-          // left unfinished.
-          pendingOrderStore: getIt<PendingOrderStoreI>(),
+          authRepository: widget.authRepository,
+          tokenStorage: widget.tokenStorage,
+          ordersRepository: widget.ordersRepository,
+          pendingOrderStore: widget.pendingOrderStore,
+          talker: widget.talker,
         )..add(const AuthStarted());
         widget.router.adminGuard.authBloc = bloc;
         return bloc;
       },
       child: BlocProvider(
-        create: (context) => ShiftCubit(getIt<ShiftRepositoryI>()),
+        create: (context) =>
+            ShiftCubit(shiftRepository: widget.shiftRepository),
         child: BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthUnauthenticated) {

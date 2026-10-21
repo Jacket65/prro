@@ -52,9 +52,7 @@ void main() {
     apiClient = ApiClient(dio: dio, tokenStorage: tokenStorage, talker: talker);
   });
 
-  List<String> messages() => observer.records
-      .map((record) => record.message ?? '')
-      .toList(growable: false);
+  List<TalkerData> loggedRecords() => observer.records;
 
   test('logs the request line and the body that is sent', () async {
     await apiClient.post(
@@ -67,21 +65,21 @@ void main() {
       },
     );
 
-    final records = messages();
+    final records = loggedRecords();
     expect(
       records.any(
-        (m) =>
-            m.contains('[REQUEST] POST') &&
-            m.contains('/retail-outlets/1/orders'),
+        (r) =>
+            r.key == TalkerKey.httpRequest &&
+            r.message?.contains('/retail-outlets/1/orders') == true,
       ),
       isTrue,
     );
     expect(
       records.any(
-        (m) =>
-            m.contains('[REQUEST BODY]') &&
-            m.contains('"id": 173') &&
-            m.contains('"quantity": "1"'),
+        (r) =>
+            r.message?.contains('[REQUEST BODY]') == true &&
+            r.message?.contains('"id": 173') == true &&
+            r.message?.contains('"quantity": "1"') == true,
       ),
       isTrue,
     );
@@ -93,7 +91,9 @@ void main() {
       data: {'login': 'user', 'password': 'super-secret'},
     );
 
-    final body = messages().firstWhere((m) => m.contains('[REQUEST BODY]'));
+    final body = loggedRecords()
+        .firstWhere((r) => r.message?.contains('[REQUEST BODY]') == true)
+        .message!;
     expect(body, isNot(contains('super-secret')));
     expect(body, contains('"login": "user"'));
   });
@@ -101,7 +101,10 @@ void main() {
   test('does not log a body for a request without one', () async {
     await apiClient.get('/retail-outlets/1/categories');
 
-    expect(messages().any((m) => m.contains('[REQUEST BODY]')), isFalse);
+    expect(
+      loggedRecords().any((r) => r.message?.contains('[REQUEST BODY]') == true),
+      isFalse,
+    );
   });
 
   test('logs the error body when the server answers with an error', () async {
@@ -119,11 +122,13 @@ void main() {
       throwsA(isA<DioException>()),
     );
 
-    final records = messages();
-    expect(records.any((m) => m.contains('[ERROR] 500')), isTrue);
+    final records = loggedRecords();
+    expect(records.any((m) => m.key == TalkerKey.httpError), isTrue);
     expect(
       records.any(
-        (m) => m.contains('[ERROR BODY]') && m.contains('empty slice found'),
+        (r) =>
+            r.message?.contains('[ERROR BODY]') == true &&
+            r.message?.contains('empty slice found') == true,
       ),
       isTrue,
     );

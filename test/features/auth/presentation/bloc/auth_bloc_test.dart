@@ -9,6 +9,7 @@ import 'package:prro/features/auth/presentation/bloc/auth_event.dart';
 import 'package:prro/features/auth/presentation/bloc/auth_state.dart';
 import 'package:prro/features/seller/domain/repositories/orders_repository_i.dart';
 import 'package:prro/features/seller/domain/repositories/pending_order_store_i.dart';
+import 'package:talker/talker.dart';
 
 class MockAuthRepository extends Mock implements AuthRepositoryI {}
 
@@ -38,6 +39,7 @@ void main() {
       tokenStorage: tokenStorage,
       ordersRepository: ordersRepository,
       pendingOrderStore: pendingOrderStore,
+      talker: Talker(settings: TalkerSettings(useConsoleLogs: false)),
     );
   });
 

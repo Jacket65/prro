@@ -1,10 +1,10 @@
-import 'package:prro/core/logging/app_talker.dart';
+import 'package:injectable/injectable.dart';
+import 'package:talker/talker.dart';
 
-/// Payment configuration constants.
-///
-/// All values are configurable and should not be hardcoded in business logic.
+@lazySingleton
 class PaymentConfig {
-  PaymentConfig._();
+  PaymentConfig(this.talker);
+  final Talker talker;
 
   /// Deep link callback scheme (e.g., 'prro').
   static const String callbackScheme = 'prro';
@@ -17,11 +17,7 @@ class PaymentConfig {
 
   /// Whether [uri] is a payment callback this app launched the terminal with.
   ///
-  /// The single definition of the rule: both sides of the flow ask this, the
-  /// listener before emitting (`DeepLinkService`) and the orchestrator on
-  /// receipt (`TerminalPaymentService`). Keeping one copy means a change to
-  /// [callbackScheme] or [callbackHost] cannot leave the two disagreeing about
-  /// which URIs count.
+  /// Both sides of the flow ask this, so they cannot disagree.
   static bool isCallback(Uri uri) =>
       uri.scheme == callbackScheme && uri.host == callbackHost;
 
@@ -38,20 +34,15 @@ class PaymentConfig {
 
   /// Placeholder written in place of the PrivatBank JWT in every log line.
   ///
-  /// The token is a bearer credential for a card charge, so a full copy in a
-  /// log line is a credential leak — the same rule `TerminalToken.toString`
-  /// applies. Every log line that mentions a terminal URI goes through
-  /// [redactedTerminalUri] instead of formatting the URI directly.
+  /// The token is a bearer credential for a card charge, so every log line
+  /// that mentions a terminal URI goes through [redactedTerminalUri].
   static const String redactedToken = '***';
 
   /// Log-safe rendering of a terminal launch [uri].
   ///
-  /// Keeps only the fields that identify a charge in a log — scheme, pay
-  /// action, amount, currency, order id, merchant id — and replaces the JWT
-  /// with [redactedToken]. Assembled by hand rather than from `uri.toString()`
-  /// so a caller cannot re-emit the credential by formatting the original, and
-  /// so the placeholder is never percent-encoded back into a token-looking
-  /// query value.
+  /// Keeps only the fields that identify a charge and replaces the JWT with
+  /// [redactedToken]. Assembled by hand rather than from `uri.toString()` so
+  /// a caller cannot re-emit the credential by formatting the original.
   static String redactedTerminalUri(Uri uri) {
     final query = uri.queryParameters;
     final fields = <String>[
@@ -65,7 +56,7 @@ class PaymentConfig {
   }
 
   /// Builds the terminal launch URI with the given payment details.
-  static String buildTerminalUri({
+  String buildTerminalUri({
     required String jwtToken,
     required int amount,
     required String currency,
@@ -85,9 +76,9 @@ class PaymentConfig {
       },
     );
     final uriString = uri.toString();
-    // Only the redacted form may reach the log: [jwtToken] authorizes a charge
-    // against the terminal, so a full URI in a log line leaks the credential.
-    appTalker.info(
+    // Only the redacted form reaches the log: [jwtToken] authorizes a charge
+    // against the terminal.
+    talker.info(
       '[PaymentConfig] Built terminal URI: ${redactedTerminalUri(uri)}',
     );
     return uriString;

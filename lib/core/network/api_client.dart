@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:prro/core/config/env.dart';
-import 'package:prro/core/logging/app_talker.dart';
 import 'package:prro/core/network/api_client_i.dart';
 import 'package:prro/core/network/payload_log.dart';
 import 'package:prro/core/security/token_storage_i.dart';
@@ -9,9 +8,11 @@ import 'package:talker/talker.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 
 class ApiClient implements ApiClientI {
-  ApiClient({required this.dio, required this.tokenStorage, Talker? talker})
-    : _talker = talker ?? appTalker,
-      _refreshDio = Dio(BaseOptions(baseUrl: Env.baseUrl)) {
+  ApiClient({
+    required this.dio,
+    required this.tokenStorage,
+    required this._talker,
+  }) : _refreshDio = Dio(BaseOptions(baseUrl: Env.baseUrl)) {
     dio.options
       ..baseUrl = Env.baseUrl
       ..connectTimeout = const Duration(seconds: 10)
@@ -36,7 +37,19 @@ class ApiClient implements ApiClientI {
   void _initializeInterceptors() {
     dio.interceptors
       ..clear()
-      ..add(TalkerDioLogger(talker: _talker))
+      ..add(
+        TalkerDioLogger(
+          talker: _talker,
+          // Bodies are logged by the interceptor below, with credentials
+          // redacted: a raw login payload carries the password.
+          settings: const TalkerDioLoggerSettings(
+            printRequestData: false,
+            printResponseData: false,
+            printErrorData: false,
+            printErrorHeaders: false,
+          ),
+        ),
+      )
       ..add(
         InterceptorsWrapper(
           onRequest: (options, handler) async {
