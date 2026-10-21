@@ -25,7 +25,7 @@ void main() {
 
   setUp(() {
     repository = MockShiftRepository();
-    cubit = ShiftCubit(repository);
+    cubit = ShiftCubit(shiftRepository: repository);
   });
 
   tearDown(() async {
